@@ -1,0 +1,1590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modelling decisions</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+ 
+    body {
+      background: #141420;
+      color: #e8e8f0;
+      font-family: Georgia, 'Times New Roman', serif;
+      line-height: 1.8;
+      font-size: 18px;
+      -webkit-font-smoothing: antialiased;
+    }
+ 
+    .container {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+ 
+    .lang-toggle {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      background: #2a2a44;
+      border: 1px solid #4a4a70;
+      border-radius: 20px;
+      padding: 6px 14px;
+      cursor: pointer;
+      font-size: 13px;
+      font-family: sans-serif;
+      color: #a0a0d0;
+      z-index: 100;
+      transition: background 0.2s;
+    }
+    .lang-toggle:hover { background: #363658; }
+ 
+    .hero {
+      text-align: center;
+      padding: 80px 24px 50px;
+    }
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 28px;
+    }
+    .tag {
+      background: #1c1c2e;
+      color: #8888b0;
+      border: 1px solid #2a2a40;
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 12px;
+      font-family: sans-serif;
+      letter-spacing: 0.3px;
+    }
+    .hero h1 {
+      font-size: 42px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.3;
+      max-width: 720px;
+      margin: 0 auto 24px;
+    }
+    .hero-sub {
+      color: #a0a0c0;
+      font-style: italic;
+      font-size: 20px;
+      max-width: 660px;
+      margin: 0 auto;
+    }
+ 
+    section {
+      padding: 50px 0;
+      border-top: 1px solid #1f1f33;
+    }
+    section:first-of-type { border-top: none; }
+ 
+    h2 {
+      font-size: 28px;
+      color: #fff;
+      margin-bottom: 26px;
+      letter-spacing: -0.2px;
+    }
+    p { margin-bottom: 22px; color: #d0d0e0; }
+    p em { color: #c8c8e8; font-style: italic; }
+ 
+    .formula {
+      font-family: 'Cambria Math', 'Georgia', serif;
+      font-style: italic;
+      background: #1c1c2e;
+      border: 1px solid #2a2a40;
+      border-radius: 8px;
+      padding: 22px 28px;
+      margin: 18px auto 28px;
+      text-align: center;
+      font-size: 22px;
+      color: #f0c060;
+      line-height: 1.5;
+    }
+    .formula .small { font-size: 14px; color: #888; font-family: sans-serif; font-style: normal; margin-top: 10px; }
+ 
+    .game {
+      background: #1c1c2e;
+      border: 1px solid #2a2a40;
+      border-radius: 10px;
+      padding: 28px;
+      margin: 30px 0;
+    }
+ 
+    .canvas-wrap {
+      text-align: center;
+      margin-bottom: 22px;
+    }
+    canvas {
+      max-width: 100%;
+      height: auto;
+      border-radius: 6px;
+      background: #0e0e18;
+    }
+ 
+    .slider-row { margin: 16px 0; }
+    .lbl-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 6px;
+      font-family: sans-serif;
+      font-size: 13px;
+    }
+    .lbl-row .nm { color: #a0a0c0; }
+    .lbl-row .vl { color: #f0c060; font-family: 'Courier New', monospace; font-weight: bold; }
+ 
+    input[type="range"] {
+      width: 100%;
+      -webkit-appearance: none;
+      background: transparent;
+    }
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 4px;
+      background: #2a2a44;
+      border-radius: 2px;
+    }
+    input[type="range"]::-moz-range-track {
+      height: 4px;
+      background: #2a2a44;
+      border-radius: 2px;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      background: #f0c060;
+      border-radius: 50%;
+      margin-top: -6px;
+      cursor: pointer;
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      background: #f0c060;
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
+    }
+ 
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+      margin-top: 22px;
+    }
+    .stat {
+      background: #0e0e18;
+      border: 1px solid #2a2a40;
+      border-radius: 6px;
+      padding: 12px 14px;
+      text-align: center;
+    }
+    .stat .k {
+      font-family: sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.3px;
+      color: #8888b0;
+      text-transform: uppercase;
+    }
+    .stat .v {
+      font-family: 'Courier New', monospace;
+      font-size: 22px;
+      font-weight: bold;
+      color: #f0c060;
+      margin-top: 4px;
+    }
+    .stat .vs {
+      font-family: sans-serif;
+      font-size: 11px;
+      color: #888;
+      margin-top: 2px;
+    }
+ 
+    .hint-box {
+      margin-top: 22px;
+      padding: 14px 18px;
+      background: #0e0e18;
+      border-left: 3px solid #f0c060;
+      border-radius: 4px;
+      font-size: 15px;
+      color: #b0b0d0;
+      font-style: italic;
+    }
+ 
+    /* ------- Bundestag (log-odds counter) ------- */
+    .feat-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-bottom: 22px;
+      font-family: sans-serif;
+      font-size: 14px;
+    }
+    .feat-table th {
+      text-align: left;
+      padding: 10px 12px;
+      color: #8888b0;
+      font-size: 11px;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      border-bottom: 1px solid #2a2a40;
+      font-weight: normal;
+    }
+    .feat-table td {
+      padding: 12px;
+      border-bottom: 1px solid #1f1f33;
+      vertical-align: middle;
+    }
+    .feat-table td.coef {
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      width: 80px;
+      text-align: right;
+    }
+    .feat-table td.coef.pos { color: #6fc093; }
+    .feat-table td.coef.neg { color: #e07065; }
+    .feat-table td.toggle-cell { width: 60px; text-align: right; }
+    .feat-table tr.intercept td {
+      background: #0e0e18;
+      color: #b0b0d0;
+      font-style: italic;
+    }
+    .feat-table tr.intercept td.coef { color: #f0c060; font-style: normal; }
+    .feat-table .feat-note {
+      display: block;
+      font-size: 11px;
+      color: #666;
+      margin-top: 2px;
+      font-style: italic;
+    }
+ 
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 38px;
+      height: 22px;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider-sw {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #2a2a44;
+      border-radius: 22px;
+      transition: 0.2s;
+    }
+    .slider-sw:before {
+      position: absolute;
+      content: "";
+      height: 16px; width: 16px;
+      left: 3px; bottom: 3px;
+      background: #888;
+      border-radius: 50%;
+      transition: 0.2s;
+    }
+    input:checked + .slider-sw { background: #3a5a3a; }
+    input:checked + .slider-sw:before { transform: translateX(16px); background: #f0c060; }
+ 
+    .sigmoid-wrap { text-align: center; margin: 22px 0; }
+ 
+    /* ------- Head count game ------- */
+    .threshold-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 20px 0 10px;
+      flex-wrap: wrap;
+    }
+    .threshold-row .lbl {
+      font-family: sans-serif;
+      font-size: 13px;
+      color: #a0a0c0;
+      white-space: nowrap;
+    }
+    .threshold-row input[type="range"] { flex: 1; min-width: 200px; }
+    .threshold-row .vl {
+      font-family: 'Courier New', monospace;
+      color: #f0c060;
+      font-weight: bold;
+      min-width: 50px;
+      text-align: right;
+    }
+ 
+    .confmat {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin: 20px 0;
+    }
+    .cm-cell {
+      background: #0e0e18;
+      border: 1px solid #2a2a40;
+      border-radius: 6px;
+      padding: 14px;
+      text-align: center;
+    }
+    .cm-cell .lbl {
+      font-family: sans-serif;
+      font-size: 11px;
+      color: #8888b0;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .cm-cell .count {
+      font-family: 'Courier New', monospace;
+      font-size: 24px;
+      font-weight: bold;
+      margin-top: 6px;
+    }
+    .cm-cell.tp { border-left: 3px solid #6fc093; }
+    .cm-cell.tn { border-left: 3px solid #6fc093; }
+    .cm-cell.fp { border-left: 3px solid #e07065; }
+    .cm-cell.fn { border-left: 3px solid #e07065; }
+    .cm-cell.tp .count, .cm-cell.tn .count { color: #6fc093; }
+    .cm-cell.fp .count, .cm-cell.fn .count { color: #e07065; }
+    .cm-cell .desc {
+      font-family: sans-serif;
+      font-size: 12px;
+      color: #888;
+      margin-top: 4px;
+    }
+ 
+    /* Site footer */
+    .site-footer {
+      margin-top: 60px;
+      padding-top: 30px;
+      border-top: 1px solid #1f1f33;
+      text-align: center;
+      font-size: 14px;
+      color: #666;
+      font-family: sans-serif;
+    }
+    .site-footer a {
+      color: #a0a0c0;
+      text-decoration: none;
+      border-bottom: 1px dotted #555;
+    }
+    .site-footer a:hover { color: #f0c060; }
+    .site-footer .dot { margin: 0 8px; color: #444; }
+ 
+    @media (max-width: 600px) {
+      body { font-size: 17px; }
+      .hero h1 { font-size: 32px; }
+      .hero-sub { font-size: 17px; }
+      h2 { font-size: 24px; }
+      .formula { font-size: 18px; padding: 16px 18px; }
+      .game { padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+ 
+<button class="lang-toggle" onclick="toggleLang()">DE</button>
+ 
+<div class="container">
+ 
+  <header class="hero">
+    <div class="tags">
+      <span class="tag" data-i18n="tag.class">Class 06, Classification</span>
+      <span class="tag" data-i18n="tag.lr">Logistic regression</span>
+      <span class="tag" data-i18n="tag.sig">Sigmoid</span>
+      <span class="tag" data-i18n="tag.ce">Cross-entropy</span>
+      <span class="tag" data-i18n="tag.int">Interactive</span>
+    </div>
+    <h1 data-i18n="hero.title">Modelling decisions</h1>
+    <p class="hero-sub" data-i18n="hero.sub">The simplest model of choices</p>
+  </header>
+ 
+  <!-- ============================================================ -->
+  <!-- Opening the box -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 data-i18n="box.h">Voting on a bill</h2>
+    <p data-i18n="box.p3">Imagine a representative in Bundestag making decision to vote on a bill and doing mental maths on it. The bill aligns with the party platform: plus five toward yes. The bill conflicts with a public statement from three years ago: minus three and a half. The bill benefits the home district: plus two and a half. Each factor contributes to the final decision. Each factor has a fixed score.</p>
+    <p data-i18n="box.p4">The sum of the scores is a real number that can land anywhere on the number line. That sum is the log-odds. The final probability has to live in the interval zero to one. The "sigmoid" is the function that maps any real number onto [0,1] interval without ever quite reaching the edges. Log-odds zero comes out as exactly fifty percent. Log-odds plus three lands at about ninety-five percent yes. Log-odds minus three at about five percent. The curve approaches one and zero without touching them, which is the polite way of saying the representative is never entirely sure.</p>
+    <p data-i18n="box.p5">The whole thing fits in one line.</p>
+ 
+    <div class="canvas-wrap" style="margin: 30px 0 4px;">
+      <canvas id="introSigCanvas" width="540" height="240"></canvas>
+    </div>
+ 
+    <div class="formula">
+      σ( z ) = 1 / ( 1 + e<sup>−z</sup> )
+      <div class="small">where z = b + w<sub>1</sub>x<sub>1</sub> + w<sub>2</sub>x<sub>2</sub> + ... + w<sub>n</sub>x<sub>n</sub></div>
+    </div>
+  </section>
+ 
+  <!-- ============================================================ -->
+  <!-- Verhulst and Berkson -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 data-i18n="hist.h">Verhulst and Berkson</h2>
+    <p data-i18n="hist.p1">The sigmoid did not begin life as a probability tool. In 1845 the Belgian mathematician Pierre François Verhulst was studying how populations grow when resources are finite. Exponential growth is the early phase, when nothing is scarce. Saturation is the late phase, when everything is. The S-curve bridges them. He called it the <em>logistique</em>, from logarithm and arithmetic. It described rabbits, bacteria, and the population of Belgium itself.</p>
+    <p data-i18n="hist.p2">A century later, in 1944, the American statistician Joseph Berkson was running bioassays. He needed to model the probability that a given dose of insecticide would kill an insect. The probability had to live in zero to one. He took Verhulst's S-curve, took the logarithm of the odds ratio, and named the result the <em>logit</em>. Same curve. Different problem.</p>
+  </section>
+ 
+  <!-- ============================================================ -->
+  <!-- Game 1: The tilting boundary -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 data-i18n="tilt.h">Game one. The tilting boundary</h2>
+    <p data-i18n="tilt.p1">Two features, two classes, one boundary. Imagine the first feature is how strongly a bill aligns with a representative's party platform. The second feature is how much it benefits their home district. Each dot on the plane is a past bill on which the representative voted. Green dots voted yes. Red dots voted no. The boundary is the line where the representative is fifty-fifty. On one side, mostly yes votes. On the other, mostly no.</p>
+ 
+    <div class="game">
+      <div class="canvas-wrap">
+        <canvas id="tiltCanvas" width="380" height="380"></canvas>
+      </div>
+ 
+      <div class="slider-row">
+        <div class="lbl-row">
+          <span class="nm">w<sub>1</sub> <span data-i18n="tilt.w1_note">(party-alignment coefficient)</span></span>
+          <span class="vl" id="tiltW1Val">0.50</span>
+        </div>
+        <input type="range" min="-500" max="500" value="50" id="tiltW1">
+      </div>
+      <div class="slider-row">
+        <div class="lbl-row">
+          <span class="nm">w<sub>2</sub> <span data-i18n="tilt.w2_note">(district-benefit coefficient)</span></span>
+          <span class="vl" id="tiltW2Val">0.50</span>
+        </div>
+        <input type="range" min="-500" max="500" value="50" id="tiltW2">
+      </div>
+      <div class="slider-row">
+        <div class="lbl-row">
+          <span class="nm" data-i18n="tilt.b_lbl">b (intercept)</span>
+          <span class="vl" id="tiltBVal">0.00</span>
+        </div>
+        <input type="range" min="-500" max="500" value="0" id="tiltB">
+      </div>
+ 
+      <div class="stats">
+        <div class="stat">
+          <div class="k" data-i18n="tilt.stat_loss">Cross-entropy loss</div>
+          <div class="v" id="tiltLoss">0.00</div>
+        </div>
+        <div class="stat">
+          <div class="k" data-i18n="tilt.stat_acc">Training accuracy</div>
+          <div class="v" id="tiltAcc">, </div>
+        </div>
+      </div>
+ 
+      <div class="hint-box" data-i18n="tilt.hint">In three dimensions the boundary becomes a plane. In ten dimensions it becomes a hyperplane that no one can picture. The model still works. Our intuition no longer does. This is the same problem we visited in Class 04 under the name curse of dimensionality.</div>
+    </div>
+  </section>
+ 
+  <!-- ============================================================ -->
+  <!-- Game 2: The log-odds counter -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 data-i18n="senate.h">Game two. The log-odds counter</h2>
+    <p data-i18n="senate.p1">Let's visualise every score in the mental model. Toggle a feature on, and its coefficient enters the sum. Toggle it off, and it abstains. The intercept votes whether you do or not, which is the polite way of saying the representative has a baseline lean even before they know anything specific about the bill.</p>
+    <p data-i18n="senate.p2">The running total above is the log-odds. The curve in the middle is the sigmoid. The dot on the curve is where the internal Bundestag has landed. The probability on the right is the chance this representative votes yes.</p>
+ 
+    <div class="game">
+      <div class="stats" style="margin-bottom: 22px;">
+        <div class="stat">
+          <div class="k" data-i18n="senate.stat_logodds">Log-odds</div>
+          <div class="v" id="senateLogOdds">−1.50</div>
+          <div class="vs" data-i18n="senate.stat_sum">sum of senators' votes</div>
+        </div>
+        <div class="stat">
+          <div class="k" data-i18n="senate.stat_prob">P(vote yes)</div>
+          <div class="v" id="senateProb">18%</div>
+          <div class="vs" data-i18n="senate.stat_after">after the sigmoid</div>
+        </div>
+      </div>
+ 
+      <div class="sigmoid-wrap">
+        <canvas id="sigCanvas" width="380" height="160"></canvas>
+      </div>
+ 
+      <table class="feat-table" id="featTable">
+        <thead>
+          <tr>
+            <th data-i18n="senate.col_feat">Feature of the bill</th>
+            <th style="text-align:right;" data-i18n="senate.col_coef">Coefficient</th>
+            <th style="text-align:right;" data-i18n="senate.col_vote">Vote</th>
+          </tr>
+        </thead>
+        <tbody id="featBody"></tbody>
+      </table>
+ 
+    </div>
+  </section>
+ 
+  <!-- ============================================================ -->
+  <!-- Game 3: The head count -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 data-i18n="forest.h">Game three. The head count</h2>
+    <p data-i18n="forest.p1">A bill comes to the floor tomorrow. Imagine we know how the representative voted on sixty previous bills. We can run the thought process above, but build a logistic regression, fit it against their voting records on past bills of this kind, and depending on the bill calculate a particular probability to vote yes. If we want to predict the vote we can change the threshold of our model depending on our needs either making it skew towards predicting a yes vote (with lower threshold) or towards predicting a no vote (with higher threshold).</p>
+    <p data-i18n="forest.p2">Drag the threshold. Everything to the right of the line is predicted as a yes vote. Everything to the left is predicted as a no. Watch the four cells of the confusion matrix update. Watch precision and recall fight each other. Watch the point move along the precision-recall curve.</p>
+ 
+    <div class="game">
+      <div class="canvas-wrap">
+        <canvas id="forestCanvas" width="380" height="180"></canvas>
+      </div>
+ 
+      <div class="threshold-row">
+        <span class="lbl" data-i18n="forest.threshold">Threshold</span>
+        <input type="range" min="0" max="1000" value="500" id="forestThresh">
+        <span class="vl" id="forestThreshVal">0.50</span>
+      </div>
+ 
+      <div class="confmat">
+        <div class="cm-cell tp">
+          <div class="lbl" data-i18n="forest.tp">TP · voted yes &amp; predicted yes</div>
+          <div class="count" id="cmTP">0</div>
+        </div>
+        <div class="cm-cell fp">
+          <div class="lbl" data-i18n="forest.fp">FP · voted no &amp; predicted yes</div>
+          <div class="count" id="cmFP">0</div>
+        </div>
+        <div class="cm-cell fn">
+          <div class="lbl" data-i18n="forest.fn">FN · voted yes &amp; predicted no</div>
+          <div class="count" id="cmFN">0</div>
+        </div>
+        <div class="cm-cell tn">
+          <div class="lbl" data-i18n="forest.tn">TN · voted no &amp; predicted no</div>
+          <div class="count" id="cmTN">0</div>
+        </div>
+      </div>
+ 
+      <div class="stats">
+        <div class="stat">
+          <div class="k" data-i18n="forest.k_prec">Precision</div>
+          <div class="v" id="forestPrec">, </div>
+        </div>
+        <div class="stat">
+          <div class="k" data-i18n="forest.k_rec">Recall</div>
+          <div class="v" id="forestRec">, </div>
+        </div>
+        <div class="stat">
+          <div class="k" data-i18n="forest.k_f1">F1</div>
+          <div class="v" id="forestF1">, </div>
+        </div>
+      </div>
+ 
+      <div class="canvas-wrap" style="margin-top: 22px;">
+        <canvas id="prCanvas" width="380" height="280"></canvas>
+      </div>
+ 
+      <div class="hint-box" data-i18n="forest.hint">The model is one thing. The threshold is another. The model encodes how representatives have voted on past bills. The threshold encodes how confident you need to be before you call someone a yes vote. A cautious whip gets a tighter count than an optimistic sponsor from the same model.</div>
+    </div>
+  </section>
+ 
+  <!-- ============================================================ -->
+  <!-- Optional deep dive: cross-entropy vs MSE -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 data-i18n="ce.h">Deep dive. Why cross-entropy and not squared error</h2>
+    <p data-i18n="ce.p1">The model produces a probability. The training data has a true label, zero or one. The loss says how wrong the model was. Squared error would have worked, mathematically. Cross-entropy is what everyone uses. The reason fits in one picture.</p>
+    <p data-i18n="ce.p2">Imagine a single representative who in fact voted yes. The true label is one. The model produces a probability p, its estimate that this representative would vote yes. The plot below shows the loss as a function of p, under two different rules. The grey curve is squared error: (1 − p)². The amber curve is cross-entropy: −log(p).</p>
+ 
+    <div class="canvas-wrap">
+      <canvas id="lossCanvas" width="500" height="300"></canvas>
+    </div>
+ 
+    <p data-i18n="ce.p3">When p is close to one, both losses are small. When p is around a half, both losses are middling. When p is very close to zero, the difference becomes brutal. Squared error caps out at one. The model was as confidently wrong as it could be, and it paid a price of one. Cross-entropy keeps climbing. A model that says "five percent chance of voting yes" about a representative who in fact voted yes pays a loss of three. A model that says "one percent" pays four point six. A model that says "zero point one percent" pays seven.</p>
+    <p data-i18n="ce.p4">That is the point. If a model is going to call itself a probability, it has to be punished for being confident about wrong answers. Squared error does not punish enough. Cross-entropy does. The model learns to be uncertain when it should be.</p>
+  </section>
+ 
+  <!-- ============================================================ -->
+  <!-- Closing -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 data-i18n="end.h">summing up</h2>
+    <p data-i18n="end.p1">Most of the decisions we make could be represented as a sequence of yes or no answers that we take with some probabilities depending on our previous experience. We can model customer behaviour choosing to buy something or click on a link. We can model if the letter is spam or not. If the transaction is fraudulent or real. The logistic regression is not the best classification model (as well as linear regression is not the best regression one), but it's a simple solid baseline that is very easy to interpret.</p>
+  </section>
+ 
+  <footer class="site-footer">
+    <span data-i18n="footer.part">Part of</span>
+    <a href="../../">Passt</a>
+    <span class="dot">·</span>
+    <span data-i18n="footer.class">Class 06, Classification Fundamentals</span>
+    <br><br>
+    <a href="https://github.com/i-yam/passt/tree/main/modules/decisions">github.com/i-yam/passt</a>
+  </footer>
+ 
+</div>
+ 
+<script>
+// ============================================================
+// Translations
+// ============================================================
+const T = {
+  en: {
+    'tag.class': 'Class 06, Classification',
+    'tag.lr': 'Logistic regression',
+    'tag.sig': 'Sigmoid',
+    'tag.ce': 'Cross-entropy',
+    'tag.int': 'Interactive',
+ 
+    'hero.title': 'Modelling decisions',
+    'hero.sub': 'The simplest model of choices',
+ 
+    'box.h': 'Voting on a bill',
+    'box.p3': "Imagine a representative in Bundestag making decision to vote on a bill and doing mental maths on it. The bill aligns with the party platform: plus five toward yes. The bill conflicts with a public statement from three years ago: minus three and a half. The bill benefits the home district: plus two and a half. Each factor contributes to the final decision. Each factor has a fixed score.",
+    'box.p4': "The sum of the scores is a real number that can land anywhere on the number line. That sum is the log-odds. The final probability has to live in the interval zero to one. The \"sigmoid\" is the function that maps any real number onto [0,1] interval without ever quite reaching the edges. Log-odds zero comes out as exactly fifty percent. Log-odds plus three lands at about ninety-five percent yes. Log-odds minus three at about five percent. The curve approaches one and zero without touching them, which is the polite way of saying the representative is never entirely sure.",
+    'box.p5': 'The whole thing fits in one line.',
+ 
+    'hist.h': 'Verhulst and Berkson',
+    'hist.p1': "The sigmoid did not begin life as a probability tool. In 1845 the Belgian mathematician Pierre François Verhulst was studying how populations grow when resources are finite. Exponential growth is the early phase, when nothing is scarce. Saturation is the late phase, when everything is. The S-curve bridges them. He called it the <em>logistique</em>, from logarithm and arithmetic. It described rabbits, bacteria, and the population of Belgium itself.",
+    'hist.p2': "A century later, in 1944, the American statistician Joseph Berkson was running bioassays. He needed to model the probability that a given dose of insecticide would kill an insect. The probability had to live in zero to one. He took Verhulst's S-curve, took the logarithm of the odds ratio, and named the result the <em>logit</em>. Same curve. Different problem.",
+ 
+    'tilt.h': 'Game one. The tilting boundary',
+    'tilt.p1': 'Two features, two classes, one boundary. Imagine the first feature is how strongly a bill aligns with a representative\'s party platform. The second feature is how much it benefits their home district. Each dot on the plane is a past bill on which the representative voted. Green dots voted yes. Red dots voted no. The boundary is the line where the representative is fifty-fifty. On one side, mostly yes votes. On the other, mostly no.',
+    'tilt.w1_note': '(party-alignment coefficient)',
+    'tilt.w2_note': '(district-benefit coefficient)',
+    'tilt.b_lbl': 'b (intercept)',
+    'tilt.stat_loss': 'Cross-entropy loss',
+    'tilt.stat_acc': 'Training accuracy',
+    'tilt.hint': 'In three dimensions the boundary becomes a plane. In ten dimensions it becomes a hyperplane that no one can picture. The model still works. Our intuition no longer does. This is the same problem we visited in Class 04 under the name curse of dimensionality.',
+ 
+    'senate.h': 'Game two. The log-odds counter',
+    'senate.p1': "Let's visualise every score in the mental model. Toggle a feature on, and its coefficient enters the sum. Toggle it off, and it abstains. The intercept votes whether you do or not, which is the polite way of saying the representative has a baseline lean even before they know anything specific about the bill.",
+    'senate.p2': "The running total above is the log-odds. The curve in the middle is the sigmoid. The dot on the curve is where the internal Bundestag has landed. The probability on the right is the chance this representative votes yes.",
+    'senate.stat_logodds': 'Log-odds',
+    'senate.stat_sum': "sum of senators' votes",
+    'senate.stat_prob': 'P(vote yes)',
+    'senate.stat_after': 'after the sigmoid',
+    'senate.col_feat': 'Feature of the bill',
+    'senate.col_coef': 'Coefficient',
+    'senate.col_vote': 'Vote',
+ 
+    'feat.intercept': 'Intercept (baseline lean)',
+    'feat.intercept_note': 'always counted',
+    'feat.party':    'Bill aligns with party platform',
+    'feat.sponsor':  'Representative is a co-sponsor',
+    'feat.district': 'Bill benefits the home district',
+    'feat.coalition':'Coalition leadership requests yes',
+    'feat.media':    'Endorsed by district newspaper',
+    'feat.flip':     'Conflicts with previous public statement',
+    'feat.voters':   'Constituents strongly opposed',
+ 
+    'forest.h': 'Game three. The head count',
+    'forest.p1': 'A bill comes to the floor tomorrow. Imagine we know how the representative voted on sixty previous bills. We can run the thought process above, but build a logistic regression, fit it against their voting records on past bills of this kind, and depending on the bill calculate a particular probability to vote yes. If we want to predict the vote we can change the threshold of our model depending on our needs either making it skew towards predicting a yes vote (with lower threshold) or towards predicting a no vote (with higher threshold).',
+    'forest.p2': "Drag the threshold. Everything to the right of the line is predicted as a yes vote. Everything to the left is predicted as a no. Watch the four cells of the confusion matrix update. Watch precision and recall fight each other. Watch the point move along the precision-recall curve.",
+    'forest.threshold': 'Threshold',
+    'forest.tp': 'TP · voted yes & predicted yes',
+    'forest.fp': 'FP · voted no & predicted yes',
+    'forest.fn': 'FN · voted yes & predicted no',
+    'forest.tn': 'TN · voted no & predicted no',
+    'forest.k_prec': 'Precision',
+    'forest.k_rec': 'Recall',
+    'forest.k_f1': 'F1',
+    'forest.hint': 'The model is one thing. The threshold is another. The model encodes how representatives have voted on past bills. The threshold encodes how confident you need to be before you call someone a yes vote. A cautious whip gets a tighter count than an optimistic sponsor from the same model.',
+    'forest.pr_axis_x': 'Recall',
+    'forest.pr_axis_y': 'Precision',
+    'forest.axis_x_label': 'P(vote yes)',
+ 
+    'ce.h': 'Deep dive. Why cross-entropy and not squared error',
+    'ce.p1': 'The model produces a probability. The training data has a true label, zero or one. The loss says how wrong the model was. Squared error would have worked, mathematically. Cross-entropy is what everyone uses. The reason fits in one picture.',
+    'ce.p2': "Imagine a single representative who in fact voted yes. The true label is one. The model produces a probability p, its estimate that this representative would vote yes. The plot below shows the loss as a function of p, under two different rules. The grey curve is squared error: (1 − p)². The amber curve is cross-entropy: −log(p).",
+    'ce.p3': 'When p is close to one, both losses are small. When p is around a half, both losses are middling. When p is very close to zero, the difference becomes brutal. Squared error caps out at one. The model was as confidently wrong as it could be, and it paid a price of one. Cross-entropy keeps climbing. A model that says "five percent chance of voting yes" about a representative who in fact voted yes pays a loss of three. A model that says "one percent" pays four point six. A model that says "zero point one percent" pays seven.',
+    'ce.p4': 'That is the point. If a model is going to call itself a probability, it has to be punished for being confident about wrong answers. Squared error does not punish enough. Cross-entropy does. The model learns to be uncertain when it should be.',
+    'ce.lossLabel': 'loss',
+    'ce.probLabel': 'predicted probability p (true label = yes vote)',
+    'ce.mseLabel': 'squared error',
+    'ce.celabel': 'cross-entropy',
+ 
+    'end.h': 'summing up',
+    'end.p1': "Most of the decisions we make could be represented as a sequence of yes or no answers that we take with some probabilities depending on our previous experience. We can model customer behaviour choosing to buy something or click on a link. We can model if the letter is spam or not. If the transaction is fraudulent or real. The logistic regression is not the best classification model (as well as linear regression is not the best regression one), but it's a simple solid baseline that is very easy to interpret.",
+ 
+    'footer.part': 'Part of',
+    'footer.class': 'Class 06, Classification Fundamentals',
+ 
+    'intro.title': 'The sigmoid σ(z)',
+    'intro.xLabel': 'z (log-odds)',
+    'intro.yLabel': 'σ(z)',
+    'intro.annot_zero': 'z = 0 → 50%',
+    'intro.annot_pos': 'z = +3 → ≈95%',
+    'intro.annot_neg': 'z = −3 → ≈5%'
+  },
+ 
+  de: {
+    'tag.class': 'Klasse 06: Klassifikation',
+    'tag.lr': 'Logistische Regression',
+    'tag.sig': 'Sigmoid',
+    'tag.ce': 'Kreuzentropie',
+    'tag.int': 'Interaktiv',
+ 
+    'hero.title': 'Entscheidungen modellieren',
+    'hero.sub': 'Das einfachste Modell für Entscheidungen',
+ 
+    'box.h': 'Über einen Gesetzentwurf abstimmen',
+    'box.p3': "Stell dir einen Abgeordneten im Bundestag vor. Er muss über einen Gesetzentwurf abstimmen und rechnet dabei im Kopf. Der Entwurf passt zur Parteilinie: plus fünf Richtung Ja. Der Entwurf widerspricht einer öffentlichen Aussage von vor drei Jahren: minus dreieinhalb. Der Entwurf nützt dem Wahlkreis: plus zweieinhalb. Jeder Faktor trägt zur Endentscheidung bei. Jeder Faktor hat einen festen Score.",
+    'box.p4': "Die Summe der Scores ist eine reelle Zahl. Sie kann irgendwo auf der Zahlengeraden landen. Diese Summe sind die Log-Odds. Die endgültige Wahrscheinlichkeit muss dagegen zwischen null und eins liegen. Die „Sigmoidfunktion“ bildet jede reelle Zahl auf das Intervall [0,1] ab. Die Ränder erreicht sie dabei nie ganz. Log-Odds null landet bei genau fünfzig Prozent. Plus drei landet bei etwa fünfundneunzig Prozent ja. Minus drei bei etwa fünf Prozent. Die Kurve nähert sich eins und null, ohne sie je zu berühren. Höflich gesagt: Der Abgeordnete ist sich nie ganz sicher.",
+    'box.p5': 'Das Ganze passt in eine Zeile.',
+ 
+    'hist.h': 'Verhulst und Berkson',
+    'hist.p1': "Die Sigmoidfunktion begann nicht als Werkzeug für Wahrscheinlichkeiten. 1845 untersuchte der belgische Mathematiker Pierre François Verhulst das Wachstum von Populationen. Ihn interessierte der Fall mit endlichen Ressourcen. Exponentielles Wachstum ist die frühe Phase, wenn noch nichts knapp ist. Sättigung ist die späte Phase, wenn alles knapp ist. Die S-Kurve verbindet beide. Er nannte sie <em>logistique</em>, aus Logarithmus und Arithmetik. Sie beschrieb Kaninchen, Bakterien und die Bevölkerung Belgiens selbst.",
+    'hist.p2': "Ein Jahrhundert später, 1944, führte der amerikanische Statistiker Joseph Berkson Bioassays durch. Er wollte eine Wahrscheinlichkeit modellieren: Tötet eine bestimmte Dosis Insektizid ein Insekt? Dieser Wert musste zwischen null und eins liegen. Berkson nahm Verhulsts S-Kurve. Er bildete den Logarithmus des Odds-Verhältnisses und nannte das Ergebnis <em>logit</em>. Dieselbe Kurve. Anderes Problem.",
+ 
+    'tilt.h': 'Spiel eins. Die kippende Grenze',
+    'tilt.p1': 'Zwei Merkmale, zwei Klassen, eine Grenze. Das erste Merkmal: wie stark ein Gesetzentwurf zur Parteilinie des Abgeordneten passt. Das zweite Merkmal: wie sehr er dem Wahlkreis nützt. Jeder Punkt in der Ebene ist ein früherer Entwurf. Über jeden davon hat der Abgeordnete abgestimmt. Grüne Punkte stimmten ja. Rote Punkte stimmten nein. An der Grenzlinie steht der Abgeordnete fünfzig zu fünfzig. Auf der einen Seite überwiegen die Ja-Stimmen. Auf der anderen die Nein-Stimmen.',
+    'tilt.w1_note': '(Gewicht für Parteilinie)',
+    'tilt.w2_note': '(Gewicht für Wahlkreisnutzen)',
+    'tilt.b_lbl': 'b (Achsenabschnitt)',
+    'tilt.stat_loss': 'Kreuzentropieverlust',
+    'tilt.stat_acc': 'Trefferquote im Training',
+    'tilt.hint': 'In drei Dimensionen wird die Grenze eine Ebene. In zehn Dimensionen wird sie eine Hyperebene. Die kann sich niemand mehr vorstellen. Das Modell funktioniert weiter. Unsere Intuition nicht mehr. Dasselbe Problem hatten wir in Klasse 04. Dort hieß es Fluch der Dimensionalität.',
+ 
+    'senate.h': 'Spiel zwei. Der Log-Odds-Zähler',
+    'senate.p1': "Machen wir jeden Score im mentalen Modell sichtbar. Schalt ein Merkmal ein, dann geht sein Gewicht in die Summe ein. Schalt es aus, dann enthält es sich. Der Achsenabschnitt stimmt immer mit, ob du willst oder nicht. Höflich gesagt: Der Abgeordnete hat eine Grundtendenz. Die hat er schon, bevor er etwas Konkretes über den Entwurf weiß.",
+    'senate.p2': "Die laufende Summe oben sind die Log-Odds. Die Kurve in der Mitte ist die Sigmoidfunktion. Der Punkt auf der Kurve zeigt, wo der innere Bundestag gelandet ist. Die Wahrscheinlichkeit rechts ist die Chance, dass dieser Abgeordnete ja stimmt.",
+    'senate.stat_logodds': 'Log-Odds',
+    'senate.stat_sum': 'Summe der Senatorenstimmen',
+    'senate.stat_prob': 'P(Stimme ja)',
+    'senate.stat_after': 'nach der Sigmoidfunktion',
+    'senate.col_feat': 'Merkmal des Entwurfs',
+    'senate.col_coef': 'Gewicht',
+    'senate.col_vote': 'Stimme',
+ 
+    'feat.intercept': 'Achsenabschnitt (Grundtendenz)',
+    'feat.intercept_note': 'immer mitgezählt',
+    'feat.party':    'Entwurf passt zur Parteilinie',
+    'feat.sponsor':  'Abgeordnete/r ist Mitantragsteller/in',
+    'feat.district': 'Entwurf nützt dem Wahlkreis',
+    'feat.coalition':'Fraktionsführung wünscht Ja-Stimme',
+    'feat.media':    'Zustimmung der Lokalzeitung',
+    'feat.flip':     'Widerspricht früherer öffentlicher Aussage',
+    'feat.voters':   'Wähler im Wahlkreis stark dagegen',
+ 
+    'forest.h': 'Spiel drei. Die Stimmenauszählung',
+    'forest.p1': 'Morgen kommt ein Gesetzentwurf in den Plenarsaal. Nehmen wir an, wir wissen: So hat der Abgeordnete bei sechzig früheren Entwürfen abgestimmt. Wir können den Gedankengang von oben durchspielen. Wir können aber auch eine logistische Regression bauen. Wir passen sie an das Stimmverhalten bei früheren Entwürfen dieser Art an. Dann berechnet sie für jeden Entwurf eine Wahrscheinlichkeit für eine Ja-Stimme. Für eine Vorhersage brauchen wir noch eine Schwelle. Eine niedrige Schwelle kippt das Modell Richtung Ja. Eine hohe Schwelle kippt es Richtung Nein.',
+    'forest.p2': "Zieh an der Schwelle. Alles rechts der Linie wird als Ja-Stimme vorhergesagt. Alles links als Nein. Sieh zu, wie sich die vier Zellen der Wahrheitsmatrix ändern. Sieh zu, wie Präzision und Recall gegeneinander kämpfen. Sieh zu, wie der Punkt sich auf der Präzisions-Recall-Kurve bewegt.",
+    'forest.threshold': 'Schwelle',
+    'forest.tp': 'TP · ja gestimmt & ja vorhergesagt',
+    'forest.fp': 'FP · nein gestimmt & ja vorhergesagt',
+    'forest.fn': 'FN · ja gestimmt & nein vorhergesagt',
+    'forest.tn': 'TN · nein gestimmt & nein vorhergesagt',
+    'forest.k_prec': 'Präzision',
+    'forest.k_rec': 'Recall',
+    'forest.k_f1': 'F1',
+    'forest.hint': 'Das Modell ist eine Sache. Die Schwelle ist eine andere. Das Modell kodiert, wie Abgeordnete bei früheren Entwürfen abgestimmt haben. Die Schwelle kodiert etwas anderes: wie sicher du sein musst, bevor du jemanden als Ja-Stimme zählst. Ein vorsichtiger Fraktionsmanager zählt darum enger als ein optimistischer Antragsteller. Beide nutzen dasselbe Modell.',
+    'forest.pr_axis_x': 'Recall',
+    'forest.pr_axis_y': 'Präzision',
+    'forest.axis_x_label': 'P(Stimme ja)',
+ 
+    'ce.h': 'Vertiefung. Warum Kreuzentropie und nicht quadratischer Fehler',
+    'ce.p1': 'Das Modell liefert eine Wahrscheinlichkeit. Die Trainingsdaten haben ein wahres Label, null oder eins. Der Verlust sagt, wie falsch das Modell lag. Quadratischer Fehler hätte mathematisch funktioniert. Genommen wird trotzdem überall die Kreuzentropie. Der Grund passt in ein Bild.',
+    'ce.p2': "Stell dir einen einzelnen Abgeordneten vor, der tatsächlich ja gestimmt hat. Das wahre Label ist eins. Das Modell liefert eine Wahrscheinlichkeit p. Das ist seine Schätzung für eine Ja-Stimme. Der Plot unten zeigt den Verlust als Funktion von p, und zwar nach zwei verschiedenen Regeln. Die graue Kurve ist der quadratische Fehler: (1 − p)². Die bernsteinfarbene Kurve ist die Kreuzentropie: −log(p).",
+    'ce.p3': 'Wenn p nahe bei eins liegt, sind beide Verluste klein. Bei etwa einem halben sind beide mittelgroß. Wenn p sehr nahe bei null liegt, wird der Unterschied brutal. Der quadratische Fehler ist bei eins gedeckelt. Das Modell lag so überzeugt falsch wie nur möglich und zahlte trotzdem nur einen Preis von eins. Die Kreuzentropie steigt weiter. Ein Modell sagt „fünf Prozent Ja-Chance“ über einen Abgeordneten, der tatsächlich ja gestimmt hat. Es zahlt einen Verlust von drei. Bei „ein Prozent“ zahlt es vier komma sechs. Bei „null komma eins Prozent“ zahlt es sieben.',
+    'ce.p4': 'Das ist der Punkt. Ein Modell, das sich selbst eine Wahrscheinlichkeit nennt, muss für selbstsichere Fehler zahlen. Der quadratische Fehler bestraft zu wenig. Die Kreuzentropie bestraft genug. So lernt das Modell, unsicher zu sein, wenn es unsicher sein sollte.',
+    'ce.lossLabel': 'Verlust',
+    'ce.probLabel': 'vorhergesagte Wahrscheinlichkeit p (wahres Label = Ja-Stimme)',
+    'ce.mseLabel': 'quadratischer Fehler',
+    'ce.celabel': 'Kreuzentropie',
+ 
+    'end.h': 'zusammenfassend',
+    'end.p1': "Die meisten Entscheidungen lassen sich als Folge von Ja- oder Nein-Antworten darstellen. Wir treffen sie mit gewissen Wahrscheinlichkeiten, abhängig von unserer früheren Erfahrung. So lässt sich Kundenverhalten modellieren: kaufen oder nicht, klicken oder nicht. So lässt sich modellieren, ob ein Brief Spam ist oder nicht. Oder ob eine Transaktion betrügerisch oder echt ist. Die logistische Regression ist nicht das beste Klassifikationsmodell, so wie die lineare Regression nicht die beste Regression ist. Aber sie ist einfach, solide und sehr leicht zu deuten. Als Ausgangspunkt passt sie schon.",
+ 
+    'footer.part': 'Teil von',
+    'footer.class': 'Klasse 06: Klassifikationsgrundlagen',
+ 
+    'intro.title': 'Die Sigmoidfunktion σ(z)',
+    'intro.xLabel': 'z (Log-Odds)',
+    'intro.yLabel': 'σ(z)',
+    'intro.annot_zero': 'z = 0 → 50%',
+    'intro.annot_pos': 'z = +3 → ≈95%',
+    'intro.annot_neg': 'z = −3 → ≈5%'
+  }
+};
+ 
+let currentLang = 'en';
+ 
+function applyLang() {
+  document.documentElement.lang = currentLang;
+  document.querySelector('.lang-toggle').textContent = currentLang === 'en' ? 'DE' : 'EN';
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (T[currentLang][key] !== undefined) {
+      el.innerHTML = T[currentLang][key];
+    }
+  });
+  buildFeatureList();
+  drawLossCurves();
+  computeAndDrawPR();
+  drawSigmoidCurve();
+  drawForest();
+  drawIntroSigmoid();
+}
+ 
+function toggleLang() {
+  currentLang = currentLang === 'en' ? 'de' : 'en';
+  applyLang();
+}
+ 
+// ============================================================
+// Utility
+// ============================================================
+function sigmoid(z) { return 1 / (1 + Math.exp(-z)); }
+ 
+// ============================================================
+// Intro sigmoid (in "Opening the box")
+// ============================================================
+const introSigCanvas = document.getElementById('introSigCanvas');
+const introSigCtx = introSigCanvas.getContext('2d');
+ 
+function drawIntroSigmoid() {
+  const W = introSigCanvas.width;
+  const H = introSigCanvas.height;
+  introSigCtx.clearRect(0, 0, W, H);
+ 
+  const padL = 56, padR = 24, padT = 24, padB = 44;
+  const plotW = W - padL - padR;
+  const plotH = H - padT - padB;
+ 
+  // background
+  introSigCtx.fillStyle = '#0e0e18';
+  introSigCtx.fillRect(padL, padT, plotW, plotH);
+ 
+  // mapping
+  const zMin = -6, zMax = 6;
+  const zToX = z => padL + ((z - zMin) / (zMax - zMin)) * plotW;
+  const pToY = p => padT + (1 - p) * plotH;
+ 
+  // gridlines (probability)
+  introSigCtx.strokeStyle = 'rgba(255,255,255,0.06)';
+  introSigCtx.lineWidth = 1;
+  for (let pv = 0.25; pv <= 0.75; pv += 0.25) {
+    if (pv === 0.5) continue;
+    const y = pToY(pv);
+    introSigCtx.beginPath();
+    introSigCtx.moveTo(padL, y); introSigCtx.lineTo(padL + plotW, y);
+    introSigCtx.stroke();
+  }
+ 
+  // horizontal at p = 0.5
+  introSigCtx.strokeStyle = 'rgba(255,255,255,0.15)';
+  introSigCtx.setLineDash([4, 4]);
+  introSigCtx.beginPath();
+  const y50 = pToY(0.5);
+  introSigCtx.moveTo(padL, y50); introSigCtx.lineTo(padL + plotW, y50);
+  introSigCtx.stroke();
+ 
+  // vertical at z = 0
+  introSigCtx.beginPath();
+  const x0 = zToX(0);
+  introSigCtx.moveTo(x0, padT); introSigCtx.lineTo(x0, padT + plotH);
+  introSigCtx.stroke();
+  introSigCtx.setLineDash([]);
+ 
+  // The sigmoid curve
+  introSigCtx.strokeStyle = '#f0c060';
+  introSigCtx.lineWidth = 2.5;
+  introSigCtx.beginPath();
+  for (let i = 0; i <= 240; i++) {
+    const zv = zMin + (zMax - zMin) * (i / 240);
+    const pv = sigmoid(zv);
+    const x = zToX(zv);
+    const y = pToY(pv);
+    if (i === 0) introSigCtx.moveTo(x, y); else introSigCtx.lineTo(x, y);
+  }
+  introSigCtx.stroke();
+ 
+  // Annotated landmark dots
+  const landmarks = [
+    { z: -3, p: sigmoid(-3), label: T[currentLang]['intro.annot_neg']  },
+    { z:  0, p: 0.5,         label: T[currentLang]['intro.annot_zero'] },
+    { z:  3, p: sigmoid(3),  label: T[currentLang]['intro.annot_pos']  }
+  ];
+  for (const lm of landmarks) {
+    const x = zToX(lm.z);
+    const y = pToY(lm.p);
+    introSigCtx.beginPath();
+    introSigCtx.arc(x, y, 4, 0, Math.PI * 2);
+    introSigCtx.fillStyle = '#fff';
+    introSigCtx.fill();
+    introSigCtx.strokeStyle = '#f0c060';
+    introSigCtx.lineWidth = 1.5;
+    introSigCtx.stroke();
+  }
+ 
+  // Annotation labels (offset for readability)
+  introSigCtx.font = '11px sans-serif';
+  introSigCtx.fillStyle = '#a0a0c0';
+  // z = -3
+  introSigCtx.textAlign = 'left';
+  introSigCtx.fillText(landmarks[0].label, zToX(-3) + 10, pToY(sigmoid(-3)) + 4);
+  // z = 0
+  introSigCtx.textAlign = 'left';
+  introSigCtx.fillText(landmarks[1].label, zToX(0) + 10, pToY(0.5) - 6);
+  // z = 3
+  introSigCtx.textAlign = 'right';
+  introSigCtx.fillText(landmarks[2].label, zToX(3) - 10, pToY(sigmoid(3)) - 6);
+ 
+  // Axis ticks & labels
+  introSigCtx.fillStyle = '#666';
+  introSigCtx.font = '11px sans-serif';
+  introSigCtx.textAlign = 'center';
+  for (let zv = -6; zv <= 6; zv += 3) {
+    const x = zToX(zv);
+    introSigCtx.fillText(zv.toString(), x, padT + plotH + 16);
+  }
+  introSigCtx.textAlign = 'right';
+  for (let pv of [0, 0.5, 1]) {
+    const y = pToY(pv);
+    introSigCtx.fillText(pv.toFixed(1), padL - 8, y + 4);
+  }
+ 
+  // Axis titles
+  introSigCtx.fillStyle = '#888';
+  introSigCtx.font = '12px sans-serif';
+  introSigCtx.textAlign = 'center';
+  introSigCtx.fillText(T[currentLang]['intro.xLabel'], padL + plotW / 2, H - 8);
+  introSigCtx.save();
+  introSigCtx.translate(16, padT + plotH / 2);
+  introSigCtx.rotate(-Math.PI / 2);
+  introSigCtx.textAlign = 'center';
+  introSigCtx.fillText(T[currentLang]['intro.yLabel'], 0, 0);
+  introSigCtx.restore();
+}
+ 
+// ============================================================
+// Game 1: Tilting boundary
+// ============================================================
+const tiltCanvas = document.getElementById('tiltCanvas');
+const tiltCtx = tiltCanvas.getContext('2d');
+const TILT_W = tiltCanvas.width;
+const TILT_H = tiltCanvas.height;
+ 
+let tiltPoints = [];
+function makeTiltPoints() {
+  tiltPoints = [];
+  // Deterministic via LCG, two Gaussian clusters
+  // Class 0 = NO votes, lower-left
+  // Class 1 = YES votes, upper-right
+  let seed = 17;
+  function rand() {
+    seed = (seed * 9301 + 49297) % 233280;
+    return seed / 233280;
+  }
+  function g() {
+    const u = Math.max(1e-6, rand());
+    const v = rand();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  }
+  for (let i = 0; i < 18; i++) {
+    tiltPoints.push({ x: -1.4 + g() * 0.7, y: -0.5 + g() * 0.7, c: 0 });
+  }
+  for (let i = 0; i < 18; i++) {
+    tiltPoints.push({ x:  1.2 + g() * 0.7, y:  0.6 + g() * 0.7, c: 1 });
+  }
+}
+ 
+function tiltWorldToPx(xw, yw) {
+  return {
+    px: (xw + 3) / 6 * TILT_W,
+    py: (1 - (yw + 3) / 6) * TILT_H
+  };
+}
+ 
+let tiltW1 = 0.50, tiltW2 = 0.50, tiltB = 0.00;
+ 
+function tiltDraw() {
+  // Heatmap: model predicts P(yes vote) = sigmoid(b + w1*x + w2*y)
+  // High p = GREEN region (yes), low p = RED region (no)
+  const img = tiltCtx.createImageData(TILT_W, TILT_H);
+  const data = img.data;
+  for (let py = 0; py < TILT_H; py++) {
+    const yw = -(((py / TILT_H) * 6) - 3);
+    for (let px = 0; px < TILT_W; px++) {
+      const xw = (px / TILT_W) * 6 - 3;
+      const z = tiltB + tiltW1 * xw + tiltW2 * yw;
+      const p = 1 / (1 + Math.exp(-z));
+      let r, gC, bC;
+      if (p > 0.5) {
+        // greener as p approaches 1
+        const t = (p - 0.5) * 2;
+        r = 30 + (1 - t) * 35;
+        gC = 60 + t * 100;
+        bC = 35 + (1 - t) * 15;
+      } else {
+        // redder as p approaches 0
+        const t = (0.5 - p) * 2;
+        r = 65 + t * 130;
+        gC = 60 - t * 30;
+        bC = 50 - t * 30;
+      }
+      const idx = (py * TILT_W + px) * 4;
+      data[idx]     = r;
+      data[idx + 1] = gC;
+      data[idx + 2] = bC;
+      data[idx + 3] = 255;
+    }
+  }
+  tiltCtx.putImageData(img, 0, 0);
+ 
+  // Decision boundary: w1*x + w2*y + b = 0
+  if (Math.abs(tiltW1) > 1e-6 || Math.abs(tiltW2) > 1e-6) {
+    tiltCtx.strokeStyle = '#f0c060';
+    tiltCtx.lineWidth = 2;
+    tiltCtx.beginPath();
+    if (Math.abs(tiltW2) > Math.abs(tiltW1)) {
+      for (let i = 0; i <= 100; i++) {
+        const xw = -3 + 6 * (i / 100);
+        const yw = -(tiltW1 * xw + tiltB) / tiltW2;
+        const pt = tiltWorldToPx(xw, yw);
+        if (i === 0) tiltCtx.moveTo(pt.px, pt.py); else tiltCtx.lineTo(pt.px, pt.py);
+      }
+    } else {
+      for (let i = 0; i <= 100; i++) {
+        const yw = -3 + 6 * (i / 100);
+        const xw = -(tiltW2 * yw + tiltB) / tiltW1;
+        const pt = tiltWorldToPx(xw, yw);
+        if (i === 0) tiltCtx.moveTo(pt.px, pt.py); else tiltCtx.lineTo(pt.px, pt.py);
+      }
+    }
+    tiltCtx.stroke();
+  }
+ 
+  // Axes
+  tiltCtx.strokeStyle = 'rgba(255,255,255,0.08)';
+  tiltCtx.lineWidth = 1;
+  const origin = tiltWorldToPx(0, 0);
+  tiltCtx.beginPath();
+  tiltCtx.moveTo(0, origin.py); tiltCtx.lineTo(TILT_W, origin.py);
+  tiltCtx.moveTo(origin.px, 0); tiltCtx.lineTo(origin.px, TILT_H);
+  tiltCtx.stroke();
+ 
+  // Scatter points: class 1 (yes) = green, class 0 (no) = red
+  for (const pt of tiltPoints) {
+    const pp = tiltWorldToPx(pt.x, pt.y);
+    tiltCtx.beginPath();
+    tiltCtx.arc(pp.px, pp.py, 5, 0, Math.PI * 2);
+    tiltCtx.fillStyle = pt.c === 1 ? '#6fc093' : '#e07065';
+    tiltCtx.fill();
+    tiltCtx.strokeStyle = 'rgba(0,0,0,0.6)';
+    tiltCtx.lineWidth = 1.2;
+    tiltCtx.stroke();
+  }
+}
+ 
+function tiltUpdate() {
+  document.getElementById('tiltW1Val').textContent = tiltW1.toFixed(2);
+  document.getElementById('tiltW2Val').textContent = tiltW2.toFixed(2);
+  document.getElementById('tiltBVal').textContent = tiltB.toFixed(2);
+ 
+  let loss = 0, correct = 0;
+  for (const pt of tiltPoints) {
+    const z = tiltB + tiltW1 * pt.x + tiltW2 * pt.y;
+    const p = 1 / (1 + Math.exp(-z));
+    const pSafe = Math.min(0.999999, Math.max(1e-6, p));
+    if (pt.c === 1) loss += -Math.log(pSafe);
+    else            loss += -Math.log(1 - pSafe);
+    const pred = p >= 0.5 ? 1 : 0;
+    if (pred === pt.c) correct++;
+  }
+  loss /= tiltPoints.length;
+  const acc = correct / tiltPoints.length;
+  document.getElementById('tiltLoss').textContent = loss.toFixed(3);
+  document.getElementById('tiltAcc').textContent = (acc * 100).toFixed(0) + '%';
+ 
+  tiltDraw();
+}
+ 
+document.getElementById('tiltW1').addEventListener('input', e => {
+  tiltW1 = parseInt(e.target.value) / 100;
+  tiltUpdate();
+});
+document.getElementById('tiltW2').addEventListener('input', e => {
+  tiltW2 = parseInt(e.target.value) / 100;
+  tiltUpdate();
+});
+document.getElementById('tiltB').addEventListener('input', e => {
+  tiltB = parseInt(e.target.value) / 100;
+  tiltUpdate();
+});
+ 
+// ============================================================
+// Game 2: Bundestag (log-odds counter)
+// ============================================================
+// Coefficients model P(vote YES).
+// Positive coefficients push toward YES; negative push toward NO.
+const SENATE_FEATURES = [
+  { key: 'party',     coef:  5.0, on: false },
+  { key: 'sponsor',   coef:  3.0, on: false },
+  { key: 'district',  coef:  2.5, on: false },
+  { key: 'coalition', coef:  1.5, on: false },
+  { key: 'media',     coef:  1.0, on: false },
+  { key: 'flip',      coef: -3.5, on: false },
+  { key: 'voters',    coef: -2.5, on: false },
+];
+const SENATE_INTERCEPT = -1.5;
+ 
+function buildFeatureList() {
+  const body = document.getElementById('featBody');
+  body.innerHTML = '';
+ 
+  // Intercept row
+  const trInt = document.createElement('tr');
+  trInt.className = 'intercept';
+  trInt.innerHTML = `
+    <td>${T[currentLang]['feat.intercept']}<span class="feat-note">${T[currentLang]['feat.intercept_note']}</span></td>
+    <td class="coef" style="color:#f0c060;">${SENATE_INTERCEPT.toFixed(1)}</td>
+    <td class="toggle-cell">, </td>
+  `;
+  body.appendChild(trInt);
+ 
+  // Feature rows
+  SENATE_FEATURES.forEach((f, i) => {
+    const tr = document.createElement('tr');
+    const sign = f.coef > 0 ? '+' : '';
+    tr.innerHTML = `
+      <td>${T[currentLang]['feat.' + f.key]}</td>
+      <td class="coef ${f.coef >= 0 ? 'pos' : 'neg'}">${sign}${f.coef.toFixed(1)}</td>
+      <td class="toggle-cell">
+        <label class="switch">
+          <input type="checkbox" data-feat="${i}" ${f.on ? 'checked' : ''}>
+          <span class="slider-sw"></span>
+        </label>
+      </td>
+    `;
+    body.appendChild(tr);
+  });
+ 
+  // Wire toggles
+  body.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', e => {
+      const idx = parseInt(e.target.dataset.feat);
+      SENATE_FEATURES[idx].on = e.target.checked;
+      senateUpdate();
+    });
+  });
+}
+ 
+function senateLogOdds() {
+  let z = SENATE_INTERCEPT;
+  for (const f of SENATE_FEATURES) if (f.on) z += f.coef;
+  return z;
+}
+ 
+function senateUpdate() {
+  const z = senateLogOdds();
+  const p = sigmoid(z);
+  document.getElementById('senateLogOdds').textContent = (z >= 0 ? '+' : '') + z.toFixed(2);
+  document.getElementById('senateProb').textContent = Math.round(p * 100) + '%';
+  drawSigmoidCurve();
+}
+ 
+const sigCanvas = document.getElementById('sigCanvas');
+const sigCtx = sigCanvas.getContext('2d');
+ 
+function drawSigmoidCurve() {
+  const W = sigCanvas.width;
+  const H = sigCanvas.height;
+  sigCtx.clearRect(0, 0, W, H);
+ 
+  const padL = 36, padR = 16, padT = 14, padB = 28;
+  const plotW = W - padL - padR;
+  const plotH = H - padT - padB;
+ 
+  sigCtx.strokeStyle = 'rgba(255,255,255,0.06)';
+  sigCtx.lineWidth = 1;
+  for (let yv = 0; yv <= 4; yv++) {
+    const y = padT + (plotH * yv / 4);
+    sigCtx.beginPath();
+    sigCtx.moveTo(padL, y); sigCtx.lineTo(padL + plotW, y);
+    sigCtx.stroke();
+  }
+  const zeroX = padL + plotW * 0.5;
+  sigCtx.strokeStyle = 'rgba(255,255,255,0.12)';
+  sigCtx.setLineDash([3, 3]);
+  sigCtx.beginPath();
+  sigCtx.moveTo(zeroX, padT); sigCtx.lineTo(zeroX, padT + plotH);
+  sigCtx.stroke();
+  sigCtx.setLineDash([]);
+ 
+  sigCtx.fillStyle = '#666';
+  sigCtx.font = '10px sans-serif';
+  sigCtx.textAlign = 'center';
+  for (let zv = -6; zv <= 6; zv += 3) {
+    const x = padL + plotW * ((zv + 6) / 12);
+    sigCtx.fillText(zv.toString(), x, padT + plotH + 14);
+  }
+  sigCtx.textAlign = 'right';
+  for (let pv = 0; pv <= 1; pv += 0.5) {
+    const y = padT + plotH * (1 - pv);
+    sigCtx.fillText(pv.toFixed(1), padL - 6, y + 3);
+  }
+ 
+  sigCtx.strokeStyle = '#f0c060';
+  sigCtx.lineWidth = 2;
+  sigCtx.beginPath();
+  for (let i = 0; i <= 120; i++) {
+    const zv = -6 + 12 * (i / 120);
+    const pv = sigmoid(zv);
+    const x = padL + plotW * ((zv + 6) / 12);
+    const y = padT + plotH * (1 - pv);
+    if (i === 0) sigCtx.moveTo(x, y); else sigCtx.lineTo(x, y);
+  }
+  sigCtx.stroke();
+ 
+  const z = senateLogOdds();
+  const zClamped = Math.max(-6, Math.min(6, z));
+  const pNow = sigmoid(z);
+  const cx = padL + plotW * ((zClamped + 6) / 12);
+  const cy = padT + plotH * (1 - pNow);
+  sigCtx.beginPath();
+  sigCtx.arc(cx, cy, 6, 0, Math.PI * 2);
+  sigCtx.fillStyle = '#fff';
+  sigCtx.fill();
+  sigCtx.strokeStyle = '#f0c060';
+  sigCtx.lineWidth = 2;
+  sigCtx.stroke();
+ 
+  sigCtx.fillStyle = '#666';
+  sigCtx.textAlign = 'center';
+  sigCtx.font = '11px sans-serif';
+  sigCtx.fillText('z (log-odds)', padL + plotW / 2, H - 4);
+  sigCtx.save();
+  sigCtx.translate(10, padT + plotH / 2);
+  sigCtx.rotate(-Math.PI / 2);
+  sigCtx.textAlign = 'center';
+  sigCtx.fillText('σ(z)', 0, 0);
+  sigCtx.restore();
+}
+ 
+// ============================================================
+// Game 3: The head count (threshold + PR curve)
+// ============================================================
+const forestCanvas = document.getElementById('forestCanvas');
+const forestCtx = forestCanvas.getContext('2d');
+ 
+const prCanvas = document.getElementById('prCanvas');
+const prCtx = prCanvas.getContext('2d');
+ 
+let forestReps = [];
+ 
+function makeForest() {
+  // Deterministic via LCG
+  let seed = 99;
+  function rand() {
+    seed = (seed * 9301 + 49297) % 233280;
+    return seed / 233280;
+  }
+  function g() {
+    const u = Math.max(1e-6, rand());
+    const v = rand();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  }
+  forestReps = [];
+  // 30 NO voters (class 0): P(yes) centered around 0.30
+  for (let i = 0; i < 30; i++) {
+    let s = 0.30 + g() * 0.16;
+    s = Math.max(0.02, Math.min(0.98, s));
+    forestReps.push({ s, c: 0 });
+  }
+  // 30 YES voters (class 1): P(yes) centered around 0.70
+  for (let i = 0; i < 30; i++) {
+    let s = 0.70 + g() * 0.16;
+    s = Math.max(0.02, Math.min(0.98, s));
+    forestReps.push({ s, c: 1 });
+  }
+}
+ 
+let forestThresh = 0.50;
+ 
+function drawForest() {
+  const W = forestCanvas.width;
+  const H = forestCanvas.height;
+  forestCtx.clearRect(0, 0, W, H);
+ 
+  const padL = 30, padR = 16, padT = 12, padB = 30;
+  const plotW = W - padL - padR;
+  const plotH = H - padT - padB;
+ 
+  // background
+  forestCtx.fillStyle = '#0e0e18';
+  forestCtx.fillRect(padL, padT, plotW, plotH);
+ 
+  // shaded "predicted yes" zone (right side, green tint)
+  const thX = padL + plotW * forestThresh;
+  forestCtx.fillStyle = 'rgba(111, 192, 147, 0.08)';
+  forestCtx.fillRect(thX, padT, padL + plotW - thX, plotH);
+ 
+  // axis ticks
+  forestCtx.strokeStyle = 'rgba(255,255,255,0.08)';
+  forestCtx.lineWidth = 1;
+  forestCtx.fillStyle = '#666';
+  forestCtx.font = '10px sans-serif';
+  forestCtx.textAlign = 'center';
+  for (let v = 0; v <= 1; v += 0.25) {
+    const x = padL + plotW * v;
+    forestCtx.beginPath();
+    forestCtx.moveTo(x, padT + plotH); forestCtx.lineTo(x, padT + plotH + 4);
+    forestCtx.stroke();
+    forestCtx.fillText(v.toFixed(2), x, padT + plotH + 16);
+  }
+  forestCtx.fillText(T[currentLang]['forest.axis_x_label'], padL + plotW / 2, H - 4);
+ 
+  // Place: class 1 (yes voters) on upper row, class 0 (no voters) on lower row
+  for (const m of forestReps) {
+    const x = padL + plotW * m.s;
+    const y = m.c === 1 ? padT + plotH * 0.30 : padT + plotH * 0.70;
+    const j = ((m.s * 1000) % 7) - 3;
+    forestCtx.beginPath();
+    forestCtx.arc(x, y + j, 5, 0, Math.PI * 2);
+    forestCtx.fillStyle = m.c === 1 ? '#6fc093' : '#e07065';
+    forestCtx.fill();
+    forestCtx.strokeStyle = 'rgba(0,0,0,0.6)';
+    forestCtx.lineWidth = 1;
+    forestCtx.stroke();
+  }
+ 
+  // threshold line
+  forestCtx.strokeStyle = '#f0c060';
+  forestCtx.lineWidth = 2;
+  forestCtx.beginPath();
+  forestCtx.moveTo(thX, padT); forestCtx.lineTo(thX, padT + plotH);
+  forestCtx.stroke();
+}
+ 
+function computeConfusion(thresh) {
+  // Positive class = 1 = yes vote
+  // "Predicted yes" means score >= threshold
+  let tp = 0, fp = 0, fn = 0, tn = 0;
+  for (const m of forestReps) {
+    const predictedYes = m.s >= thresh;
+    if (m.c === 1 && predictedYes) tp++;
+    else if (m.c === 0 && predictedYes) fp++;
+    else if (m.c === 1 && !predictedYes) fn++;
+    else tn++;
+  }
+  return { tp, fp, fn, tn };
+}
+ 
+function computeAndDrawPR() {
+  const W = prCanvas.width;
+  const H = prCanvas.height;
+  prCtx.clearRect(0, 0, W, H);
+ 
+  const padL = 50, padR = 16, padT = 18, padB = 38;
+  const plotW = W - padL - padR;
+  const plotH = H - padT - padB;
+ 
+  prCtx.fillStyle = '#0e0e18';
+  prCtx.fillRect(padL, padT, plotW, plotH);
+ 
+  prCtx.strokeStyle = 'rgba(255,255,255,0.06)';
+  prCtx.lineWidth = 1;
+  for (let v = 0.25; v < 1; v += 0.25) {
+    const x = padL + plotW * v;
+    const y = padT + plotH * (1 - v);
+    prCtx.beginPath();
+    prCtx.moveTo(x, padT); prCtx.lineTo(x, padT + plotH);
+    prCtx.stroke();
+    prCtx.beginPath();
+    prCtx.moveTo(padL, y); prCtx.lineTo(padL + plotW, y);
+    prCtx.stroke();
+  }
+ 
+  const pts = [];
+  for (let i = 0; i <= 200; i++) {
+    const t = i / 200;
+    const { tp, fp, fn } = computeConfusion(t);
+    const prec = (tp + fp) === 0 ? 1 : tp / (tp + fp);
+    const rec  = (tp + fn) === 0 ? 0 : tp / (tp + fn);
+    pts.push({ t, prec, rec });
+  }
+ 
+  pts.sort((a, b) => a.rec - b.rec);
+  prCtx.strokeStyle = '#f0c060';
+  prCtx.lineWidth = 2;
+  prCtx.beginPath();
+  for (let i = 0; i < pts.length; i++) {
+    const x = padL + plotW * pts[i].rec;
+    const y = padT + plotH * (1 - pts[i].prec);
+    if (i === 0) prCtx.moveTo(x, y); else prCtx.lineTo(x, y);
+  }
+  prCtx.stroke();
+ 
+  const { tp, fp, fn } = computeConfusion(forestThresh);
+  const precNow = (tp + fp) === 0 ? 1 : tp / (tp + fp);
+  const recNow  = (tp + fn) === 0 ? 0 : tp / (tp + fn);
+  const cx = padL + plotW * recNow;
+  const cy = padT + plotH * (1 - precNow);
+  prCtx.beginPath();
+  prCtx.arc(cx, cy, 7, 0, Math.PI * 2);
+  prCtx.fillStyle = '#fff';
+  prCtx.fill();
+  prCtx.strokeStyle = '#f0c060';
+  prCtx.lineWidth = 2;
+  prCtx.stroke();
+ 
+  prCtx.fillStyle = '#666';
+  prCtx.font = '11px sans-serif';
+  prCtx.textAlign = 'center';
+  for (let v = 0; v <= 1; v += 0.25) {
+    const x = padL + plotW * v;
+    prCtx.fillText(v.toFixed(2), x, padT + plotH + 16);
+  }
+  prCtx.textAlign = 'right';
+  for (let v = 0; v <= 1; v += 0.25) {
+    const y = padT + plotH * (1 - v);
+    prCtx.fillText(v.toFixed(2), padL - 6, y + 3);
+  }
+  prCtx.textAlign = 'center';
+  prCtx.fillText(T[currentLang]['forest.pr_axis_x'], padL + plotW / 2, H - 8);
+  prCtx.save();
+  prCtx.translate(14, padT + plotH / 2);
+  prCtx.rotate(-Math.PI / 2);
+  prCtx.textAlign = 'center';
+  prCtx.fillText(T[currentLang]['forest.pr_axis_y'], 0, 0);
+  prCtx.restore();
+}
+ 
+function forestUpdate() {
+  document.getElementById('forestThreshVal').textContent = forestThresh.toFixed(2);
+  const { tp, fp, fn, tn } = computeConfusion(forestThresh);
+  document.getElementById('cmTP').textContent = tp;
+  document.getElementById('cmFP').textContent = fp;
+  document.getElementById('cmFN').textContent = fn;
+  document.getElementById('cmTN').textContent = tn;
+ 
+  const prec = (tp + fp) === 0 ? null : tp / (tp + fp);
+  const rec  = (tp + fn) === 0 ? null : tp / (tp + fn);
+  const f1   = (prec === null || rec === null || (prec + rec) === 0)
+                  ? null
+                  : 2 * prec * rec / (prec + rec);
+  document.getElementById('forestPrec').textContent = prec === null ? ', ' : prec.toFixed(2);
+  document.getElementById('forestRec').textContent  = rec  === null ? ', ' : rec.toFixed(2);
+  document.getElementById('forestF1').textContent   = f1   === null ? ', ' : f1.toFixed(2);
+ 
+  drawForest();
+  computeAndDrawPR();
+}
+ 
+document.getElementById('forestThresh').addEventListener('input', e => {
+  forestThresh = parseInt(e.target.value) / 1000;
+  forestUpdate();
+});
+ 
+// ============================================================
+// Deep dive: cross-entropy vs squared error
+// ============================================================
+const lossCanvas = document.getElementById('lossCanvas');
+const lossCtx = lossCanvas.getContext('2d');
+ 
+function drawLossCurves() {
+  const W = lossCanvas.width;
+  const H = lossCanvas.height;
+  lossCtx.clearRect(0, 0, W, H);
+ 
+  const padL = 60, padR = 24, padT = 24, padB = 50;
+  const plotW = W - padL - padR;
+  const plotH = H - padT - padB;
+  const yMax = 5;
+ 
+  lossCtx.fillStyle = '#0e0e18';
+  lossCtx.fillRect(padL, padT, plotW, plotH);
+ 
+  lossCtx.strokeStyle = 'rgba(255,255,255,0.06)';
+  lossCtx.lineWidth = 1;
+  for (let yv = 1; yv < yMax; yv++) {
+    const y = padT + plotH * (1 - yv / yMax);
+    lossCtx.beginPath();
+    lossCtx.moveTo(padL, y); lossCtx.lineTo(padL + plotW, y);
+    lossCtx.stroke();
+  }
+  for (let xv = 0.25; xv < 1; xv += 0.25) {
+    const x = padL + plotW * xv;
+    lossCtx.beginPath();
+    lossCtx.moveTo(x, padT); lossCtx.lineTo(x, padT + plotH);
+    lossCtx.stroke();
+  }
+ 
+  // MSE curve (grey dashed): (1 - p)^2
+  lossCtx.strokeStyle = '#888';
+  lossCtx.lineWidth = 2;
+  lossCtx.setLineDash([5, 4]);
+  lossCtx.beginPath();
+  for (let i = 0; i <= 100; i++) {
+    const p = i / 100;
+    const loss = (1 - p) * (1 - p);
+    const x = padL + plotW * p;
+    const y = padT + plotH * (1 - Math.min(yMax, loss) / yMax);
+    if (i === 0) lossCtx.moveTo(x, y); else lossCtx.lineTo(x, y);
+  }
+  lossCtx.stroke();
+  lossCtx.setLineDash([]);
+ 
+  // Cross-entropy curve (amber): -log(p)
+  lossCtx.strokeStyle = '#f0c060';
+  lossCtx.lineWidth = 2.5;
+  lossCtx.beginPath();
+  let started = false;
+  for (let i = 1; i <= 100; i++) {
+    const p = i / 100;
+    const loss = -Math.log(p);
+    if (loss > yMax * 1.05) continue;
+    const x = padL + plotW * p;
+    const y = padT + plotH * (1 - Math.min(yMax, loss) / yMax);
+    if (!started) { lossCtx.moveTo(x, y); started = true; } else lossCtx.lineTo(x, y);
+  }
+  lossCtx.stroke();
+ 
+  lossCtx.fillStyle = '#888';
+  lossCtx.font = '11px sans-serif';
+  lossCtx.textAlign = 'center';
+  for (let xv = 0; xv <= 1; xv += 0.25) {
+    const x = padL + plotW * xv;
+    lossCtx.fillText(xv.toFixed(2), x, padT + plotH + 14);
+  }
+  lossCtx.fillText(T[currentLang]['ce.probLabel'], padL + plotW / 2, H - 18);
+  lossCtx.textAlign = 'right';
+  for (let yv = 0; yv <= yMax; yv++) {
+    const y = padT + plotH * (1 - yv / yMax);
+    lossCtx.fillText(String(yv), padL - 6, y + 3);
+  }
+  lossCtx.save();
+  lossCtx.translate(18, padT + plotH / 2);
+  lossCtx.rotate(-Math.PI / 2);
+  lossCtx.textAlign = 'center';
+  lossCtx.fillText(T[currentLang]['ce.lossLabel'], 0, 0);
+  lossCtx.restore();
+ 
+  const legendX = padL + plotW - 160;
+  const legendY = padT + 14;
+  lossCtx.strokeStyle = '#f0c060';
+  lossCtx.lineWidth = 2.5;
+  lossCtx.beginPath();
+  lossCtx.moveTo(legendX, legendY); lossCtx.lineTo(legendX + 24, legendY);
+  lossCtx.stroke();
+  lossCtx.fillStyle = '#f0c060';
+  lossCtx.font = '12px sans-serif';
+  lossCtx.textAlign = 'left';
+  lossCtx.fillText(T[currentLang]['ce.celabel'], legendX + 30, legendY + 4);
+  lossCtx.strokeStyle = '#888';
+  lossCtx.lineWidth = 2;
+  lossCtx.setLineDash([5, 4]);
+  lossCtx.beginPath();
+  lossCtx.moveTo(legendX, legendY + 18); lossCtx.lineTo(legendX + 24, legendY + 18);
+  lossCtx.stroke();
+  lossCtx.setLineDash([]);
+  lossCtx.fillStyle = '#888';
+  lossCtx.fillText(T[currentLang]['ce.mseLabel'], legendX + 30, legendY + 22);
+}
+ 
+// ============================================================
+// Init
+// ============================================================
+makeTiltPoints();
+tiltUpdate();
+buildFeatureList();
+senateUpdate();
+makeForest();
+forestUpdate();
+drawLossCurves();
+drawIntroSigmoid();
+applyLang();
+</script>
+ 
+</body>
+</html>

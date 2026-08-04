@@ -1,0 +1,1540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regularisation: Shift and Spread</title>
+
+    <!-- KaTeX -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #141420;
+            color: #e8e8f0;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            line-height: 1.8;
+            font-size: 18px;
+        }
+
+        .container {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* === Language toggle === */
+        .lang-toggle {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            background: #2a2a44;
+            border: 1px solid #4a4a70;
+            border-radius: 20px;
+            padding: 6px 14px;
+            cursor: pointer;
+            font-size: 13px;
+            font-family: sans-serif;
+            color: #a0a0d0;
+            z-index: 100;
+            transition: background 0.2s;
+        }
+        .lang-toggle:hover { background: #363658; }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: 80px 24px 40px;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.3;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .hero .subtitle {
+            margin-top: 16px;
+            color: #888;
+            font-size: 16px;
+            font-style: italic;
+        }
+
+        /* Sections */
+        section { padding: 50px 0; }
+
+        h2 {
+            font-size: 30px;
+            color: #fff;
+            margin-bottom: 24px;
+            line-height: 1.3;
+        }
+
+        h3 {
+            font-size: 20px;
+            color: #ccc;
+            margin: 28px 0 12px;
+        }
+
+        p { margin-bottom: 20px; color: #ccc; }
+
+        /* Images */
+        .figure {
+            margin: 28px 0;
+            text-align: center;
+        }
+
+        .figure img {
+            max-width: 100%;
+            border-radius: 8px;
+        }
+
+        .caption {
+            margin-top: 8px;
+            font-size: 14px;
+            color: #777;
+            font-style: italic;
+        }
+
+        /* Formula blocks */
+        .formula-block {
+            margin: 24px auto;
+            text-align: center;
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+
+        /* Definition list */
+        .def-list {
+            margin: 16px 0 20px 20px;
+            color: #ccc;
+        }
+
+        .def-list li {
+            margin-bottom: 8px;
+            list-style: none;
+        }
+
+        .def-list li::before {
+            content: "– ";
+            color: #666;
+        }
+
+        /* Ingredient list */
+        .step-list {
+            counter-reset: steps;
+            margin: 16px 0;
+            padding: 0;
+        }
+
+        .step-list li {
+            list-style: none;
+            counter-increment: steps;
+            margin-bottom: 24px;
+            padding-left: 48px;
+            position: relative;
+            color: #ccc;
+        }
+
+        .step-list li::before {
+            content: counter(steps);
+            position: absolute;
+            left: 0;
+            top: 2px;
+            width: 32px;
+            height: 32px;
+            background: #2a2a44;
+            border: 1px solid #4a4a70;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            font-family: sans-serif;
+            color: #a0a0d0;
+        }
+
+        .step-list li strong {
+            display: block;
+            color: #e0e0f0;
+            margin-bottom: 4px;
+        }
+
+        /* Quiz */
+        .quiz {
+            background: #1c1c2e;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            padding: 28px;
+            margin: 36px 0;
+        }
+
+        .quiz-question {
+            font-size: 18px;
+            color: #e0e0f0;
+            margin-bottom: 18px;
+            font-style: italic;
+        }
+
+        .quiz-options {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .quiz-btn {
+            background: #2a2a44;
+            color: #e0e0f0;
+            border: 1px solid #3a3a55;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+            flex: 1;
+            min-width: 160px;
+            text-align: center;
+        }
+
+        .quiz-btn:hover { background: #363658; border-color: #5a5a80; }
+
+        .quiz-btn.correct {
+            background: #1a4a2a;
+            border-color: #50b878;
+            color: #70e898;
+        }
+
+        .quiz-btn.wrong {
+            background: #2a2248;
+            border-color: #8264dc;
+            color: #a88ef0;
+        }
+
+        .quiz-btn.disabled { pointer-events: none; opacity: 0.6; }
+
+        .quiz-feedback {
+            margin-top: 14px;
+            font-size: 16px;
+            min-height: 24px;
+            line-height: 1.5;
+        }
+
+        .quiz-feedback.success { color: #70e898; }
+        .quiz-feedback.fail    { color: #a88ef0; }
+
+        /* Game embed */
+        .game-section { padding: 50px 0; }
+
+        .game-frame-wrap {
+            width: 100%;
+            max-width: 820px;
+            margin: 30px auto;
+            aspect-ratio: 820 / 700;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #2a2a40;
+        }
+
+        .game-frame-wrap iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Divider */
+        .section-rule {
+            border: none;
+            border-top: 1px solid #2a2a40;
+            margin: 0;
+        }
+
+        /* Links */
+        a { color: #80b4f0; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 24px;
+            color: #444;
+            font-size: 14px;
+        }
+
+        /* === Module additions === */
+
+        /* Collapsible deep dive */
+        details { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px; padding: 0 28px; margin: 36px 0; }
+        details[open] { padding-bottom: 8px; }
+        summary { cursor: pointer; padding: 22px 0; color: #80b4f0; font-family: sans-serif; font-size: 15px; list-style: none; }
+        summary::-webkit-details-marker { display: none; }
+        summary::before { content: "\203A  "; }
+        details[open] summary::before { content: "\2304  "; }
+
+        /* Pull quote and boxes */
+        .pull {
+            border-left: 3px solid #4a4a70;
+            padding: 4px 0 4px 20px;
+            margin: 28px 0;
+            color: #e0e0f0;
+            font-style: italic;
+        }
+        .pull p:last-child { margin-bottom: 0; }
+
+        .callout {
+            background: #1c1c2e;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            padding: 24px 28px;
+            margin: 30px 0;
+            color: #e0e0f0;
+        }
+        .callout p:last-child { margin-bottom: 0; }
+
+        .debunk {
+            background: #1c1c2e;
+            border: 1px solid #3a3050;
+            border-left: 3px solid #a88ef0;
+            border-radius: 10px;
+            padding: 24px 28px;
+            margin: 36px 0;
+        }
+        .debunk .debunk-tag {
+            font-family: sans-serif;
+            font-size: 12px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #a88ef0;
+            display: block;
+            margin-bottom: 6px;
+        }
+        .debunk h3 { margin-top: 0; color: #e0e0f0; font-size: 19px; }
+        .debunk p:last-child { margin-bottom: 0; }
+
+        /* Tables */
+        .tbl-wrap { overflow-x: auto; margin: 26px 0; }
+        table.tbl {
+            border-collapse: collapse;
+            width: 100%;
+            font-family: sans-serif;
+            font-size: 15px;
+            color: #ccc;
+        }
+        table.tbl th, table.tbl td {
+            padding: 9px 14px;
+            text-align: right;
+            border-bottom: 1px solid #2a2a40;
+            font-variant-numeric: tabular-nums;
+        }
+        table.tbl th {
+            color: #a0a0d0;
+            font-weight: normal;
+            border-bottom: 1px solid #4a4a70;
+            text-align: right;
+        }
+        table.tbl th:first-child, table.tbl td:first-child { text-align: left; }
+        table.tbl tr.hi td { color: #f0a860; }
+
+        /* Canvas panels */
+        .panel-label { font-family: sans-serif; font-size: 13px; color: #888; margin: 14px 0 6px; }
+        .chart-wrap { width: 100%; border: 1px solid #2a2a40; border-radius: 10px; background: #1c1c2e; padding: 12px; }
+        .chart-wrap canvas { display: block; width: 100%; height: auto; }
+
+        .ss-panels { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 8px; }
+        .ss-panel { flex: 1 1 300px; min-width: 280px; }
+
+        .controls { display: flex; flex-wrap: wrap; gap: 24px; margin: 24px 0 6px; font-family: sans-serif; }
+        .control { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 220px; }
+        .control label { font-size: 13px; color: #888; }
+        .control input[type=range] { accent-color: #80b4f0; cursor: pointer; width: 100%; }
+        .control .val { font-size: 14px; color: #e8e8f0; font-variant-numeric: tabular-nums; }
+
+        .readout {
+            display: flex; gap: 28px; flex-wrap: wrap;
+            font-family: sans-serif; font-size: 14px; color: #888;
+            margin-top: 18px; padding-top: 16px; border-top: 1px solid #2a2a40;
+        }
+        .readout .item { display: flex; flex-direction: column; gap: 2px; }
+        .readout .num { color: #e8e8f0; font-size: 20px; font-variant-numeric: tabular-nums; }
+        .readout .num.shift { color: #f0a860; }
+        .readout .num.spread { color: #70e898; }
+        .readout .num.total { color: #80b4f0; }
+
+        .legend { display: flex; gap: 20px; flex-wrap: wrap; font-family: sans-serif; font-size: 13px; color: #888; margin-top: 10px; }
+        .legend span { display: inline-flex; align-items: center; }
+        .legend span::before { content: ""; display: inline-block; width: 16px; margin-right: 7px; border-top: 2px solid transparent; }
+        .legend .l-shift::before  { border-top-color: #f0a860; }
+        .legend .l-spread::before { border-top-color: #70e898; }
+        .legend .l-total::before  { border-top-color: #80b4f0; }
+
+        .hidden { display: none; }
+
+        /* Next-step links */
+        .next-links { display: flex; gap: 16px; flex-wrap: wrap; margin: 30px 0 0; }
+        .next-card {
+            flex: 1 1 280px;
+            background: #1c1c2e;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            padding: 22px 24px;
+            transition: border-color 0.2s, background 0.2s;
+            display: block;
+            color: #ccc;
+        }
+        .next-card:hover { background: #22223a; border-color: #4a4a70; text-decoration: none; }
+        .next-card strong { display: block; color: #80b4f0; font-size: 19px; margin-bottom: 6px; }
+
+        /* Responsive */
+        @media (max-width: 680px) {
+            .hero h1 { font-size: 28px; }
+            h2 { font-size: 24px; }
+            body { font-size: 16px; }
+            .quiz-options { flex-direction: column; }
+            .controls { flex-direction: column; gap: 18px; }
+            .ss-panels { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<button class="lang-toggle" onclick="toggleLang()">DE</button>
+
+<!-- Hero -->
+<div class="hero">
+    <h1 data-i18n="hero.title">Regularisation: Shift and Spread</h1>
+    <p class="subtitle" data-i18n="hero.subtitle">Class 5, module one of three. Why a model that is a little bit wrong on purpose can beat one that is right on average.</p>
+</div>
+
+<div class="container">
+
+<!-- ── 1. Cold open ────────────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s1.h2">The model says email loses money</h2>
+
+    <p data-i18n="s1.p1">The meeting is at ten. You have two years of weekly numbers for one e-commerce brand. That is a hundred and four rows. Revenue on the left. On the right, spend on Google Search, Google Shopping, Meta, TikTok, display and affiliate, plus how many marketing emails went out that week.</p>
+
+    <p data-i18n="s1.p2">You add adstock lags, because money spent this week keeps selling next week, and everybody who builds these models includes them. Thirteen weekly lags per channel, seven channels. Ninety-one columns. Still a hundred and four rows.</p>
+
+    <p data-i18n="s1.p3">You fit least squares. It takes half a second. The coefficient on email comes back at minus four point two. Two rows further down, TikTok sits at plus eleven point eight.</p>
+
+    <p data-i18n="s1.p4">Minus four point two means that every send loses money. At ten o'clock you have to say that out loud to the woman who runs email. She has four people and a campaign calendar and she built the welcome sequence everybody quotes.</p>
+
+    <p data-i18n="s1.p5">Nobody in the room believes it. Nobody in the room can argue with it either. The arithmetic is correct, and while you are still talking two people check it on their laptops and get the same answer.</p>
+
+    <p data-i18n="s1.p6">Waiting does not help. The data arrives at one row per week and there are fifty-two weeks in a year.</p>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── 2. Why it happened ──────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s2.h2">Least squares has nothing left to say</h2>
+
+    <p data-i18n="s2.p1">Budgets are not set independently. Somebody decides in September that the fourth quarter is going to be big. Then Search goes up, Shopping goes up, Meta goes up, TikTok goes up and the email calendar fills. All in the same weeks. January is the same thing in reverse.</p>
+
+    <p data-i18n="s2.p2">Now ask least squares what each channel did on its own. The columns never moved separately, so nothing in the file records what happens when they do. Least squares does not stop and tell you that. It minimises error, and it finds that a large positive number on TikTok and a large negative number on email produce the same fitted line as two modest sensible ones.</p>
+
+    <p data-i18n="s2.p3">Those two coefficients are not two findings. They are one finding, cut in half and given opposite signs. They cancel every week.</p>
+
+    <p data-i18n="s2.p4">Here it is on five rows you can check by hand. Search and Shopping are the same column, because in this brand the two budgets are set in the same meeting by the same person.</p>
+
+    <div class="tbl-wrap">
+        <table class="tbl">
+            <thead><tr>
+                <th data-i18n="t1.h1">Week</th>
+                <th data-i18n="t1.h2">Search spend</th>
+                <th data-i18n="t1.h3">Shopping spend</th>
+                <th data-i18n="t1.h4">Revenue</th>
+            </tr></thead>
+            <tbody>
+                <tr><td>1</td><td>1</td><td>1</td><td>2</td></tr>
+                <tr><td>2</td><td>2</td><td>2</td><td>4</td></tr>
+                <tr><td>3</td><td>3</td><td>3</td><td>6</td></tr>
+                <tr><td>4</td><td>4</td><td>4</td><td>8</td></tr>
+                <tr><td>5</td><td>5</td><td>5</td><td>10</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <p data-i18n="s2.p5">Try two on Search and zero on Shopping. Week one predicts two, and revenue was two. Week five predicts ten, and revenue was ten. Every week exact. Now try zero and two. Exact. Now one and one. Exact. Now a thousand and minus nine hundred and ninety-eight: week three predicts three thousand minus two thousand nine hundred and ninety-four, which is six, and revenue was six.</p>
+
+    <div class="tbl-wrap">
+        <table class="tbl">
+            <thead><tr>
+                <th data-i18n="t2.h1">Search coefficient</th>
+                <th data-i18n="t2.h2">Shopping coefficient</th>
+                <th data-i18n="t2.h3">Error on all five weeks</th>
+            </tr></thead>
+            <tbody>
+                <tr><td>2</td><td>0</td><td>0</td></tr>
+                <tr><td>0</td><td>2</td><td>0</td></tr>
+                <tr><td>1</td><td>1</td><td>0</td></tr>
+                <tr class="hi"><td>1000</td><td>&minus;998</td><td>0</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="callout">
+        <p data-i18n="s2.callout">Any two numbers that add up to two fit this data perfectly. There are infinitely many of them and the data prefers none of them.</p>
+    </div>
+
+    <p data-i18n="s2.p6">The data cannot choose. Something else has to. That is what the rest of this module is about.</p>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── 3. Shift and spread ─────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s3.h2">Shift and spread</h2>
+
+    <p data-i18n="s3.p1">Forget coefficients for a minute. You are throwing darts.</p>
+
+    <p data-i18n="s3.p2">Two things can go wrong. The darts land in a tight group in the wrong place. Or they land all over the board with their average in the right place. Those are different problems and they take different repairs.</p>
+
+    <p data-i18n="s3.p3">Call the first one <strong>shift</strong>: how far the centre of your group sits from the bullseye. Call the second one <strong>spread</strong>: how far the darts sit from each other.</p>
+
+    <p data-i18n="s3.p4">Every shot below is one refit. Same brand, same model, a slightly different two years of weeks. The shot marks where the model landed. In real life you get one shot. The cloud is what you would have got.</p>
+
+    <p data-i18n="s3.p5">Drag lambda, the amount of restraint. On the left the shots move. On the right the same shots are flattened onto one line, so you can read the two quantities apart: where the centre of the cloud sits, and how wide the cloud is.</p>
+
+    <div class="ss-panels">
+        <div class="ss-panel">
+            <p class="panel-label" data-i18n="panel.board">The board: one shot per refit</p>
+            <div class="chart-wrap"><canvas id="cv-board" width="400" height="400"></canvas></div>
+        </div>
+        <div class="ss-panel">
+            <p class="panel-label" data-i18n="panel.line">The same shots on one line</p>
+            <div class="chart-wrap"><canvas id="cv-line" width="400" height="400"></canvas></div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <div class="control">
+            <label data-i18n="lbl.lambda">Restraint (lambda)</label>
+            <input type="range" id="sl-lam" min="0" max="4" step="0.05" value="0" oninput="onLam()">
+            <span class="val" id="val-lam">&lambda; = 0.00</span>
+        </div>
+    </div>
+
+    <div class="readout">
+        <div class="item"><span data-i18n="ro.shift">Shift</span><span class="num shift" id="ro-shift">0.00</span></div>
+        <div class="item"><span data-i18n="ro.spread">Spread</span><span class="num spread" id="ro-spread">1.00</span></div>
+        <div class="item"><span data-i18n="ro.total">Total error</span><span class="num total" id="ro-total">1.00</span></div>
+    </div>
+
+    <div class="formula-block" data-i18n="s3.formula">$$\text{total error} \;=\; \text{shift}^2 \;+\; \text{spread}$$</div>
+
+    <p data-i18n="s3.p6">The bar on the right panel is one standard deviation. Spread in that sum is that bar squared.</p>
+
+    <!-- Guess first -->
+    <div class="quiz" id="guess">
+        <div class="quiz-question" data-i18n="guess.q">Commit before the curve is drawn. Which setting has the lowest total error?</div>
+        <div class="quiz-options">
+            <button class="quiz-btn" onclick="commitGuess(this, false)" data-i18n="guess.a1">No restraint, \(\lambda = 0\)</button>
+            <button class="quiz-btn" onclick="commitGuess(this, true)" data-i18n="guess.a2">A little restraint, \(\lambda = 1\)</button>
+            <button class="quiz-btn" onclick="commitGuess(this, false)" data-i18n="guess.a3">Heavy restraint, \(\lambda = 4\)</button>
+        </div>
+        <div class="quiz-feedback" id="guess-feedback"></div>
+    </div>
+
+    <div id="curve-block" class="hidden">
+        <p class="panel-label" data-i18n="panel.curve">Total error against restraint</p>
+        <div class="chart-wrap"><canvas id="cv-curve" width="800" height="320"></canvas></div>
+        <div class="legend">
+            <span class="l-shift" data-i18n="lg.shift">Shift squared</span>
+            <span class="l-spread" data-i18n="lg.spread">Spread</span>
+            <span class="l-total" data-i18n="lg.total">Total</span>
+        </div>
+        <div class="caption" data-i18n="cap.curve">Drag the slider again. The dot on the blue curve is where you are standing.</div>
+    </div>
+
+    <p data-i18n="s3.p7">Shift squared goes up the whole way. Spread comes down the whole way. Their sum is the thing you are paid to make small, and a rising curve plus a falling curve does not have to be smallest at the left edge.</p>
+
+    <p data-i18n="s3.p8">Those two words have proper names. Shift is <strong>bias</strong>. Spread is <strong>variance</strong>. There is a third piece, <strong>noise</strong>, which is the part of next week's revenue that nothing in your file predicts. Noise does not move, whatever you do to the model.</p>
+
+    <!-- Quiz 1 -->
+    <div class="quiz" id="quiz1">
+        <div class="quiz-question" data-i18n="quiz1.q">You turn the restraint up. What happens to shift and to spread?</div>
+        <div class="quiz-options">
+            <button class="quiz-btn" onclick="answerQuiz('quiz1', this, true)" data-i18n="quiz1.a1">Shift goes up, spread goes down</button>
+            <button class="quiz-btn" onclick="answerQuiz('quiz1', this, false)" data-i18n="quiz1.a2">Both go down</button>
+        </div>
+        <div class="quiz-feedback" id="quiz1-feedback"></div>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── 4. The bargain ──────────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s4.h2">The bargain</h2>
+
+    <p data-i18n="s4.p1">You accept a little shift to buy a lot less spread.</p>
+
+    <p data-i18n="s4.p2">At the left edge of that slider the model is right on average and wild in practice. You get one draw from it. Being right on average is a statement about infinitely many parallel universes, and that is not a comfort anybody has needed on a Tuesday.</p>
+
+    <div class="pull">
+        <p data-i18n="s4.pull">A wrong-but-steady model can beat a right-on-average-but-wild one. That sentence is the whole idea of a penalty.</p>
+    </div>
+
+    <p data-i18n="s4.p3">A penalty is a price on size. Until now the model was asked one question: how close can you get to the data. From here it is asked two. How close can you get, and how big are the numbers you used to get there. The second question has a price attached, and the price is the dial you just dragged.</p>
+
+    <p data-i18n="s4.p4">Hoerl and Kennard proved something stronger in 1970. There always exists a penalty greater than zero whose total error is lower than the total error of least squares. Not usually. Always, for every dataset that has ever been collected and every one that ever will be. They cannot tell you which penalty it is. It is there anyway.</p>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── 5. DuPont ───────────────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s5.h2">DuPont, and twenty years of the same complaint</h2>
+
+    <p data-i18n="s5.p1">Arthur Hoerl was hired in 1950 as DuPont's first statistician. Robert Kennard joined five years later. The job meant plant logs rather than textbook data. Yield, temperature, pressure, feed rate, catalyst concentration, recorded by people who were running a chemical process and not designing an experiment.</p>
+
+    <p data-i18n="s5.p2">Twenty years later the two of them published the complaint. Their words:</p>
+
+    <div class="pull">
+        <p data-i18n="s5.quote">"the least squares estimates often do not make sense when put into the context of the physics, chemistry, and engineering of the process"</p>
+    </div>
+
+    <p data-i18n="s5.p3">Regress yield on temperature, pressure, feed rate and catalyst. The engineers standing next to the reactor already know the sign of every one of those. Least squares hands back a number saying that heating the reactor lowers the yield. Not because it does. Because temperature and pressure move together in the plant log, every day, all year, and nothing in the log records a day when one moved without the other.</p>
+
+    <p data-i18n="s5.p4">Nobody at DuPont made a mistake and nobody in your marketing meeting made a mistake. A business that changes one channel at a time while holding the others fixed is a business that is not being run. When a calculation and a person with twenty years on the floor disagree, the useful question is what the calculation was fed.</p>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── 6. The ridge trace ──────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s6.h2">The picture an engineer looked at</h2>
+
+    <p data-i18n="s6.p1">Cross-validation did not exist yet. Neither did grid search, and nobody had a validation fold. The model-selection rule in the 1970 paper was this: plot every coefficient against the penalty, all on one set of axes, and look at it.</p>
+
+    <p data-i18n="s6.p2">That plot is called the ridge trace. Its stated purpose was to show how sensitive the answers are to the data, and to let the analyst pick the point where the system stabilises.</p>
+
+    <div class="chart-wrap"><canvas id="cv-trace" width="800" height="400"></canvas></div>
+    <div class="caption" data-i18n="cap.trace">The ridge trace, built from the marketing model at the top of the page. Seven coefficients, one horizontal axis, no cross-validation anywhere.</div>
+
+    <p data-i18n="s6.p3">Read it from the left. The penalty is zero and the coefficients are flailing. Email at minus four point two, TikTok at plus eleven point eight. Absurd on both ends, and absurd together, because they are cancelling. Now move right. The wild ones come screaming in toward zero, because they were only ever large in order to cancel each other, and the moment size costs anything the deal stops being worth it. The ones with something behind them settle and hold.</p>
+
+    <p data-i18n="s6.p4">Somewhere the whole picture stops thrashing. That is where the engineer put the dial. A picture, not a formula, and it is the forgotten half of the paper.</p>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── 7. Where the word comes from ────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s7.h2">Where the word ridge comes from</h2>
+
+    <p data-i18n="s7.p1">Almost every course says ridge refers to a ridge in the loss surface. It does not, and this one is easy to check, because the paper says where the word came from.</p>
+
+    <p data-i18n="s7.p2">Eleven years earlier Hoerl published "Optimum Solution of Many Variables Equations" in <em>Chemical Engineering Progress</em>, in November 1959. Then "Application of Ridge Analysis to Regression Problems" in 1962. That 1962 paper is reference nine of the 1970 paper, cited there as the origin of the idea.</p>
+
+    <p data-i18n="s7.p3">Ridge analysis was a plant optimisation tool. You have a fitted response surface, some yield as a function of your settings, and you want the best settings you can reach. So you find the best point on a sphere of radius one. Then radius two. Then radius three. You trace those constrained optima outward. When the surface is elongated rather than sharply peaked, that path climbs along a raised spine. A ridge, in the walking-boots sense of the word.</p>
+
+    <p data-i18n="s7.p4">A plausible explanation travels faster than a real one, because it is easier to remember. When somebody gives you the origin of a word, notice whether they are reporting it or reconstructing it. Those two sound identical from the outside.</p>
+
+    <!-- Quiz 2 -->
+    <div class="quiz" id="quiz2">
+        <div class="quiz-question" data-i18n="quiz2.q">Where does the word ridge come from?</div>
+        <div class="quiz-options">
+            <button class="quiz-btn" onclick="answerQuiz('quiz2', this, false)" data-i18n="quiz2.a1">A ridge in the loss surface</button>
+            <button class="quiz-btn" onclick="answerQuiz('quiz2', this, true)" data-i18n="quiz2.a2">A chemical engineering method that traced optima on spheres of growing radius</button>
+        </div>
+        <div class="quiz-feedback" id="quiz2-feedback"></div>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── 8. Correction ───────────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s8.h2">A correction</h2>
+
+    <div class="debunk">
+        <span class="debunk-tag" data-i18n="s8.tag">What everyone says</span>
+        <h3 data-i18n="s8.h3">"Tikhonov invented regularization in 1943"</h3>
+
+        <p data-i18n="s8.p1">He did not, and the paper is four pages long and free, so you can settle this yourself in twenty minutes.</p>
+
+        <p data-i18n="s8.p2">The 1943 paper is a stability theorem. It proves that stability of an inverse problem follows from the uniqueness theorem, by a topological mapping argument. There is no penalty in it. There is no stabilizing functional. Nothing anywhere in it is being penalised. Its context is geophysics, which is to say guessing what is underground from what you can measure standing on top of it.</p>
+
+        <p data-i18n="s8.p3">Regularization proper, with a stabilizing functional, is 1963. And David Phillips got there in 1962, in the <em>Journal of the ACM</em>, which is why careful people write Phillips-Tikhonov.</p>
+
+        <p data-i18n="s8.p4">The error is not the interesting part. Hoerl and Kennard's reference list cites neither Tikhonov nor Phillips. The only antecedent they cite is Hoerl's own 1962 paper. Two research communities, Soviet ill-posed inverse problems and American industrial statistics, arrived at the same estimator about seven years apart, for unrelated reasons, without contact.</p>
+
+        <p data-i18n="s8.p5">When two people who never met arrive at the same answer, the answer was sitting inside the problem the whole time, waiting for anybody who turned up with the right complaint.</p>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── 9. For the curious ──────────────────────────────────────────────────── -->
+<section>
+    <details>
+        <summary data-i18n="dd.summary">For the curious: batting averages and the price of tea in Shanghai</summary>
+
+        <p data-i18n="dd.p1">In May 1977 Bradley Efron and Carl Morris published a piece in <em>Scientific American</em> about eighteen baseball players. They took the first forty-five at-bats of the 1970 season and asked one question. What will each man hit for the rest of the year?</p>
+
+        <p data-i18n="dd.p2">The obvious answer is his own average. Roberto Clemente was hitting .400, so predict .400.</p>
+
+        <p data-i18n="dd.p3">They did something else. They took the grand mean across all eighteen players.265, and pulled every player toward it by a factor of .212. You can check it in one line:</p>
+
+        <div class="formula-block">$$.265 + 0.212 \times (.400 - .265) = .2936$$</div>
+
+        <p data-i18n="dd.p4">Two ninety-four, for a man who was hitting four hundred. Clemente's actual average over the rest of that season was .346. Four hundred was too high. Two ninety-four was closer.</p>
+
+        <p data-i18n="dd.p5">The same procedure beat the raw average for sixteen of the eighteen players, and total squared error on the raw averages was about three and a half times worse. Those last two figures come from a source quoting the article rather than from the article itself, so this page says so out loud instead of printing them clean.</p>
+
+        <p data-i18n="dd.p6">The theory is from 1956. Charles Stein showed that the obvious estimator of the mean of a multivariate Gaussian, which is to use the sample mean separately for each coordinate, is inadmissible in three or more dimensions. There exists another estimator whose total squared error is lower for every possible value of the true means. Not lower on average over some prior. Not lower usually. Lower always.</p>
+
+        <p data-i18n="dd.p7"><strong>The theorem does not require the quantities to be related.</strong></p>
+
+        <p data-i18n="dd.p8">Estimate a batting average, the price of tea in Shanghai and the mass of an electron at the same time. Shrink all three toward their common mean. You beat estimating each one separately. The three have nothing to do with each other and it does not matter, because the result is about the geometry of estimating several things at once.</p>
+
+        <p data-i18n="dd.p9">Your best week and your worst review are the same arithmetic. Every extreme reading is extreme partly because something real happened and partly because that was the week the dice landed that way. The truth about you sits closer to the middle than any single reading says, and that applies to the good readings exactly as hard as the bad ones.</p>
+    </details>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── 10. Closing ─────────────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s9.h2">The penalty needs a shape</h2>
+
+    <p data-i18n="s9.p1">You have the idea now. Of all the answers that fit the data, prefer the small one. What is missing is what small means, and there are two famous answers.</p>
+
+    <p data-i18n="s9.p2">One keeps every feature and makes them all small. Nothing ever reaches exactly zero, so you come out holding ninety-one channels and trusting none of them individually.</p>
+
+    <p data-i18n="s9.p3">The other deletes features outright. Coefficients land on zero and stay there, so you come out with a short list you can read aloud in a meeting.</p>
+
+    <p data-i18n="s9.p4">Those are two different meetings. Keep everything and trust nothing on its own is one conversation. Drop TikTok is a budget line somebody loses. Choosing between them is not only a technical preference.</p>
+
+    <div class="next-links">
+        <a class="next-card" href="../ridge/">
+            <strong data-i18n="next.ridge.t">Ridge</strong>
+            <span data-i18n="next.ridge.d">The penalty that charges for squares. It shrinks everything and deletes nothing.</span>
+        </a>
+        <a class="next-card" href="../lasso/">
+            <strong data-i18n="next.lasso.t">Lasso</strong>
+            <span data-i18n="next.lasso.d">The penalty that charges for absolute values. It sends coefficients to exactly zero.</span>
+        </a>
+    </div>
+</section>
+
+</div>
+
+<footer>
+    <span data-i18n="footer.title">Regularisation: Shift and Spread</span>
+    <br>&copy; All rights reserved
+</footer>
+
+<!-- ── Scripts ─────────────────────────────────────────────────────────────── -->
+<script>
+
+// ─── Language data ────────────────────────────────────────────────────────────
+const T = {
+    en: {
+        'hero.title':    'Regularisation: Shift and Spread',
+        'hero.subtitle': 'Class 5, module one of three. Why a model that is a little bit wrong on purpose can beat one that is right on average.',
+
+        's1.h2': 'The model says email loses money',
+        's1.p1': 'The meeting is at ten. You have two years of weekly numbers for one e-commerce brand. That is a hundred and four rows. Revenue on the left. On the right, spend on Google Search, Google Shopping, Meta, TikTok, display and affiliate, plus how many marketing emails went out that week.',
+        's1.p2': 'You add adstock lags, because money spent this week keeps selling next week, and everybody who builds these models includes them. Thirteen weekly lags per channel, seven channels. Ninety-one columns. Still a hundred and four rows.',
+        's1.p3': 'You fit least squares. It takes half a second. The coefficient on email comes back at minus four point two. Two rows further down, TikTok sits at plus eleven point eight.',
+        's1.p4': 'Minus four point two means that every send loses money. At ten o’clock you have to say that out loud to the woman who runs email. She has four people and a campaign calendar and she built the welcome sequence everybody quotes.',
+        's1.p5': 'Nobody in the room believes it. Nobody in the room can argue with it either. The arithmetic is correct, and while you are still talking two people check it on their laptops and get the same answer.',
+        's1.p6': 'Waiting does not help. The data arrives at one row per week and there are fifty-two weeks in a year.',
+
+        's2.h2': 'Least squares has nothing left to say',
+        's2.p1': 'Budgets are not set independently. Somebody decides in September that the fourth quarter is going to be big. Then Search goes up, Shopping goes up, Meta goes up, TikTok goes up and the email calendar fills. All in the same weeks. January is the same thing in reverse.',
+        's2.p2': 'Now ask least squares what each channel did on its own. The columns never moved separately, so nothing in the file records what happens when they do. Least squares does not stop and tell you that. It minimises error, and it finds that a large positive number on TikTok and a large negative number on email produce the same fitted line as two modest sensible ones.',
+        's2.p3': 'Those two coefficients are not two findings. They are one finding, cut in half and given opposite signs. They cancel every week.',
+        's2.p4': 'Here it is on five rows you can check by hand. Search and Shopping are the same column, because in this brand the two budgets are set in the same meeting by the same person.',
+        't1.h1': 'Week',
+        't1.h2': 'Search spend',
+        't1.h3': 'Shopping spend',
+        't1.h4': 'Revenue',
+        's2.p5': 'Try two on Search and zero on Shopping. Week one predicts two, and revenue was two. Week five predicts ten, and revenue was ten. Every week exact. Now try zero and two. Exact. Now one and one. Exact. Now a thousand and minus nine hundred and ninety-eight: week three predicts three thousand minus two thousand nine hundred and ninety-four, which is six, and revenue was six.',
+        't2.h1': 'Search coefficient',
+        't2.h2': 'Shopping coefficient',
+        't2.h3': 'Error on all five weeks',
+        's2.callout': 'Any two numbers that add up to two fit this data perfectly. There are infinitely many of them and the data prefers none of them.',
+        's2.p6': 'The data cannot choose. Something else has to. That is what the rest of this module is about.',
+
+        's3.h2': 'Shift and spread',
+        's3.p1': 'Forget coefficients for a minute. You are throwing darts.',
+        's3.p2': 'Two things can go wrong. The darts land in a tight group in the wrong place. Or they land all over the board with their average in the right place. Those are different problems and they take different repairs.',
+        's3.p3': 'Call the first one <strong>shift</strong>: how far the centre of your group sits from the bullseye. Call the second one <strong>spread</strong>: how far the darts sit from each other.',
+        's3.p4': 'Every shot below is one refit. Same brand, same model, a slightly different two years of weeks. The shot marks where the model landed. In real life you get one shot. The cloud is what you would have got.',
+        's3.p5': 'Drag lambda, the amount of restraint. On the left the shots move. On the right the same shots are flattened onto one line, so you can read the two quantities apart: where the centre of the cloud sits, and how wide the cloud is.',
+        'panel.board': 'The board: one shot per refit',
+        'panel.line':  'The same shots on one line',
+        'lbl.lambda':  'Restraint (lambda)',
+        'ro.shift':    'Shift',
+        'ro.spread':   'Spread',
+        'ro.total':    'Total error',
+        's3.formula':  '$$\\text{total error} \\;=\\; \\text{shift}^2 \\;+\\; \\text{spread}$$',
+        's3.p6': 'The bar on the right panel is one standard deviation. Spread in that sum is that bar squared.',
+
+        'guess.q':  'Commit before the curve is drawn. Which setting has the lowest total error?',
+        'guess.a1': 'No restraint, \\(\\lambda = 0\\)',
+        'guess.a2': 'A little restraint, \\(\\lambda = 1\\)',
+        'guess.a3': 'Heavy restraint, \\(\\lambda = 4\\)',
+        'guess.ok': 'Yes. The minimum sits at λ = 1 here, and total error there is half what it is at λ = 0. The curve is below. Drag the slider again and watch shift and spread do the trade.',
+        'guess.no': 'The minimum sits at λ = 1 here, and total error there is half what it is at λ = 0. At zero the cloud is centred and wild. At four it is tight and sitting off the bullseye. The curve is below.',
+
+        'panel.curve': 'Total error against restraint',
+        'lg.shift':    'Shift squared',
+        'lg.spread':   'Spread',
+        'lg.total':    'Total',
+        'cap.curve':   'Drag the slider again. The dot on the blue curve is where you are standing.',
+
+        's3.p7': 'Shift squared goes up the whole way. Spread comes down the whole way. Their sum is the thing you are paid to make small, and a rising curve plus a falling curve does not have to be smallest at the left edge.',
+        's3.p8': 'Those two words have proper names. Shift is <strong>bias</strong>. Spread is <strong>variance</strong>. There is a third piece, <strong>noise</strong>, which is the part of next week’s revenue that nothing in your file predicts. Noise does not move, whatever you do to the model.',
+
+        'quiz1.q':  'You turn the restraint up. What happens to shift and to spread?',
+        'quiz1.a1': 'Shift goes up, spread goes down',
+        'quiz1.a2': 'Both go down',
+        'quiz1.ok': 'Right. Shift climbs the whole way and spread falls the whole way. Their sum can dip below its value at zero restraint, and that dip is the reason penalties exist.',
+        'quiz1.no': 'Not quite. If both fell there would be nothing to trade. Restraint buys you less spread and it costs you shift, and the only question is whether the trade is worth it.',
+
+        's4.h2':   'The bargain',
+        's4.p1':   'You accept a little shift to buy a lot less spread.',
+        's4.p2':   'At the left edge of that slider the model is right on average and wild in practice. You get one draw from it. Being right on average is a statement about infinitely many parallel universes, and that is not a comfort anybody has needed on a Tuesday.',
+        's4.pull': 'A wrong-but-steady model can beat a right-on-average-but-wild one. That sentence is the whole idea of a penalty.',
+        's4.p3':   'A penalty is a price on size. Until now the model was asked one question: how close can you get to the data. From here it is asked two. How close can you get, and how big are the numbers you used to get there. The second question has a price attached, and the price is the dial you just dragged.',
+        's4.p4':   'Hoerl and Kennard proved something stronger in 1970. There always exists a penalty greater than zero whose total error is lower than the total error of least squares. Not usually. Always, for every dataset that has ever been collected and every one that ever will be. They cannot tell you which penalty it is. It is there anyway.',
+
+        's5.h2':    'DuPont, and twenty years of the same complaint',
+        's5.p1':    'Arthur Hoerl was hired in 1950 as DuPont’s first statistician. Robert Kennard joined five years later. The job meant plant logs rather than textbook data. Yield, temperature, pressure, feed rate, catalyst concentration, recorded by people who were running a chemical process and not designing an experiment.',
+        's5.p2':    'Twenty years later the two of them published the complaint. Their words:',
+        's5.quote': '“the least squares estimates often do not make sense when put into the context of the physics, chemistry, and engineering of the process”',
+        's5.p3':    'Regress yield on temperature, pressure, feed rate and catalyst. The engineers standing next to the reactor already know the sign of every one of those. Least squares hands back a number saying that heating the reactor lowers the yield. Not because it does. Because temperature and pressure move together in the plant log, every day, all year, and nothing in the log records a day when one moved without the other.',
+        's5.p4':    'Nobody at DuPont made a mistake and nobody in your marketing meeting made a mistake. A business that changes one channel at a time while holding the others fixed is a business that is not being run. When a calculation and a person with twenty years on the floor disagree, the useful question is what the calculation was fed.',
+
+        's6.h2':     'The picture an engineer looked at',
+        's6.p1':     'Cross-validation did not exist yet. Neither did grid search, and nobody had a validation fold. The model-selection rule in the 1970 paper was this: plot every coefficient against the penalty, all on one set of axes, and look at it.',
+        's6.p2':     'That plot is called the ridge trace. Its stated purpose was to show how sensitive the answers are to the data, and to let the analyst pick the point where the system stabilises.',
+        'cap.trace': 'The ridge trace, built from the marketing model at the top of the page. Seven coefficients, one horizontal axis, no cross-validation anywhere.',
+        's6.p3':     'Read it from the left. The penalty is zero and the coefficients are flailing. Email at minus four point two, TikTok at plus eleven point eight. Absurd on both ends, and absurd together, because they are cancelling. Now move right. The wild ones come screaming in toward zero, because they were only ever large in order to cancel each other, and the moment size costs anything the deal stops being worth it. The ones with something behind them settle and hold.',
+        's6.p4':     'Somewhere the whole picture stops thrashing. That is where the engineer put the dial. A picture, not a formula, and it is the forgotten half of the paper.',
+
+        's7.h2': 'Where the word ridge comes from',
+        's7.p1': 'Almost every course says ridge refers to a ridge in the loss surface. It does not, and this one is easy to check, because the paper says where the word came from.',
+        's7.p2': 'Eleven years earlier Hoerl published “Optimum Solution of Many Variables Equations” in <em>Chemical Engineering Progress</em>, in November 1959. Then “Application of Ridge Analysis to Regression Problems” in 1962. That 1962 paper is reference nine of the 1970 paper, cited there as the origin of the idea.',
+        's7.p3': 'Ridge analysis was a plant optimisation tool. You have a fitted response surface, some yield as a function of your settings, and you want the best settings you can reach. So you find the best point on a sphere of radius one. Then radius two. Then radius three. You trace those constrained optima outward. When the surface is elongated rather than sharply peaked, that path climbs along a raised spine. A ridge, in the walking-boots sense of the word.',
+        's7.p4': 'A plausible explanation travels faster than a real one, because it is easier to remember. When somebody gives you the origin of a word, notice whether they are reporting it or reconstructing it. Those two sound identical from the outside.',
+
+        'quiz2.q':  'Where does the word ridge come from?',
+        'quiz2.a1': 'A ridge in the loss surface',
+        'quiz2.a2': 'A chemical engineering method that traced optima on spheres of growing radius',
+        'quiz2.ok': 'Right. Hoerl’s 1959 and 1962 papers in Chemical Engineering Progress. The 1962 one is reference nine of the 1970 paper, cited there as the origin. On an elongated surface the path of those constrained optima climbs a real topographic ridge.',
+        'quiz2.no': 'That is the story almost every course tells, and it is a reconstruction rather than a report. The name is inherited from Hoerl’s own ridge analysis, a plant optimisation method from 1959 and 1962.',
+
+        's8.h2':  'A correction',
+        's8.tag': 'What everyone says',
+        's8.h3':  '“Tikhonov invented regularization in 1943”',
+        's8.p1':  'He did not, and the paper is four pages long and free, so you can settle this yourself in twenty minutes.',
+        's8.p2':  'The 1943 paper is a stability theorem. It proves that stability of an inverse problem follows from the uniqueness theorem, by a topological mapping argument. There is no penalty in it. There is no stabilizing functional. Nothing anywhere in it is being penalised. Its context is geophysics, which is to say guessing what is underground from what you can measure standing on top of it.',
+        's8.p3':  'Regularization proper, with a stabilizing functional, is 1963. And David Phillips got there in 1962, in the <em>Journal of the ACM</em>, which is why careful people write Phillips-Tikhonov.',
+        's8.p4':  'The error is not the interesting part. Hoerl and Kennard’s reference list cites neither Tikhonov nor Phillips. The only antecedent they cite is Hoerl’s own 1962 paper. Two research communities, Soviet ill-posed inverse problems and American industrial statistics, arrived at the same estimator about seven years apart, for unrelated reasons, without contact.',
+        's8.p5':  'When two people who never met arrive at the same answer, the answer was sitting inside the problem the whole time, waiting for anybody who turned up with the right complaint.',
+
+        'dd.summary': 'For the curious: batting averages and the price of tea in Shanghai',
+        'dd.p1': 'In May 1977 Bradley Efron and Carl Morris published a piece in <em>Scientific American</em> about eighteen baseball players. They took the first forty-five at-bats of the 1970 season and asked one question. What will each man hit for the rest of the year?',
+        'dd.p2': 'The obvious answer is his own average. Roberto Clemente was hitting .400, so predict .400.',
+        'dd.p3': 'They did something else. They took the grand mean across all eighteen players.265, and pulled every player toward it by a factor of .212. You can check it in one line:',
+        'dd.p4': 'Two ninety-four, for a man who was hitting four hundred. Clemente’s actual average over the rest of that season was .346. Four hundred was too high. Two ninety-four was closer.',
+        'dd.p5': 'The same procedure beat the raw average for sixteen of the eighteen players, and total squared error on the raw averages was about three and a half times worse. Those last two figures come from a source quoting the article rather than from the article itself, so this page says so out loud instead of printing them clean.',
+        'dd.p6': 'The theory is from 1956. Charles Stein showed that the obvious estimator of the mean of a multivariate Gaussian, which is to use the sample mean separately for each coordinate, is inadmissible in three or more dimensions. There exists another estimator whose total squared error is lower for every possible value of the true means. Not lower on average over some prior. Not lower usually. Lower always.',
+        'dd.p7': '<strong>The theorem does not require the quantities to be related.</strong>',
+        'dd.p8': 'Estimate a batting average, the price of tea in Shanghai and the mass of an electron at the same time. Shrink all three toward their common mean. You beat estimating each one separately. The three have nothing to do with each other and it does not matter, because the result is about the geometry of estimating several things at once.',
+        'dd.p9': 'Your best week and your worst review are the same arithmetic. Every extreme reading is extreme partly because something real happened and partly because that was the week the dice landed that way. The truth about you sits closer to the middle than any single reading says, and that applies to the good readings exactly as hard as the bad ones.',
+
+        's9.h2': 'The penalty needs a shape',
+        's9.p1': 'You have the idea now. Of all the answers that fit the data, prefer the small one. What is missing is what small means, and there are two famous answers.',
+        's9.p2': 'One keeps every feature and makes them all small. Nothing ever reaches exactly zero, so you come out holding ninety-one channels and trusting none of them individually.',
+        's9.p3': 'The other deletes features outright. Coefficients land on zero and stay there, so you come out with a short list you can read aloud in a meeting.',
+        's9.p4': 'Those are two different meetings. Keep everything and trust nothing on its own is one conversation. Drop TikTok is a budget line somebody loses. Choosing between them is not only a technical preference.',
+
+        'next.ridge.t': 'Ridge',
+        'next.ridge.d': 'The penalty that charges for squares. It shrinks everything and deletes nothing.',
+        'next.lasso.t': 'Lasso',
+        'next.lasso.d': 'The penalty that charges for absolute values. It sends coefficients to exactly zero.',
+
+        'cv.bullseye': 'bullseye (the truth)',
+        'cv.zero':     'zero',
+        'cv.centre':   'centre of the cloud',
+        'cv.shift':    'SHIFT',
+        'cv.spread':   'SPREAD',
+        'cv.axisErr':  'distance from the bullseye',
+        'cv.lam':      'restraint (lambda)',
+        'cv.errAxis':  'error',
+        'cv.min':      'lowest total error',
+        'cv.youAre':   'you are here',
+        'cv.coef':     'coefficient',
+        'cv.pen':      'penalty (lambda)',
+        'cv.stab':     'the system stabilises',
+        'cv.search':   'Search',
+        'cv.shopping': 'Shopping',
+        'cv.meta':     'Meta',
+        'cv.tiktok':   'TikTok',
+        'cv.display':  'Display',
+        'cv.affil':    'Affiliate',
+        'cv.email':    'Email',
+
+        'footer.title': 'Regularisation: Shift and Spread',
+    },
+
+    de: {
+        'hero.title':    'Regularisierung: Verschiebung und Streuung',
+        'hero.subtitle': 'Klasse 5, Modul eins von drei. Warum ein Modell, das absichtlich ein wenig danebenliegt, besser sein kann als eines, das im Mittel richtig liegt.',
+
+        's1.h2': 'Das Modell sagt, E-Mail kostet Geld',
+        's1.p1': 'Das Meeting ist um zehn. Du hast zwei Jahre Wochenzahlen für eine E-Commerce-Marke. Das sind hundertvier Zeilen. Links der Umsatz. Rechts die Ausgaben für Google Search, Google Shopping, Meta, TikTok, Display und Affiliate. Dazu die Zahl der Marketing-Mails pro Woche.',
+        's1.p2': 'Du fügst Adstock-Verzögerungen hinzu. Geld von dieser Woche verkauft auch nächste Woche noch. Jeder, der solche Modelle baut, macht das so. Dreizehn Wochenverzögerungen pro Kanal, sieben Kanäle. Einundneunzig Spalten. Immer noch hundertvier Zeilen.',
+        's1.p3': 'Du rechnest die Methode der kleinsten Quadrate. Das dauert eine halbe Sekunde. Das Gewicht für E-Mail kommt mit minus vier Komma zwei zurück. Zwei Zeilen tiefer steht TikTok bei plus elf Komma acht.',
+        's1.p4': 'Minus vier Komma zwei heißt: Jede Mail kostet Umsatz. Um zehn musst du das der Kollegin sagen, die den E-Mail-Kanal leitet. Sie hat vier Leute und einen Kampagnenkalender. Und sie hat die Willkommensstrecke gebaut, die alle zitieren.',
+        's1.p5': 'Niemand im Raum glaubt es. Niemand im Raum kann dagegen argumentieren. Die Rechnung stimmt. Während du noch redest, prüfen zwei Leute sie auf ihren Laptops nach. Sie bekommen dasselbe Ergebnis.',
+        's1.p6': 'Warten hilft nicht. Die Daten kommen mit einer Zeile pro Woche. Ein Jahr hat zweiundfünfzig Wochen.',
+
+        's2.h2': 'Die kleinsten Quadrate haben nichts mehr zu sagen',
+        's2.p1': 'Budgets werden nicht unabhängig voneinander festgelegt. Im September entscheidet jemand, dass das vierte Quartal groß wird. Dann steigt Search. Dann steigt Shopping. Dann steigen Meta und TikTok. Und der E-Mail-Kalender füllt sich. Alles in denselben Wochen. Im Januar läuft dasselbe rückwärts.',
+        's2.p2': 'Jetzt fragst du das Modell, was jeder Kanal für sich getan hat. Die Spalten haben sich nie einzeln bewegt. In der Datei steht darüber also nichts. Das Modell sagt dir das nicht. Es minimiert den Fehler. Und es merkt etwas: Eine große positive Zahl bei TikTok und eine große negative Zahl bei E-Mail passen genauso gut. Sie ergeben dieselbe Gerade wie zwei kleine, vernünftige Zahlen.',
+        's2.p3': 'Die beiden Gewichte sind kein doppelter Befund. Sie sind ein Befund, halbiert und mit umgedrehten Vorzeichen. Sie heben sich jede Woche gegenseitig auf.',
+        's2.p4': 'Auf fünf Zeilen kannst du das von Hand prüfen. Search und Shopping sind dieselbe Spalte. In dieser Firma legt eine Person beide Budgets im selben Meeting fest.',
+        't1.h1': 'Woche',
+        't1.h2': 'Ausgaben Search',
+        't1.h3': 'Ausgaben Shopping',
+        't1.h4': 'Umsatz',
+        's2.p5': 'Nimm zwei für Search und null für Shopping. Woche eins sagt zwei voraus, der Umsatz war zwei. Woche fünf sagt zehn voraus, der Umsatz war zehn. Jede Woche exakt. Jetzt null und zwei. Exakt. Jetzt eins und eins. Exakt. Jetzt tausend und minus achthundertachtundneunzig: Woche drei sagt dreitausend minus zweitausendneunhundertvierundneunzig voraus, also sechs. Der Umsatz war sechs.',
+        't2.h1': 'Gewicht Search',
+        't2.h2': 'Gewicht Shopping',
+        't2.h3': 'Fehler über alle fünf Wochen',
+        's2.callout': 'Alle Zahlenpaare, die zusammen zwei ergeben, passen perfekt zu diesen Daten. Es gibt unendlich viele davon. Die Daten bevorzugen keines.',
+        's2.p6': 'Das Modell passt. Passt schon, würde man sagen. Trotzdem ist jede einzelne Zahl darin erfunden. Die Daten können nicht wählen. Also muss etwas anderes wählen. Darum geht es im Rest dieses Moduls.',
+
+        's3.h2': 'Verschiebung und Streuung',
+        's3.p1': 'Vergiss die Gewichte für einen Moment. Du wirfst Darts.',
+        's3.p2': 'Zwei Dinge können schiefgehen. Die Pfeile landen dicht beieinander, aber an der falschen Stelle. Oder sie landen über die ganze Scheibe verteilt, und ihr Mittelpunkt liegt genau richtig. Das sind zwei verschiedene Probleme. Sie brauchen zwei verschiedene Reparaturen.',
+        's3.p3': 'Das Erste heißt <strong>Verschiebung</strong>. Sie misst, wie weit der Mittelpunkt deiner Wolke vom Bullseye entfernt liegt. Das Zweite heißt <strong>Streuung</strong>. Sie misst, wie weit die Pfeile voneinander entfernt liegen.',
+        's3.p4': 'Jeder Wurf unten ist eine Neuanpassung. Dieselbe Marke, dasselbe Modell, ein leicht anderer Zeitraum von zwei Jahren. Der Wurf zeigt, wo das Modell gelandet ist. In der Praxis bekommst du genau einen Wurf. Die Wolke ist das, was du hättest bekommen können.',
+        's3.p5': 'Zieh am Regler für Lambda, also für die Zurückhaltung. Links bewegen sich die Würfe. Rechts liegen dieselben Würfe auf einer Linie. So kannst du die beiden Größen getrennt ablesen: wo der Mittelpunkt sitzt und wie breit die Wolke ist.',
+        'panel.board': 'Die Scheibe: ein Wurf pro Neuanpassung',
+        'panel.line':  'Dieselben Würfe auf einer Linie',
+        'lbl.lambda':  'Zurückhaltung (Lambda)',
+        'ro.shift':    'Verschiebung',
+        'ro.spread':   'Streuung',
+        'ro.total':    'Gesamtfehler',
+        's3.formula':  '$$\\text{Gesamtfehler} \\;=\\; \\text{Verschiebung}^2 \\;+\\; \\text{Streuung}$$',
+        's3.p6': 'Der Balken im rechten Panel ist eine Standardabweichung. Die Streuung in der Summe ist dieser Balken zum Quadrat.',
+
+        'guess.q':  'Entscheide dich, bevor die Kurve gezeichnet wird. Welche Einstellung hat den kleinsten Gesamtfehler?',
+        'guess.a1': 'Keine Zurückhaltung, \\(\\lambda = 0\\)',
+        'guess.a2': 'Ein wenig Zurückhaltung, \\(\\lambda = 1\\)',
+        'guess.a3': 'Viel Zurückhaltung, \\(\\lambda = 4\\)',
+        'guess.ok': 'Ja. Das Minimum liegt hier bei λ = 1. Der Gesamtfehler ist dort halb so groß wie bei λ = 0. Die Kurve steht unten. Zieh noch einmal am Regler und schau dem Handel zu.',
+        'guess.no': 'Das Minimum liegt hier bei λ = 1. Der Gesamtfehler ist dort halb so groß wie bei λ = 0. Bei null ist die Wolke mittig und wild. Bei vier ist sie eng und sitzt neben dem Bullseye. Die Kurve steht unten.',
+
+        'panel.curve': 'Gesamtfehler gegen Zurückhaltung',
+        'lg.shift':    'Verschiebung im Quadrat',
+        'lg.spread':   'Streuung',
+        'lg.total':    'Gesamt',
+        'cap.curve':   'Zieh noch einmal am Regler. Der Punkt auf der blauen Kurve zeigt, wo du gerade stehst.',
+
+        's3.p7': 'Die Verschiebung im Quadrat steigt die ganze Zeit. Die Streuung fällt die ganze Zeit. Ihre Summe ist das, was zählt. Eine steigende Kurve plus eine fallende Kurve muss am linken Rand nicht am kleinsten sein.',
+        's3.p8': 'Für die beiden Wörter gibt es Fachbegriffe. Verschiebung heißt <strong>Verzerrung</strong>. Streuung heißt <strong>Varianz</strong>. Es gibt noch ein drittes Stück: das <strong>Rauschen</strong>. Das ist der Teil des Umsatzes der nächsten Woche, den keine Spalte in deiner Datei vorhersagt. Das Rauschen bewegt sich nicht, egal was du am Modell machst.',
+
+        'quiz1.q':  'Du drehst die Zurückhaltung hoch. Was passiert mit Verschiebung und Streuung?',
+        'quiz1.a1': 'Verschiebung steigt, Streuung fällt',
+        'quiz1.a2': 'Beide fallen',
+        'quiz1.ok': 'Richtig. Die Verschiebung steigt die ganze Zeit, die Streuung fällt die ganze Zeit. Ihre Summe kann unter den Wert bei null Zurückhaltung fallen. Genau diese Delle ist der Grund für Strafterme.',
+        'quiz1.no': 'Nicht ganz. Wenn beide fielen, gäbe es nichts zu handeln. Zurückhaltung kauft dir weniger Streuung und kostet dich Verschiebung. Die einzige Frage ist, ob sich der Handel lohnt.',
+
+        's4.h2':   'Der Handel',
+        's4.p1':   'Du nimmst ein wenig Verschiebung in Kauf. Dafür bekommst du viel weniger Streuung.',
+        's4.p2':   'Am linken Rand des Reglers liegt das Modell im Mittel richtig und in der Praxis wild daneben. Du bekommst genau eine Ziehung daraus. Im Mittel richtig zu liegen ist eine Aussage über unendlich viele Paralleluniversen. An einem Dienstag hilft dir das wenig.',
+        's4.pull': 'Ein Modell, das leicht danebenliegt und ruhig bleibt, kann besser sein als eines, das im Mittel stimmt und wild schwankt. Dieser Satz ist die ganze Idee hinter einem Strafterm.',
+        's4.p3':   'Ein Strafterm ist ein Preis auf Größe. Bisher bekam das Modell eine Frage: Wie nah kommst du an die Daten? Ab jetzt bekommt es zwei. Wie nah kommst du, und wie groß sind die Zahlen, mit denen du dorthin gekommen bist? Die zweite Frage hat einen Preis. Der Preis ist der Regler, an dem du gerade gezogen hast.',
+        's4.p4':   'Hoerl und Kennard haben 1970 etwas Stärkeres bewiesen. Es gibt immer einen Strafterm größer als null, dessen Gesamtfehler kleiner ist als der der kleinsten Quadrate. Nicht meistens. Immer, für jeden Datensatz, den je jemand erhoben hat. Welcher Strafterm es ist, können sie dir nicht sagen. Er ist trotzdem da.',
+
+        's5.h2':    'DuPont, und zwanzig Jahre dieselbe Beschwerde',
+        's5.p1':    'Arthur Hoerl wurde 1950 als erster Statistiker bei DuPont eingestellt. Robert Kennard kam fünf Jahre später dazu. Der Job bedeutete Anlagenprotokolle statt Lehrbuchdaten. Ausbeute, Temperatur, Druck, Zulaufmenge, Katalysatorkonzentration. Aufgezeichnet von Leuten, die eine chemische Anlage betrieben und kein Experiment planten.',
+        's5.p2':    'Zwanzig Jahre später veröffentlichten die beiden ihre Beschwerde. Im Original:',
+        's5.quote': '„the least squares estimates often do not make sense when put into the context of the physics, chemistry, and engineering of the process“ (Sinngemäß: Die Schätzungen der kleinsten Quadrate ergeben oft keinen Sinn, wenn man sie neben die Physik, die Chemie und die Technik des Prozesses stellt.)',
+        's5.p3':    'Rechne die Ausbeute gegen Temperatur, Druck, Zulaufmenge und Katalysator. Die Ingenieure neben dem Reaktor kennen das Vorzeichen von jedem dieser Effekte. Die kleinsten Quadrate liefern eine Zahl, nach der ein heißerer Reaktor weniger Ausbeute bringt. Nicht weil es so wäre. Sondern weil Temperatur und Druck im Protokoll immer zusammen steigen. Jeden Tag, das ganze Jahr. Kein Tag im Protokoll zeigt das eine ohne das andere.',
+        's5.p4':    'Bei DuPont hat niemand einen Fehler gemacht. In deinem Marketing-Meeting auch nicht. Eine Firma, die einen Kanal ändert und alle anderen festhält, wird nicht geführt. Wenn eine Rechnung und ein Mensch mit zwanzig Jahren Erfahrung sich widersprechen, lautet die nützliche Frage: Womit wurde die Rechnung gefüttert?',
+
+        's6.h2':     'Das Bild, auf das ein Ingenieur geschaut hat',
+        's6.p1':     'Kreuzvalidierung gab es noch nicht. Rastersuche auch nicht. Niemand hatte einen Validierungssatz. Die Regel zur Modellauswahl stand 1970 so im Papier: Zeichne jedes Gewicht gegen den Strafterm, alles in ein Koordinatensystem, und schau es dir an.',
+        's6.p2':     'Dieses Bild heißt Ridge-Trace. Sein erklärter Zweck war, die Empfindlichkeit der Lösungen gegenüber den Daten zu zeigen. Und dem Analysten die Stelle zu geben, an der sich das System beruhigt.',
+        'cap.trace': 'Der Ridge-Trace, gebaut aus dem Marketing-Modell vom Anfang der Seite. Sieben Gewichte, eine waagerechte Achse, nirgends Kreuzvalidierung.',
+        's6.p3':     'Lies von links. Der Strafterm ist null, und die Gewichte flattern. E-Mail bei minus vier Komma zwei, TikTok bei plus elf Komma acht. Absurd an beiden Enden. Und absurd im Paar, denn sie heben sich gegenseitig auf. Geh nach rechts. Die wilden Kurven rasen auf die Null zu. Sie waren nur groß, um sich gegenseitig auszugleichen. Sobald Größe etwas kostet, lohnt sich der Deal nicht mehr. Die Kurven mit echter Substanz legen sich hin und bleiben liegen.',
+        's6.p4':     'Irgendwo hört das ganze Bild auf zu zappeln. Dort hat der Ingenieur den Regler gesetzt. Ein Bild, keine Formel. Das ist die vergessene Hälfte des Papiers.',
+
+        's7.h2': 'Woher das Wort Ridge kommt',
+        's7.p1': 'Fast jeder Kurs sagt, Ridge meine einen Grat in der Fehlerlandschaft. Das stimmt nicht. Und es ist leicht zu prüfen, denn im Papier steht, woher das Wort kommt.',
+        's7.p2': 'Elf Jahre vorher veröffentlichte Hoerl den Aufsatz „Optimum Solution of Many Variables Equations“ in <em>Chemical Engineering Progress</em>, im November 1959. Dann 1962 „Application of Ridge Analysis to Regression Problems“. Dieses Papier von 1962 ist Referenz neun im Papier von 1970. Dort wird es als Ursprung der Idee genannt.',
+        's7.p3': 'Ridge-Analyse war ein Werkzeug zur Anlagenoptimierung. Du hast eine angepasste Antwortfläche, also die Ausbeute als Funktion deiner Einstellungen. Du suchst die besten Einstellungen, die du erreichen kannst. Also suchst du den besten Punkt auf einer Kugel mit Radius eins. Dann mit Radius zwei. Dann mit Radius drei. Diese Optima ziehst du als Spur nach außen. Ist die Fläche langgezogen statt spitz, klettert die Spur einen erhöhten Kamm entlang. Ein Grat, im Sinne von Wanderschuhen.',
+        's7.p4': 'Eine plausible Erklärung reist schneller als eine richtige, weil man sie leichter behalten kann. Wenn dir jemand die Herkunft eines Wortes erklärt, achte darauf, ob er berichtet oder rekonstruiert. Von außen klingt beides gleich.',
+
+        'quiz2.q':  'Woher stammt das Wort Ridge?',
+        'quiz2.a1': 'Von einem Grat in der Fehlerlandschaft',
+        'quiz2.a2': 'Von einer Methode der Verfahrenstechnik, die Optima auf Kugeln mit wachsendem Radius verfolgt',
+        'quiz2.ok': 'Richtig. Hoerls Papiere von 1959 und 1962 in Chemical Engineering Progress. Das von 1962 ist Referenz neun im Papier von 1970 und wird dort als Ursprung genannt. Auf einer langgezogenen Fläche klettert die Spur dieser Optima einen echten Kamm hinauf.',
+        'quiz2.no': 'Das ist die Geschichte, die fast jeder Kurs erzählt. Sie ist eine Rekonstruktion, kein Bericht. Der Name stammt von Hoerls eigener Ridge-Analyse, einer Optimierungsmethode aus den Jahren 1959 und 1962.',
+
+        's8.h2':  'Eine Korrektur',
+        's8.tag': 'Was alle sagen',
+        's8.h3':  '„Tikhonov hat die Regularisierung 1943 erfunden“',
+        's8.p1':  'Hat er nicht. Das Papier ist vier Seiten lang und frei verfügbar. Du kannst das in zwanzig Minuten selbst klären.',
+        's8.p2':  'Das Papier von 1943 ist ein Stabilitätssatz. Es beweist, dass die Stabilität eines inversen Problems aus dem Eindeutigkeitssatz folgt. Der Beweis läuft über ein topologisches Abbildungsargument. Es enthält keinen Strafterm. Es enthält kein stabilisierendes Funktional. Nichts darin wird bestraft. Der Anwendungsbereich ist Geophysik. Man rät, was unter der Erde liegt, aus dem, was man an der Oberfläche messen kann.',
+        's8.p3':  'Die Regularisierung mit einem stabilisierenden Funktional ist von 1963. Und David Phillips war 1962 da, im <em>Journal of the ACM</em>. Deshalb schreiben sorgfältige Leute Phillips-Tikhonov.',
+        's8.p4':  'Der Fehler ist nicht der interessante Teil. Hoerl und Kennard zitieren weder Tikhonov noch Phillips. Der einzige Vorläufer in ihrer Literaturliste ist Hoerls eigenes Papier von 1962. Zwei Forschungsgemeinschaften kamen etwa sieben Jahre auseinander auf denselben Schätzer. Die eine arbeitete in der Sowjetunion an schlecht gestellten inversen Problemen. Die andere an amerikanischer Industriestatistik. Ohne Kontakt.',
+        's8.p5':  'Wenn zwei Menschen, die sich nie getroffen haben, bei derselben Antwort landen, saß die Antwort die ganze Zeit im Problem. Sie hat auf jemanden gewartet, der mit der richtigen Beschwerde vorbeikommt.',
+
+        'dd.summary': 'Für Neugierige: Schlagdurchschnitte und der Teepreis in Schanghai',
+        'dd.p1': 'Im Mai 1977 veröffentlichten Bradley Efron und Carl Morris einen Artikel im <em>Scientific American</em> über achtzehn Baseballspieler. Sie nahmen die ersten fünfundvierzig Schlagversuche der Saison 1970. Und sie stellten eine Frage. Was trifft jeder Mann im Rest des Jahres?',
+        'dd.p2': 'Die naheliegende Antwort ist sein eigener Durchschnitt. Roberto Clemente stand bei .400, also sage .400 voraus.',
+        'dd.p3': 'Sie machten etwas anderes. Sie nahmen den Gesamtdurchschnitt aller achtzehn Spieler.265, und zogen jeden Spieler mit dem Faktor .212 dorthin. Du kannst es in einer Zeile nachrechnen:',
+        'dd.p4': 'Zweihundertvierundneunzig, für einen Mann, der bei vierhundert stand. Clementes tatsächlicher Durchschnitt im Rest der Saison war .346. Vierhundert war zu hoch. Zweihundertvierundneunzig war näher dran.',
+        'dd.p5': 'Dasselbe Verfahren schlug den rohen Durchschnitt bei sechzehn von achtzehn Spielern. Der gesamte quadratische Fehler der rohen Durchschnitte war etwa dreieinhalbmal größer. Diese beiden Zahlen stammen aus einer Quelle, die den Artikel zitiert, nicht aus dem Artikel selbst. Deshalb steht das hier so da, statt sauber gedruckt zu werden.',
+        'dd.p6': 'Die Theorie ist von 1956. Charles Stein zeigte etwas über den naheliegenden Schätzer für den Mittelwert einer mehrdimensionalen Normalverteilung. Dieser Schätzer nimmt für jede Koordinate einzeln den Stichprobenmittelwert. Ab drei Dimensionen ist er unzulässig. Es gibt einen anderen Schätzer mit kleinerem gesamten quadratischen Fehler. Und zwar für jeden möglichen Wert der wahren Mittelwerte. Nicht im Mittel über eine Vorannahme. Nicht meistens. Immer.',
+        'dd.p7': '<strong>Der Satz verlangt nicht, dass die Größen etwas miteinander zu tun haben.</strong>',
+        'dd.p8': 'Schätze gleichzeitig einen Schlagdurchschnitt, den Teepreis in Schanghai und die Masse eines Elektrons. Zieh alle drei zu ihrem gemeinsamen Mittelwert. Du schlägst damit die einzelne Schätzung. Die drei haben nichts miteinander zu tun, und das ist egal. Das Ergebnis handelt von der Geometrie, wenn man mehrere Dinge auf einmal schätzt.',
+        'dd.p9': 'Deine beste Woche und deine schlechteste Bewertung sind dieselbe Rechnung. Jeder extreme Messwert ist extrem, weil etwas Echtes passiert ist und weil die Würfel in dieser Woche so fielen. Die Wahrheit über dich liegt näher an der Mitte als jeder einzelne Messwert sagt. Das gilt für die guten Messwerte genauso hart wie für die schlechten.',
+
+        's9.h2': 'Der Strafterm braucht eine Form',
+        's9.p1': 'Die Idee hast du jetzt. Von allen Antworten, die zu den Daten passen, nimm die kleine. Was fehlt, ist die Bedeutung von klein. Dafür gibt es zwei berühmte Antworten.',
+        's9.p2': 'Die eine behält jedes Merkmal und macht alle Gewichte klein. Nichts wird je genau null. Du behältst einundneunzig Kanäle und traust keinem einzelnen davon.',
+        's9.p3': 'Die andere löscht Merkmale ganz. Gewichte landen auf null und bleiben dort. Am Ende hast du eine kurze Liste, die du im Meeting vorlesen kannst.',
+        's9.p4': 'Das sind zwei verschiedene Meetings. Behalte alles und traue nichts für sich allein ist das eine Gespräch. Streich TikTok ist eine Budgetzeile, die jemand verliert. Die Wahl zwischen beiden ist nicht nur eine technische Vorliebe.',
+
+        'next.ridge.t': 'Ridge',
+        'next.ridge.d': 'Der Strafterm, der für Quadrate kassiert. Er schrumpft alles und löscht nichts.',
+        'next.lasso.t': 'Lasso',
+        'next.lasso.d': 'Der Strafterm, der für Beträge kassiert. Er schickt Gewichte auf genau null.',
+
+        'cv.bullseye': 'Bullseye (die Wahrheit)',
+        'cv.zero':     'null',
+        'cv.centre':   'Mittelpunkt der Wolke',
+        'cv.shift':    'VERSCHIEBUNG',
+        'cv.spread':   'STREUUNG',
+        'cv.axisErr':  'Abstand vom Bullseye',
+        'cv.lam':      'Zurückhaltung (Lambda)',
+        'cv.errAxis':  'Fehler',
+        'cv.min':      'kleinster Gesamtfehler',
+        'cv.youAre':   'hier stehst du',
+        'cv.coef':     'Gewicht',
+        'cv.pen':      'Strafterm (Lambda)',
+        'cv.stab':     'das System beruhigt sich',
+        'cv.search':   'Search',
+        'cv.shopping': 'Shopping',
+        'cv.meta':     'Meta',
+        'cv.tiktok':   'TikTok',
+        'cv.display':  'Display',
+        'cv.affil':    'Affiliate',
+        'cv.email':    'E-Mail',
+
+        'footer.title': 'Regularisierung: Verschiebung und Streuung',
+    }
+};
+
+let currentLang = 'en';
+
+function toggleLang() {
+    currentLang = currentLang === 'en' ? 'de' : 'en';
+    document.documentElement.lang = currentLang;
+    document.querySelector('.lang-toggle').textContent = currentLang === 'en' ? 'DE' : 'EN';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (T[currentLang] && T[currentLang][key]) el.innerHTML = T[currentLang][key];
+    });
+    // Re-render KaTeX after language switch
+    if (typeof renderMathInElement !== 'undefined') {
+        renderMathInElement(document.body, {
+            delimiters: [
+                { left: '$$', right: '$$', display: true  },
+                { left: '\\(', right: '\\)', display: false }
+            ],
+            throwOnError: false
+        });
+    }
+    if (typeof onLangChange === 'function') onLangChange(currentLang);
+}
+
+/* Translate a key in the current language, with an English fallback. */
+function t(key) {
+    return (T[currentLang] && T[currentLang][key]) || (T.en && T.en[key]) || key;
+}
+
+// ─── Quiz ─────────────────────────────────────────────────────────────────────
+function answerQuiz(quizId, btn, isCorrect) {
+    const quiz     = document.getElementById(quizId);
+    const feedback = document.getElementById(quizId + '-feedback');
+    quiz.querySelectorAll('.quiz-btn').forEach(b => b.classList.add('disabled'));
+    btn.classList.add(isCorrect ? 'correct' : 'wrong');
+    feedback.className = 'quiz-feedback ' + (isCorrect ? 'success' : 'fail');
+    const key = quizId + (isCorrect ? '.ok' : '.no');
+    feedback.innerHTML = (T[currentLang] && T[currentLang][key]) ? T[currentLang][key] : T.en[key];
+}
+
+// ─── Shift and spread ─────────────────────────────────────────────────────────
+// One shot = one refit of the same model on a slightly different two years.
+// Along the axis that matters the raw estimate is  B + noise, and restraint
+// divides it by (1 + lambda). Restraint pulls the whole cloud toward zero.
+
+const SS = {
+    B: 1.0,        // the true coefficient
+    s: 1.0,        // noise on one refit
+    n: 160,
+    SC: 58,        // pixels per unit
+    lam: 0,
+    committed: false,
+    u: [],         // raw draws along the shift axis
+    v: []          // raw draws across it, cosmetic only
+};
+
+function mulberry32(a) {
+    return function () {
+        a |= 0; a = a + 0x6D2B79F5 | 0;
+        let t = Math.imul(a ^ a >>> 15, 1 | a);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+}
+
+function buildShots() {
+    const rnd = mulberry32(20250803);
+    const gauss = () => {
+        let a = 0, b = 0;
+        while (a === 0) a = rnd();
+        while (b === 0) b = rnd();
+        return Math.sqrt(-2 * Math.log(a)) * Math.cos(2 * Math.PI * b);
+    };
+    let g = [], h = [];
+    for (let i = 0; i < SS.n; i++) { g.push(gauss()); h.push(gauss()); }
+    // Calibrate the sample so mean is exactly 0 and sd exactly 1. The cloud
+    // then behaves exactly like the theory and the minimum lands where it should.
+    const cal = arr => {
+        const m = arr.reduce((p, c) => p + c, 0) / arr.length;
+        const sd = Math.sqrt(arr.reduce((p, c) => p + (c - m) * (c - m), 0) / arr.length);
+        return arr.map(x => (x - m) / sd);
+    };
+    g = cal(g); h = cal(h);
+    SS.u = g.map(x => SS.B + SS.s * x);
+    SS.v = h.map(x => SS.s * x);
+}
+
+function shotsAt(lam) {
+    const k = 1 / (1 + lam);
+    return { u: SS.u.map(x => x * k), v: SS.v.map(x => x * k) };
+}
+
+function statsAt(lam) {
+    const sh = shotsAt(lam);
+    const m = sh.u.reduce((p, c) => p + c, 0) / sh.u.length;
+    const shift = m - SS.B;
+    const spread = sh.u.reduce((p, c) => p + (c - m) * (c - m), 0) / sh.u.length;
+    return { mean: m, shift: shift, spread: spread, total: shift * shift + spread };
+}
+
+// ── Left panel: the board ─────────────────────────────────────────────────────
+function drawBoard() {
+    const cv = document.getElementById('cv-board');
+    const g = cv.getContext('2d');
+    const W = cv.width, H = cv.height, cx = W / 2, cy = H / 2, SC = SS.SC;
+    g.clearRect(0, 0, W, H);
+
+    // rings, centred on the truth
+    const rings = [2.9, 2.4, 1.9, 1.4, 0.9, 0.45];
+    rings.forEach((r, i) => {
+        g.beginPath();
+        g.arc(cx, cy, r * SC, 0, 2 * Math.PI);
+        g.fillStyle = (i % 2 === 0) ? '#1a1a2c' : '#202034';
+        g.fill();
+        g.strokeStyle = '#2a2a40';
+        g.lineWidth = 1;
+        g.stroke();
+    });
+    g.beginPath();
+    g.arc(cx, cy, 0.16 * SC, 0, 2 * Math.PI);
+    g.fillStyle = '#d05a6e';
+    g.fill();
+
+    const sh = shotsAt(SS.lam);
+    const st = statsAt(SS.lam);
+
+    // the zero point: where full restraint sends everything
+    const zx = cx + (0 - SS.B) * SC;
+    g.strokeStyle = '#5a5a80';
+    g.lineWidth = 1.5;
+    g.beginPath();
+    g.moveTo(zx - 6, cy - 6); g.lineTo(zx + 6, cy + 6);
+    g.moveTo(zx + 6, cy - 6); g.lineTo(zx - 6, cy + 6);
+    g.stroke();
+    g.font = '12px sans-serif';
+    g.fillStyle = '#7a7aa0';
+    g.textAlign = 'center';
+    g.fillText(t('cv.zero'), zx, cy + 24);
+
+    // the shots
+    g.fillStyle = 'rgba(128,180,240,0.55)';
+    for (let i = 0; i < sh.u.length; i++) {
+        const x = cx + (sh.u[i] - SS.B) * SC;
+        const y = cy + sh.v[i] * SC;
+        if (x < 4 || x > W - 4 || y < 4 || y > H - 4) continue;
+        g.beginPath();
+        g.arc(x, y, 2.6, 0, 2 * Math.PI);
+        g.fill();
+    }
+
+    // the centre of the cloud
+    const mx = cx + st.shift * SC;
+    g.strokeStyle = '#f0a860';
+    g.lineWidth = 2;
+    g.beginPath();
+    g.arc(mx, cy, 7, 0, 2 * Math.PI);
+    g.stroke();
+    g.beginPath();
+    g.moveTo(mx - 12, cy); g.lineTo(mx + 12, cy);
+    g.moveTo(mx, cy - 12); g.lineTo(mx, cy + 12);
+    g.stroke();
+
+    // labels
+    g.font = '12px sans-serif';
+    g.fillStyle = '#d05a6e';
+    g.textAlign = 'left';
+    g.fillText(t('cv.bullseye'), cx + 10, cy - 12);
+    g.fillStyle = '#f0a860';
+    g.textAlign = 'center';
+    g.fillText(t('cv.centre'), mx, H - 14);
+}
+
+// ── Right panel: the same shots on one line ───────────────────────────────────
+function drawLine() {
+    const cv = document.getElementById('cv-line');
+    const g = cv.getContext('2d');
+    const W = cv.width, H = cv.height, SC = SS.SC;
+    const zeroX = W / 2;              // error = 0 sits at the bullseye
+    const axisY = 250;
+    g.clearRect(0, 0, W, H);
+
+    const sh = shotsAt(SS.lam);
+    const st = statsAt(SS.lam);
+    const px = e => zeroX + e * SC;
+
+    // histogram of the errors
+    const lo = -3.2, hi = 3.2, nb = 40, bw = (hi - lo) / nb;
+    const bins = new Array(nb).fill(0);
+    sh.u.forEach(x => {
+        const e = x - SS.B;
+        const k = Math.floor((e - lo) / bw);
+        if (k >= 0 && k < nb) bins[k]++;
+    });
+    const mx = Math.max(1, ...bins);
+    const hMax = 150;
+    g.fillStyle = 'rgba(128,180,240,0.35)';
+    for (let k = 0; k < nb; k++) {
+        if (!bins[k]) continue;
+        const h = (bins[k] / mx) * hMax;
+        const x0 = px(lo + k * bw), x1 = px(lo + (k + 1) * bw);
+        g.fillRect(x0, axisY - h, Math.max(1, x1 - x0 - 1), h);
+    }
+
+    // the axis
+    g.strokeStyle = '#4a4a70';
+    g.lineWidth = 1;
+    g.beginPath(); g.moveTo(10, axisY); g.lineTo(W - 10, axisY); g.stroke();
+    g.font = '11px sans-serif';
+    g.fillStyle = '#666';
+    g.textAlign = 'center';
+    for (let e = -3; e <= 3; e++) {
+        const x = px(e);
+        if (x < 12 || x > W - 12) continue;
+        g.beginPath(); g.moveTo(x, axisY); g.lineTo(x, axisY + 5); g.stroke();
+        g.fillText(String(e), x, axisY + 18);
+    }
+
+    // one tick per shot
+    g.strokeStyle = 'rgba(128,180,240,0.65)';
+    sh.u.forEach((x, i) => {
+        const e = x - SS.B, pxx = px(e);
+        if (pxx < 6 || pxx > W - 6) return;
+        const row = axisY - 3 - (i % 3) * 3;
+        g.beginPath(); g.moveTo(pxx, row); g.lineTo(pxx, row - 5); g.stroke();
+    });
+
+    // the bullseye line
+    g.strokeStyle = '#d05a6e';
+    g.setLineDash([4, 4]);
+    g.beginPath(); g.moveTo(zeroX, 22); g.lineTo(zeroX, axisY); g.stroke();
+    g.setLineDash([]);
+    g.font = '12px sans-serif';
+    g.fillStyle = '#d05a6e';
+    g.textAlign = zeroX > W - 120 ? 'right' : 'left';
+    g.fillText(t('cv.bullseye'), zeroX + 6, 18);
+
+    // the centre of the cloud
+    const cX = px(st.shift);
+    g.strokeStyle = '#f0a860';
+    g.lineWidth = 2;
+    g.beginPath(); g.moveTo(cX, 40); g.lineTo(cX, axisY); g.stroke();
+
+    // shift, as an arrow from the bullseye to the centre
+    const ay = 292;
+    g.strokeStyle = '#f0a860';
+    g.lineWidth = 2;
+    g.beginPath(); g.moveTo(zeroX, ay); g.lineTo(cX, ay); g.stroke();
+    g.beginPath(); g.moveTo(zeroX, ay - 5); g.lineTo(zeroX, ay + 5); g.stroke();
+    if (Math.abs(cX - zeroX) > 2) {
+        const dir = cX < zeroX ? 1 : -1;
+        g.beginPath();
+        g.moveTo(cX, ay);
+        g.lineTo(cX + dir * 8, ay - 4);
+        g.lineTo(cX + dir * 8, ay + 4);
+        g.closePath();
+        g.fillStyle = '#f0a860';
+        g.fill();
+    }
+    g.font = '12px sans-serif';
+    g.fillStyle = '#f0a860';
+    g.textAlign = 'center';
+    g.fillText(t('cv.shift') + '  ' + Math.abs(st.shift).toFixed(2), (zeroX + cX) / 2, ay - 12);
+
+    // spread, as one standard deviation either side of the centre
+    const sd = Math.sqrt(st.spread), by = 344;
+    const b0 = px(st.shift - sd), b1 = px(st.shift + sd);
+    g.strokeStyle = '#70e898';
+    g.lineWidth = 2;
+    g.beginPath(); g.moveTo(b0, by); g.lineTo(b1, by); g.stroke();
+    g.beginPath(); g.moveTo(b0, by - 6); g.lineTo(b0, by + 6); g.stroke();
+    g.beginPath(); g.moveTo(b1, by - 6); g.lineTo(b1, by + 6); g.stroke();
+    g.fillStyle = '#70e898';
+    g.fillText(t('cv.spread') + '  ' + st.spread.toFixed(2), (b0 + b1) / 2, by - 12);
+
+    g.fillStyle = '#666';
+    g.font = '11px sans-serif';
+    g.fillText(t('cv.axisErr'), W / 2, H - 8);
+}
+
+// ── The error curve ───────────────────────────────────────────────────────────
+function drawCurve() {
+    const cv = document.getElementById('cv-curve');
+    const g = cv.getContext('2d');
+    const W = cv.width, H = cv.height;
+    const L = 60, R = 24, TOP = 20, BOT = 48;
+    g.clearRect(0, 0, W, H);
+
+    const lamMax = 4, yMax = 1.15;
+    const X = l => L + (l / lamMax) * (W - L - R);
+    const Y = y => H - BOT - (y / yMax) * (H - TOP - BOT);
+
+    // grid
+    g.strokeStyle = '#24243a';
+    g.lineWidth = 1;
+    for (let y = 0; y <= 1; y += 0.25) {
+        g.beginPath(); g.moveTo(L, Y(y)); g.lineTo(W - R, Y(y)); g.stroke();
+        g.fillStyle = '#666'; g.font = '11px sans-serif'; g.textAlign = 'right';
+        g.fillText(y.toFixed(2), L - 8, Y(y) + 4);
+    }
+    g.strokeStyle = '#4a4a70';
+    g.beginPath(); g.moveTo(L, Y(0)); g.lineTo(W - R, Y(0)); g.stroke();
+    g.beginPath(); g.moveTo(L, TOP); g.lineTo(L, Y(0)); g.stroke();
+    g.textAlign = 'center'; g.fillStyle = '#666';
+    for (let l = 0; l <= lamMax; l += 1) {
+        g.beginPath(); g.moveTo(X(l), Y(0)); g.lineTo(X(l), Y(0) + 5); g.stroke();
+        g.fillText(String(l), X(l), Y(0) + 20);
+    }
+    g.fillText(t('cv.lam'), (L + W - R) / 2, H - 10);
+
+    // sample the three curves from the shots themselves
+    const pts = [];
+    for (let i = 0; i <= 200; i++) {
+        const l = (i / 200) * lamMax;
+        const st = statsAt(l);
+        pts.push({ l: l, b: st.shift * st.shift, v: st.spread, tot: st.total });
+    }
+    const line = (key, colour, wdt) => {
+        g.strokeStyle = colour; g.lineWidth = wdt;
+        g.beginPath();
+        pts.forEach((p, i) => { const x = X(p.l), y = Y(p[key]); i ? g.lineTo(x, y) : g.moveTo(x, y); });
+        g.stroke();
+    };
+    line('b', '#f0a860', 2);
+    line('v', '#70e898', 2);
+    line('tot', '#80b4f0', 2.6);
+
+    // the minimum
+    let best = pts[0];
+    pts.forEach(p => { if (p.tot < best.tot) best = p; });
+    g.strokeStyle = '#80b4f0';
+    g.setLineDash([4, 4]);
+    g.beginPath(); g.moveTo(X(best.l), Y(best.tot)); g.lineTo(X(best.l), Y(0)); g.stroke();
+    g.setLineDash([]);
+    g.beginPath(); g.arc(X(best.l), Y(best.tot), 5, 0, 2 * Math.PI);
+    g.fillStyle = '#80b4f0'; g.fill();
+    g.font = '12px sans-serif'; g.textAlign = 'left'; g.fillStyle = '#80b4f0';
+    g.fillText(t('cv.min') + '  λ = ' + best.l.toFixed(2), X(best.l) + 10, Y(best.tot) - 10);
+
+    // where the reader is standing
+    const now = statsAt(SS.lam);
+    g.beginPath(); g.arc(X(SS.lam), Y(now.total), 6, 0, 2 * Math.PI);
+    g.strokeStyle = '#fff'; g.lineWidth = 2; g.stroke();
+    g.font = '11px sans-serif'; g.fillStyle = '#aaa';
+    g.textAlign = SS.lam > lamMax * 0.75 ? 'right' : 'left';
+    g.fillText(t('cv.youAre'), X(SS.lam) + (SS.lam > lamMax * 0.75 ? -10 : 10), Y(now.total) + 20);
+}
+
+// ── The ridge trace ───────────────────────────────────────────────────────────
+// Seven channels. Each one is a steady part plus a wild part, and the wild part
+// is the one that only exists so that two coefficients can cancel each other.
+const CHANNELS = [
+    { key: 'cv.search',   a: 2.9, b:  0.3, c: '#80b4f0' },
+    { key: 'cv.shopping', a: 2.5, b: -0.2, c: '#66d0d8' },
+    { key: 'cv.meta',     a: 1.8, b:  0.4, c: '#a88ef0' },
+    { key: 'cv.tiktok',   a: 1.6, b: 10.2, c: '#f0a860' },
+    { key: 'cv.display',  a: 0.9, b: -0.3, c: '#c8c86a' },
+    { key: 'cv.affil',    a: 1.1, b:  0.2, c: '#70e898' },
+    { key: 'cv.email',    a: -0.3, b: -3.9, c: '#e8788c' }
+];
+
+function traceLam(u) { return 0.03 * (Math.pow(10, 3.2 * u) - 1); }
+function traceU(l) { return Math.log10(l / 0.03 + 1) / 3.2; }
+
+function drawTrace() {
+    const cv = document.getElementById('cv-trace');
+    const g = cv.getContext('2d');
+    const W = cv.width, H = cv.height;
+    const L = 56, R = 108, TOP = 24, BOT = 52;
+    g.clearRect(0, 0, W, H);
+
+    const yLo = -6, yHi = 13;
+    const X = u => L + u * (W - L - R);
+    const Y = y => H - BOT - ((y - yLo) / (yHi - yLo)) * (H - TOP - BOT);
+
+    g.strokeStyle = '#24243a'; g.lineWidth = 1;
+    g.font = '11px sans-serif'; g.textAlign = 'right';
+    for (let y = -5; y <= 10; y += 5) {
+        g.beginPath(); g.moveTo(L, Y(y)); g.lineTo(W - R, Y(y)); g.stroke();
+        g.fillStyle = '#666'; g.fillText(String(y), L - 8, Y(y) + 4);
+    }
+    g.strokeStyle = '#4a4a70';
+    g.beginPath(); g.moveTo(L, Y(0)); g.lineTo(W - R, Y(0)); g.stroke();
+    g.beginPath(); g.moveTo(L, TOP); g.lineTo(L, H - BOT); g.stroke();
+
+    g.textAlign = 'center'; g.fillStyle = '#666';
+    [0, 0.1, 1, 10, 40].forEach(l => {
+        const u = traceU(l);
+        g.strokeStyle = '#4a4a70';
+        g.beginPath(); g.moveTo(X(u), H - BOT); g.lineTo(X(u), H - BOT + 5); g.stroke();
+        g.fillText(String(l), X(u), H - BOT + 20);
+    });
+    g.fillText(t('cv.pen'), (L + W - R) / 2, H - 10);
+    g.save();
+    g.translate(14, (TOP + H - BOT) / 2);
+    g.rotate(-Math.PI / 2);
+    g.textAlign = 'center';
+    g.fillText(t('cv.coef'), 0, 0);
+    g.restore();
+
+    // where the picture stops thrashing
+    const uStab = traceU(1.2);
+    g.strokeStyle = '#7a7aa0';
+    g.setLineDash([5, 5]);
+    g.beginPath(); g.moveTo(X(uStab), TOP); g.lineTo(X(uStab), H - BOT); g.stroke();
+    g.setLineDash([]);
+    g.fillStyle = '#a0a0d0'; g.textAlign = 'left'; g.font = '12px sans-serif';
+    g.fillText(t('cv.stab'), X(uStab) + 8, TOP + 12);
+
+    CHANNELS.forEach(ch => {
+        g.strokeStyle = ch.c;
+        g.lineWidth = (ch.key === 'cv.email' || ch.key === 'cv.tiktok') ? 2.6 : 1.6;
+        g.beginPath();
+        for (let i = 0; i <= 300; i++) {
+            const u = i / 300, l = traceLam(u);
+            const val = ch.a * (4.9 / (4.9 + l)) + ch.b * (0.16 / (0.16 + l));
+            const x = X(u), y = Y(val);
+            i ? g.lineTo(x, y) : g.moveTo(x, y);
+        }
+        g.stroke();
+        const start = ch.a + ch.b;
+        g.fillStyle = ch.c;
+        g.font = '12px sans-serif';
+        g.textAlign = 'left';
+        g.fillText(t(ch.key), W - R + 8, Y(labelY(ch)) + 4);
+        // a dot at the raw least squares value
+        g.beginPath(); g.arc(X(0), Y(start), 3, 0, 2 * Math.PI); g.fill();
+    });
+}
+
+// keep the right-hand labels from sitting on top of each other
+function labelY(ch) {
+    const spread = { 'cv.tiktok': 11.0, 'cv.search': 3.0, 'cv.shopping': 1.6,
+                     'cv.meta': 0.2, 'cv.affil': -1.2, 'cv.display': -2.6,
+                     'cv.email': -4.2 };
+    return spread[ch.key];
+}
+
+// ── Wiring ───────────────────────────────────────────────────────────────────
+function redrawAll() {
+    drawBoard();
+    drawLine();
+    drawTrace();
+    if (SS.committed) drawCurve();
+}
+
+function onLam() {
+    SS.lam = parseFloat(document.getElementById('sl-lam').value);
+    const st = statsAt(SS.lam);
+    document.getElementById('val-lam').innerHTML = 'λ = ' + SS.lam.toFixed(2);
+    document.getElementById('ro-shift').textContent  = Math.abs(st.shift).toFixed(2);
+    document.getElementById('ro-spread').textContent = st.spread.toFixed(2);
+    document.getElementById('ro-total').textContent  = st.total.toFixed(2);
+    drawBoard();
+    drawLine();
+    if (SS.committed) drawCurve();
+}
+
+function commitGuess(btn, isCorrect) {
+    const quiz = document.getElementById('guess');
+    const feedback = document.getElementById('guess-feedback');
+    quiz.querySelectorAll('.quiz-btn').forEach(b => b.classList.add('disabled'));
+    btn.classList.add(isCorrect ? 'correct' : 'wrong');
+    feedback.className = 'quiz-feedback ' + (isCorrect ? 'success' : 'fail');
+    feedback.innerHTML = t(isCorrect ? 'guess.ok' : 'guess.no');
+    SS.committed = true;
+    document.getElementById('curve-block').classList.remove('hidden');
+    drawCurve();
+}
+
+function onLangChange() {
+    redrawAll();
+}
+
+// ─── KaTeX ────────────────────────────────────────────────────────────────────
+window.addEventListener('load', function () {
+    if (typeof renderMathInElement !== 'undefined') {
+        renderMathInElement(document.body, {
+            delimiters: [
+                { left: '$$', right: '$$', display: true  },
+                { left: '\\(', right: '\\)', display: false }
+            ],
+            throwOnError: false
+        });
+    }
+});
+
+buildShots();
+onLam();
+drawTrace();
+</script>
+</body>
+</html>

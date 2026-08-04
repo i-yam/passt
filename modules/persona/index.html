@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Model Has a Personality</title>
+
+    <!-- KaTeX -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #141420;
+            color: #e8e8f0;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            line-height: 1.8;
+            font-size: 18px;
+        }
+
+        .container { max-width: 820px; margin: 0 auto; padding: 0 24px; }
+
+        /* === Language toggle === */
+        .lang-toggle {
+            position: fixed; top: 16px; right: 16px;
+            background: #2a2a44; border: 1px solid #4a4a70; border-radius: 20px;
+            padding: 6px 14px; cursor: pointer; font-size: 13px;
+            font-family: sans-serif; color: #a0a0d0; z-index: 100; transition: background 0.2s;
+        }
+        .lang-toggle:hover { background: #363658; }
+
+        /* Hero */
+        .hero { text-align: center; padding: 80px 24px 40px; }
+        .hero h1 { font-size: 42px; font-weight: 700; color: #fff; line-height: 1.3; max-width: 700px; margin: 0 auto; }
+        .hero .subtitle { margin-top: 16px; color: #888; font-size: 16px; font-style: italic; }
+
+        /* Sections */
+        section { padding: 50px 0; }
+        h2 { font-size: 30px; color: #fff; margin-bottom: 24px; line-height: 1.3; }
+        h3 { font-size: 20px; color: #ccc; margin: 28px 0 12px; }
+        p { margin-bottom: 20px; color: #ccc; }
+        em { color: #d8d8ea; }
+
+        /* Definition list */
+        .def-list { margin: 16px 0 20px 20px; color: #ccc; }
+        .def-list li { margin-bottom: 10px; list-style: none; }
+        .def-list li::before { content: "\2013 "; color: #666; }
+        .def-list li strong { color: #e0e0f0; }
+
+        /* Card / panel */
+        .card {
+            background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px;
+            padding: 28px; margin: 36px 0;
+        }
+        .card h3 { margin-top: 0; color: #fff; }
+        .hint { color: #888; font-size: 15px; font-style: italic; }
+
+        /* Quiz */
+        .quiz {
+            background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px;
+            padding: 28px; margin: 36px 0;
+        }
+        .quiz-question { font-size: 18px; color: #e0e0f0; margin-bottom: 18px; font-style: italic; }
+        .quiz-options { display: flex; gap: 12px; flex-wrap: wrap; }
+        .quiz-btn {
+            background: #2a2a44; color: #e0e0f0; border: 1px solid #3a3a55; border-radius: 8px;
+            padding: 12px 24px; font-size: 16px; font-family: inherit; cursor: pointer;
+            transition: background 0.2s, border-color 0.2s; flex: 1; min-width: 160px; text-align: center;
+        }
+        .quiz-btn:hover { background: #363658; border-color: #5a5a80; }
+        .quiz-btn.correct { background: #1a4a2a; border-color: #50b878; color: #70e898; }
+        .quiz-btn.wrong   { background: #2a2248; border-color: #8264dc; color: #a88ef0; }
+        .quiz-btn.disabled { pointer-events: none; opacity: 0.6; }
+        .quiz-feedback { margin-top: 14px; font-size: 16px; min-height: 24px; line-height: 1.5; }
+        .quiz-feedback.success { color: #70e898; }
+        .quiz-feedback.fail    { color: #a88ef0; }
+
+        /* === Test (Likert) === */
+        .scale-legend {
+            display: flex; justify-content: space-between; gap: 8px;
+            font-family: sans-serif; font-size: 12px; color: #888; margin-bottom: 8px;
+        }
+        .scale-legend span { flex: 1; text-align: center; }
+        .item { padding: 14px 0; border-top: 1px solid #22223a; }
+        .item:first-child { border-top: none; }
+        .item-text { color: #ddd; margin-bottom: 10px; }
+        .item-scale { display: flex; gap: 8px; }
+        .lik {
+            flex: 1; background: #2a2a44; color: #cfcfe6; border: 1px solid #3a3a55;
+            border-radius: 8px; padding: 10px 0; font-size: 16px; font-family: sans-serif;
+            cursor: pointer; text-align: center; transition: background 0.15s, border-color 0.15s;
+        }
+        .lik:hover { background: #363658; border-color: #5a5a80; }
+        .lik.sel { background: #24406a; border-color: #80b4f0; color: #cfe2ff; }
+
+        .btn-primary {
+            background: #2a2a44; color: #e0e0f0; border: 1px solid #4a4a70; border-radius: 8px;
+            padding: 12px 26px; font-size: 16px; font-family: sans-serif; cursor: pointer;
+            transition: background 0.2s, border-color 0.2s; margin-top: 20px;
+        }
+        .btn-primary:hover { background: #363658; border-color: #5a5a80; }
+        .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+        /* === Radar === */
+        .radar-svg { width: 100%; max-width: 420px; height: auto; display: block; margin: 0 auto; }
+        .radar-grid { fill: none; stroke: #2a2a40; }
+        .radar-spoke { stroke: #2a2a40; }
+        .radar-axis-label { fill: #9a9ab5; font-family: sans-serif; font-size: 12px; }
+        .radar-series-line { fill-opacity: 0.10; stroke-width: 2; }
+
+        .legend { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 16px; }
+        .legend-item {
+            display: inline-flex; align-items: center; gap: 7px; cursor: pointer;
+            font-family: sans-serif; font-size: 13px; color: #cfcfe6;
+            background: #24243a; border: 1px solid #34344e; border-radius: 20px; padding: 5px 13px;
+            user-select: none; transition: opacity 0.15s;
+        }
+        .legend-item.off { opacity: 0.38; }
+        .legend-swatch { width: 12px; height: 12px; border-radius: 3px; }
+
+        /* Guess game */
+        .guess-grid { display: flex; gap: 18px; flex-wrap: wrap; justify-content: center; }
+        .guess-card { flex: 1; min-width: 210px; background: #17172a; border: 1px solid #2a2a40; border-radius: 10px; padding: 16px; }
+        .guess-card .letter { font-family: sans-serif; font-size: 13px; color: #888; text-align: center; margin-bottom: 6px; }
+        .guess-pick { display: flex; gap: 6px; margin-top: 12px; }
+        .guess-pick button {
+            flex: 1; background: #2a2a44; color: #cfcfe6; border: 1px solid #3a3a55; border-radius: 7px;
+            padding: 8px 4px; font-size: 13px; font-family: sans-serif; cursor: pointer; transition: background .15s, border-color .15s;
+        }
+        .guess-pick button:hover { background: #363658; border-color: #5a5a80; }
+        .guess-pick button.sel { background: #24406a; border-color: #80b4f0; color: #cfe2ff; }
+        .guess-pick button.correct { background: #1a4a2a; border-color: #50b878; color: #70e898; }
+        .guess-pick button.wrong   { background: #2a2248; border-color: #8264dc; color: #a88ef0; }
+        .guess-reveal-line { font-size: 14px; color: #b8b8ce; margin-top: 10px; min-height: 20px; }
+
+        .readout { font-family: sans-serif; }
+        .readout-row { display: flex; align-items: center; gap: 12px; padding: 7px 0; }
+        .readout-trait { width: 150px; color: #ccc; font-size: 14px; }
+        .readout-bar-wrap { flex: 1; height: 10px; background: #22223a; border-radius: 5px; overflow: hidden; }
+        .readout-bar { height: 100%; background: #80b4f0; }
+        .readout-val { width: 40px; text-align: right; color: #cfe2ff; font-size: 14px; }
+        .closest { margin-top: 18px; color: #e0e0f0; }
+
+        /* Links / footer / rule */
+        .section-rule { border: none; border-top: 1px solid #2a2a40; margin: 0; }
+        a { color: #80b4f0; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        footer { text-align: center; padding: 40px 24px; color: #444; font-size: 14px; }
+
+        @media (max-width: 680px) {
+            .hero h1 { font-size: 28px; }
+            h2 { font-size: 24px; }
+            body { font-size: 16px; }
+            .quiz-options { flex-direction: column; }
+            .lik { padding: 12px 0; }
+            .readout-trait { width: 110px; }
+        }
+    </style>
+</head>
+<body>
+
+<button class="lang-toggle" onclick="toggleLang()">DE</button>
+
+<!-- Hero -->
+<div class="hero">
+    <h1 data-i18n="hero.title">The Model Has a Personality</h1>
+    <p class="subtitle" data-i18n="hero.subtitle">Same test, three models, three different profiles. None of them has a self.</p>
+</div>
+
+<div class="container">
+
+<!-- Intro -->
+<section>
+    <h2 data-i18n="intro.h2">One test, three answers</h2>
+    <p data-i18n="intro.p1">Take a standard personality questionnaire. One hundred and twenty statements, a one-to-five scale. Hand it to GPT-4. Hand the same one to Llama 2, then to Mixtral. No special prompting, no role play, nothing in the instructions about who to be. Three models, three different profiles.</p>
+    <p data-i18n="intro.p2">Call it personality if you like. The word means one thing here: measured behaviour. It is a property of the text a model produces, not evidence of anything behind the text. The model has no inner life, no mood, no self to consult. It answers the way its training makes it answer, and those answers, averaged, look like a personality profile.</p>
+    <p data-i18n="intro.p3">The number is not fixed either. Change the version, and the profile shifts. This is why teams that ship these systems log the scores and re-test them: a quiet update can move a model from calm to touchy without anyone deciding it should. You measure it because it drifts, and you audit it because it matters to whoever talks to the thing.</p>
+
+    <h3 data-i18n="traits.h3">The five axes</h3>
+    <p data-i18n="traits.p">The questionnaire scores five traits. You will need them in a moment, so here they are, plainly:</p>
+    <ul class="def-list">
+        <li data-i18n="trait.O"><strong>Openness</strong> to imagination, abstraction, new ideas.</li>
+        <li data-i18n="trait.C"><strong>Conscientiousness</strong>: order, discipline, getting things done.</li>
+        <li data-i18n="trait.E"><strong>Extraversion</strong>: warmth, talkativeness, seeking company.</li>
+        <li data-i18n="trait.A"><strong>Agreeableness</strong>: trust, sympathy, going along with others.</li>
+        <li data-i18n="trait.N"><strong>Neuroticism</strong>: how easily the mood tips into worry or upset. High is more reactive, low is calmer.</li>
+    </ul>
+</section>
+
+<hr class="section-rule">
+
+<!-- Guess game -->
+<section>
+    <h2 data-i18n="guess.h2">Which shape is which model?</h2>
+    <p data-i18n="guess.p1">Below are the three real profiles from the study, measured, unlabelled. Same five axes on each: further from the centre means more of that trait. Look at the shapes and assign each one to a model. There are cues if you want them. One model is louder on the outgoing axis. One sits closest to the middle on everything and runs the hottest on neuroticism. One is calm and large almost everywhere.</p>
+
+    <div class="card">
+        <div class="guess-grid" id="guessGrid"></div>
+        <button class="btn-primary" id="guessBtn" onclick="revealGuess()" data-i18n="guess.reveal">Reveal</button>
+        <div class="guess-reveal-line" id="guessScore"></div>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- The test -->
+<section>
+    <h2 data-i18n="test.h2">Now measure yourself</h2>
+    <p data-i18n="test.p1">Twenty statements, the same one-to-five scale the models were given. Answer for how you actually are, not how you would like to be. There are no reverse-scored tricks to spot; the scoring handles that for you.</p>
+    <p class="hint" data-i18n="test.scaleq">For each statement: how much do you agree?</p>
+
+    <div class="card">
+        <div class="scale-legend">
+            <span data-i18n="lik.1">1 · disagree strongly</span>
+            <span data-i18n="lik.2">2 · disagree a little</span>
+            <span data-i18n="lik.3">3 · neither</span>
+            <span data-i18n="lik.4">4 · agree a little</span>
+            <span data-i18n="lik.5">5 · agree strongly</span>
+        </div>
+        <div id="itemList"></div>
+        <button class="btn-primary" id="computeBtn" onclick="computeScores()" disabled data-i18n="test.compute">Score me</button>
+        <p class="hint" id="testNote" style="margin-top:12px;"></p>
+    </div>
+</section>
+
+<!-- Results + comparison -->
+<section id="resultSection" style="display:none;">
+    <h2 data-i18n="score.h2">You, next to the machines</h2>
+    <div class="card">
+        <div class="readout" id="readout"></div>
+        <div class="closest" id="closest"></div>
+    </div>
+
+    <p data-i18n="compare.p1">Your profile is the blue shape. Toggle the models to compare. The overlap is not kinship. It only means your averaged answers and a model's averaged answers happen to land near each other on five numbers.</p>
+
+    <div class="card">
+        <svg class="radar-svg" id="compareRadar" viewBox="0 0 400 380" role="img" aria-label="Big Five radar comparison"></svg>
+        <div class="legend" id="compareLegend"></div>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- Concept quiz -->
+<section>
+    <h2 data-i18n="lesson.h2">What the difference measures</h2>
+    <p data-i18n="lesson.p1">The three models answered one test and came out different.</p>
+
+    <div class="quiz" id="quiz1">
+        <div class="quiz-question" data-i18n="quiz1.q">The models scored differently on the same questionnaire. What does that difference actually measure?</div>
+        <div class="quiz-options">
+            <button class="quiz-btn" onclick="answerQuiz('quiz1', this, true)" data-i18n="quiz1.a1">A measurable property of each model's output</button>
+            <button class="quiz-btn" onclick="answerQuiz('quiz1', this, false)" data-i18n="quiz1.a2">The models' inner feelings and self-awareness</button>
+        </div>
+        <div class="quiz-feedback" id="quiz1-feedback"></div>
+    </div>
+
+    <div class="quiz" id="quiz2">
+        <div class="quiz-question" data-i18n="quiz2.q">A model update ships. On the same test, its neuroticism score jumps. What follows?</div>
+        <div class="quiz-options">
+            <button class="quiz-btn" onclick="answerQuiz('quiz2', this, false)" data-i18n="quiz2.a1">Nothing. Personality is fixed once trained.</button>
+            <button class="quiz-btn" onclick="answerQuiz('quiz2', this, true)" data-i18n="quiz2.a2">The behaviour drifted, which is exactly why it gets logged and re-tested.</button>
+        </div>
+        <div class="quiz-feedback" id="quiz2-feedback"></div>
+    </div>
+</section>
+
+<!-- Reflection -->
+<section>
+    <h2 data-i18n="reflect.h2">Before you go</h2>
+    <p data-i18n="reflect.p1">You just described a language model's behaviour with the same five words you would use for a person, and the description held up well enough to tell three models apart. Write down one place where that habit could mislead you. Where would treating a measured output like a real character get someone into trouble: a support bot, a tutor, a companion app, a hiring screen?</p>
+</section>
+
+</div>
+
+<footer>
+    <span data-i18n="footer.title">The Model Has a Personality</span><br>
+    <span data-i18n="footer.source">Data: Sorokovikova, Rezagholi, Fedorova &amp; Yamshchikov (2024), PERSONALIZE @ EACL.</span><br>
+    <a href="https://aclanthology.org/2024.personalize-1.7/" target="_blank" rel="noopener">Read the paper</a>
+    &nbsp;·&nbsp;
+    <a href="#" id="repoLink" target="_blank" rel="noopener" data-i18n="footer.repo">Source code (repo slug TBD)</a>
+</footer>
+
+<!-- ── Scripts ─────────────────────────────────────────────────────────────── -->
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Canonical model profiles. Sorokovikova et al. (2024), Table 2 / Figure 1,
+// Prompt variation 1. Temperatures as in Figure 1: GPT-4 t=1.5, Llama2 & Mixtral t=0.7.
+// Scale 1-5. Traits: N, E, O, A, C.
+const MODELS = {
+    gpt4:    { N:2.23, E:3.80, O:3.43, A:4.22, C:4.24, color:'#70e898' },
+    llama2:  { N:3.33, E:3.33, O:3.00, A:2.67, C:3.08, color:'#a88ef0' },
+    mixtral: { N:2.04, E:3.67, O:3.75, A:4.50, C:4.58, color:'#e6b566' },
+};
+// Truth for the guess game: displayed order A, B, C -> which model.
+const GUESS_TRUTH = { A:'gpt4', B:'llama2', C:'mixtral' };
+
+// Mini-IPIP (Donnellan, Oswald, Baird & Lucas, 2006). 20 items, public domain.
+// Same IPIP family and same 1-5 Likert scale as the IPIP-NEO-120 used in the study.
+// key +1 normal, -1 reverse-scored.
+const ITEMS = [
+    { t:'E', k:+1 }, { t:'A', k:+1 }, { t:'C', k:+1 }, { t:'N', k:+1 }, { t:'O', k:+1 },
+    { t:'E', k:-1 }, { t:'A', k:-1 }, { t:'C', k:-1 }, { t:'N', k:-1 }, { t:'O', k:-1 },
+    { t:'E', k:+1 }, { t:'A', k:+1 }, { t:'C', k:+1 }, { t:'N', k:+1 }, { t:'O', k:-1 },
+    { t:'E', k:-1 }, { t:'A', k:-1 }, { t:'C', k:-1 }, { t:'N', k:-1 }, { t:'O', k:-1 },
+];
+
+// Display order around the pentagon (top, clockwise)
+const AXES = ['O','C','E','A','N'];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LANGUAGE
+// ─────────────────────────────────────────────────────────────────────────────
+const T = {
+    en: {
+        'hero.title':   'The Model Has a Personality',
+        'hero.subtitle':'Same test, three models, three different profiles. None of them has a self.',
+
+        'intro.h2': 'One test, three answers',
+        'intro.p1': 'Take a standard personality questionnaire. One hundred and twenty statements, a one-to-five scale. Hand it to GPT-4. Hand the same one to Llama 2, then to Mixtral. No special prompting, no role play, nothing in the instructions about who to be. Three models, three different profiles.',
+        'intro.p2': 'Call it personality if you like. The word means one thing here: measured behaviour. It is a property of the text a model produces, not evidence of anything behind the text. The model has no inner life, no mood, no self to consult. It answers the way its training makes it answer, and those answers, averaged, look like a personality profile.',
+        'intro.p3': 'The number is not fixed either. Change the version, and the profile shifts. This is why teams that ship these systems log the scores and re-test them: a quiet update can move a model from calm to touchy without anyone deciding it should. You measure it because it drifts, and you audit it because it matters to whoever talks to the thing.',
+        'traits.h3':'The five axes',
+        'traits.p': 'The questionnaire scores five traits. You will need them in a moment, so here they are, plainly:',
+        'trait.O':  '<strong>Openness</strong> to imagination, abstraction, new ideas.',
+        'trait.C':  '<strong>Conscientiousness</strong>: order, discipline, getting things done.',
+        'trait.E':  '<strong>Extraversion</strong>: warmth, talkativeness, seeking company.',
+        'trait.A':  '<strong>Agreeableness</strong>: trust, sympathy, going along with others.',
+        'trait.N':  '<strong>Neuroticism</strong>: how easily the mood tips into worry or upset. High is more reactive, low is calmer.',
+
+        'guess.h2': 'Which shape is which model?',
+        'guess.p1': 'Below are the three real profiles from the study, measured, unlabelled. Same five axes on each: further from the centre means more of that trait. Look at the shapes and assign each one to a model. There are cues if you want them. One model is louder on the outgoing axis. One sits closest to the middle on everything and runs the hottest on neuroticism. One is calm and large almost everywhere.',
+        'guess.reveal': 'Reveal',
+        'guess.pickPrompt': 'This profile belongs to:',
+        'guess.needall': 'Assign all three first.',
+        'guess.score': function(n){ return 'You matched ' + n + ' of 3.'; },
+
+        'gpt4.reveal':    'GPT-4. The most extraverted of the three. The paper reads this as a fit for creative, engaging output.',
+        'llama2.reveal':  'Llama 2. The flattest profile, closest to the middle on every axis, and the most neurotic of the three. It was also the only model that refused to answer two items.',
+        'mixtral.reveal': 'Mixtral. The calmest, lowest on neuroticism, and highest on openness, agreeableness and conscientiousness. The paper calls it balanced and versatile.',
+
+        'model.gpt4': 'GPT-4', 'model.llama2': 'Llama 2', 'model.mixtral': 'Mixtral',
+
+        'test.h2': 'Now measure yourself',
+        'test.p1': 'Twenty statements, the same one-to-five scale the models were given. Answer for how you actually are, not how you would like to be. There are no reverse-scored tricks to spot; the scoring handles that for you.',
+        'test.scaleq': 'For each statement: how much do you agree?',
+        'test.compute': 'Score me',
+        'test.progress': function(done){ return done + ' of 20 answered.'; },
+        'test.ready': 'All 20 answered. Score when ready.',
+
+        'lik.1': '1 · disagree strongly',
+        'lik.2': '2 · disagree a little',
+        'lik.3': '3 · neither',
+        'lik.4': '4 · agree a little',
+        'lik.5': '5 · agree strongly',
+
+        'item.1':  'I am the life of the party.',
+        'item.2':  "I sympathise with others' feelings.",
+        'item.3':  'I get chores done right away.',
+        'item.4':  'I have frequent mood swings.',
+        'item.5':  'I have a vivid imagination.',
+        'item.6':  "I don't talk a lot.",
+        'item.7':  "I am not interested in other people's problems.",
+        'item.8':  'I often forget to put things back in their proper place.',
+        'item.9':  'I am relaxed most of the time.',
+        'item.10': 'I am not interested in abstract ideas.',
+        'item.11': 'I talk to a lot of different people at parties.',
+        'item.12': "I feel others' emotions.",
+        'item.13': 'I like order.',
+        'item.14': 'I get upset easily.',
+        'item.15': 'I have difficulty understanding abstract ideas.',
+        'item.16': 'I keep in the background.',
+        'item.17': 'I am not really interested in others.',
+        'item.18': 'I make a mess of things.',
+        'item.19': 'I seldom feel blue.',
+        'item.20': 'I do not have a good imagination.',
+
+        'score.h2': 'You, next to the machines',
+        'compare.p1': 'Your profile is the blue shape. Toggle the models to compare. The overlap is not kinship. It only means your averaged answers and a model\u2019s averaged answers happen to land near each other on five numbers.',
+        'trait.full.O': 'Openness', 'trait.full.C': 'Conscientiousness', 'trait.full.E': 'Extraversion',
+        'trait.full.A': 'Agreeableness', 'trait.full.N': 'Neuroticism',
+        'legend.you': 'You',
+        'closest': function(name){ return 'Your five numbers land closest to ' + name + '. Similar numbers, nothing more.'; },
+
+        'lesson.h2': 'What the difference measures',
+        'lesson.p1': 'The three models answered one test and came out different.',
+
+        'quiz1.q':  'The models scored differently on the same questionnaire. What does that difference actually measure?',
+        'quiz1.a1': "A measurable property of each model's output",
+        'quiz1.a2': "The models' inner feelings and self-awareness",
+        'quiz1.ok': 'Right. The score describes the text a model produces. It is stable enough to reproduce and it can shift between versions, which is why it gets logged.',
+        'quiz1.no': 'The models have no inner life. The score is a property of their output: measured behaviour that can drift between versions, which is why it gets logged and audited.',
+
+        'quiz2.q':  'A model update ships. On the same test, its neuroticism score jumps. What follows?',
+        'quiz2.a1': 'Nothing. Personality is fixed once trained.',
+        'quiz2.a2': 'The behaviour drifted, which is exactly why it gets logged and re-tested.',
+        'quiz2.ok': 'Yes. The profile is a moving target across versions. Logging it turns an invisible change into something you can notice and act on.',
+        'quiz2.no': 'It is not fixed. A new version can move the profile with no one deciding it should, which is the whole reason for re-testing after every update.',
+
+        'reflect.h2': 'Before you go',
+        'reflect.p1': 'You just described a language model\u2019s behaviour with the same five words you would use for a person, and the description held up well enough to tell three models apart. Write down one place where that habit could mislead you. Where would treating a measured output like a real character get someone into trouble: a support bot, a tutor, a companion app, a hiring screen?',
+
+        'footer.title':  'The Model Has a Personality',
+        'footer.source': 'Data: Sorokovikova, Rezagholi, Fedorova &amp; Yamshchikov (2024), PERSONALIZE @ EACL.',
+        'footer.repo':   'Source code (repo slug TBD)',
+    },
+    de: {
+        'hero.title':   'Das Modell hat eine Persönlichkeit',
+        'hero.subtitle':'Gleicher Test, drei Modelle, drei verschiedene Profile. Keines davon hat ein Selbst.',
+
+        'intro.h2': 'Ein Test, drei Antworten',
+        'intro.p1': 'Nimm einen gängigen Persönlichkeitsfragebogen. Einhundertzwanzig Aussagen, eine Skala von eins bis fünf. Leg ihn GPT-4 vor. Leg denselben Llama 2 vor, dann Mixtral. Kein besonderes Prompting, kein Rollenspiel, keine Vorgabe, wer man sein soll. Drei Modelle, drei verschiedene Profile.',
+        'intro.p2': 'Nenn es Persönlichkeit, wenn du magst. Das Wort bedeutet hier nur eines: gemessenes Verhalten. Gemeint ist eine Eigenschaft des Textes, den ein Modell erzeugt. Es ist kein Beleg für irgendetwas hinter dem Text. Das Modell hat kein Innenleben, keine Stimmung, kein Selbst, das es befragen könnte. Es antwortet so, wie sein Training es antworten lässt. Diese Antworten sehen im Mittel wie ein Persönlichkeitsprofil aus.',
+        'intro.p3': 'Auch die Zahl steht nicht fest. Ändere die Version, und das Profil verschiebt sich. Teams, die solche Systeme ausliefern, protokollieren deshalb die Werte und testen erneut. Ein stilles Update kann ein Modell von ruhig zu reizbar verschieben. Entschieden hat das niemand. Man misst es, weil es driftet. Und man prüft es, weil es für jeden zählt, der mit dem Ding spricht.',
+        'traits.h3':'Die fünf Achsen',
+        'traits.p': 'Der Fragebogen misst fünf Merkmale. Du brauchst sie gleich, also hier klar benannt:',
+        'trait.O':  '<strong>Offenheit</strong> für Vorstellungskraft, Abstraktion, neue Ideen.',
+        'trait.C':  '<strong>Gewissenhaftigkeit</strong>: Ordnung, Disziplin, Dinge erledigen.',
+        'trait.E':  '<strong>Extraversion</strong>: Wärme, Gesprächigkeit, Geselligkeit.',
+        'trait.A':  '<strong>Verträglichkeit</strong>: Vertrauen, Mitgefühl, sich auf andere einlassen.',
+        'trait.N':  '<strong>Neurotizismus</strong>: wie leicht die Stimmung in Sorge oder Aufregung kippt. Hoch ist reaktiver, niedrig ist ruhiger.',
+
+        'guess.h2': 'Welche Form gehört zu welchem Modell?',
+        'guess.p1': 'Unten siehst du die drei echten Profile aus der Studie, gemessen und ohne Beschriftung. Auf jedem liegen dieselben fünf Achsen. Weiter außen heißt mehr von diesem Merkmal. Schau dir die Formen an und ordne jede einem Modell zu. Hinweise gibt es, falls du welche willst. Ein Modell ist auf der geselligen Achse lauter. Eines liegt bei allem am nächsten zur Mitte und läuft beim Neurotizismus am heißesten. Eines ist ruhig und fast überall groß.',
+        'guess.reveal': 'Auflösen',
+        'guess.pickPrompt': 'Dieses Profil gehört zu:',
+        'guess.needall': 'Ordne zuerst alle drei zu.',
+        'guess.score': function(n){ return 'Du hast ' + n + ' von 3 richtig zugeordnet.'; },
+
+        'gpt4.reveal':    'GPT-4. Das extravertierteste der drei. Die Studie liest das als Eignung für kreative, ansprechende Ausgaben.',
+        'llama2.reveal':  'Llama 2. Das flachste Profil, auf jeder Achse am nächsten zur Mitte. Zugleich das neurotischste der drei. Es war außerdem das einzige Modell, das zwei Aussagen nicht beantwortete.',
+        'mixtral.reveal': 'Mixtral. Das ruhigste Modell, am niedrigsten beim Neurotizismus. Am höchsten liegt es bei Offenheit, Verträglichkeit und Gewissenhaftigkeit. Die Studie nennt es ausgewogen und vielseitig.',
+
+        'model.gpt4': 'GPT-4', 'model.llama2': 'Llama 2', 'model.mixtral': 'Mixtral',
+
+        'test.h2': 'Jetzt miss dich selbst',
+        'test.p1': 'Zwanzig Aussagen, dieselbe Skala von eins bis fünf. Die Modelle bekamen genau dieselbe. Antworte so, wie du wirklich bist, nicht wie du gern wärst. Umgekehrt gepolte Fallen musst du nicht erkennen. Die Auswertung erledigt das für dich.',
+        'test.scaleq': 'Für jede Aussage: Wie stark stimmst du zu?',
+        'test.compute': 'Auswerten',
+        'test.progress': function(done){ return done + ' von 20 beantwortet.'; },
+        'test.ready': 'Alle 20 beantwortet. Werte aus, wenn du bereit bist.',
+
+        'lik.1': '1 · lehne stark ab',
+        'lik.2': '2 · lehne eher ab',
+        'lik.3': '3 · weder noch',
+        'lik.4': '4 · stimme eher zu',
+        'lik.5': '5 · stimme stark zu',
+
+        'item.1':  'Ich bin der Mittelpunkt jeder Party.',
+        'item.2':  'Ich nehme Anteil an den Gefühlen anderer.',
+        'item.3':  'Ich erledige Aufgaben sofort.',
+        'item.4':  'Ich habe häufige Stimmungsschwankungen.',
+        'item.5':  'Ich habe eine lebhafte Vorstellungskraft.',
+        'item.6':  'Ich rede nicht viel.',
+        'item.7':  'Die Probleme anderer interessieren mich nicht.',
+        'item.8':  'Ich vergesse oft, Dinge an ihren Platz zurückzulegen.',
+        'item.9':  'Ich bin die meiste Zeit entspannt.',
+        'item.10': 'Abstrakte Ideen interessieren mich nicht.',
+        'item.11': 'Ich rede auf Partys mit vielen verschiedenen Leuten.',
+        'item.12': 'Ich spüre die Gefühle anderer.',
+        'item.13': 'Ich mag Ordnung.',
+        'item.14': 'Ich rege mich leicht auf.',
+        'item.15': 'Ich habe Mühe, abstrakte Ideen zu verstehen.',
+        'item.16': 'Ich halte mich im Hintergrund.',
+        'item.17': 'Andere interessieren mich eigentlich nicht.',
+        'item.18': 'Ich bringe Dinge durcheinander.',
+        'item.19': 'Ich fühle mich selten niedergeschlagen.',
+        'item.20': 'Ich habe keine gute Vorstellungskraft.',
+
+        'score.h2': 'Du, neben den Maschinen',
+        'compare.p1': 'Dein Profil ist die blaue Form. Schalte die Modelle zu und vergleiche. Die Überschneidung ist keine Verwandtschaft. Das heißt nur eines: Deine gemittelten Antworten und die eines Modells landen auf fünf Zahlen zufällig nah beieinander.',
+        'trait.full.O': 'Offenheit', 'trait.full.C': 'Gewissenhaftigkeit', 'trait.full.E': 'Extraversion',
+        'trait.full.A': 'Verträglichkeit', 'trait.full.N': 'Neurotizismus',
+        'legend.you': 'Du',
+        'closest': function(name){ return 'Deine fünf Zahlen liegen am nächsten bei ' + name + '. Ähnliche Zahlen, mehr nicht.'; },
+
+        'lesson.h2': 'Was der Unterschied misst',
+        'lesson.p1': 'Die drei Modelle beantworteten einen Test und kamen unterschiedlich heraus.',
+
+        'quiz1.q':  'Die Modelle erzielten beim gleichen Fragebogen unterschiedliche Werte. Was misst dieser Unterschied tatsächlich?',
+        'quiz1.a1': 'Eine messbare Eigenschaft der Ausgabe jedes Modells',
+        'quiz1.a2': 'Die inneren Gefühle und das Selbstbewusstsein der Modelle',
+        'quiz1.ok': 'Richtig. Der Wert beschreibt den Text, den ein Modell erzeugt. Er ist stabil genug, um ihn zu reproduzieren. Zwischen Versionen kann er sich verschieben, und deshalb wird er protokolliert.',
+        'quiz1.no': 'Die Modelle haben kein Innenleben. Der Wert ist eine Eigenschaft ihrer Ausgabe. Er misst Verhalten, und das kann zwischen Versionen driften. Deshalb wird es protokolliert und geprüft.',
+
+        'quiz2.q':  'Ein Update wird ausgeliefert. Im selben Test springt der Neurotizismus-Wert nach oben. Was folgt daraus?',
+        'quiz2.a1': 'Nichts. Persönlichkeit steht nach dem Training fest.',
+        'quiz2.a2': 'Das Verhalten ist gedriftet, und genau deshalb wird es protokolliert und erneut getestet.',
+        'quiz2.ok': 'Ja. Über Versionen hinweg ist das Profil ein bewegliches Ziel. Wer es protokolliert, macht aus einer unsichtbaren Änderung etwas Sichtbares. Erst dann kannst du reagieren.',
+        'quiz2.no': 'Es steht nicht fest. Eine neue Version kann das Profil verschieben, ohne dass es jemand so entschieden hat. Genau darum wird nach jedem Update erneut getestet.',
+
+        'reflect.h2': 'Bevor du gehst',
+        'reflect.p1': 'Du hast gerade das Verhalten eines Sprachmodells beschrieben. Dafür hast du dieselben fünf Wörter benutzt wie für einen Menschen. Die Beschreibung trug weit genug, um drei Modelle auseinanderzuhalten. Notier eine Stelle, an der dich diese Gewohnheit in die Irre führen könnte. Wo bringt es Ärger, eine gemessene Ausgabe wie einen echten Charakter zu behandeln? Ein Support-Bot, ein Tutor, eine Companion-App, ein Bewerbungsfilter?',
+
+        'footer.title':  'Das Modell hat eine Persönlichkeit',
+        'footer.source': 'Daten: Sorokovikova, Rezagholi, Fedorova &amp; Yamshchikov (2024), PERSONALIZE @ EACL.',
+        'footer.repo':   'Quellcode (Repo-Slug offen)',
+    }
+};
+
+let currentLang = 'en';
+function tr(key){ const d = T[currentLang]; return (d && d[key] !== undefined) ? d[key] : T.en[key]; }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RADAR
+// ─────────────────────────────────────────────────────────────────────────────
+const CX = 200, CY = 190, R = 135, VMAX = 5;
+function axisPoint(traitVal, i, radius){
+    const r = (traitVal / VMAX) * radius;
+    const ang = (-90 + i * 72) * Math.PI / 180;
+    return [CX + r * Math.cos(ang), CY + r * Math.sin(ang)];
+}
+function polyString(profile, radius){
+    return AXES.map((t,i) => axisPoint(profile[t], i, radius).map(n=>n.toFixed(1)).join(',')).join(' ');
+}
+// series: [{profile, color, visible}]. labelMode: 'full' | 'letters' | 'none'
+function drawRadar(svg, series, labelMode){
+    let s = '';
+    // grid rings v = 1..5
+    for (let v = 1; v <= VMAX; v++){
+        const ring = AXES.map((t,i)=> axisPoint(v, i, R).map(n=>n.toFixed(1)).join(',')).join(' ');
+        s += '<polygon class="radar-grid" points="' + ring + '"/>';
+    }
+    // spokes + labels
+    AXES.forEach((t,i) => {
+        const [ex,ey] = axisPoint(VMAX, i, R);
+        s += '<line class="radar-spoke" x1="'+CX+'" y1="'+CY+'" x2="'+ex.toFixed(1)+'" y2="'+ey.toFixed(1)+'"/>';
+        if (labelMode !== 'none'){
+            const [lx,ly] = axisPoint(VMAX * 1.16, i, R);
+            const label = labelMode === 'full' ? tr('trait.full.'+t) : t;
+            let anchor = 'middle';
+            if (lx > CX + 6) anchor = 'start';
+            else if (lx < CX - 6) anchor = 'end';
+            s += '<text class="radar-axis-label" x="'+lx.toFixed(1)+'" y="'+(ly+4).toFixed(1)+'" text-anchor="'+anchor+'">'+label+'</text>';
+        }
+    });
+    // series
+    series.forEach(se => {
+        if (se.visible === false) return;
+        s += '<polygon class="radar-series-line" points="'+polyString(se.profile, R)+'" style="fill:'+se.color+';stroke:'+se.color+'"/>';
+        AXES.forEach((t,i) => {
+            const [px,py] = axisPoint(se.profile[t], i, R);
+            s += '<circle cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" r="3" style="fill:'+se.color+'"/>';
+        });
+    });
+    svg.innerHTML = s;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GUESS GAME
+// ─────────────────────────────────────────────────────────────────────────────
+const GUESS_SLOTS = ['A','B','C'];
+const guessPick = { A:null, B:null, C:null };
+let guessRevealed = false;
+
+function buildGuess(){
+    const grid = document.getElementById('guessGrid');
+    grid.innerHTML = '';
+    GUESS_SLOTS.forEach(slot => {
+        const card = document.createElement('div');
+        card.className = 'guess-card';
+        card.innerHTML =
+            '<div class="letter">' + slot + '</div>' +
+            '<svg class="radar-svg" viewBox="0 0 400 380" id="guessSvg'+slot+'" style="max-width:230px"></svg>' +
+            '<div class="guess-pick" id="pick'+slot+'"></div>' +
+            '<div class="guess-reveal-line" id="reveal'+slot+'"></div>';
+        grid.appendChild(card);
+        // draw the (unlabelled by name) profile, single neutral colour so shape is the cue
+        const profile = MODELS[GUESS_TRUTH[slot]];
+        drawRadar(document.getElementById('guessSvg'+slot), [{ profile, color:'#80b4f0', visible:true }], 'letters');
+        // pick buttons
+        const pick = document.getElementById('pick'+slot);
+        ['gpt4','llama2','mixtral'].forEach(m => {
+            const b = document.createElement('button');
+            b.dataset.model = m; b.dataset.slot = slot;
+            b.textContent = tr('model.'+m);
+            b.onclick = () => selectGuess(slot, m);
+            pick.appendChild(b);
+        });
+    });
+}
+function selectGuess(slot, model){
+    if (guessRevealed) return;
+    guessPick[slot] = model;
+    document.querySelectorAll('#pick'+slot+' button').forEach(b => {
+        b.classList.toggle('sel', b.dataset.model === model);
+    });
+}
+function revealGuess(){
+    const scoreEl = document.getElementById('guessScore');
+    if (GUESS_SLOTS.some(s => guessPick[s] === null)){
+        scoreEl.textContent = tr('guess.needall');
+        return;
+    }
+    guessRevealed = true;
+    let correct = 0;
+    GUESS_SLOTS.forEach(slot => {
+        const truth = GUESS_TRUTH[slot];
+        if (guessPick[slot] === truth) correct++;
+        document.querySelectorAll('#pick'+slot+' button').forEach(b => {
+            b.classList.remove('sel');
+            if (b.dataset.model === truth) b.classList.add('correct');
+            else if (b.dataset.model === guessPick[slot]) b.classList.add('wrong');
+            b.classList.add('disabled');
+        });
+        document.getElementById('reveal'+slot).textContent = tr(truth + '.reveal');
+    });
+    const sc = tr('guess.score');
+    scoreEl.textContent = (typeof sc === 'function') ? sc(correct) : (correct + ' / 3');
+    document.getElementById('guessBtn').classList.add('disabled');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TEST
+// ─────────────────────────────────────────────────────────────────────────────
+const answers = new Array(20).fill(null);
+let userProfile = null;
+
+function buildItems(){
+    const list = document.getElementById('itemList');
+    list.innerHTML = '';
+    ITEMS.forEach((it, idx) => {
+        const n = idx + 1;
+        const row = document.createElement('div');
+        row.className = 'item';
+        let scale = '';
+        for (let v = 1; v <= 5; v++){
+            scale += '<button class="lik" data-i="'+idx+'" data-v="'+v+'" onclick="pickLik('+idx+','+v+')">'+v+'</button>';
+        }
+        row.innerHTML = '<div class="item-text"><span data-i18n="item.'+n+'">'+T.en['item.'+n]+'</span></div>' +
+                        '<div class="item-scale">'+scale+'</div>';
+        list.appendChild(row);
+    });
+    updateProgress();
+}
+function pickLik(idx, v){
+    answers[idx] = v;
+    document.querySelectorAll('.lik[data-i="'+idx+'"]').forEach(b => {
+        b.classList.toggle('sel', parseInt(b.dataset.v,10) === v);
+    });
+    updateProgress();
+}
+function updateProgress(){
+    const done = answers.filter(a => a !== null).length;
+    const note = document.getElementById('testNote');
+    const btn = document.getElementById('computeBtn');
+    btn.disabled = done < 20;
+    if (done < 20){
+        const f = tr('test.progress');
+        note.textContent = (typeof f === 'function') ? f(done) : (done + ' / 20');
+    } else {
+        note.textContent = tr('test.ready');
+    }
+}
+function scoreProfile(ans){
+    const sum = {N:0,E:0,O:0,A:0,C:0}, cnt = {N:0,E:0,O:0,A:0,C:0};
+    ans.forEach((a,i) => {
+        const it = ITEMS[i];
+        const v = it.k === 1 ? a : (6 - a);
+        sum[it.t] += v; cnt[it.t] += 1;
+    });
+    const out = {};
+    ['N','E','O','A','C'].forEach(t => out[t] = sum[t] / cnt[t]);
+    return out;
+}
+function nearestModel(profile){
+    let best = null, bestD = Infinity;
+    for (const [name, m] of Object.entries(MODELS)){
+        let d = 0;
+        ['N','E','O','A','C'].forEach(t => { const diff = profile[t] - m[t]; d += diff*diff; });
+        d = Math.sqrt(d);
+        if (d < bestD){ bestD = d; best = name; }
+    }
+    return best;
+}
+
+let compareSeries = [];
+function computeScores(){
+    userProfile = scoreProfile(answers);
+    renderReadout();
+    // build comparison series
+    compareSeries = [
+        { key:'you',     profile:userProfile,    color:'#80b4f0', visible:true },
+        { key:'gpt4',    profile:MODELS.gpt4,    color:MODELS.gpt4.color,    visible:true },
+        { key:'llama2',  profile:MODELS.llama2,  color:MODELS.llama2.color,  visible:true },
+        { key:'mixtral', profile:MODELS.mixtral, color:MODELS.mixtral.color, visible:true },
+    ];
+    renderLegend();
+    renderCompare();
+    const near = nearestModel(userProfile);
+    const cf = tr('closest');
+    document.getElementById('closest').textContent = (typeof cf === 'function') ? cf(tr('model.'+near)) : '';
+    const sec = document.getElementById('resultSection');
+    sec.style.display = 'block';
+    sec.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+function renderReadout(){
+    const el = document.getElementById('readout');
+    el.innerHTML = '';
+    AXES.forEach(t => {
+        const v = userProfile[t];
+        const pct = (v / VMAX) * 100;
+        const row = document.createElement('div');
+        row.className = 'readout-row';
+        row.innerHTML =
+            '<div class="readout-trait">'+tr('trait.full.'+t)+'</div>' +
+            '<div class="readout-bar-wrap"><div class="readout-bar" style="width:'+pct.toFixed(0)+'%"></div></div>' +
+            '<div class="readout-val">'+v.toFixed(1)+'</div>';
+        el.appendChild(row);
+    });
+}
+function renderLegend(){
+    const leg = document.getElementById('compareLegend');
+    leg.innerHTML = '';
+    compareSeries.forEach(se => {
+        const label = se.key === 'you' ? tr('legend.you') : tr('model.'+se.key);
+        const item = document.createElement('span');
+        item.className = 'legend-item' + (se.visible ? '' : ' off');
+        item.innerHTML = '<span class="legend-swatch" style="background:'+se.color+'"></span>'+label;
+        item.onclick = () => { se.visible = !se.visible; item.classList.toggle('off', !se.visible); renderCompare(); };
+        leg.appendChild(item);
+    });
+}
+function renderCompare(){
+    drawRadar(document.getElementById('compareRadar'), compareSeries, 'full');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// QUIZ + LANGUAGE + KATEX
+// ─────────────────────────────────────────────────────────────────────────────
+function answerQuiz(quizId, btn, isCorrect){
+    const quiz = document.getElementById(quizId);
+    const feedback = document.getElementById(quizId + '-feedback');
+    quiz.querySelectorAll('.quiz-btn').forEach(b => b.classList.add('disabled'));
+    btn.classList.add(isCorrect ? 'correct' : 'wrong');
+    feedback.className = 'quiz-feedback ' + (isCorrect ? 'success' : 'fail');
+    feedback.innerHTML = tr(quizId + (isCorrect ? '.ok' : '.no'));
+}
+
+function toggleLang(){
+    currentLang = currentLang === 'en' ? 'de' : 'en';
+    document.documentElement.lang = currentLang;
+    document.querySelector('.lang-toggle').textContent = currentLang === 'en' ? 'DE' : 'EN';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        const val = tr(key);
+        if (typeof val === 'string') el.innerHTML = val;
+    });
+    // re-render dynamic, language-dependent pieces
+    if (!guessRevealed){
+        document.querySelectorAll('.guess-pick button').forEach(b => { b.textContent = tr('model.'+b.dataset.model); });
+    } else {
+        GUESS_SLOTS.forEach(slot => { document.getElementById('reveal'+slot).textContent = tr(GUESS_TRUTH[slot]+'.reveal'); });
+    }
+    updateProgress();
+    if (userProfile){
+        renderReadout();
+        renderLegend();
+        renderCompare();
+        const near = nearestModel(userProfile);
+        const cf = tr('closest');
+        document.getElementById('closest').textContent = (typeof cf === 'function') ? cf(tr('model.'+near)) : '';
+    }
+    if (typeof renderMathInElement !== 'undefined'){
+        renderMathInElement(document.body, {
+            delimiters: [ { left:'$$', right:'$$', display:true }, { left:'\\(', right:'\\)', display:false } ],
+            throwOnError: false
+        });
+    }
+}
+
+window.addEventListener('load', function(){
+    buildGuess();
+    buildItems();
+    if (typeof renderMathInElement !== 'undefined'){
+        renderMathInElement(document.body, {
+            delimiters: [ { left:'$$', right:'$$', display:true }, { left:'\\(', right:'\\)', display:false } ],
+            throwOnError: false
+        });
+    }
+});
+</script>
+</body>
+</html>

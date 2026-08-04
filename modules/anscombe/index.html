@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lies, Damned Lies, and Statistics</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #141420;
+            color: #e8e8f0;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            line-height: 1.8;
+            font-size: 18px;
+        }
+
+        .container {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Language toggle */
+        .lang-toggle {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            background: #2a2a44;
+            border: 1px solid #4a4a70;
+            border-radius: 20px;
+            padding: 6px 14px;
+            cursor: pointer;
+            font-size: 13px;
+            font-family: sans-serif;
+            color: #a0a0d0;
+            z-index: 100;
+            transition: background 0.2s;
+        }
+        .lang-toggle:hover { background: #363658; }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: 80px 24px 40px;
+        }
+
+        .hero-tags {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .tag {
+            background: #1c1c2e;
+            color: #5a5a88;
+            border: 1px solid #2a2a44;
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 12px;
+            font-family: sans-serif;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.3;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .hero .subtitle {
+            margin-top: 16px;
+            color: #888;
+            font-size: 16px;
+            font-style: italic;
+        }
+
+        /* Sections */
+        section { padding: 50px 0; }
+
+        h2 {
+            font-size: 30px;
+            color: #fff;
+            margin-bottom: 24px;
+            line-height: 1.3;
+        }
+
+        p { margin-bottom: 20px; color: #ccc; }
+
+        /* Formula blocks */
+        .formula-block {
+            background: #1c1c2e;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            margin: 24px 0;
+            padding: 20px 24px;
+            text-align: center;
+            overflow-x: auto;
+        }
+
+        .formula-label {
+            font-family: sans-serif;
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #444460;
+            margin-bottom: 12px;
+        }
+
+        /* Quiz */
+        .quiz {
+            background: #1c1c2e;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            padding: 28px;
+            margin: 36px 0;
+        }
+
+        .quiz-question {
+            font-size: 18px;
+            color: #e0e0f0;
+            margin-bottom: 18px;
+            font-style: italic;
+        }
+
+        .quiz-options {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .quiz-btn {
+            background: #2a2a44;
+            color: #e0e0f0;
+            border: 1px solid #3a3a55;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+            flex: 1;
+            min-width: 160px;
+            text-align: center;
+        }
+
+        .quiz-btn:hover { background: #363658; border-color: #5a5a80; }
+
+        .quiz-btn.correct {
+            background: #1a4a2a;
+            border-color: #50b878;
+            color: #70e898;
+        }
+
+        .quiz-btn.wrong {
+            background: #2a2248;
+            border-color: #8264dc;
+            color: #a88ef0;
+        }
+
+        .quiz-btn.disabled { pointer-events: none; opacity: 0.6; }
+
+        .quiz-feedback {
+            margin-top: 14px;
+            font-size: 16px;
+            min-height: 24px;
+            line-height: 1.5;
+        }
+
+        .quiz-feedback.success { color: #70e898; }
+        .quiz-feedback.fail    { color: #a88ef0; }
+
+        /* Divider */
+        .section-rule {
+            border: none;
+            border-top: 1px solid #2a2a40;
+            margin: 0;
+        }
+
+        /* Data tables */
+        .quartet-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 28px 0;
+        }
+
+        .dataset-card {
+            background: #1a1a2a;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .dataset-title {
+            background: #222236;
+            padding: 10px 16px;
+            font-family: sans-serif;
+            font-size: 11px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #6060a0;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        .data-table th {
+            padding: 8px 14px;
+            color: #444464;
+            font-weight: normal;
+            text-align: right;
+            border-bottom: 1px solid #222234;
+            font-size: 12px;
+        }
+
+        .data-table th:first-child { text-align: center; }
+
+        .data-table td {
+            padding: 5px 14px;
+            text-align: right;
+            color: #9090b8;
+            border-bottom: 1px solid #1a1a28;
+        }
+
+        .data-table td:first-child {
+            text-align: center;
+            color: #333348;
+            font-size: 12px;
+        }
+
+        /* Prompt box */
+        .task-prompt {
+            margin: 28px 0;
+            background: #1a1a2a;
+            border: 1px solid #2a2a40;
+            border-left: 3px solid #5050a0;
+            border-radius: 0 8px 8px 0;
+            padding: 18px 22px;
+            font-size: 15px;
+            font-family: sans-serif;
+            color: #6868a0;
+            line-height: 1.7;
+        }
+
+        /* Password gate */
+        .locked-gate {
+            margin: 32px 0;
+            background: #1a1a2a;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            padding: 40px 28px;
+            text-align: center;
+        }
+
+        .lock-icon {
+            font-size: 28px;
+            margin-bottom: 14px;
+            opacity: 0.4;
+        }
+
+        .locked-gate p {
+            color: #444460;
+            font-size: 15px;
+            font-family: sans-serif;
+            margin-bottom: 20px;
+        }
+
+        .pw-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .pw-input {
+            background: #12121e;
+            border: 1px solid #2a2a40;
+            border-radius: 8px;
+            color: #a0a0d0;
+            font-size: 15px;
+            font-family: 'Courier New', monospace;
+            padding: 10px 18px;
+            letter-spacing: 4px;
+            text-align: center;
+            width: 200px;
+            outline: none;
+        }
+
+        .pw-input:focus { border-color: #4a4a70; }
+
+        .pw-btn {
+            background: #2a2a44;
+            border: 1px solid #3a3a58;
+            border-radius: 8px;
+            color: #a0a0d0;
+            font-size: 14px;
+            font-family: sans-serif;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .pw-btn:hover { background: #363658; }
+
+        .pw-error {
+            color: #a88ef0;
+            font-size: 13px;
+            font-family: sans-serif;
+            margin-top: 12px;
+            min-height: 18px;
+        }
+
+        /* Visual section */
+        #visual-section { display: none; margin: 32px 0 0; }
+
+        .quartet-canvas-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .plot-wrap {
+            background: #1a1a2a;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .plot-title {
+            background: #222236;
+            padding: 8px 16px;
+            font-family: sans-serif;
+            font-size: 11px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #6060a0;
+        }
+
+        .plot-wrap canvas { display: block; width: 100%; }
+
+        /* Links */
+        a { color: #80b4f0; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 24px;
+            color: #333;
+            font-size: 14px;
+            font-family: sans-serif;
+        }
+
+        footer a { color: #444; }
+        footer a:hover { color: #888; }
+
+        /* ── Interactive viz widgets ──────────────────────────────────────── */
+        .viz-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 20px 0 12px;
+        }
+
+        .viz-btn {
+            background: #2a2a44;
+            border: 1px solid #3a3a58;
+            border-radius: 6px;
+            padding: 5px 14px;
+            font-size: 13px;
+            font-family: sans-serif;
+            cursor: pointer;
+            color: #6060a0;
+            transition: background 0.15s, border-color 0.15s, color 0.15s;
+        }
+        .viz-btn:hover { background: #363658; color: #9090c0; }
+        .viz-btn.active { border-color: #4dba80; color: #4dba80; background: rgba(77,186,128,0.08); }
+
+        .viz-canvas {
+            width: 100%;
+            display: block;
+            margin: 8px 0;
+            border-radius: 10px;
+            border: 1px solid #2a2a40;
+        }
+
+        .viz-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 12px 0;
+        }
+
+        .viz-metric {
+            background: #1a1a2a;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            padding: 14px 16px;
+            text-align: center;
+        }
+
+        .viz-metric-label {
+            font-family: sans-serif;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #444460;
+            margin-bottom: 6px;
+        }
+
+        .viz-metric-val {
+            font-size: 22px;
+            font-family: 'Courier New', monospace;
+            color: #9090c0;
+        }
+
+        .viz-metric.mean-accent .viz-metric-label { color: #4dba80; }
+        .viz-metric.mean-accent .viz-metric-val   { color: #4dba80; }
+        .viz-metric.var-accent  .viz-metric-label { color: #d4a060; }
+        .viz-metric.var-accent  .viz-metric-val   { color: #d4a060; }
+        .viz-metric.std-accent  .viz-metric-label { color: #7098e0; }
+        .viz-metric.std-accent  .viz-metric-val   { color: #7098e0; }
+
+        .viz-dev-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .viz-dev-table th {
+            color: #444460;
+            font-weight: normal;
+            font-size: 12px;
+            text-align: right;
+            padding: 6px 14px;
+            border-bottom: 1px solid #222234;
+        }
+        .viz-dev-table th:first-child { text-align: left; }
+        .viz-dev-table td {
+            padding: 5px 14px;
+            text-align: right;
+            color: #7070a0;
+            border-bottom: 1px solid #1a1a28;
+        }
+        .viz-dev-table td:first-child { text-align: left; }
+        .viz-dev-table .sum-row td {
+            border-top: 1px solid #2a2a40;
+            border-bottom: none;
+            padding-top: 8px;
+            color: #9090c0;
+        }
+
+        @media (max-width: 620px) {
+            .hero h1 { font-size: 28px; }
+            h2 { font-size: 24px; }
+            body { font-size: 16px; }
+            .quartet-grid { grid-template-columns: 1fr; }
+            .quartet-canvas-grid { grid-template-columns: 1fr; }
+            .quiz-options { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<button class="lang-toggle" onclick="toggleLang()">DE</button>
+
+<div class="hero">
+    <div class="hero-tags">
+        <span class="tag" data-i18n="tag.type">mini-module</span>
+        <span class="tag">~20 min</span>
+        <span class="tag" data-i18n="tag.code">no-code</span>
+        <span class="tag" data-i18n="tag.ai">try-without-ai</span>
+        <span class="tag">statistics</span>
+    </div>
+    <h1 data-i18n="hero.title">Lies, Damned Lies, and Statistics</h1>
+    <p class="subtitle" data-i18n="hero.sub">"There are three kinds of lies: lies, damned lies, and statistics.", Mark Twain</p>
+</div>
+
+<div class="container">
+
+<!-- ── Part 1: Mean ──────────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s1.h2">Mean</h2>
+
+    <p data-i18n="s1.p1">Take a set of numbers. Add them up. Divide by how many there are. That is the mean. It is the balancing point of the data, the value where everything would sit in equilibrium if placed on a seesaw.</p>
+
+    <div class="formula-block">
+        <div class="formula-label" data-i18n="label.mean">Mean</div>
+        $$\bar{x} = \frac{1}{n} \sum_{i=1}^{n} x_i$$
+    </div>
+
+    <div class="viz-controls">
+        <button class="viz-btn active" onclick="setVizPreset('balanced')" data-i18n="viz.balanced">Balanced</button>
+        <button class="viz-btn" onclick="setVizPreset('skewed')" data-i18n="viz.skewed">Skewed right</button>
+        <button class="viz-btn" onclick="setVizPreset('outlier')" data-i18n="viz.outlier">With outlier</button>
+        <button class="viz-btn" onclick="setVizPreset('tight')" data-i18n="viz.tight">Tight cluster</button>
+    </div>
+    <canvas class="viz-canvas" id="mean-canvas" height="140"></canvas>
+    <div class="viz-metrics">
+        <div class="viz-metric">
+            <div class="viz-metric-label" data-i18n="viz.n">Values (n)</div>
+            <div class="viz-metric-val" id="m-n-val">, </div>
+        </div>
+        <div class="viz-metric">
+            <div class="viz-metric-label" data-i18n="viz.sum">Sum</div>
+            <div class="viz-metric-val" id="m-sum-val">, </div>
+        </div>
+        <div class="viz-metric mean-accent">
+            <div class="viz-metric-label" data-i18n="viz.meanlabel">Mean (μ)</div>
+            <div class="viz-metric-val" id="m-mean-val">, </div>
+        </div>
+    </div>
+
+    <p data-i18n="s1.p2">A shop with daily revenues of 200, 400, 300, 500, 100 has a mean of 300. That number hides a lot. It says nothing about how irregular the days were. That is what variance is for.</p>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Part 2: Variance ──────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s2.h2">Variance</h2>
+
+    <p data-i18n="s2.p1">Variance measures how spread out the data is around the mean. For each value, compute how far it sits from the mean, square that distance, and average the result. Squaring does two things: it makes all distances positive, and it punishes large deviations more than small ones.</p>
+
+    <div class="formula-block">
+        <div class="formula-label" data-i18n="label.var">Variance</div>
+        $$\sigma^2 = \frac{1}{n} \sum_{i=1}^{n} (x_i - \bar{x})^2$$
+    </div>
+
+    <p data-i18n="s2.p2">Standard deviation \(\sigma\) is just the square root of variance. It brings the number back to the original unit, so you can read it as a typical distance from the mean.</p>
+
+    <div class="formula-block">
+        <div class="formula-label" data-i18n="label.std">Standard deviation</div>
+        $$\sigma = \sqrt{\,\frac{1}{n} \sum_{i=1}^{n} (x_i - \bar{x})^2\,}$$
+    </div>
+
+    <div class="viz-controls">
+        <button class="viz-btn active" onclick="setVizPreset('balanced')" data-i18n="viz.balanced">Balanced</button>
+        <button class="viz-btn" onclick="setVizPreset('skewed')" data-i18n="viz.skewed">Skewed right</button>
+        <button class="viz-btn" onclick="setVizPreset('outlier')" data-i18n="viz.outlier">With outlier</button>
+        <button class="viz-btn" onclick="setVizPreset('tight')" data-i18n="viz.tight">Tight cluster</button>
+    </div>
+    <canvas class="viz-canvas" id="var-canvas" height="220"></canvas>
+    <table class="viz-dev-table">
+        <thead>
+            <tr>
+                <th style="text-align:left">x<sub>i</sub></th>
+                <th>x<sub>i</sub> − μ</th>
+                <th>(x<sub>i</sub> − μ)²</th>
+            </tr>
+        </thead>
+        <tbody id="dev-tbody"></tbody>
+        <tfoot>
+            <tr class="sum-row">
+                <td></td><td></td><td id="sq-sum">, </td>
+            </tr>
+        </tfoot>
+    </table>
+    <div class="viz-metrics">
+        <div class="viz-metric mean-accent">
+            <div class="viz-metric-label" data-i18n="viz.meanlabel">Mean (μ)</div>
+            <div class="viz-metric-val" id="m-mean-val2">, </div>
+        </div>
+        <div class="viz-metric var-accent">
+            <div class="viz-metric-label" data-i18n="viz.varlabel">Variance (σ²)</div>
+            <div class="viz-metric-val" id="m-var-val">, </div>
+        </div>
+        <div class="viz-metric std-accent">
+            <div class="viz-metric-label" data-i18n="viz.stdlabel">Std dev (σ)</div>
+            <div class="viz-metric-val" id="m-std-val">, </div>
+        </div>
+    </div>
+
+    <p data-i18n="s2.p3">Two datasets can share the same mean and look nothing alike. Variance tells you whether the data clusters tightly or sprawls. Still, both mean and variance describe a single variable in isolation. When you have two variables, a third question appears.</p>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Part 3: Correlation ───────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s3.h2">Correlation</h2>
+
+    <p data-i18n="s3.p1">When one variable changes, does another tend to change with it? A lemonade stand that sells more on warm days has something going on between temperature and sales. A car that loses value as mileage increases has something going on between kilometres and price. The question is whether that something is consistent, and in what direction.</p>
+
+    <p data-i18n="s3.p2">Start with covariance. For each observation, take the deviation of x from its mean and the deviation of y from its mean, multiply them together, and average the result.</p>
+
+    <div class="formula-block">
+        <div class="formula-label" data-i18n="label.cov">Covariance</div>
+        $$\text{Cov}(x, y) = \frac{1}{n} \sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})$$
+    </div>
+
+    <p data-i18n="s3.p3">When x and y are both above their means, the product is positive. When one is above and the other below, it is negative. Average those products: a positive result means they tend to move together, a negative result means they tend to move in opposite directions.</p>
+
+    <p data-i18n="s3.p4">The problem with covariance is the unit. Multiply euros by kilograms and the number is hard to read. So divide by both standard deviations to normalise everything onto a fixed scale. That gives Pearson's r.</p>
+
+    <div class="formula-block">
+        <div class="formula-label" data-i18n="label.corr">Pearson correlation</div>
+        $$r = \frac{\text{Cov}(x, y)}{\sigma_x \cdot \sigma_y} = \frac{\displaystyle\sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y})}{\sqrt{\displaystyle\sum_{i=1}^{n}(x_i - \bar{x})^2 \cdot \sum_{i=1}^{n}(y_i - \bar{y})^2}}$$
+    </div>
+
+    <p data-i18n="s3.p5">The result always sits between -1 and 1. At 1, a perfect positive linear relationship. At -1, a perfect negative one. At 0, no linear relationship. The word linear is doing real work in that sentence. A curved relationship, a cluster with one extreme outlier, a vertical spike of points: all of these can produce the same r while looking completely different from each other.</p>
+
+    <div class="quiz" id="quiz1">
+        <div class="quiz-question" data-i18n="q1.q">The numerator of r is the sum of products \((x_i - \bar{x})(y_i - \bar{y})\). If x tends to be above its mean when y is also above its mean, what sign will this sum have?</div>
+        <div class="quiz-options">
+            <button class="quiz-btn" onclick="answerQuiz('quiz1', this, true)" data-i18n="q1.a1">Positive</button>
+            <button class="quiz-btn" onclick="answerQuiz('quiz1', this, false)" data-i18n="q1.a2">Negative</button>
+            <button class="quiz-btn" onclick="answerQuiz('quiz1', this, false)" data-i18n="q1.a3">Zero</button>
+        </div>
+        <div class="quiz-feedback" id="quiz1-feedback"></div>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Part 4: The Quartet ───────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s4.h2">Anscombe's Quartet</h2>
+
+    <p data-i18n="s4.p1">In 1973, statistician <a href="https://en.wikipedia.org/wiki/Frank_Anscombe" target="_blank">Francis Anscombe</a> built a trap. He constructed four datasets.</p>
+
+    <p data-i18n="s4.p3">Calculate the following for each dataset below. Mean of x. Mean of y. Variance of x. Variance of y. Correlation r between x and y. Compare your results across all four.</p>
+
+    <div class="task-prompt" data-i18n="s4.prompt">
+        For each dataset: compute mean(x), mean(y), var(x), var(y), and r(x, y). You should find that all four sets of results are nearly identical.
+    </div>
+
+    <div class="quartet-grid">
+
+        <div class="dataset-card">
+            <div class="dataset-title">Dataset I</div>
+            <table class="data-table">
+                <thead><tr><th>i</th><th>x</th><th>y</th></tr></thead>
+                <tbody>
+                    <tr><td>1</td><td>10</td><td>8.04</td></tr>
+                    <tr><td>2</td><td>8</td><td>6.95</td></tr>
+                    <tr><td>3</td><td>13</td><td>7.58</td></tr>
+                    <tr><td>4</td><td>9</td><td>8.81</td></tr>
+                    <tr><td>5</td><td>11</td><td>8.33</td></tr>
+                    <tr><td>6</td><td>14</td><td>9.96</td></tr>
+                    <tr><td>7</td><td>6</td><td>7.24</td></tr>
+                    <tr><td>8</td><td>4</td><td>4.26</td></tr>
+                    <tr><td>9</td><td>12</td><td>10.84</td></tr>
+                    <tr><td>10</td><td>7</td><td>4.82</td></tr>
+                    <tr><td>11</td><td>5</td><td>5.68</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="dataset-card">
+            <div class="dataset-title">Dataset II</div>
+            <table class="data-table">
+                <thead><tr><th>i</th><th>x</th><th>y</th></tr></thead>
+                <tbody>
+                    <tr><td>1</td><td>10</td><td>9.14</td></tr>
+                    <tr><td>2</td><td>8</td><td>8.14</td></tr>
+                    <tr><td>3</td><td>13</td><td>8.74</td></tr>
+                    <tr><td>4</td><td>9</td><td>8.77</td></tr>
+                    <tr><td>5</td><td>11</td><td>9.26</td></tr>
+                    <tr><td>6</td><td>14</td><td>8.10</td></tr>
+                    <tr><td>7</td><td>6</td><td>6.13</td></tr>
+                    <tr><td>8</td><td>4</td><td>3.10</td></tr>
+                    <tr><td>9</td><td>12</td><td>9.13</td></tr>
+                    <tr><td>10</td><td>7</td><td>7.26</td></tr>
+                    <tr><td>11</td><td>5</td><td>4.74</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="dataset-card">
+            <div class="dataset-title">Dataset III</div>
+            <table class="data-table">
+                <thead><tr><th>i</th><th>x</th><th>y</th></tr></thead>
+                <tbody>
+                    <tr><td>1</td><td>10</td><td>7.46</td></tr>
+                    <tr><td>2</td><td>8</td><td>6.77</td></tr>
+                    <tr><td>3</td><td>13</td><td>12.74</td></tr>
+                    <tr><td>4</td><td>9</td><td>7.11</td></tr>
+                    <tr><td>5</td><td>11</td><td>7.81</td></tr>
+                    <tr><td>6</td><td>14</td><td>8.84</td></tr>
+                    <tr><td>7</td><td>6</td><td>6.08</td></tr>
+                    <tr><td>8</td><td>4</td><td>5.39</td></tr>
+                    <tr><td>9</td><td>12</td><td>8.15</td></tr>
+                    <tr><td>10</td><td>7</td><td>6.42</td></tr>
+                    <tr><td>11</td><td>5</td><td>5.73</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="dataset-card">
+            <div class="dataset-title">Dataset IV</div>
+            <table class="data-table">
+                <thead><tr><th>i</th><th>x</th><th>y</th></tr></thead>
+                <tbody>
+                    <tr><td>1</td><td>8</td><td>6.58</td></tr>
+                    <tr><td>2</td><td>8</td><td>5.76</td></tr>
+                    <tr><td>3</td><td>8</td><td>7.71</td></tr>
+                    <tr><td>4</td><td>8</td><td>8.84</td></tr>
+                    <tr><td>5</td><td>8</td><td>8.47</td></tr>
+                    <tr><td>6</td><td>8</td><td>7.04</td></tr>
+                    <tr><td>7</td><td>8</td><td>5.25</td></tr>
+                    <tr><td>8</td><td>19</td><td>12.50</td></tr>
+                    <tr><td>9</td><td>8</td><td>5.56</td></tr>
+                    <tr><td>10</td><td>8</td><td>7.91</td></tr>
+                    <tr><td>11</td><td>8</td><td>6.89</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <div class="quiz" id="quiz2">
+        <div class="quiz-question" data-i18n="q2.q">You compute r for all four datasets and get approximately 0.816 each time. What does this tell you?</div>
+        <div class="quiz-options">
+            <button class="quiz-btn" onclick="answerQuiz('quiz2', this, false)" data-i18n="q2.a1">The datasets are essentially the same, just reordered</button>
+            <button class="quiz-btn" onclick="answerQuiz('quiz2', this, true)" data-i18n="q2.a2">The datasets share a statistical summary but may have completely different shapes</button>
+            <button class="quiz-btn" onclick="answerQuiz('quiz2', this, false)" data-i18n="q2.a3">All four follow a linear relationship between x and y</button>
+        </div>
+        <div class="quiz-feedback" id="quiz2-feedback"></div>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Part 5: Visual (password-locked) ─────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s5.h2">Now Look at Them</h2>
+    <p data-i18n="s5.p1">You have done the calculation. The four datasets produce the same numbers. Enter the password to see what the numbers are hiding.</p>
+
+    <div class="locked-gate" id="locked-gate">
+        <div class="lock-icon">&#128274;</div>
+        <p data-i18n="s5.hint">Enter the password to reveal the plots.</p>
+        <div class="pw-row">
+            <input class="pw-input" type="password" id="pw-input"
+                   placeholder="· · · · · · · ·"
+                   onkeydown="if(event.key==='Enter') checkPw()">
+            <button class="pw-btn" onclick="checkPw()" data-i18n="s5.unlock">Unlock</button>
+        </div>
+        <div class="pw-error" id="pw-error"></div>
+    </div>
+
+    <div id="visual-section">
+        <p data-i18n="s4.p2">His point was not subtle: a number is not a description. Before you report a statistic, you need to see what you are summarising. A correlation of 0.816 can describe a clean linear trend, a perfect curve, a linear relationship with one rogue point, or a vertical stack of values with a single outlier pulling the line. All four look nothing alike. All four produce r = 0.816.</p>
+        <p data-i18n="s5.revealed">Four datasets. The dashed line is the same regression line on every chart. The points are not.</p>
+        <div class="quartet-canvas-grid">
+            <div class="plot-wrap">
+                <div class="plot-title">Dataset I</div>
+                <canvas id="plot1" height="200"></canvas>
+            </div>
+            <div class="plot-wrap">
+                <div class="plot-title">Dataset II</div>
+                <canvas id="plot2" height="200"></canvas>
+            </div>
+            <div class="plot-wrap">
+                <div class="plot-title">Dataset III</div>
+                <canvas id="plot3" height="200"></canvas>
+            </div>
+            <div class="plot-wrap">
+                <div class="plot-title">Dataset IV</div>
+                <canvas id="plot4" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Reflection ───────────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s6.h2">Before You Go</h2>
+    <p data-i18n="s6.p1">Think of a report, a presentation, or a dashboard you have seen. A number was shown. A correlation, a mean, a trend line. Was the raw data shown alongside it? What might a plot have revealed that the number did not?</p>
+</section>
+
+</div>
+
+<footer>
+    <a href="https://github.com/i-yam/passt/tree/main/modules/anscombe" target="_blank">github.com/i-yam/passt</a>
+    &nbsp;·&nbsp;
+    <a href="../../" target="_blank">overfit &amp; chill</a>
+    <br>&copy; All rights reserved
+</footer>
+
+<script>
+// ── Anscombe data ─────────────────────────────────────────────────────────────
+const datasets = [
+    { x: [10,8,13,9,11,14,6,4,12,7,5],  y: [8.04,6.95,7.58,8.81,8.33,9.96,7.24,4.26,10.84,4.82,5.68] },
+    { x: [10,8,13,9,11,14,6,4,12,7,5],  y: [9.14,8.14,8.74,8.77,9.26,8.10,6.13,3.10,9.13,7.26,4.74]  },
+    { x: [10,8,13,9,11,14,6,4,12,7,5],  y: [7.46,6.77,12.74,7.11,7.81,8.84,6.08,5.39,8.15,6.42,5.73] },
+    { x: [8,8,8,8,8,8,8,19,8,8,8],      y: [6.58,5.76,7.71,8.84,8.47,7.04,5.25,12.50,5.56,7.91,6.89] }
+];
+
+// ── Quiz ──────────────────────────────────────────────────────────────────────
+const quizData = {
+    quiz1: {
+        correct: 'Positive. When both variables sit above their means, the product (xi \u2212 x\u0304)(yi \u2212 y\u0304) is positive. Average enough of those and the sum is positive, giving a positive r.',
+        wrong:   'Not quite. Both above their means means both deviations are positive, so the product is positive. Negative products require one value to be above its mean while the other is below.'
+    },
+    quiz2: {
+        correct: 'Exactly. This is the point. Four completely different datasets, identical summary statistics. The correlation coefficient captures the strength of a linear trend, but it cannot tell you whether the data actually follows one. Always plot your data.',
+        wrong:   'Not quite. This is the trap Anscombe set. The datasets look completely different when plotted. Identical numbers can describe radically different realities. The correlation tells you there is a linear-ish relationship, but not what the data actually looks like.'
+    }
+};
+
+function answerQuiz(quizId, btn, isCorrect) {
+    const quiz     = document.getElementById(quizId);
+    const feedback = document.getElementById(quizId + '-feedback');
+    quiz.querySelectorAll('.quiz-btn').forEach(b => b.classList.add('disabled'));
+    btn.classList.add(isCorrect ? 'correct' : 'wrong');
+    feedback.className = 'quiz-feedback ' + (isCorrect ? 'success' : 'fail');
+    feedback.innerHTML = quizData[quizId][isCorrect ? 'correct' : 'wrong'];
+}
+
+// ── Password ──────────────────────────────────────────────────────────────────
+function checkPw() {
+    const val = document.getElementById('pw-input').value.trim().toLowerCase();
+    const errEl = document.getElementById('pw-error');
+    if (val === 'anscombe') {
+        document.getElementById('locked-gate').style.display = 'none';
+        const vs = document.getElementById('visual-section');
+        vs.style.display = 'block';
+        drawAllPlots();
+    } else {
+        errEl.textContent = currentLang === 'de' ? 'Falsches Passwort.' : 'Wrong password.';
+    }
+}
+
+// ── Scatter plots ─────────────────────────────────────────────────────────────
+function drawAllPlots() {
+    datasets.forEach((ds, i) => drawScatter('plot' + (i + 1), ds.x, ds.y));
+}
+
+function drawScatter(id, xs, ys) {
+    const canvas = document.getElementById(id);
+    const W = canvas.offsetWidth || 360;
+    const H = 200;
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width  = W * dpr;
+    canvas.height = H * dpr;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+
+    const P = { t: 16, r: 16, b: 30, l: 34 };
+    const pw = W - P.l - P.r;
+    const ph = H - P.t - P.b;
+
+    const xMin = 0, xMax = 22, yMin = 0, yMax = 14;
+    function px(x) { return P.l + (x - xMin) / (xMax - xMin) * pw; }
+    function py(y) { return P.t + ph - (y - yMin) / (yMax - yMin) * ph; }
+
+    // Background
+    ctx.fillStyle = '#1a1a2a';
+    ctx.fillRect(0, 0, W, H);
+
+    // Grid
+    ctx.strokeStyle = '#1f1f32';
+    ctx.lineWidth = 1;
+    for (let gx = 0; gx <= 20; gx += 5) {
+        ctx.beginPath(); ctx.moveTo(px(gx), P.t); ctx.lineTo(px(gx), H - P.b); ctx.stroke();
+    }
+    for (let gy = 2; gy <= 14; gy += 2) {
+        ctx.beginPath(); ctx.moveTo(P.l, py(gy)); ctx.lineTo(W - P.r, py(gy)); ctx.stroke();
+    }
+
+    // Axes
+    ctx.strokeStyle = '#2e2e48';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(P.l, P.t); ctx.lineTo(P.l, H - P.b); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(P.l, H - P.b); ctx.lineTo(W - P.r, H - P.b); ctx.stroke();
+
+    // Axis tick labels
+    ctx.fillStyle = '#35354e';
+    ctx.font = '10px sans-serif';
+    ctx.textAlign = 'center';
+    [0, 5, 10, 15, 20].forEach(v => ctx.fillText(v, px(v), H - P.b + 14));
+    ctx.textAlign = 'right';
+    [0, 4, 8, 12].forEach(v => ctx.fillText(v, P.l - 5, py(v) + 4));
+
+    // Regression line: y = 3.0 + 0.5x
+    ctx.strokeStyle = '#5a5a9a';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([5, 4]);
+    ctx.beginPath();
+    ctx.moveTo(px(xMin), py(3.0 + 0.5 * xMin));
+    ctx.lineTo(px(xMax), py(3.0 + 0.5 * xMax));
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Data points
+    for (let i = 0; i < xs.length; i++) {
+        const cx = px(xs[i]);
+        const cy = py(ys[i]);
+        ctx.fillStyle   = '#7070c830';
+        ctx.strokeStyle = '#8888d8';
+        ctx.lineWidth   = 1.5;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+    }
+}
+
+window.addEventListener('resize', function () {
+    if (document.getElementById('visual-section').style.display === 'block') {
+        drawAllPlots();
+    }
+});
+
+// ── Mean & Variance visualisations ───────────────────────────────────────────
+const VIZ_DOT_COLORS = ['#4dba80', '#6090d8', '#d4a060', '#d06090', '#8878e8'];
+
+const vizPresets = {
+    balanced: [2, 4, 6, 8, 10],
+    skewed:   [1, 2, 3, 4, 14],
+    outlier:  [5, 6, 6, 7, 30],
+    tight:    [9, 10, 10, 10, 11]
+};
+let vizData = [...vizPresets.balanced];
+
+function r2(v) { return Math.round(v * 100) / 100; }
+
+function vizStackedDots(data, xPos, DOT_R) {
+    const placed = [];
+    data.forEach((v, i) => {
+        let x = xPos(v), y = -DOT_R - 4, tries = 0;
+        while (tries++ < 20) {
+            if (!placed.find(p => Math.abs(p.x - x) < DOT_R * 2 + 3 && Math.abs(p.y - y) < DOT_R * 2 + 3)) break;
+            y -= DOT_R * 2 + 4;
+        }
+        placed.push({ x, y, v, i });
+    });
+    return placed;
+}
+
+function vizDrawDots(ctx, dots, baseY, DOT_R) {
+    dots.forEach(({ x, y, v, i }) => {
+        const absY = baseY + y;
+        const col = VIZ_DOT_COLORS[i % VIZ_DOT_COLORS.length];
+        ctx.fillStyle   = col + '22';
+        ctx.strokeStyle = col;
+        ctx.lineWidth   = 1.5;
+        ctx.beginPath(); ctx.arc(x, absY, DOT_R, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = col;
+        ctx.font = '500 12px "Courier New", monospace';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(v, x, absY);
+        ctx.textBaseline = 'alphabetic';
+    });
+}
+
+function drawMeanCanvas(data, mean) {
+    const canvas = document.getElementById('mean-canvas');
+    if (!canvas) return;
+    const W = canvas.offsetWidth || 740, H = 140;
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+
+    const PAD = 28, DOT_R = 16, AXIS_Y = H - 26;
+    const minV = Math.min(...data), maxV = Math.max(...data);
+    const span = Math.max(maxV - minV, 1), extra = span * 0.14;
+    const lo = minV - extra, hi = maxV + extra;
+    function xPos(v) { return PAD + (v - lo) / (hi - lo) * (W - PAD * 2); }
+
+    ctx.fillStyle = '#1a1a2a';
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.strokeStyle = '#2e2e48'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(PAD, AXIS_Y); ctx.lineTo(W - PAD, AXIS_Y); ctx.stroke();
+
+    const meanX = xPos(mean);
+
+    ctx.strokeStyle = '#4dba80'; ctx.lineWidth = 1.5; ctx.setLineDash([3, 3]);
+    ctx.beginPath(); ctx.moveTo(meanX, AXIS_Y - 4); ctx.lineTo(meanX, 18); ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.strokeStyle = '#4dba8066'; ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.moveTo(meanX, AXIS_Y - 4); ctx.lineTo(meanX, AXIS_Y + 4); ctx.stroke();
+    ctx.fillStyle = '#4dba80'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('μ', meanX, AXIS_Y + 15);
+
+    const dots = vizStackedDots(data, xPos, DOT_R);
+    const topmostY = AXIS_Y + Math.min(...dots.map(d => d.y)) - DOT_R;
+
+    ctx.fillStyle = '#4dba80'; ctx.font = '500 11px "Courier New", monospace'; ctx.textAlign = 'center';
+    ctx.fillText('μ = ' + r2(mean), meanX, Math.max(topmostY - 8, 12));
+
+    vizDrawDots(ctx, dots, AXIS_Y, DOT_R);
+
+    ctx.fillStyle = '#4dba8030'; ctx.strokeStyle = '#4dba80'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(meanX, AXIS_Y - 4, 5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+}
+
+function drawVarCanvas(data, mean, std) {
+    const canvas = document.getElementById('var-canvas');
+    if (!canvas) return;
+    const W = canvas.offsetWidth || 740, H = 220;
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+
+    const PAD = 28, DOT_R = 14;
+    const AXIS_Y = H - 26, BRACKET_H = 44, DOT_BASE = AXIS_Y - BRACKET_H;
+
+    const minV = Math.min(...data), maxV = Math.max(...data);
+    const span = Math.max(maxV - minV, 1);
+    const extra = Math.max(span * 0.15, std * 0.5);
+    const lo = Math.min(minV - extra, mean - std * 1.6);
+    const hi = Math.max(maxV + extra, mean + std * 1.6);
+    function xPos(v) { return PAD + (v - lo) / (hi - lo) * (W - PAD * 2); }
+
+    ctx.fillStyle = '#1a1a2a';
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.strokeStyle = '#2e2e48'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(PAD, AXIS_Y); ctx.lineTo(W - PAD, AXIS_Y); ctx.stroke();
+
+    const meanX = xPos(mean), stdL = xPos(mean - std), stdR = xPos(mean + std);
+
+    ctx.strokeStyle = '#4dba8066'; ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.moveTo(meanX, AXIS_Y - 4); ctx.lineTo(meanX, AXIS_Y + 4); ctx.stroke();
+    ctx.fillStyle = '#4dba80'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('μ', meanX, AXIS_Y + 15);
+
+    ctx.strokeStyle = '#d4a06066'; ctx.lineWidth = 0.5;
+    [[stdL, 'μ−σ'], [stdR, 'μ+σ']].forEach(([x, lbl]) => {
+        ctx.beginPath(); ctx.moveTo(x, AXIS_Y - 4); ctx.lineTo(x, AXIS_Y + 4); ctx.stroke();
+        ctx.fillStyle = '#d4a060'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText(lbl, x, AXIS_Y + 15);
+    });
+
+    ctx.fillStyle = '#d4a06018';
+    ctx.beginPath(); ctx.rect(stdL, 14, stdR - stdL, DOT_BASE - 14); ctx.fill();
+    ctx.strokeStyle = '#d4a060'; ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
+    ctx.beginPath(); ctx.moveTo(stdL, 14); ctx.lineTo(stdL, DOT_BASE); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(stdR, 14); ctx.lineTo(stdR, DOT_BASE); ctx.stroke();
+    ctx.setLineDash([]);
+
+    const bY = 20;
+    ctx.strokeStyle = '#d4a060'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(stdL, bY); ctx.lineTo(stdR, bY); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(stdL, bY - 4); ctx.lineTo(stdL, bY + 4); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(stdR, bY - 4); ctx.lineTo(stdR, bY + 4); ctx.stroke();
+    ctx.fillStyle = '#d4a060'; ctx.font = '500 11px "Courier New", monospace'; ctx.textAlign = 'center';
+    ctx.fillText('σ = ' + r2(std), (stdL + stdR) / 2, bY - 7);
+
+    ctx.strokeStyle = '#4dba80'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(meanX, 26); ctx.lineTo(meanX, DOT_BASE); ctx.stroke();
+
+    const dots = vizStackedDots(data, xPos, DOT_R);
+
+    dots.forEach(({ x, y, i }) => {
+        const absY = DOT_BASE + y;
+        const col = VIZ_DOT_COLORS[i % VIZ_DOT_COLORS.length];
+        ctx.strokeStyle = col + '55'; ctx.lineWidth = 1; ctx.setLineDash([2, 2]);
+        ctx.beginPath(); ctx.moveTo(x, absY + DOT_R); ctx.lineTo(meanX, DOT_BASE); ctx.stroke();
+        ctx.setLineDash([]);
+    });
+
+    vizDrawDots(ctx, dots, DOT_BASE, DOT_R);
+
+    ctx.fillStyle = '#4dba8030'; ctx.strokeStyle = '#4dba80'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(meanX, DOT_BASE - 4, 5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+}
+
+function setVizPreset(name) {
+    vizData = [...vizPresets[name]];
+    document.querySelectorAll('.viz-btn').forEach(b => {
+        b.classList.toggle('active', b.getAttribute('onclick').includes("'" + name + "'"));
+    });
+    renderViz();
+}
+
+function renderViz() {
+    const n = vizData.length;
+    const sum = vizData.reduce((a, b) => a + b, 0);
+    const mean = sum / n;
+    const sqDevs = vizData.map(x => (x - mean) ** 2);
+    const variance = sqDevs.reduce((a, b) => a + b, 0) / n;
+    const std = Math.sqrt(variance);
+
+    document.getElementById('m-n-val').textContent    = n;
+    document.getElementById('m-sum-val').textContent  = r2(sum);
+    document.getElementById('m-mean-val').textContent = r2(mean);
+    document.getElementById('m-mean-val2').textContent = r2(mean);
+    document.getElementById('m-var-val').textContent  = r2(variance);
+    document.getElementById('m-std-val').textContent  = r2(std);
+
+    const tbody = document.getElementById('dev-tbody');
+    tbody.innerHTML = '';
+    vizData.forEach(v => {
+        const dev = r2(v - mean), sq = r2((v - mean) ** 2);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${v}</td><td style="color:#7098e0">${dev >= 0 ? '+' : ''}${dev}</td><td style="color:#d4a060">${sq}</td>`;
+        tbody.appendChild(tr);
+    });
+    const sqSum = sqDevs.reduce((a, b) => a + b, 0);
+    document.getElementById('sq-sum').textContent =
+        'Σ = ' + r2(sqSum) + '  →  σ² = ' + r2(sqSum) + '/' + n + ' = ' + r2(variance);
+
+    drawMeanCanvas(vizData, mean);
+    drawVarCanvas(vizData, mean, std);
+}
+
+// ── Language ──────────────────────────────────────────────────────────────────
+const T = {
+    en: {
+        'tag.type':    'mini-module',
+        'tag.code':    'no-code',
+        'tag.ai':      'try-without-ai',
+        'hero.title':  'Lies, Damned Lies, and Statistics',
+        'hero.sub':    '\u201cThere are three kinds of lies: lies, damned lies, and statistics.\u201d \u2014 Mark Twain',
+        's1.h2':       'Mean',
+        's1.p1':       'Take a set of numbers. Add them up. Divide by how many there are. That is the mean. It is the balancing point of the data, the value where everything would sit in equilibrium if placed on a seesaw.',
+        's1.p2':       'A shop with daily revenues of 200, 400, 300, 500, 100 has a mean of 300. That number hides a lot. It says nothing about how irregular the days were. That is what variance is for.',
+        'label.mean':  'Mean',
+        's2.h2':       'Variance',
+        's2.p1':       'Variance measures how spread out the data is around the mean. For each value, compute how far it sits from the mean, square that distance, and average the result. Squaring does two things: it makes all distances positive, and it punishes large deviations more than small ones.',
+        's2.p2':       'Standard deviation \u03c3 is just the square root of variance. It brings the number back to the original unit, so you can read it as a typical distance from the mean.',
+        's2.p3':       'Two datasets can share the same mean and look nothing alike. Variance tells you whether the data clusters tightly or sprawls. Still, both mean and variance describe a single variable in isolation. When you have two variables, a third question appears.',
+        'label.var':   'Variance',
+        'label.std':   'Standard deviation',
+        's3.h2':       'Correlation',
+        's3.p1':       'When one variable changes, does another tend to change with it? A lemonade stand that sells more on warm days has something going on between temperature and sales. A car that loses value as mileage increases has something going on between kilometres and price. The question is whether that something is consistent, and in what direction.',
+        's3.p2':       'Start with covariance. For each observation, take the deviation of x from its mean and the deviation of y from its mean, multiply them together, and average the result.',
+        's3.p3':       'When x and y are both above their means, the product is positive. When one is above and the other below, it is negative. Average those products: a positive result means they tend to move together, a negative result means they tend to move in opposite directions.',
+        's3.p4':       'The problem with covariance is the unit. Multiply euros by kilograms and the number is hard to read. So divide by both standard deviations to normalise everything onto a fixed scale. That gives Pearson\u2019s r.',
+        's3.p5':       'The result always sits between -1 and 1. At 1, a perfect positive linear relationship. At -1, a perfect negative one. At 0, no linear relationship. The word linear is doing real work in that sentence. A curved relationship, a cluster with one extreme outlier, a vertical spike of points: all of these can produce the same r while looking completely different from each other.',
+        'label.cov':   'Covariance',
+        'label.corr':  'Pearson correlation',
+        'q1.q':        'The numerator of r is the sum of products (x\u1d62 \u2212 x\u0304)(y\u1d62 \u2212 y\u0304). If x tends to be above its mean when y is also above its mean, what sign will this sum have?',
+        'q1.a1':       'Positive',
+        'q1.a2':       'Negative',
+        'q1.a3':       'Zero',
+        's4.h2':       "Anscombe\u2019s Quartet",
+        's4.p1':       'In 1973, statistician <a href="https://en.wikipedia.org/wiki/Frank_Anscombe" target="_blank">Francis Anscombe</a> built a trap. He constructed four datasets.',
+        's4.p2':       'His point was not subtle: a number is not a description. Before you report a statistic, you need to see what you are summarising. A correlation of 0.816 can describe a clean linear trend, a perfect curve, a linear relationship with one rogue point, or a vertical stack of values with a single outlier pulling the line. All four look nothing alike. All four produce r = 0.816.',
+        's4.p3':       'Calculate the following for each dataset below. Mean of x. Mean of y. Variance of x. Variance of y. Correlation r between x and y. Compare your results across all four.',
+        's4.prompt':   'For each dataset: compute mean(x), mean(y), var(x), var(y), and r(x, y). You should find that all four sets of results are nearly identical.',
+        'q2.q':        'You compute r for all four datasets and get approximately 0.816 each time. What does this tell you?',
+        'q2.a1':       'The datasets are essentially the same, just reordered',
+        'q2.a2':       'The datasets share a statistical summary but may have completely different shapes',
+        'q2.a3':       'All four follow a linear relationship between x and y',
+        's5.h2':       'Now Look at Them',
+        's5.p1':       'You have done the calculation. The four datasets produce the same numbers. Enter the password to see what the numbers are hiding.',
+        's5.hint':     'Enter the password to reveal the plots.',
+        's5.unlock':   'Unlock',
+        's5.revealed': 'Four datasets. The dashed line is the same regression line on every chart. The points are not.',
+        's6.h2':       'Before You Go',
+        's6.p1':       'Think of a report, a presentation, or a dashboard you have seen. A number was shown. A correlation, a mean, a trend line. Was the raw data shown alongside it? What might a plot have revealed that the number did not?',
+        'viz.balanced': 'Balanced',
+        'viz.skewed':   'Skewed right',
+        'viz.outlier':  'With outlier',
+        'viz.tight':    'Tight cluster',
+        'viz.n':        'Values (n)',
+        'viz.sum':      'Sum',
+        'viz.meanlabel':'Mean (μ)',
+        'viz.varlabel': 'Variance (σ²)',
+        'viz.stdlabel': 'Std dev (σ)',
+    },
+    de: {
+        'tag.type':    'Mini-Modul',
+        'tag.code':    'kein Code',
+        'tag.ai':      'ohne KI versuchen',
+        'hero.title':  'L\u00fcgen, verdammte L\u00fcgen und Statistiken',
+        'hero.sub':    '\u201eEs gibt drei Arten von L\u00fcgen: L\u00fcgen, verdammte L\u00fcgen und Statistiken.\u201c (Mark Twain)',
+        's1.h2':       'Mittelwert',
+        's1.p1':       'Nimm eine Menge Zahlen. Addier sie auf. Teil durch die Anzahl. Das ist der Mittelwert. Er ist der Schwerpunkt der Daten. Legst du alles auf eine Wippe, ist genau dort das Gleichgewicht.',
+        's1.p2':       'Ein Laden macht t\u00e4glich 200, 400, 300, 500, 100 Umsatz. Der Mittelwert ist 300. Diese Zahl verbirgt viel. Sie sagt nichts dar\u00fcber, wie unregelm\u00e4\u00dfig die Tage waren. Daf\u00fcr ist die Varianz da.',
+        'label.mean':  'Mittelwert',
+        's2.h2':       'Varianz',
+        's2.p1':       'Die Varianz misst, wie stark die Daten um den Mittelwert streuen. Berechne f\u00fcr jeden Wert seinen Abstand zum Mittelwert. Quadrier diesen Abstand. Dann mittle alle Ergebnisse. Das Quadrieren macht zweierlei: Es macht alle Abst\u00e4nde positiv, und es bestraft gro\u00dfe Abweichungen st\u00e4rker als kleine.',
+        's2.p2':       'Die Standardabweichung \u03c3 ist einfach die Quadratwurzel der Varianz. Sie bringt die Zahl zur\u00fcck in die urspr\u00fcngliche Einheit. So kannst du sie als typischen Abstand vom Mittelwert lesen.',
+        's2.p3':       'Zwei Datens\u00e4tze k\u00f6nnen denselben Mittelwert haben und trotzdem v\u00f6llig verschieden aussehen. Die Varianz zeigt dir, ob die Daten eng geb\u00fcndelt oder weit gestreut sind. Beide beschreiben aber nur je eine Variable f\u00fcr sich. Bei zwei Variablen kommt eine dritte Frage dazu.',
+        'label.var':   'Varianz',
+        'label.std':   'Standardabweichung',
+        's3.h2':       'Korrelation',
+        's3.p1':       'Wenn sich eine Variable \u00e4ndert, \u00e4ndert sich dann auch eine andere? Ein Limonadenstand verkauft an warmen Tagen mehr. Zwischen Temperatur und Umsatz l\u00e4uft also etwas. Ein Auto verliert mit steigender Kilometerleistung an Wert. Zwischen Kilometern und Preis l\u00e4uft also auch etwas. Die Frage ist: Ist dieses Etwas konsistent, und in welche Richtung geht es?',
+        's3.p2':       'Ausgangspunkt ist die Kovarianz. Nimm f\u00fcr jede Beobachtung die Abweichung von x zu seinem Mittelwert. Nimm ebenso die Abweichung von y. Multiplizier beide miteinander. Dann mittle die Ergebnisse.',
+        's3.p3':       'Liegen x und y beide \u00fcber ihren Mittelwerten, ist das Produkt positiv. Liegt eines dar\u00fcber und eines darunter, ist es negativ. Jetzt mittle diese Produkte. Ein positives Ergebnis hei\u00dft: Sie bewegen sich gemeinsam. Ein negatives Ergebnis hei\u00dft: Sie bewegen sich gegenl\u00e4ufig.',
+        's3.p4':       'Das Problem bei der Kovarianz ist die Einheit. Multiplizier Euro mit Kilogramm, und die Zahl ist kaum zu lesen. Teil deshalb durch beide Standardabweichungen. Das normiert alles auf eine feste Skala. Heraus kommt Pearsons r.',
+        's3.p5':       'Das Ergebnis liegt immer zwischen -1 und 1. Bei 1 ist der lineare Zusammenhang perfekt positiv. Bei -1 ist er perfekt negativ. Bei 0 gibt es keinen linearen Zusammenhang. Das Wort linear ist hier entscheidend. Eine gekr\u00fcmmte Beziehung, ein Cluster mit einem extremen Ausrei\u00dfer, eine vertikale Punktwolke: All das kann dasselbe r ergeben. Und dabei v\u00f6llig verschieden aussehen.',
+        'label.cov':   'Kovarianz',
+        'label.corr':  'Pearson-Korrelation',
+        'q1.q':        'Der Z\u00e4hler von r ist die Summe der Produkte (x\u1d62 \u2212 x\u0304)(y\u1d62 \u2212 y\u0304). Angenommen, x liegt meistens dann \u00fcber seinem Mittelwert, wenn y auch dar\u00fcber liegt. Welches Vorzeichen hat die Summe dann?',
+        'q1.a1':       'Positiv',
+        'q1.a2':       'Negativ',
+        'q1.a3':       'Null',
+        's4.h2':       'Anscombes Quartett',
+        's4.p1':       '1973 baute der Statistiker <a href="https://en.wikipedia.org/wiki/Frank_Anscombe" target="_blank">Francis Anscombe</a> eine Falle. Er erstellte vier Datens\u00e4tze.',
+        's4.p2':       'Seine Botschaft war nicht subtil: Eine Zahl ist keine Beschreibung. Bevor du eine Kennzahl berichtest, schau dir an, was du da zusammenfasst. Eine Korrelation von 0,816 kann vieles bedeuten: einen klaren linearen Trend, eine perfekte Kurve, eine lineare Beziehung mit einem Ausrei\u00dfer oder eine vertikale Punktwolke. Alle vier sehen v\u00f6llig verschieden aus. Alle vier ergeben r = 0,816.',
+        's4.p3':       'Berechne das Folgende f\u00fcr jeden Datensatz unten. Mittelwert von x. Mittelwert von y. Varianz von x. Varianz von y. Korrelation r zwischen x und y. Vergleich danach deine Ergebnisse \u00fcber alle vier.',
+        's4.prompt':   'Berechne f\u00fcr jeden Datensatz: Mittelwert(x), Mittelwert(y), Var(x), Var(y) und r(x, y). Alle vier Ergebnisse sollten nahezu identisch sein.',
+        'q2.q':        'Du berechnest r f\u00fcr alle vier Datens\u00e4tze und bekommst jedes Mal etwa 0,816. Was sagt dir das?',
+        'q2.a1':       'Die Datens\u00e4tze sind im Wesentlichen gleich, nur neu angeordnet',
+        'q2.a2':       'Die Datens\u00e4tze teilen eine statistische Zusammenfassung. Ihre Formen k\u00f6nnen trotzdem v\u00f6llig verschieden sein',
+        'q2.a3':       'Alle vier folgen einem linearen Zusammenhang zwischen x und y',
+        's5.h2':       'Jetzt ansehen',
+        's5.p1':       'Du hast gerechnet. Alle vier Datens\u00e4tze liefern dieselben Zahlen. Gib das Passwort ein. Dann siehst du, was die Zahlen verbergen.',
+        's5.hint':     'Gib das Passwort ein, um die Diagramme zu sehen.',
+        's5.unlock':   'Freischalten',
+        's5.revealed': 'Vier Datens\u00e4tze. Die gestrichelte Linie ist in jedem Diagramm dieselbe Regressionsgerade. Die Punkte nicht.',
+        's6.h2':       'Zum Abschluss',
+        's6.p1':       'Denk an einen Bericht, eine Pr\u00e4sentation oder ein Dashboard, das du gesehen hast. Eine Zahl wurde gezeigt. Eine Korrelation, ein Mittelwert, eine Trendlinie. Standen die Rohdaten daneben? Was h\u00e4tte ein Diagramm sichtbar gemacht, das die Zahl verschwiegen hat?',
+        'viz.balanced': 'Gleichm\u00e4\u00dfig',
+        'viz.skewed':   'Rechtsschief',
+        'viz.outlier':  'Mit Ausrei\u00dfer',
+        'viz.tight':    'Enger Cluster',
+        'viz.n':        'Werte (n)',
+        'viz.sum':      'Summe',
+        'viz.meanlabel':'Mittelwert (\u03bc)',
+        'viz.varlabel': 'Varianz (\u03c3\u00b2)',
+        'viz.stdlabel': 'Standardabw. (\u03c3)',
+    }
+};
+
+let currentLang = 'en';
+
+function toggleLang() {
+    currentLang = currentLang === 'en' ? 'de' : 'en';
+    document.documentElement.lang = currentLang;
+    document.querySelector('.lang-toggle').textContent = currentLang === 'en' ? 'DE' : 'EN';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (T[currentLang][key] !== undefined) el.innerHTML = T[currentLang][key];
+    });
+}
+
+// ── KaTeX ─────────────────────────────────────────────────────────────────────
+window.addEventListener('load', function () {
+    if (typeof renderMathInElement !== 'undefined') {
+        renderMathInElement(document.body, {
+            delimiters: [
+                { left: '$$',   right: '$$',   display: true  },
+                { left: '\\(',  right: '\\)',   display: false }
+            ],
+            throwOnError: false
+        });
+    }
+    renderViz();
+});
+
+window.addEventListener('resize', renderViz);
+</script>
+
+</body>
+</html>

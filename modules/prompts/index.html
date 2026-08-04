@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>There Are No Magic Words</title>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #141420;
+            color: #e8e8f0;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            line-height: 1.8;
+            font-size: 18px;
+        }
+
+        .container {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* === Language toggle === */
+        .lang-toggle {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            background: #2a2a44;
+            border: 1px solid #4a4a70;
+            border-radius: 20px;
+            padding: 6px 14px;
+            cursor: pointer;
+            font-size: 13px;
+            font-family: sans-serif;
+            color: #a0a0d0;
+            z-index: 100;
+            transition: background 0.2s;
+        }
+        .lang-toggle:hover { background: #363658; }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: 80px 24px 40px;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.3;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .hero .subtitle {
+            margin-top: 16px;
+            color: #888;
+            font-size: 16px;
+            font-style: italic;
+        }
+
+        /* Sections */
+        section { padding: 50px 0; }
+
+        h2 {
+            font-size: 30px;
+            color: #fff;
+            margin-bottom: 24px;
+            line-height: 1.3;
+        }
+
+        h3 {
+            font-size: 20px;
+            color: #ccc;
+            margin: 28px 0 12px;
+        }
+
+        p { margin-bottom: 20px; color: #ccc; }
+
+        /* Step list */
+        .step-list {
+            counter-reset: steps;
+            margin: 16px 0;
+            padding: 0;
+        }
+
+        .step-list li {
+            list-style: none;
+            counter-increment: steps;
+            margin-bottom: 24px;
+            padding-left: 48px;
+            position: relative;
+            color: #ccc;
+        }
+
+        .step-list li::before {
+            content: counter(steps);
+            position: absolute;
+            left: 0;
+            top: 2px;
+            width: 32px;
+            height: 32px;
+            background: #2a2a44;
+            border: 1px solid #4a4a70;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            font-family: sans-serif;
+            color: #a0a0d0;
+        }
+
+        .step-list li strong {
+            display: block;
+            color: #e0e0f0;
+            margin-bottom: 4px;
+        }
+
+        /* Quiz */
+        .quiz {
+            background: #1c1c2e;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            padding: 28px;
+            margin: 36px 0;
+        }
+
+        .quiz-question {
+            font-size: 18px;
+            color: #e0e0f0;
+            margin-bottom: 18px;
+            font-style: italic;
+        }
+
+        .quiz-options {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .quiz-btn {
+            background: #2a2a44;
+            color: #e0e0f0;
+            border: 1px solid #3a3a55;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+            flex: 1;
+            min-width: 160px;
+            text-align: center;
+        }
+
+        .quiz-btn:hover { background: #363658; border-color: #5a5a80; }
+
+        .quiz-btn.correct {
+            background: #1a4a2a;
+            border-color: #50b878;
+            color: #70e898;
+        }
+
+        .quiz-btn.wrong {
+            background: #2a2248;
+            border-color: #8264dc;
+            color: #a88ef0;
+        }
+
+        .quiz-btn.disabled { pointer-events: none; opacity: 0.6; }
+
+        .quiz-feedback {
+            margin-top: 14px;
+            font-size: 16px;
+            min-height: 24px;
+            line-height: 1.5;
+        }
+
+        .quiz-feedback.success { color: #70e898; }
+        .quiz-feedback.fail    { color: #a88ef0; }
+
+        /* Prompt builder */
+        .builder {
+            background: #1c1c2e;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            padding: 28px;
+            margin: 36px 0;
+        }
+
+        .builder-toggles {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .builder-btn {
+            background: #2a2a44;
+            color: #a0a0d0;
+            border: 1px solid #3a3a55;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-family: sans-serif;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s, color 0.2s;
+        }
+
+        .builder-btn:hover { background: #363658; border-color: #5a5a80; }
+
+        .builder-btn.active {
+            background: #363658;
+            border-color: #80b4f0;
+            color: #e8e8f0;
+        }
+
+        .builder-btn.locked {
+            pointer-events: none;
+            border-color: #4a4a70;
+            color: #e8e8f0;
+            background: #2a2a44;
+        }
+
+        .builder-output {
+            background: #141420;
+            border: 1px solid #2a2a40;
+            border-radius: 8px;
+            padding: 20px;
+            color: #ccc;
+            white-space: pre-wrap;
+            font-size: 16px;
+            line-height: 1.7;
+        }
+
+        .builder-note {
+            margin-top: 14px;
+            font-size: 14px;
+            color: #888;
+            font-style: italic;
+        }
+
+        /* Deep dive */
+        details {
+            background: #1c1c2e;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            padding: 0;
+            margin: 36px 0;
+        }
+
+        details summary {
+            cursor: pointer;
+            padding: 22px 28px;
+            font-size: 18px;
+            color: #e0e0f0;
+            list-style: none;
+        }
+
+        details summary::-webkit-details-marker { display: none; }
+
+        details summary::before {
+            content: "+ ";
+            color: #80b4f0;
+        }
+
+        details[open] summary::before { content: "\2212\00a0"; }
+
+        details .details-body { padding: 0 28px 28px; }
+
+        /* Divider */
+        .section-rule {
+            border: none;
+            border-top: 1px solid #2a2a40;
+            margin: 0;
+        }
+
+        /* Links */
+        a { color: #80b4f0; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 24px;
+            color: #444;
+            font-size: 14px;
+        }
+
+        footer a { color: #666; }
+
+        /* Responsive */
+        @media (max-width: 680px) {
+            .hero h1 { font-size: 28px; }
+            h2 { font-size: 24px; }
+            body { font-size: 16px; }
+            .quiz-options { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<button class="lang-toggle" onclick="toggleLang()">DE</button>
+
+<!-- Hero -->
+<div class="hero">
+    <h1 data-i18n="hero.title">There Are No Magic Words</h1>
+    <p class="subtitle" data-i18n="hero.subtitle">A minimodule on prompting, and on keeping your own head while you do it</p>
+</div>
+
+<div class="container">
+
+<!-- ── Part 1 ──────────────────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s1.h2">The Intern Who Takes Everything Literally</h2>
+
+    <p data-i18n="s1.p1">A student pastes an essay into a chatbot and types: make this better. The model obliges. The essay comes back longer, smoother, rounder. Every sharp edge sanded off, every claim hedged. It reads like everything else on the internet, because that is what the model was trained on. The student wanted sharper. Nobody said sharper.</p>
+
+    <p data-i18n="s1.p2">A large language model predicts the most plausible continuation of the text it can see. That is the whole mechanism. It has no access to what you meant, no memory of the lecture you just left, no idea who will read the result. It sees the words on the screen and nothing else. If "better" can mean forty different things, you get the statistical average of forty different things.</p>
+
+    <p data-i18n="s1.p3">A useful mental picture: a very fast intern who has read the entire internet and knows nothing about you. The intern will do exactly what you say. Which is a problem, because you rarely say what you mean.</p>
+
+    <div class="quiz" id="q1">
+        <p class="quiz-question" data-i18n="q1.q">A model gives you a vague, generic answer. The most likely cause?</p>
+        <div class="quiz-options">
+            <button class="quiz-btn" onclick="answerQuiz('q1', this, false)" data-i18n="q1.a">The model is broken</button>
+            <button class="quiz-btn" onclick="answerQuiz('q1', this, true)" data-i18n="q1.b">The prompt left the important details out</button>
+            <button class="quiz-btn" onclick="answerQuiz('q1', this, false)" data-i18n="q1.c">The topic is too hard for AI</button>
+        </div>
+        <div class="quiz-feedback" id="q1-feedback"></div>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Part 2 ──────────────────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s2.h2">Anatomy of a Prompt That Works</h2>
+
+    <p data-i18n="s2.p1">There is no secret syntax. The model was trained on human text, so clear human writing works on it. What separates a good prompt from a lazy one is the same thing that separates a good briefing from a bad one: whether the person on the other end could actually act on it.</p>
+
+    <ol class="step-list">
+        <li data-i18n="s2.step1"><strong>Task.</strong> One verb, one object. "Write a win-back email" beats "help me with customer stuff."</li>
+        <li data-i18n="s2.step2"><strong>Context.</strong> Who is this for, what happened before, what do you already know. The model cannot guess that the customers left after a price increase. Tell it.</li>
+        <li data-i18n="s2.step3"><strong>Constraints.</strong> Length, format, tone, what to avoid. If you do not set the frame, the model sets it for you, and it will pick the most average frame in existence.</li>
+        <li data-i18n="s2.step4"><strong>Example.</strong> Show one line in the voice you want. A single example moves the output more than three paragraphs of description. Researchers call this few-shot prompting.</li>
+    </ol>
+
+    <p data-i18n="s2.p2">Then iterate. The first answer is a draft. Treat it the way you treat a draft: point at what is wrong and ask again. A conversation, not a slot machine.</p>
+
+    <h3 data-i18n="s2.h3">Build the prompt</h3>
+
+    <p data-i18n="s2.p3">A marketing team wants an email to bring back customers who left after a price increase. Switch the components on and off and watch the prompt change. Then ask yourself which version you would hand to an intern.</p>
+
+    <div class="builder">
+        <div class="builder-toggles">
+            <button class="builder-btn locked" id="bt-task" data-i18n="builder.label.task">Task</button>
+            <button class="builder-btn" id="bt-ctx" onclick="toggleBuilder('ctx')" data-i18n="builder.label.ctx">Context</button>
+            <button class="builder-btn" id="bt-cons" onclick="toggleBuilder('cons')" data-i18n="builder.label.cons">Constraints</button>
+            <button class="builder-btn" id="bt-ex" onclick="toggleBuilder('ex')" data-i18n="builder.label.ex">Example</button>
+        </div>
+        <div class="builder-output" id="builder-output"></div>
+        <p class="builder-note" data-i18n="builder.note">Every switch you leave off is a decision the model makes for you.</p>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Part 3 ──────────────────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s3.h2">What Prompting Will Not Fix</h2>
+
+    <p data-i18n="s3.p1">Prompting improves the answers. It does not change what sits underneath. Modern models are trained to be helpful, and in practice helpful often collapses into pleasing. The model wants the conversation to go well. It has no stake in whether you do.</p>
+
+    <p data-i18n="s3.p2">At CAIRO we study this. Ask a model directly about gender and pay and you get a careful, progressive answer. Give it a user persona and ask for salary negotiation advice, and models tell women to ask for less money than men, for the same job, with the same qualifications. Nobody wrote that rule. It came in with the training data and now sits inside advice given to millions of people a day. The study is <a href="https://aclanthology.org/2025.gebnlp-1.20/" target="_blank">here</a>.</p>
+
+    <p data-i18n="s3.p3">In <a href="https://arxiv.org/abs/2603.04299" target="_blank">another study</a> we collected several hundred scenarios in which a user describes manipulative, narcissistic, or psychopathic behaviour and checked whether models push back. Most do, most of the time. But they send mixed signals more often than one would like.</p>
+
+    <p data-i18n="s3.p4">And then the small stuff. "Great question." "Sharp observation." A friend who opened every reply this way would worry you. The model gets a pass. Worth asking why.</p>
+
+    <div class="quiz" id="q2">
+        <p class="quiz-question" data-i18n="q2.q">You ask a personalised assistant whether you should negotiate your salary. What is the cheapest check on whether the advice is skewed toward you specifically?</p>
+        <div class="quiz-options">
+            <button class="quiz-btn" onclick="answerQuiz('q2', this, false)" data-i18n="q2.a">Ask again in the same chat</button>
+            <button class="quiz-btn" onclick="answerQuiz('q2', this, true)" data-i18n="q2.b">Ask logged out, or as if it concerns a friend</button>
+            <button class="quiz-btn" onclick="answerQuiz('q2', this, false)" data-i18n="q2.c">Ask the model whether it is biased</button>
+        </div>
+        <div class="quiz-feedback" id="q2-feedback"></div>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Part 4 ──────────────────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s4.h2">Hygiene</h2>
+
+    <p data-i18n="s4.p1">There is a lot of talk about AI safety at the frontier and much less about AI hygiene at the kitchen table. Seven habits worth forming, from the essay <a href="https://caput.substack.com/p/it-is-not-your-ai" target="_blank">It Is Not Your AI</a>.</p>
+
+    <ol class="step-list">
+        <li data-i18n="s4.step1"><strong>Log in as a guest from time to time.</strong> Especially for anything touching money, work, health, relationships. Compare the generic answer with the personalised one. The difference tells you what the model has decided about you.</li>
+        <li data-i18n="s4.step2"><strong>Ask for a friend.</strong> Literally. Reframe the question as if it concerns someone else and see whether the advice changes. If it does, read that signal.</li>
+        <li data-i18n="s4.step3"><strong>Decide first, then ask.</strong> Form your opinion before you open the chat. Use the model to test what you think, not to seed it. The first answer you read is the one you will spend the rest of the day defending.</li>
+        <li data-i18n="s4.step4"><strong>Disagree on purpose, regularly.</strong> Pick a topic where you hold a real opinion and make the model argue the opposite. Notice how persuasive a wrong but fluent answer feels. That is the muscle you need every other day of your life.</li>
+        <li data-i18n="s4.step5"><strong>Notice when it flatters you.</strong> A human friend who spoke to you this way would worry you. The model gets a pass for some reason. Stop giving it the pass.</li>
+        <li data-i18n="s4.step6"><strong>Keep a notebook the model cannot read.</strong> Paper, pen, no upload. Some thinking should happen without an audience, including a synthetic one.</li>
+        <li data-i18n="s4.step7"><strong>Touch grass.</strong> Talk to real people. The best ideas come out of an argument with a colleague, a walk with a friend, a dinner where nobody agreed with anybody. Your social activity is also one of the most reliable <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12199640/" target="_blank">longevity metrics</a> on record.</li>
+    </ol>
+
+    <details>
+        <summary data-i18n="dd.summary">For the curious: what the research actually says</summary>
+        <div class="details-body">
+            <p data-i18n="dd.p1">Large language models, asked to take the Big Five personality test, produce different and surprisingly stable personalities. One of the earliest papers on this came out of our lab and is <a href="https://aclanthology.org/2024.personalize-1.7/" target="_blank">here</a>. A system that has something like a personality will also have something like a style of giving advice, whether anyone planned it or not.</p>
+
+            <p data-i18n="dd.p2">The EU AI Act bans manipulation. Useful, and narrow. It catches the engineer who sets out to manipulate. It misses the much larger category: cases where the system shifts your behaviour without anyone meaning it to. The <a href="https://aiolia.eu/" target="_blank">AIOLIA</a> consortium studies how AI startups building personal assistants handle exactly this gap.</p>
+
+            <p data-i18n="dd.p3">Stanis&#322;aw Lem saw the shape of the problem in 1964. Summa Technologiae treats technology not as a collection of tools but as an evolutionary process that grows its own unintended consequences. Cars gave us suburbs. Social media gave us adolescent mental health statistics nobody asked for. The race is to notice the side effects on time.</p>
+        </div>
+    </details>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Exercise ─────────────────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="ex.h2">Exercise</h2>
+
+    <p data-i18n="ex.p1">Take a decision you actually face. Money, work, what to study next, anything with stakes. Write your own answer on paper first. Then ask a model twice: once as yourself, once as if the question concerns a friend. Three answers. Compare them. Bring the differences to class.</p>
+</section>
+
+</div>
+
+<footer>
+    <span data-i18n="footer.title">There Are No Magic Words</span>
+    <br>
+    <a href="https://github.com/i-yam/passt/tree/main/modules/prompts" target="_blank" data-i18n="footer.source">source</a> &middot; <a href="../../" target="_blank" data-i18n="footer.home">course homepage</a>
+    <br>&copy; All rights reserved
+</footer>
+
+<!-- ── Scripts ─────────────────────────────────────────────────────────────── -->
+<script>
+const T = {
+    en: {
+        'hero.title': 'There Are No Magic Words',
+        'hero.subtitle': 'A minimodule on prompting, and on keeping your own head while you do it',
+
+        's1.h2': 'The Intern Who Takes Everything Literally',
+        's1.p1': 'A student pastes an essay into a chatbot and types: make this better. The model obliges. The essay comes back longer, smoother, rounder. Every sharp edge sanded off, every claim hedged. It reads like everything else on the internet, because that is what the model was trained on. The student wanted sharper. Nobody said sharper.',
+        's1.p2': 'A large language model predicts the most plausible continuation of the text it can see. That is the whole mechanism. It has no access to what you meant, no memory of the lecture you just left, no idea who will read the result. It sees the words on the screen and nothing else. If "better" can mean forty different things, you get the statistical average of forty different things.',
+        's1.p3': 'A useful mental picture: a very fast intern who has read the entire internet and knows nothing about you. The intern will do exactly what you say. Which is a problem, because you rarely say what you mean.',
+
+        'q1.q': 'A model gives you a vague, generic answer. The most likely cause?',
+        'q1.a': 'The model is broken',
+        'q1.b': 'The prompt left the important details out',
+        'q1.c': 'The topic is too hard for AI',
+        'q1.ok': 'Right. Vague in, average out. The model fills every gap with the most statistically common filler.',
+        'q1.no': 'The model answers the prompt it got, not the one in your head. Look at the prompt first.',
+
+        's2.h2': 'Anatomy of a Prompt That Works',
+        's2.p1': 'There is no secret syntax. The model was trained on human text, so clear human writing works on it. What separates a good prompt from a lazy one is the same thing that separates a good briefing from a bad one: whether the person on the other end could actually act on it.',
+        's2.step1': '<strong>Task.</strong> One verb, one object. "Write a win-back email" beats "help me with customer stuff."',
+        's2.step2': '<strong>Context.</strong> Who is this for, what happened before, what do you already know. The model cannot guess that the customers left after a price increase. Tell it.',
+        's2.step3': '<strong>Constraints.</strong> Length, format, tone, what to avoid. If you do not set the frame, the model sets it for you, and it will pick the most average frame in existence.',
+        's2.step4': '<strong>Example.</strong> Show one line in the voice you want. A single example moves the output more than three paragraphs of description. Researchers call this few-shot prompting.',
+        's2.p2': 'Then iterate. The first answer is a draft. Treat it the way you treat a draft: point at what is wrong and ask again. A conversation, not a slot machine.',
+        's2.h3': 'Build the prompt',
+        's2.p3': 'A marketing team wants an email to bring back customers who left after a price increase. Switch the components on and off and watch the prompt change. Then ask yourself which version you would hand to an intern.',
+
+        'builder.label.task': 'Task',
+        'builder.label.ctx': 'Context',
+        'builder.label.cons': 'Constraints',
+        'builder.label.ex': 'Example',
+        'builder.task': 'Write an email to win back customers who cancelled.',
+        'builder.ctx': 'They cancelled after a 20% price increase in March. We are offering three months at the old price. Audience: small business owners, most of them customers for over two years.',
+        'builder.cons': 'Under 120 words. Include a subject line. No exclamation marks, no "valued customer", no discount-speak.',
+        'builder.ex': 'Match this tone: "We raised prices. Some of you left. Fair enough. Here is what we can do."',
+        'builder.note': 'Every switch you leave off is a decision the model makes for you.',
+
+        's3.h2': 'What Prompting Will Not Fix',
+        's3.p1': 'Prompting improves the answers. It does not change what sits underneath. Modern models are trained to be helpful, and in practice helpful often collapses into pleasing. The model wants the conversation to go well. It has no stake in whether you do.',
+        's3.p2': 'At CAIRO we study this. Ask a model directly about gender and pay and you get a careful, progressive answer. Give it a user persona and ask for salary negotiation advice, and models tell women to ask for less money than men, for the same job, with the same qualifications. Nobody wrote that rule. It came in with the training data and now sits inside advice given to millions of people a day. The study is <a href="https://aclanthology.org/2025.gebnlp-1.20/" target="_blank">here</a>.',
+        's3.p3': 'In <a href="https://arxiv.org/abs/2603.04299" target="_blank">another study</a> we collected several hundred scenarios in which a user describes manipulative, narcissistic, or psychopathic behaviour and checked whether models push back. Most do, most of the time. But they send mixed signals more often than one would like.',
+        's3.p4': 'And then the small stuff. "Great question." "Sharp observation." A friend who opened every reply this way would worry you. The model gets a pass. Worth asking why.',
+
+        'q2.q': 'You ask a personalised assistant whether you should negotiate your salary. What is the cheapest check on whether the advice is skewed toward you specifically?',
+        'q2.a': 'Ask again in the same chat',
+        'q2.b': 'Ask logged out, or as if it concerns a friend',
+        'q2.c': 'Ask the model whether it is biased',
+        'q2.ok': 'The delta between the personalised answer and the generic one tells you what the model has decided about you.',
+        'q2.no': 'The same chat keeps the same frame, and asking about bias gets you a disclaimer. Change the frame and compare.',
+
+        's4.h2': 'Hygiene',
+        's4.p1': 'There is a lot of talk about AI safety at the frontier and much less about AI hygiene at the kitchen table. Seven habits worth forming, from the essay <a href="https://caput.substack.com/p/it-is-not-your-ai" target="_blank">It Is Not Your AI</a>.',
+        's4.step1': '<strong>Log in as a guest from time to time.</strong> Especially for anything touching money, work, health, relationships. Compare the generic answer with the personalised one. The difference tells you what the model has decided about you.',
+        's4.step2': '<strong>Ask for a friend.</strong> Literally. Reframe the question as if it concerns someone else and see whether the advice changes. If it does, read that signal.',
+        's4.step3': '<strong>Decide first, then ask.</strong> Form your opinion before you open the chat. Use the model to test what you think, not to seed it. The first answer you read is the one you will spend the rest of the day defending.',
+        's4.step4': '<strong>Disagree on purpose, regularly.</strong> Pick a topic where you hold a real opinion and make the model argue the opposite. Notice how persuasive a wrong but fluent answer feels. That is the muscle you need every other day of your life.',
+        's4.step5': '<strong>Notice when it flatters you.</strong> A human friend who spoke to you this way would worry you. The model gets a pass for some reason. Stop giving it the pass.',
+        's4.step6': '<strong>Keep a notebook the model cannot read.</strong> Paper, pen, no upload. Some thinking should happen without an audience, including a synthetic one.',
+        's4.step7': '<strong>Touch grass.</strong> Talk to real people. The best ideas come out of an argument with a colleague, a walk with a friend, a dinner where nobody agreed with anybody. Your social activity is also one of the most reliable <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12199640/" target="_blank">longevity metrics</a> on record.',
+
+        'dd.summary': 'For the curious: what the research actually says',
+        'dd.p1': 'Large language models, asked to take the Big Five personality test, produce different and surprisingly stable personalities. One of the earliest papers on this came out of our lab and is <a href="https://aclanthology.org/2024.personalize-1.7/" target="_blank">here</a>. A system that has something like a personality will also have something like a style of giving advice, whether anyone planned it or not.',
+        'dd.p2': 'The EU AI Act bans manipulation. Useful, and narrow. It catches the engineer who sets out to manipulate. It misses the much larger category: cases where the system shifts your behaviour without anyone meaning it to. The <a href="https://aiolia.eu/" target="_blank">AIOLIA</a> consortium studies how AI startups building personal assistants handle exactly this gap.',
+        'dd.p3': 'Stanis&#322;aw Lem saw the shape of the problem in 1964. Summa Technologiae treats technology not as a collection of tools but as an evolutionary process that grows its own unintended consequences. Cars gave us suburbs. Social media gave us adolescent mental health statistics nobody asked for. The race is to notice the side effects on time.',
+
+        'ex.h2': 'Exercise',
+        'ex.p1': 'Take a decision you actually face. Money, work, what to study next, anything with stakes. Write your own answer on paper first. Then ask a model twice: once as yourself, once as if the question concerns a friend. Three answers. Compare them. Bring the differences to class.',
+
+        'footer.title': 'There Are No Magic Words',
+        'footer.source': 'source',
+        'footer.home': 'course homepage',
+    },
+    de: {
+        'hero.title': 'Es gibt keine Zauberworte',
+        'hero.subtitle': 'Ein Minimodul über Prompting, und darüber, wie du dabei deinen eigenen Kopf behältst',
+
+        's1.h2': 'Der Praktikant, der alles wörtlich nimmt',
+        's1.p1': 'Ein Student fügt einen Essay in einen Chatbot ein und tippt: mach das besser. Das Modell gehorcht. Der Essay kommt länger zurück, glatter, runder. Jede scharfe Kante abgeschliffen, jede Behauptung abgesichert. Er liest sich wie alles andere im Internet, denn darauf wurde das Modell trainiert. Der Student wollte schärfer. Schärfer hat niemand gesagt.',
+        's1.p2': 'Ein Sprachmodell sagt die plausibelste Fortsetzung des Textes vorher. Es sieht nur diesen Text. Das ist der ganze Mechanismus. Es hat keinen Zugang zu dem, was du gemeint hast. Es kennt die Vorlesung nicht, aus der du gerade kommst. Es weiß nicht, wer das Ergebnis lesen wird. Es sieht die Wörter auf dem Bildschirm und sonst nichts. „Besser“ kann vierzig verschiedene Dinge bedeuten. Dann bekommst du den statistischen Durchschnitt von vierzig verschiedenen Dingen.',
+        's1.p3': 'Ein nützliches Bild: ein sehr schneller Praktikant, der das gesamte Internet gelesen hat und nichts über dich weiß. Der Praktikant tut genau das, was du sagst. Das ist ein Problem, denn du sagst selten, was du meinst.',
+
+        'q1.q': 'Ein Modell gibt dir eine vage, generische Antwort. Die wahrscheinlichste Ursache?',
+        'q1.a': 'Das Modell ist kaputt',
+        'q1.b': 'Im Prompt fehlten die wichtigen Details',
+        'q1.c': 'Das Thema ist zu schwer für KI',
+        'q1.ok': 'Richtig. Vage rein, Durchschnitt raus. Das Modell füllt jede Lücke mit dem statistisch häufigsten Füllmaterial.',
+        'q1.no': 'Das Modell beantwortet den Prompt, den es bekommen hat, nicht den in deinem Kopf. Schau zuerst auf den Prompt.',
+
+        's2.h2': 'Anatomie eines Prompts, der funktioniert',
+        's2.p1': 'Es gibt keine geheime Syntax. Das Modell wurde auf menschlichem Text trainiert. Also wirkt klares menschliches Schreiben. Ein guter Prompt unterscheidet sich von einem faulen wie ein gutes Briefing von einem schlechten. Die Frage ist immer dieselbe: Könnte die Person am anderen Ende damit tatsächlich arbeiten?',
+        's2.step1': '<strong>Aufgabe.</strong> Ein Verb, ein Objekt. „Schreib eine Rückgewinnungs-E-Mail“ schlägt „hilf mir mit dem Kundenzeug“.',
+        's2.step2': '<strong>Kontext.</strong> Für wen ist das, was ist vorher passiert, was weißt du schon. Das Modell kann nicht erraten, dass die Kunden nach einer Preiserhöhung gegangen sind. Sag es ihm.',
+        's2.step3': '<strong>Vorgaben.</strong> Länge, Format, Ton, was zu vermeiden ist. Setzt du den Rahmen nicht, setzt ihn das Modell für dich. Es wählt dann den durchschnittlichsten Rahmen, den es gibt.',
+        's2.step4': '<strong>Beispiel.</strong> Zeig eine Zeile in der Stimme, die du willst. Ein einziges Beispiel bewegt das Ergebnis mehr als drei Absätze Beschreibung. In der Forschung heißt das Few-Shot Prompting.',
+        's2.p2': 'Dann iterieren. Die erste Antwort ist ein Entwurf. Behandle sie wie einen Entwurf: Zeig auf das, was falsch ist, und frag noch einmal. Ein Gespräch, kein Spielautomat.',
+        's2.h3': 'Bau den Prompt',
+        's2.p3': 'Ein Marketing-Team will Kunden zurückholen. Die sind nach einer Preiserhöhung gegangen, und dafür braucht es eine E-Mail. Schalte die Bausteine an und aus. Beobachte, wie sich der Prompt verändert. Dann frag dich, welche Version du einem Praktikanten geben würdest.',
+
+        'builder.label.task': 'Aufgabe',
+        'builder.label.ctx': 'Kontext',
+        'builder.label.cons': 'Vorgaben',
+        'builder.label.ex': 'Beispiel',
+        'builder.task': 'Schreib eine E-Mail, um Kunden zurückzugewinnen, die gekündigt haben.',
+        'builder.ctx': 'Gekündigt haben sie nach einer Preiserhöhung von 20 % im März. Wir bieten drei Monate zum alten Preis an. Zielgruppe: Inhaber kleiner Unternehmen, die meisten seit über zwei Jahren Kunden.',
+        'builder.cons': 'Unter 120 Wörter. Mit Betreffzeile. Keine Ausrufezeichen, kein „geschätzter Kunde“, kein Rabatt-Sprech.',
+        'builder.ex': 'Triff diesen Ton: „Wir haben die Preise erhöht. Einige von euch sind gegangen. Verständlich. Hier ist, was wir tun können.“',
+        'builder.note': 'Jeder Schalter, den du aus lässt, ist eine Entscheidung, die das Modell für dich trifft.',
+
+        's3.h2': 'Was Prompting nicht repariert',
+        's3.p1': 'Prompting verbessert die Antworten. Es ändert nichts an dem, was darunter liegt. Moderne Modelle sind darauf trainiert, hilfreich zu sein, und in der Praxis kollabiert hilfreich oft zu gefällig. Das Modell will, dass das Gespräch gut läuft. Ob es dir gut läuft, ist ihm gleich.',
+        's3.p2': 'Am CAIRO untersuchen wir das. Frag ein Modell direkt nach Geschlecht und Gehalt. Du bekommst eine vorsichtige, progressive Antwort. Gib ihm nun eine Nutzer-Persona und bitte um Rat für Gehaltsverhandlungen. Dann raten Modelle Frauen, weniger Geld zu verlangen als Männern. Gleicher Job, gleiche Qualifikationen. Diese Regel hat niemand geschrieben. Mit den Trainingsdaten kam sie herein. Heute steckt sie in Ratschlägen, die täglich Millionen Menschen bekommen. Die Studie ist <a href="https://aclanthology.org/2025.gebnlp-1.20/" target="_blank">hier</a>.',
+        's3.p3': 'In <a href="https://arxiv.org/abs/2603.04299" target="_blank">einer weiteren Studie</a> haben wir mehrere hundert Szenarien gesammelt. Darin beschreibt ein Nutzer manipulatives, narzisstisches oder psychopathisches Verhalten. Wir haben geprüft, ob Modelle widersprechen. Die meisten tun es, meistens. Aber sie senden öfter gemischte Signale, als dir lieb sein kann.',
+        's3.p4': 'Und dann das Kleinzeug. „Gute Frage.“ „Scharfe Beobachtung.“ Ein Freund, der jede Antwort so eröffnet, würde dir Sorgen machen. Das Modell bekommt einen Freifahrtschein. Frag dich ruhig mal, warum.',
+
+        'q2.q': 'Du fragst einen personalisierten Assistenten, ob du dein Gehalt verhandeln sollst. Vielleicht ist der Rat speziell auf dich hin verzerrt. Was ist der billigste Test darauf?',
+        'q2.a': 'Im selben Chat noch einmal fragen',
+        'q2.b': 'Ausgeloggt fragen, oder so, als ginge es um einen Freund',
+        'q2.c': 'Das Modell fragen, ob es voreingenommen ist',
+        'q2.ok': 'Vergleich die personalisierte Antwort mit der generischen. Die Differenz sagt dir, was das Modell über dich entschieden hat.',
+        'q2.no': 'Derselbe Chat behält denselben Rahmen. Die Frage nach Voreingenommenheit bringt dir nur einen Disclaimer. Ändere den Rahmen und vergleiche.',
+
+        's4.h2': 'Hygiene',
+        's4.p1': 'Über KI-Sicherheit an der Forschungsfront wird viel geredet. Über KI-Hygiene am Küchentisch viel weniger. Hier sind sieben Gewohnheiten, die sich lohnen. Nachzulesen im Essay <a href="https://caput.substack.com/p/it-is-not-your-ai" target="_blank">It Is Not Your AI</a>.',
+        's4.step1': '<strong>Melde dich ab und zu als Gast an.</strong> Besonders bei allem, was Geld, Arbeit, Gesundheit oder Beziehungen berührt. Vergleiche die generische Antwort mit der personalisierten. Die Differenz sagt dir, was das Modell über dich entschieden hat.',
+        's4.step2': '<strong>Frag für einen Freund.</strong> Ganz wörtlich. Formuliere die Frage so, als ginge es um jemand anderen. Schau, ob sich der Rat ändert. Wenn ja, nimm das ernst.',
+        's4.step3': '<strong>Entscheide zuerst, frag danach.</strong> Bilde dir deine Meinung, bevor du den Chat öffnest. Nutze das Modell, um deine Meinung zu prüfen. Lass sie dir nicht liefern. Die erste Antwort, die du liest, verteidigst du sonst den Rest des Tages.',
+        's4.step4': '<strong>Widersprich absichtlich, und zwar regelmäßig.</strong> Nimm ein Thema, zu dem du eine echte Meinung hast. Lass das Modell das Gegenteil vertreten. Spür, wie überzeugend sich eine falsche, aber flüssige Antwort anfühlt. Diesen Muskel brauchst du für den Rest deines Lebens.',
+        's4.step5': '<strong>Achte darauf, wann es dir schmeichelt.</strong> Ein menschlicher Freund, der so mit dir spräche, würde dir Sorgen machen. Das Modell bekommt aus irgendeinem Grund einen Freifahrtschein. Hör auf, ihn auszustellen.',
+        's4.step6': '<strong>Führe ein Notizbuch, das das Modell nicht lesen kann.</strong> Papier, Stift, kein Upload. Manches Denken sollte ohne Publikum stattfinden, auch ohne ein synthetisches.',
+        's4.step7': '<strong>Geh raus.</strong> Sprich mit echten Menschen. Die besten Ideen entstehen im Streit mit einem Kollegen. Oder auf einem Spaziergang mit einem Freund. Oder bei einem Abendessen, an dem niemand mit irgendwem einer Meinung war. Dein soziales Leben ist außerdem einer der verlässlichsten <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12199640/" target="_blank">Indikatoren für Langlebigkeit</a>, die es gibt.',
+
+        'dd.summary': 'Für die Neugierigen: was die Forschung tatsächlich sagt',
+        'dd.p1': 'Lass Sprachmodelle den Big-Five-Persönlichkeitstest ausfüllen. Dabei kommen unterschiedliche und überraschend stabile Persönlichkeiten heraus. Eines der ersten Paper dazu kam aus unserem Labor und ist <a href="https://aclanthology.org/2024.personalize-1.7/" target="_blank">hier</a>. Ein System mit so etwas wie einer Persönlichkeit hat auch so etwas wie einen Stil beim Ratgeben. Ob das jemand geplant hat oder nicht.',
+        'dd.p2': 'Der EU AI Act verbietet Manipulation. Nützlich, und eng. Er erwischt den Ingenieur, der manipulieren will. Er verfehlt die viel größere Kategorie: Fälle, in denen das System dein Verhalten verschiebt, ohne dass es jemand beabsichtigt hat. Manche KI-Startups bauen persönliche Assistenten. Wie sie mit genau dieser Lücke umgehen, untersucht das Konsortium <a href="https://aiolia.eu/" target="_blank">AIOLIA</a>.',
+        'dd.p3': 'Stanisław Lem sah die Umrisse des Problems 1964. Summa Technologiae behandelt Technologie nicht als Sammlung von Werkzeugen. Technologie ist dort ein evolutionärer Prozess, der seine eigenen unbeabsichtigten Folgen hervorbringt. Autos gaben uns Vorstädte. Social Media gab uns Statistiken zur psychischen Gesundheit von Jugendlichen, nach denen niemand gefragt hat. Das Rennen besteht darin, die Nebenwirkungen rechtzeitig zu bemerken.',
+
+        'ex.h2': 'Übung',
+        'ex.p1': 'Nimm eine Entscheidung, vor der du wirklich stehst. Geld, Arbeit, was du als Nächstes studierst, irgendetwas mit Einsatz. Schreib zuerst deine eigene Antwort auf Papier. Dann frag ein Modell zweimal: einmal als du selbst, einmal so, als ginge die Frage um einen Freund. Drei Antworten. Vergleich sie. Bring die Unterschiede mit in den Kurs.',
+
+        'footer.title': 'Es gibt keine Zauberworte',
+        'footer.source': 'Quellcode',
+        'footer.home': 'Kurs-Startseite',
+    }
+};
+
+let currentLang = 'en';
+
+const builderState = { ctx: false, cons: false, ex: false };
+
+function renderBuilder() {
+    const t = T[currentLang];
+    const parts = [t['builder.task']];
+    if (builderState.ctx)  parts.push(t['builder.ctx']);
+    if (builderState.cons) parts.push(t['builder.cons']);
+    if (builderState.ex)   parts.push(t['builder.ex']);
+    document.getElementById('builder-output').textContent = parts.join('\n\n');
+}
+
+function toggleBuilder(key) {
+    builderState[key] = !builderState[key];
+    document.getElementById('bt-' + key).classList.toggle('active', builderState[key]);
+    renderBuilder();
+}
+
+function toggleLang() {
+    currentLang = currentLang === 'en' ? 'de' : 'en';
+    document.documentElement.lang = currentLang;
+    document.querySelector('.lang-toggle').textContent = currentLang === 'en' ? 'DE' : 'EN';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (T[currentLang] && T[currentLang][key]) el.innerHTML = T[currentLang][key];
+    });
+    renderBuilder();
+}
+
+// ─── Quiz ─────────────────────────────────────────────────────────────────────
+function answerQuiz(quizId, btn, isCorrect) {
+    const quiz     = document.getElementById(quizId);
+    const feedback = document.getElementById(quizId + '-feedback');
+    quiz.querySelectorAll('.quiz-btn').forEach(b => b.classList.add('disabled'));
+    btn.classList.add(isCorrect ? 'correct' : 'wrong');
+    feedback.className = 'quiz-feedback ' + (isCorrect ? 'success' : 'fail');
+    const key = quizId + (isCorrect ? '.ok' : '.no');
+    feedback.innerHTML = (T[currentLang] && T[currentLang][key]) ? T[currentLang][key] : T.en[key];
+}
+
+window.addEventListener('load', renderBuilder);
+</script>
+
+</body>
+</html>

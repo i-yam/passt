@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Open Questions &middot; AI Foundations</title>
+
+<!-- KaTeX -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        background-color: #141420;
+        color: #e8e8f0;
+        font-family: 'Georgia', 'Times New Roman', serif;
+        line-height: 1.8;
+        font-size: 18px;
+    }
+
+    .container { max-width: 820px; margin: 0 auto; padding: 0 24px; }
+
+    /* === Language toggle === */
+    .lang-toggle {
+        position: fixed; top: 16px; right: 16px;
+        background: #2a2a44; border: 1px solid #4a4a70; border-radius: 20px;
+        padding: 6px 14px; cursor: pointer; font-size: 13px;
+        font-family: sans-serif; color: #a0a0d0; z-index: 100;
+        transition: background 0.2s;
+    }
+    .lang-toggle:hover { background: #363658; }
+
+    /* Hero */
+    .hero { text-align: center; padding: 80px 24px 30px; }
+    .hero h1 {
+        font-size: 42px; font-weight: 700; color: #fff;
+        line-height: 1.3; max-width: 700px; margin: 0 auto;
+    }
+    .hero .subtitle { margin-top: 16px; color: #888; font-size: 16px; font-style: italic; }
+
+    /* Card (shared box, matches .quiz) */
+    .card {
+        background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px;
+        padding: 28px; margin: 18px 0;
+    }
+    .qtag {
+        font-family: sans-serif; font-size: 12px; letter-spacing: .12em;
+        text-transform: uppercase; color: #6f6fa0; margin-bottom: 14px;
+    }
+    .qtext { font-size: 21px; color: #fff; line-height: 1.4; margin-bottom: 18px; }
+
+    /* Class section header */
+    .cls {
+        font-size: 26px; color: #fff; line-height: 1.3;
+        margin: 46px 0 4px; padding-top: 24px; border-top: 1px solid #2a2a40;
+    }
+    .cls .num { font-family: sans-serif; font-size: 13px; letter-spacing: .12em;
+        text-transform: uppercase; color: #6f6fa0; display: block; margin-bottom: 2px; }
+
+    /* Feedback / explanation */
+    .explain {
+        margin-top: 16px; font-size: 16px; line-height: 1.6; display: none;
+        border-left: 3px solid #50b878; padding: 4px 0 4px 16px; color: #ccc;
+    }
+    .explain.show { display: block; }
+    .explain .tag { font-family: sans-serif; font-size: 13px; color: #70e898; display: block; margin-bottom: 4px; }
+
+    /* Buttons */
+    .btn {
+        font-family: inherit; font-size: 16px; cursor: pointer; border-radius: 8px;
+        padding: 12px 26px; transition: background 0.2s, border-color 0.2s, opacity 0.2s;
+        border: 1px solid #5a5a80; background: #3a3a60; color: #fff;
+    }
+    .btn:hover { background: #45456f; }
+    .btn.ghost { background: transparent; border-color: #3a3a55; color: #a0a0d0; }
+    .btn.ghost:hover { background: #1c1c2e; }
+    .reveal { padding: 9px 18px; font-size: 15px; }
+
+    /* Intro panel reuses .card */
+    .panel h2 { font-size: 28px; color: #fff; line-height: 1.3; margin-bottom: 18px; }
+    .panel p { color: #ccc; margin-bottom: 16px; }
+    .meta {
+        display: flex; gap: 24px; flex-wrap: wrap; margin: 18px 0;
+        font-family: sans-serif; font-size: 13px; color: #888;
+    }
+    .meta b { color: #e0e0f0; font-weight: 600; }
+    .fine { font-size: 14px; color: #888; font-style: italic; }
+    .controls { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 6px; }
+
+    .download {
+        display: inline-flex; align-items: center; gap: 10px; margin: 4px 0 18px;
+        font-family: sans-serif; font-size: 14px; color: #80b4f0;
+        border: 1px solid #2a2a40; background: #16162a; border-radius: 8px;
+        padding: 12px 18px; transition: background 0.2s, border-color 0.2s;
+    }
+    .download:hover { background: #1c1c2e; border-color: #3a3a55; text-decoration: none; }
+    .download .ic { font-style: normal; }
+
+    a { color: #80b4f0; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    footer { text-align: center; padding: 40px 24px; color: #444; font-size: 14px; }
+
+    @media (max-width: 680px) {
+        .hero h1 { font-size: 28px; }
+        body { font-size: 16px; }
+        .qtext { font-size: 19px; }
+        .cls { font-size: 22px; }
+        .panel h2 { font-size: 24px; }
+    }
+</style>
+</head>
+<body>
+
+<button class="lang-toggle" onclick="toggleLang()">DE</button>
+
+<!-- Hero -->
+<div class="hero">
+    <h1 data-i18n="title">Open Questions</h1>
+    <p class="subtitle" data-i18n="hook"></p>
+</div>
+
+<div class="container">
+
+  <!-- INTRO -->
+  <section id="intro" class="card panel">
+    <h2 data-i18n="iH">Before you begin</h2>
+    <p data-i18n="iP1"></p>
+    <a class="download" id="dl" href="open_questions.md" download>
+      <i class="ic">&#8595;</i><span data-i18n="dl"></span>
+    </a>
+    <div class="meta">
+      <span><b data-i18n="iM1"></b></span>
+      <span><b data-i18n="iM2"></b></span>
+      <span><b data-i18n="iM3"></b></span>
+    </div>
+    <p class="fine" data-i18n="iP2"></p>
+    <div class="controls">
+      <button class="btn ghost" onclick="revealAll(true)" data-i18n="showAll">Reveal all answers</button>
+      <button class="btn ghost" onclick="revealAll(false)" data-i18n="hideAll">Hide all answers</button>
+    </div>
+  </section>
+
+  <!-- QUESTION LIST -->
+  <div id="list"></div>
+
+</div>
+
+<footer><span id="foot"></span></footer>
+
+<script>
+const Q = [
+{c:1,en:{q:`Turing did not try to answer "Can machines think?" He replaced it with a different question. State the question he substituted and explain in one or two sentences why the substitute was easier to work with.`,a:`The imitation game: can a machine hold a text conversation well enough that a judge cannot reliably tell it from a person. The original question depends on undefined words like "think," so Turing swapped it for one you can actually run and score.`},de:{q:`Turing versuchte nicht, „Können Maschinen denken?“ zu beantworten. Er ersetzte die Frage durch eine andere. Nennen Sie die Ersatzfrage und erklären Sie in ein bis zwei Sätzen, warum sie leichter zu bearbeiten war.`,a:`Das Imitationsspiel: Kann eine Maschine ein Textgespräch so gut führen, dass ein Prüfer sie nicht zuverlässig von einem Menschen unterscheiden kann? Die ursprüngliche Frage hängt an undefinierten Wörtern wie „denken“, also tauschte Turing sie gegen eine, die man tatsächlich durchführen und bewerten kann.`}},
+{c:1,en:{q:`A friend says their horoscope app is scientific because it has been right about their mood many times. Use Popper to explain what is wrong with that defense, and say what would have to be true for the app to count as falsifiable.`,a:`Being confirmed by hits is not the test. A claim is scientific only if some observation could in principle prove it wrong. The app would need a prediction specific enough that a clear outcome could contradict it.`},de:{q:`Ein Freund sagt, seine Horoskop-App sei wissenschaftlich, weil sie seine Stimmung schon oft richtig getroffen hat. Erklären Sie mit Popper, was an dieser Verteidigung falsch ist, und sagen Sie, was zutreffen müsste, damit die App als falsifizierbar gilt.`,a:`Durch Treffer bestätigt zu werden ist nicht der Test. Eine Aussage ist nur wissenschaftlich, wenn eine Beobachtung sie im Prinzip widerlegen könnte. Die App bräuchte eine Vorhersage, die so konkret ist, dass ein klares Ergebnis ihr widersprechen könnte.`}},
+{c:1,en:{q:`A retailer has two years of purchase records with no labels and wants to find natural groups of customers. Name the learning category and explain what separates it from supervised learning.`,a:`Unsupervised learning. There are no target labels, so the model looks for structure in the data itself, rather than learning a mapping from inputs to known correct outputs.`},de:{q:`Ein Händler hat zwei Jahre Kaufhistorie ohne Labels und möchte natürliche Kundengruppen finden. Nennen Sie die Lernkategorie und erklären Sie, was sie vom überwachten Lernen trennt.`,a:`Unüberwachtes Lernen. Es gibt keine Ziellabels, also sucht das Modell nach Struktur in den Daten selbst, statt eine Abbildung von Eingaben auf bekannte korrekte Ausgaben zu lernen.`}},
+{c:1,en:{q:`Give one capability you would accept as evidence of strong (general) AI but not of narrow AI, and explain the distinction your example draws.`,a:`Any broad, transferable ability (reasoning across unrelated domains, learning a new kind of task without retraining) rather than one narrow benchmark win. The point is generality across domains versus competence at a single task.`},de:{q:`Nennen Sie eine Fähigkeit, die Sie als Beleg für starke (allgemeine) KI anerkennen würden, aber nicht für enge KI, und erklären Sie den Unterschied, den Ihr Beispiel zeigt.`,a:`Jede breite, übertragbare Fähigkeit (Schlussfolgern über unverwandte Bereiche, das Lernen einer neuen Art von Aufgabe ohne Neutraining) statt eines einzelnen engen Benchmark-Siegs. Es geht um Allgemeinheit über Bereiche hinweg gegenüber Kompetenz bei einer einzelnen Aufgabe.`}},
+
+{c:2,en:{q:`Sort each into deduction or induction, and justify each in one sentence. (a) "Every customer who churned last quarter had gone sixty days without a purchase, so this customer at sixty days will churn too." (b) "Policy: any account inactive ninety days is closed. This account is at ninety-two days, so it will be closed."`,a:`(a) is induction, generalizing from observed cases to a rule that is only probable. (b) is deduction, applying a stated rule to a case where the conclusion is certain if the rule holds.`},de:{q:`Ordnen Sie jede Aussage der Deduktion oder Induktion zu und begründen Sie jede in einem Satz. (a) „Jeder Kunde, der letztes Quartal abwanderte, hatte sechzig Tage lang nichts gekauft, also wird auch dieser Kunde bei sechzig Tagen abwandern.“ (b) „Richtlinie: Jedes Konto, das neunzig Tage inaktiv ist, wird geschlossen. Dieses Konto ist bei zweiundneunzig Tagen, also wird es geschlossen.“`,a:`(a) ist Induktion, eine Verallgemeinerung von beobachteten Fällen zu einer nur wahrscheinlichen Regel. (b) ist Deduktion, die Anwendung einer festgelegten Regel auf einen Fall, bei dem die Schlussfolgerung sicher ist, wenn die Regel gilt.`}},
+{c:2,en:{q:`Anscombe built four datasets with the same mean, variance, correlation, and fitted line that look nothing alike when plotted. What working habit is this meant to teach, and what mistake does it warn against?`,a:`Plot the data before trusting any summary statistic. It warns against reading identical numbers as identical data. Statistical similarity is not the same as similarity.`},de:{q:`Anscombe baute vier Datensätze mit demselben Mittelwert, derselben Varianz, Korrelation und Regressionsgeraden, die geplottet völlig verschieden aussehen. Welche Arbeitsgewohnheit soll das lehren, und vor welchem Fehler warnt es?`,a:`Plotten Sie die Daten, bevor Sie irgendeiner Kennzahl vertrauen. Es warnt davor, identische Zahlen als identische Daten zu lesen. Statistische Ähnlichkeit ist nicht dasselbe wie Ähnlichkeit.`}},
+{c:2,en:{q:`Explain the trade-off between a parametric and a non-parametric model. Give one situation where you would accept the assumptions of a parametric model and one where you would not.`,a:`Parametric fixes a functional form with a set number of parameters: simpler and more interpretable, but it can miss the real shape. Non-parametric lets the data define the shape: more flexible, but hungrier for data. Accept the assumptions when you have a clear reason to expect that shape; refuse them when the pattern is unknown.`},de:{q:`Erklären Sie den Trade-off zwischen einem parametrischen und einem nicht-parametrischen Modell. Nennen Sie eine Situation, in der Sie die Annahmen eines parametrischen Modells akzeptieren würden, und eine, in der nicht.`,a:`Parametrisch legt eine funktionale Form mit fester Parameterzahl fest: einfacher und besser interpretierbar, kann aber die echte Form verfehlen. Nicht-parametrisch lässt die Daten die Form bestimmen: flexibler, aber datenhungriger. Akzeptieren Sie die Annahmen, wenn Sie einen klaren Grund haben, diese Form zu erwarten; lehnen Sie sie ab, wenn das Muster unbekannt ist.`}},
+{c:2,en:{q:`Hand-coded rule systems were largely displaced by statistical learning. Give two reasons rule-based expert systems hit a wall as the problems grew.`,a:`Every rule has to be written and maintained by hand, which is expensive. Exceptions multiply and the rules become brittle. Statistical learning reads patterns from data instead of enumerating them.`},de:{q:`Handkodierte Regelsysteme wurden weitgehend vom statistischen Lernen verdrängt. Nennen Sie zwei Gründe, warum regelbasierte Expertensysteme mit wachsenden Problemen an eine Grenze stießen.`,a:`Jede Regel muss von Hand geschrieben und gepflegt werden, was teuer ist. Ausnahmen vermehren sich, und die Regeln werden brüchig. Statistisches Lernen liest Muster aus Daten, statt sie aufzuzählen.`}},
+
+{c:3,en:{q:`Ordinary least squares gives the exact best-fit line in one step. Give one reason a practitioner might reach for gradient descent instead of the closed-form solution.`,a:`The closed form gets expensive or impractical at scale (very many features or rows), and gradient descent generalizes to models that have no closed form.`},de:{q:`Die Methode der kleinsten Quadrate liefert die exakte beste Gerade in einem Schritt. Nennen Sie einen Grund, warum man dennoch zum Gradientenabstieg statt zur geschlossenen Lösung greifen könnte.`,a:`Die geschlossene Lösung wird bei großem Umfang teuer oder unpraktisch (sehr viele Merkmale oder Zeilen), und der Gradientenabstieg lässt sich auf Modelle verallgemeinern, die keine geschlossene Lösung haben.`}},
+{c:3,en:{q:`Explain what the loss measures in linear regression and what a residual is. Say how the two are related.`,a:`The loss measures how far the predictions sit from the actual values, commonly the mean of the squared residuals. A residual is one such gap, observed minus predicted. The loss is built by summing or averaging the residuals.`},de:{q:`Erklären Sie, was der Verlust in der linearen Regression misst und was ein Residuum ist. Sagen Sie, wie beide zusammenhängen.`,a:`Der Verlust misst, wie weit die Vorhersagen von den tatsächlichen Werten entfernt liegen, meist der Mittelwert der quadrierten Residuen. Ein Residuum ist ein solcher Abstand, beobachtet minus vorhergesagt. Der Verlust entsteht durch Summieren oder Mitteln der Residuen.`}},
+{c:3,en:{q:`Batch gradient descent is precise and can get stuck. Stochastic gradient descent is noisy and often works better. Explain how the noise can be an advantage.`,a:`The per-sample updates are cheap and jittery. That jitter can knock the search out of a shallow local minimum or flat spot where the clean version would settle, so a sloppier path can reach a better place.`},de:{q:`Batch-Gradientenabstieg ist präzise und kann steckenbleiben. Stochastischer Gradientenabstieg ist verrauscht und funktioniert oft besser. Erklären Sie, wie das Rauschen ein Vorteil sein kann.`,a:`Die Aktualisierungen pro Stichprobe sind billig und zittrig. Dieses Zittern kann die Suche aus einem flachen lokalen Minimum oder einer flachen Stelle stoßen, wo die saubere Variante sich einpendeln würde, sodass ein schlampigerer Weg einen besseren Ort erreicht.`}},
+{c:3,en:{q:`The learning rate is set very high and the loss keeps growing instead of shrinking. Explain what is going wrong, in terms of the loss surface.`,a:`The steps are too large, so instead of stepping down toward the minimum the weights overshoot it and land higher up the surface each time. The loss diverges rather than converging.`},de:{q:`Die Lernrate ist sehr hoch gesetzt, und der Verlust wächst, statt zu sinken. Erklären Sie mit Blick auf die Verlustfläche, was schiefgeht.`,a:`Die Schritte sind zu groß, also steigen die Gewichte nicht zum Minimum hinab, sondern schießen darüber hinaus und landen jedes Mal höher auf der Fläche. Der Verlust divergiert, statt zu konvergieren.`}},
+
+{c:4,en:{q:`Explain the difference between a global and a local model in one or two sentences, and name one model of each type from this course.`,a:`A global model fits one rule to all the data (linear regression). A local model lets different regions behave differently (K-NN). Global commits to a single equation; local decides based on where you are.`},de:{q:`Erklären Sie den Unterschied zwischen einem globalen und einem lokalen Modell in ein bis zwei Sätzen und nennen Sie je ein Modell aus diesem Kurs.`,a:`Ein globales Modell passt eine Regel an alle Daten an (lineare Regression). Ein lokales Modell lässt verschiedene Regionen sich unterschiedlich verhalten (K-NN). Global legt sich auf eine Gleichung fest; lokal entscheidet danach, wo man ist.`}},
+{c:4,en:{q:`A K-NN classifier is run with K equal to 1, then with K equal to 50, on the same data. Describe how the decision boundary changes and what happens to bias and variance.`,a:`At K=1 the boundary is jagged and follows every point: low bias, high variance. At K=50 it smooths out: higher bias, lower variance. Larger K averages over more neighbours.`},de:{q:`Ein K-NN-Klassifikator läuft mit K gleich 1 und dann mit K gleich 50 auf denselben Daten. Beschreiben Sie, wie sich die Entscheidungsgrenze ändert und was mit Bias und Varianz geschieht.`,a:`Bei K=1 ist die Grenze zackig und folgt jedem Punkt: niedriger Bias, hohe Varianz. Bei K=50 glättet sie sich: höherer Bias, niedrigere Varianz. Größeres K mittelt über mehr Nachbarn.`}},
+{c:4,en:{q:`Two analysts use the same K-NN model on the same point but pick different distance metrics, and they get different predictions. Explain how that is possible.`,a:`The metric decides which points count as near, so it changes which neighbours get to vote. Euclidean, Manhattan, and cosine can select different neighbour sets for the same point, and different voters give a different answer.`},de:{q:`Zwei Analysten verwenden dasselbe K-NN-Modell auf denselben Punkt, wählen aber verschiedene Distanzmetriken und erhalten verschiedene Vorhersagen. Erklären Sie, wie das möglich ist.`,a:`Die Metrik entscheidet, welche Punkte als nah gelten, also ändert sie, welche Nachbarn abstimmen. Euklidisch, Manhattan und Kosinus können für denselben Punkt verschiedene Nachbarmengen auswählen, und andere Wähler ergeben eine andere Antwort.`}},
+{c:4,en:{q:`Explain in plain terms why K-NN gets worse as you add more features. Name the phenomenon.`,a:`The curse of dimensionality. As features pile up the points spread out and distances flatten toward each other, so nearest stops picking out anything meaningfully close.`},de:{q:`Erklären Sie in einfachen Worten, warum K-NN mit mehr Merkmalen schlechter wird. Nennen Sie das Phänomen.`,a:`Der Fluch der Dimensionalität. Je mehr Merkmale hinzukommen, desto weiter verteilen sich die Punkte und desto mehr gleichen sich die Abstände an, sodass „am nächsten“ nichts wirklich Nahes mehr herausgreift.`}},
+{c:4,en:{q:`In high-dimensional space, most of a cube's volume sits in its corners and two random vectors are almost perpendicular. Why should someone building a distance-based model care?`,a:`The model leans on distance and nearness meaning something, and in high dimensions they stop behaving the way intuition from two or three dimensions expects. Points concentrate at similar distances and directions decorrelate, so the model's basic assumption weakens.`},de:{q:`Im hochdimensionalen Raum liegt das meiste Volumen eines Würfels in seinen Ecken, und zwei zufällige Vektoren sind fast senkrecht. Warum sollte das jemanden interessieren, der ein distanzbasiertes Modell baut?`,a:`Das Modell stützt sich darauf, dass Distanz und Nähe etwas bedeuten, und in hohen Dimensionen verhalten sie sich nicht mehr so, wie es die Intuition aus zwei oder drei Dimensionen erwartet. Punkte konzentrieren sich auf ähnliche Abstände und Richtungen entkoppeln sich, sodass die Grundannahme des Modells schwächer wird.`}},
+
+{c:5,en:{q:`A model scores near-perfect on the training data and poorly on new data. Name what is happening and explain how regularization is meant to help.`,a:`Overfitting: the model has memorized the training set, including its noise. Regularization adds a penalty for complexity or large weights, trading a little training fit for a model that holds up better on unseen data.`},de:{q:`Ein Modell erzielt auf den Trainingsdaten nahezu perfekte Werte und auf neuen Daten schlechte. Nennen Sie, was passiert, und erklären Sie, wie Regularisierung helfen soll.`,a:`Überanpassung: Das Modell hat den Trainingssatz samt seinem Rauschen auswendig gelernt. Regularisierung fügt eine Strafe für Komplexität oder große Gewichte hinzu und tauscht etwas Trainingsanpassung gegen ein Modell, das auf ungesehenen Daten besser hält.`}},
+{c:5,en:{q:`Ridge and Lasso both shrink coefficients. Describe the difference in what they do to those coefficients, and say which one performs feature selection.`,a:`Ridge (L2) shrinks all coefficients toward zero but keeps them, spreading weight across correlated features. Lasso (L1) can push individual coefficients exactly to zero, dropping features. Lasso is the one that selects features.`},de:{q:`Ridge und Lasso verkleinern beide die Koeffizienten. Beschreiben Sie den Unterschied darin, was sie mit den Koeffizienten tun, und sagen Sie, welches Merkmalsauswahl betreibt.`,a:`Ridge (L2) verkleinert alle Koeffizienten Richtung null, behält sie aber, und verteilt das Gewicht über korrelierte Merkmale. Lasso (L1) kann einzelne Koeffizienten exakt auf null setzen und Merkmale entfernen. Lasso ist das, das Merkmale auswählt.`}},
+{c:5,en:{q:`The regularization strength is turned up steadily from low to high. Describe what happens to bias and to variance as it climbs.`,a:`Bias rises and variance falls. More regularization means a simpler, more constrained model, which fits the training data less closely but swings around less when the data changes.`},de:{q:`Die Regularisierungsstärke wird stetig von niedrig auf hoch gedreht. Beschreiben Sie, was mit Bias und mit Varianz geschieht, während sie steigt.`,a:`Der Bias steigt und die Varianz sinkt. Mehr Regularisierung heißt ein einfacheres, stärker eingeschränktes Modell, das die Trainingsdaten weniger genau anpasst, aber weniger schwankt, wenn sich die Daten ändern.`}},
+{c:5,en:{q:`A marketing dataset has two hundred candidate features and you suspect only a handful matter. Which penalty would you reach for, and why?`,a:`Lasso (L1), because it can zero out the coefficients of the features that do not help, leaving a smaller model built from the ones that do. That is feature selection in disguise.`},de:{q:`Ein Marketing-Datensatz hat zweihundert Kandidatenmerkmale, und Sie vermuten, dass nur eine Handvoll zählt. Zu welcher Strafe würden Sie greifen und warum?`,a:`Lasso (L1), weil es die Koeffizienten der nicht hilfreichen Merkmale auf null setzen kann und ein kleineres Modell aus den nützlichen übriglässt. Das ist verkappte Merkmalsauswahl.`}},
+
+{c:6,en:{q:`Logistic regression outputs a number between 0 and 1. Explain what that number is and how the model turns it into a class decision.`,a:`It is a probability, produced by squashing the linear score through the sigmoid. A threshold (often 0.5) then converts the probability into a class: above the line one class, below it the other.`},de:{q:`Die logistische Regression gibt eine Zahl zwischen 0 und 1 aus. Erklären Sie, was diese Zahl ist und wie das Modell daraus eine Klassenentscheidung macht.`,a:`Es ist eine Wahrscheinlichkeit, erzeugt durch das Quetschen des linearen Scores durch die Sigmoidfunktion. Ein Schwellenwert (oft 0,5) wandelt die Wahrscheinlichkeit dann in eine Klasse um: über der Linie die eine Klasse, darunter die andere.`}},
+{c:6,en:{q:`A churn model reports 95% accuracy on a dataset where 95% of customers do not churn. Explain why that accuracy figure is close to worthless here, and name a metric that would tell you more.`,a:`A model that always predicts "will not churn" also scores 95% while catching zero churners. Accuracy hides that on imbalanced classes. Precision, recall, or F1 would reveal how it does on the churners you care about.`},de:{q:`Ein Abwanderungsmodell meldet 95 % Accuracy auf einem Datensatz, in dem 95 % der Kunden nicht abwandern. Erklären Sie, warum diese Zahl hier fast wertlos ist, und nennen Sie eine aussagekräftigere Metrik.`,a:`Ein Modell, das immer „wandert nicht ab“ vorhersagt, erzielt ebenfalls 95 % und fängt null Abwanderer. Accuracy verbirgt das bei unausgewogenen Klassen. Precision, Recall oder F1 würden zeigen, wie es bei den Abwanderern abschneidet, die Sie interessieren.`}},
+{c:6,en:{q:`Define precision and recall in your own words. Give one business situation where you would optimize for precision and one where you would optimize for recall.`,a:`Precision: of the cases the model flagged, how many were right. Recall: of the cases that were actually positive, how many it caught. Optimize precision when acting on a flag is costly (an expensive outbound campaign). Optimize recall when a miss is costly (fraud, disease).`},de:{q:`Definieren Sie Precision und Recall in eigenen Worten. Nennen Sie eine geschäftliche Situation, in der Sie auf Precision optimieren würden, und eine für Recall.`,a:`Precision: Von den Fällen, die das Modell markiert hat, wie viele richtig waren. Recall: Von den tatsächlich positiven Fällen, wie viele es erfasst hat. Optimieren Sie Precision, wenn das Handeln auf eine Markierung teuer ist (eine teure Outbound-Kampagne). Optimieren Sie Recall, wenn ein Verfehlen teuer ist (Betrug, Krankheit).`}},
+{c:6,en:{q:`A test is 99% accurate and a customer tests positive for a trait held by only 1 in 1000 people. Explain roughly why the real chance the customer has the trait is far below 99%, and name what dominates the result.`,a:`The trait is rare, so among all positives the false positives from the large healthy majority outnumber the few true cases. The base rate (the prior) dominates, not the test's accuracy.`},de:{q:`Ein Test ist zu 99 % genau, und ein Kunde wird positiv auf ein Merkmal getestet, das nur 1 von 1000 Personen hat. Erklären Sie grob, warum die tatsächliche Chance weit unter 99 % liegt, und nennen Sie, was das Ergebnis bestimmt.`,a:`Das Merkmal ist selten, also übersteigen unter allen Positiven die falsch Positiven aus der großen gesunden Mehrheit die wenigen echten Fälle. Die Basisrate (die Vorwahrscheinlichkeit) bestimmt das Ergebnis, nicht die Genauigkeit des Tests.`}},
+{c:6,en:{q:`Explain what moving the decision threshold up or down does to precision and recall, and why you cannot push both to the maximum at once.`,a:`Raising the threshold flags fewer, more confident cases, so precision rises and recall falls. Lowering it catches more, so recall rises and precision falls. They trade against each other, which is why one threshold cannot maximize both.`},de:{q:`Erklären Sie, was das Verschieben des Entscheidungsschwellenwerts nach oben oder unten mit Precision und Recall macht, und warum Sie nicht beide zugleich maximieren können.`,a:`Ein höherer Schwellenwert markiert weniger, sicherere Fälle, also steigt Precision und Recall fällt. Ein niedrigerer erfasst mehr, also steigt Recall und Precision fällt. Sie handeln gegeneinander, weshalb ein einzelner Schwellenwert nicht beide maximieren kann.`}},
+
+{c:7,en:{q:`A decision tree plays twenty questions greedily. Explain what "greedy" means here and why the first question matters most.`,a:`Greedy means it picks the single best split available right now, without looking ahead to how later splits will play out. The first split divides the whole dataset, so a good or bad choice there shapes everything below it.`},de:{q:`Ein Entscheidungsbaum spielt „Zwanzig Fragen“ gierig. Erklären Sie, was „gierig“ hier bedeutet und warum die erste Frage am meisten zählt.`,a:`Gierig heißt, er wählt den einzelnen besten Split, der jetzt verfügbar ist, ohne vorauszuschauen, wie spätere Splits ausfallen. Der erste Split teilt den gesamten Datensatz, also prägt eine gute oder schlechte Wahl dort alles darunter.`}},
+{c:7,en:{q:`Entropy and Gini both measure impurity at a node. Say when impurity is highest and when it is zero, and explain what information gain rewards.`,a:`Impurity is highest when the classes are evenly mixed and zero when a node holds a single class. Information gain rewards the split that drops impurity the most, moving from mixed nodes toward pure ones.`},de:{q:`Entropie und Gini messen beide die Unreinheit an einem Knoten. Sagen Sie, wann die Unreinheit am höchsten und wann sie null ist, und erklären Sie, was der Informationsgewinn belohnt.`,a:`Die Unreinheit ist am höchsten, wenn die Klassen gleichmäßig gemischt sind, und null, wenn ein Knoten nur eine Klasse enthält. Der Informationsgewinn belohnt den Split, der die Unreinheit am stärksten senkt, von gemischten Knoten hin zu reinen.`}},
+{c:7,en:{q:`On the Titanic data, "sex" turns out to be a better first split than "age." Explain what makes one feature a better split than another, in terms of impurity.`,a:`The better feature is the one whose split leaves the resulting groups purer, that is, cuts impurity more. Splitting on sex separates survivors from non-survivors more cleanly than age does, so it gives more information gain.`},de:{q:`Bei den Titanic-Daten ist „Geschlecht“ ein besserer erster Split als „Alter“. Erklären Sie mit Blick auf die Unreinheit, was ein Merkmal zu einem besseren Split macht.`,a:`Das bessere Merkmal ist das, dessen Split die entstehenden Gruppen reiner lässt, also die Unreinheit stärker senkt. Ein Split nach Geschlecht trennt Überlebende von Nicht-Überlebenden sauberer als das Alter, gibt also mehr Informationsgewinn.`}},
+{c:7,en:{q:`A credit-scoring tree splits on postal code, and the bank never fed it the applicant's ethnicity. Explain how the model could still end up discriminating.`,a:`Postal code can correlate with ethnicity and act as a stand-in for it. The tree learns the proxy and reproduces the protected pattern, so leaving the sensitive feature out does not remove the bias if a correlated feature carries it.`},de:{q:`Ein Kreditscoring-Baum splittet nach Postleitzahl, und die Bank hat ihm nie die Ethnie des Antragstellers gegeben. Erklären Sie, wie das Modell dennoch diskriminieren könnte.`,a:`Die Postleitzahl kann mit Ethnie korrelieren und als deren Stellvertreter wirken. Der Baum lernt den Stellvertreter und reproduziert das geschützte Muster, sodass das Weglassen des sensiblen Merkmals die Verzerrung nicht beseitigt, wenn ein korreliertes Merkmal sie trägt.`}},
+
+{c:8,en:{q:`One deep tree overfits, but a forest of trees generalizes. Explain why averaging many diverse, slightly-wrong trees beats a single tree.`,a:`If the trees are diverse, their errors point in different directions and tend to cancel when averaged, which lowers variance. A single tree has nothing to cancel its mistakes against.`},de:{q:`Ein einzelner tiefer Baum überanpasst, ein Wald aus Bäumen verallgemeinert. Erklären Sie, warum das Mitteln vieler vielfältiger, leicht falscher Bäume einen einzelnen Baum schlägt.`,a:`Wenn die Bäume vielfältig sind, zeigen ihre Fehler in verschiedene Richtungen und heben sich beim Mitteln tendenziell auf, was die Varianz senkt. Ein einzelner Baum hat nichts, wogegen sich seine Fehler aufheben.`}},
+{c:8,en:{q:`Explain the core difference between bagging and boosting in how the base learners are trained.`,a:`Bagging trains its learners independently and in parallel, each on a resampled version of the data, then averages them. Boosting trains them in sequence, each new learner focusing on the errors the previous ones made.`},de:{q:`Erklären Sie den Kernunterschied zwischen Bagging und Boosting darin, wie die Basislerner trainiert werden.`,a:`Bagging trainiert seine Lerner unabhängig und parallel, jeden auf einer neu gezogenen Version der Daten, und mittelt sie dann. Boosting trainiert sie nacheinander, wobei jeder neue Lerner sich auf die Fehler der vorherigen konzentriert.`}},
+{c:8,en:{q:`Gradient boosting fits each new tree to the leftovers of the trees before it. Explain what "leftovers" means here and what the learning rate controls.`,a:`The leftovers are the residuals, the part of the target the current ensemble still gets wrong. Each new tree is fit to those. The learning rate controls how large a step each tree contributes, trading speed for the risk of overfitting.`},de:{q:`Gradient Boosting passt jeden neuen Baum an die Reste der vorherigen an. Erklären Sie, was „Reste“ hier bedeutet und was die Lernrate steuert.`,a:`Die Reste sind die Residuen, der Teil des Ziels, den das aktuelle Ensemble noch falsch macht. Jeder neue Baum wird an diese angepasst. Die Lernrate steuert, wie großen Schritt jeder Baum beisteuert, und tauscht Tempo gegen das Risiko der Überanpassung.`}},
+{c:8,en:{q:`For a random forest to help, its trees have to be diverse. Name the two sources of randomness that make the trees differ.`,a:`Each tree trains on its own bootstrap sample of the rows, and at each split it may only choose from a random subset of the features. Together these make the trees disagree.`},de:{q:`Damit ein Random Forest hilft, müssen seine Bäume vielfältig sein. Nennen Sie die beiden Quellen des Zufalls, die die Bäume verschieden machen.`,a:`Jeder Baum trainiert auf seiner eigenen Bootstrap-Stichprobe der Zeilen, und an jedem Split darf er nur aus einer zufälligen Teilmenge der Merkmale wählen. Zusammen lassen sie die Bäume uneins sein.`}},
+
+{c:9,en:{q:`Why do we evaluate a model on held-out data instead of the data it trained on? Say what each score actually tells you.`,a:`The training score tells you how well the model memorized data it already saw. The held-out score estimates how it will do on data it has not seen, which is the thing you actually want to know. Scoring on the training set flatters the model.`},de:{q:`Warum werten wir ein Modell auf zurückgehaltenen Daten aus statt auf den Daten, mit denen es trainiert wurde? Sagen Sie, was jeder Wert tatsächlich aussagt.`,a:`Der Trainingswert sagt, wie gut das Modell bereits gesehene Daten auswendig gelernt hat. Der zurückgehaltene Wert schätzt, wie es auf ungesehenen Daten abschneidet, und das ist es, was Sie eigentlich wissen wollen. Auf dem Trainingssatz zu werten schmeichelt dem Modell.`}},
+{c:9,en:{q:`Explain the tension in deciding how much data to put in the test set versus the training set.`,a:`It is one fixed budget split two ways. More training data builds a better model; more test data gives a more reliable estimate of how good it is. Every row you move to one side you take from the other.`},de:{q:`Erklären Sie die Spannung bei der Entscheidung, wie viele Daten in die Testmenge gegenüber der Trainingsmenge kommen.`,a:`Es ist ein festes Budget, zweifach geteilt. Mehr Trainingsdaten bauen ein besseres Modell; mehr Testdaten geben eine zuverlässigere Schätzung, wie gut es ist. Jede Zeile, die Sie auf die eine Seite verschieben, nehmen Sie der anderen weg.`}},
+{c:9,en:{q:`Explain the difference between a parameter and a hyperparameter, and give one example of each from this course.`,a:`Parameters are learned from the data during training, like the weights of a regression line. Hyperparameters are set before training, like K in K-NN or the regularization strength. You tune the second to help the model learn the first.`},de:{q:`Erklären Sie den Unterschied zwischen einem Parameter und einem Hyperparameter und nennen Sie je ein Beispiel aus diesem Kurs.`,a:`Parameter werden beim Training aus den Daten gelernt, etwa die Gewichte einer Regressionsgeraden. Hyperparameter werden vor dem Training festgelegt, etwa K bei K-NN oder die Regularisierungsstärke. Das zweite stellt man ein, damit das Modell das erste lernt.`}},
+{c:9,en:{q:`Describe how K-fold cross-validation works and why it gives a more reliable estimate than a single train/test split.`,a:`The data is cut into K parts. Each part serves as the test set once while the other K minus one parts train, and the scores are averaged. Every point gets tested once, so the estimate does not depend on one lucky or unlucky split.`},de:{q:`Beschreiben Sie, wie die K-fache Kreuzvalidierung funktioniert und warum sie eine zuverlässigere Schätzung liefert als eine einzelne Trainings-/Test-Aufteilung.`,a:`Die Daten werden in K Teile geschnitten. Jeder Teil dient einmal als Testmenge, während die anderen K minus eins Teile trainieren, und die Werte werden gemittelt. Jeder Punkt wird einmal getestet, also hängt die Schätzung nicht von einer glücklichen oder unglücklichen Aufteilung ab.`}},
+{c:9,en:{q:`The median wage in a country rose while it fell within every education group. Name the effect and explain in plain terms how both statements can be true at once.`,a:`Simpson's paradox. The mix of groups shifted. If more people moved into higher-earning education groups, the overall median can climb even as each group's own median slips. Aggregation hides the change in group sizes.`},de:{q:`Der Medianlohn eines Landes stieg, während er in jeder Bildungsgruppe fiel. Nennen Sie den Effekt und erklären Sie in einfachen Worten, wie beide Aussagen zugleich wahr sein können.`,a:`Das Simpson-Paradoxon. Die Zusammensetzung der Gruppen verschob sich. Wenn mehr Menschen in besser verdienende Bildungsgruppen wechselten, kann der Gesamtmedian steigen, auch wenn der Median jeder Gruppe für sich sinkt. Die Aggregation verbirgt die Änderung der Gruppengrößen.`}},
+
+{c:10,en:{q:`Explain the difference between collaborative filtering and content-based filtering. Name one thing each approach needs that the other does not.`,a:`Collaborative filtering recommends based on the behaviour of users with similar taste, so it needs other users' history. Content-based filtering matches item features to what you have liked before, so it needs described item attributes but not other users.`},de:{q:`Erklären Sie den Unterschied zwischen kollaborativem und inhaltsbasiertem Filtern. Nennen Sie je eine Sache, die der eine Ansatz braucht und der andere nicht.`,a:`Kollaboratives Filtern empfiehlt auf Basis des Verhaltens von Nutzern mit ähnlichem Geschmack, braucht also die Historie anderer Nutzer. Inhaltsbasiertes Filtern gleicht Objektmerkmale mit dem ab, was Ihnen zuvor gefiel, braucht also beschriebene Objektattribute, aber keine anderen Nutzer.`}},
+{c:10,en:{q:`A streaming service adds a brand-new film with no viewing history. Name the problem this creates for recommendations and explain why ranking by popularity makes it worse.`,a:`The cold-start problem: with no history there is nothing to base a recommendation on. Popularity ranking sends viewers to items that are already popular, which makes them more popular still, so new items stay invisible in a rich-get-richer loop.`},de:{q:`Ein Streamingdienst fügt einen brandneuen Film ohne Sichtungshistorie hinzu. Nennen Sie das Problem für die Empfehlungen und erklären Sie, warum ein Ranking nach Beliebtheit es verschlimmert.`,a:`Das Kaltstartproblem: Ohne Historie gibt es nichts, worauf man eine Empfehlung stützen könnte. Ein Beliebtheitsranking schickt Zuschauer zu bereits beliebten Objekten, was sie noch beliebter macht, sodass neue Objekte in einer Schleife, in der die Reichen reicher werden, unsichtbar bleiben.`}},
+{c:10,en:{q:`Conway's Game of Life runs on four simple rules and never mentions a glider, yet gliders walk across the screen. What idea about neural networks is this used to illustrate?`,a:`Emergence. Simple local rules can produce rich global behaviour that nobody programmed in directly. A neural network can likewise do things no one wrote down explicitly, out of many simple parts.`},de:{q:`Conways Game of Life läuft auf vier einfachen Regeln und erwähnt nie einen Gleiter, doch Gleiter wandern über den Bildschirm. Welche Idee über neuronale Netze soll das veranschaulichen?`,a:`Emergenz. Einfache lokale Regeln können reiches globales Verhalten erzeugen, das niemand direkt einprogrammiert hat. Ein neuronales Netz kann ebenso aus vielen einfachen Teilen Dinge tun, die niemand ausdrücklich aufgeschrieben hat.`}},
+{c:10,en:{q:`Describe what a single neuron does to its inputs. Name the three operations it applies before producing an output.`,a:`It weights each input, adds a bias, and squashes the total through a non-linear function into an output. Weight, add bias, activate.`},de:{q:`Beschreiben Sie, was ein einzelnes Neuron mit seinen Eingaben macht. Nennen Sie die drei Operationen, die es anwendet, bevor es eine Ausgabe erzeugt.`,a:`Es gewichtet jede Eingabe, addiert einen Bias und quetscht die Summe durch eine nicht-lineare Funktion zu einer Ausgabe. Gewichten, Bias addieren, aktivieren.`}},
+{c:10,en:{q:`Stacking more layers gives a network abilities a single neuron does not have. Explain in plain terms what depth buys you.`,a:`Depth lets the network build features in stages. Early layers catch simple patterns, later layers combine them into more complex ones. A single neuron can only draw one straight boundary; layered depth composes many into something richer.`},de:{q:`Mehr Schichten zu stapeln gibt einem Netz Fähigkeiten, die ein einzelnes Neuron nicht hat. Erklären Sie in einfachen Worten, was Tiefe einbringt.`,a:`Tiefe lässt das Netz Merkmale in Stufen bauen. Frühe Schichten erfassen einfache Muster, spätere Schichten verbinden sie zu komplexeren. Ein einzelnes Neuron kann nur eine gerade Grenze ziehen; geschichtete Tiefe fügt viele zu etwas Reicherem zusammen.`}},
+
+{c:11,en:{q:`Mechanically, what is a language model trained to do? Explain how that one task ends up producing fluent sentences.`,a:`It is trained to predict the next token given the text so far. Doing that well, over and over, one token at a time, chains into fluent text, because each guess is conditioned on everything already written.`},de:{q:`Was wird ein Sprachmodell mechanisch trainiert zu tun? Erklären Sie, wie diese eine Aufgabe am Ende flüssige Sätze erzeugt.`,a:`Es wird trainiert, das nächste Token aus dem bisherigen Text vorherzusagen. Das gut zu tun, immer wieder, ein Token nach dem anderen, verkettet sich zu flüssigem Text, weil jede Vorhersage von allem bereits Geschriebenen abhängt.`}},
+{c:11,en:{q:`A trigram model writes grammatical text that drifts into nonsense over a paragraph. Explain why a model that only looks at the last couple of words loses the thread.`,a:`It has no memory beyond the last word or two, so it cannot track the topic, a subject introduced three sentences ago, or where the argument was going. Each local guess can be fine while the whole drifts, because nothing holds the long-range context.`},de:{q:`Ein Trigramm-Modell schreibt grammatischen Text, der über einen Absatz hinweg in Unsinn abdriftet. Erklären Sie, warum ein Modell, das nur die letzten paar Wörter ansieht, den Faden verliert.`,a:`Es hat kein Gedächtnis über das letzte Wort oder zwei hinaus, kann also das Thema nicht verfolgen, ein drei Sätze zuvor eingeführtes Subjekt nicht, und nicht, wohin das Argument wollte. Jede lokale Vorhersage kann in Ordnung sein, während das Ganze abdriftet, weil nichts den weitreichenden Kontext hält.`}},
+{c:11,en:{q:`A diffusion model and a next-word model are described as doing the same job in opposite directions. Say what each one starts with and what it produces.`,a:`The next-word model starts with words and adds one word at a time until it has text. The diffusion model starts with a screen of noise and removes noise pass by pass until an image is left. Both turn a guess about what should come next into finished output, one building up, one clearing away.`},de:{q:`Ein Diffusionsmodell und ein Nächstes-Wort-Modell werden als dieselbe Aufgabe in entgegengesetzte Richtungen beschrieben. Sagen Sie, womit jedes beginnt und was es erzeugt.`,a:`Das Nächstes-Wort-Modell beginnt mit Wörtern und fügt ein Wort nach dem anderen hinzu, bis Text da ist. Das Diffusionsmodell beginnt mit einer Fläche aus Rauschen und entfernt Rauschen Durchgang für Durchgang, bis ein Bild übrig ist. Beide verwandeln eine Vorhersage über das, was als Nächstes kommen sollte, in fertige Ausgabe, das eine aufbauend, das andere abtragend.`}},
+{c:11,en:{q:`A student types "make this better" and gets back a worse essay. Explain why, and name one failure that no wording of the prompt will fix.`,a:`The model does what the vague instruction implies, adding length and polish without knowing what better means to that student, so it rounds off the good parts too. No prompt fixes a failure that lives in the model itself, such as inventing facts it states with confidence, or not knowing something specific to you it was never told.`},de:{q:`Ein Student tippt „mach das besser“ und bekommt einen schlechteren Aufsatz zurück. Erklären Sie warum, und nennen Sie einen Fehler, den keine Formulierung des Prompts behebt.`,a:`Das Modell tut, was die vage Anweisung nahelegt, fügt Länge und Politur hinzu, ohne zu wissen, was „besser“ für diesen Studenten heißt, und rundet so auch die guten Teile ab. Kein Prompt behebt einen Fehler, der im Modell selbst steckt, etwa Fakten zu erfinden und selbstbewusst zu behaupten, oder etwas Konkretes über Sie nicht zu wissen, das ihm nie mitgeteilt wurde.`}},
+
+{c:12,en:{q:`A hiring model is trained on ten years of past hiring decisions. Explain how it could turn out biased even though nobody wrote a biased rule.`,a:`Historical data encodes historical decisions. If past hiring favoured some groups, the model learns that pattern as the target to reproduce, and can carry it forward or sharpen it, without anyone ever writing the bias down.`},de:{q:`Ein Einstellungsmodell wird auf zehn Jahren früherer Einstellungsentscheidungen trainiert. Erklären Sie, wie es verzerrt ausfallen könnte, obwohl niemand eine verzerrte Regel geschrieben hat.`,a:`Historische Daten kodieren historische Entscheidungen. Wenn frühere Einstellungen manche Gruppen bevorzugten, lernt das Modell dieses Muster als das zu reproduzierende Ziel und kann es fortführen oder verschärfen, ohne dass jemand die Verzerrung je aufgeschrieben hat.`}},
+{c:12,en:{q:`To read an AI system as a citizen rather than as a user, name at least two questions you should ask about it, and say briefly why each matters.`,a:`Any two of: what does it optimize for, whose interests does that serve, what data was it trained on, who can be harmed by it. The optimization target and its incentives usually explain the system's behaviour better than how pleasant it is to use.`},de:{q:`Um ein KI-System als Bürgerin statt als Nutzerin zu lesen: Nennen Sie mindestens zwei Fragen, die Sie stellen sollten, und sagen Sie kurz, warum jede zählt.`,a:`Zwei beliebige aus: Worauf optimiert es? Wessen Interessen dient das? Auf welchen Daten wurde es trainiert? Wer kann davon Schaden nehmen? Das Optimierungsziel und seine Anreize erklären das Verhalten des Systems meist besser als die Frage, wie angenehm es zu benutzen ist.`}}
+];
+
+const CLASS = {
+  en:{1:"What Is Intelligence? What Is Knowledge?",2:"Learning Has Many Faces",3:"Linear Regression",4:"Local Models & Geometry",5:"Regularization",6:"Classification Fundamentals",7:"Decision Trees",8:"Ensembles",9:"Validation & Model Selection",10:"Recommendations & Neural Networks",11:"LLMs & Generative AI",12:"AI in Practice"},
+  de:{1:"Was ist Intelligenz? Was ist Wissen?",2:"Lernen hat viele Gesichter",3:"Lineare Regression",4:"Lokale Modelle & Geometrie",5:"Regularisierung",6:"Grundlagen der Klassifikation",7:"Entscheidungsbäume",8:"Ensembles",9:"Validierung & Modellauswahl",10:"Empfehlungen & Neuronale Netze",11:"LLMs & Generative KI",12:"KI in der Praxis"}
+};
+
+const T = {
+  en:{
+    title:"Open Questions",
+    hook:"The full open-question pool. Fifteen of these appear on the exam. Reveal the model answer to check yourself.",
+    iH:"Before you begin",
+    iP1:"This is the full pool of " + Q.length + " open questions for the course, grouped by class, roughly four per class. The exam draws 15 of them. Each is written to take no more than ten minutes to answer. A model answer sits under every question so you can check your own.",
+    dl:"Download all " + Q.length + " questions (.md)",
+    iM1:"Pool: " + Q.length + " questions", iM2:"Exam draws: 15", iM3:"About 10 min each",
+    iP2:"Write your answer first, then reveal the model answer and compare. The model answer lists what a full response should contain, not the only acceptable wording.",
+    showAll:"Reveal all answers", hideAll:"Hide all answers",
+    classLabel:"Class", qLabel:"Question", aLabel:"Model answer",
+    show:"Show model answer", hide:"Hide model answer",
+    foot:"AI Foundations \u00b7 Open-question pool \u00b7 Source on GitHub."
+  },
+  de:{
+    title:"Offene Fragen",
+    hook:"Der vollst\u00e4ndige Pool offener Fragen. F\u00fcnfzehn davon erscheinen in der Klausur. Decken Sie die Modellantwort auf, um sich selbst zu pr\u00fcfen.",
+    iH:"Bevor Sie beginnen",
+    iP1:"Dies ist der vollst\u00e4ndige Pool von " + Q.length + " offenen Fragen f\u00fcr den Kurs, nach Klassen gruppiert, etwa vier je Klasse. Die Klausur zieht 15 davon. Jede ist so gefasst, dass sie h\u00f6chstens zehn Minuten zur Beantwortung braucht. Unter jeder Frage steht eine Modellantwort, an der Sie sich pr\u00fcfen k\u00f6nnen.",
+    dl:"Alle " + Q.length + " Fragen herunterladen (.md)",
+    iM1:"Pool: " + Q.length + " Fragen", iM2:"Klausur zieht: 15", iM3:"Je etwa 10 Min.",
+    iP2:"Schreiben Sie zuerst Ihre Antwort, decken Sie dann die Modellantwort auf und vergleichen Sie. Die Modellantwort nennt, was eine vollst\u00e4ndige Antwort enthalten sollte, nicht die einzige zul\u00e4ssige Formulierung.",
+    showAll:"Alle Antworten aufdecken", hideAll:"Alle Antworten verbergen",
+    classLabel:"Klasse", qLabel:"Frage", aLabel:"Modellantwort",
+    show:"Modellantwort zeigen", hide:"Modellantwort verbergen",
+    foot:"KI Grundlagen \u00b7 Pool offener Fragen \u00b7 Quellcode auf GitHub."
+  }
+};
+
+let lang = "en";
+let open = new Array(Q.length).fill(false);
+const $ = id => document.getElementById(id);
+
+function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+function render(){
+  const t = T[lang];
+  let html = "";
+  let lastC = 0;
+  Q.forEach((item,i)=>{
+    if(item.c !== lastC){
+      lastC = item.c;
+      html += `<h2 class="cls"><span class="num">${t.classLabel} ${item.c}</span>${CLASS[lang][item.c]}</h2>`;
+    }
+    const d = item[lang];
+    const op = open[i];
+    html += `<div class="card">
+      <div class="qtag">${t.qLabel} ${i+1}</div>
+      <div class="qtext">${esc(d.q)}</div>
+      <button class="btn ghost reveal" onclick="toggle(${i})">${op ? t.hide : t.show}</button>
+      <div class="explain${op ? ' show' : ''}"><span class="tag">${t.aLabel}</span>${esc(d.a)}</div>
+    </div>`;
+  });
+  $("list").innerHTML = html;
+}
+
+function toggle(i){
+  open[i] = !open[i];
+  render();
+  typeset();
+}
+
+function revealAll(v){
+  open = new Array(Q.length).fill(v);
+  render();
+  typeset();
+}
+
+function paintStatic(){
+  const t = T[lang];
+  document.querySelectorAll("[data-i18n]").forEach(el=>{
+    const k = el.getAttribute("data-i18n");
+    if(t[k] !== undefined && typeof t[k] === "string") el.textContent = t[k];
+  });
+  $("foot").textContent = t.foot;
+}
+
+function toggleLang(){
+  lang = lang === "en" ? "de" : "en";
+  document.documentElement.lang = lang;
+  document.querySelector(".lang-toggle").textContent = lang === "en" ? "DE" : "EN";
+  paintStatic();
+  render();
+  typeset();
+}
+
+function typeset(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.body,{
+      delimiters:[{left:"$$",right:"$$",display:true},{left:"$",right:"$",display:false},{left:"\\(",right:"\\)",display:false}],
+      throwOnError:false
+    });
+  }
+}
+
+window.addEventListener("load",()=>{ paintStatic(); render(); typeset(); });
+</script>
+</body>
+</html>

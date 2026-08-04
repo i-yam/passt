@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Curse of Dimensionality</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #141420; color: #e8e8f0; font-family: Georgia,'Times New Roman',serif; line-height: 1.8; font-size: 18px; }
+.container { max-width: 820px; margin: 0 auto; padding: 0 24px 80px; }
+
+.lang-toggle { position: fixed; top: 16px; right: 16px; background: #2a2a44; border: 1px solid #4a4a70; border-radius: 20px; padding: 6px 14px; cursor: pointer; font-size: 13px; font-family: sans-serif; color: #a0a0d0; z-index: 100; transition: background 0.2s; }
+.lang-toggle:hover { background: #363658; }
+
+.hero { text-align: center; padding: 80px 24px 50px; }
+.tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 28px; }
+.tag { background: #1c1c2e; color: #8888b0; border: 1px solid #2a2a40; border-radius: 20px; padding: 4px 12px; font-size: 12px; font-family: sans-serif; letter-spacing: 0.3px; }
+.hero h1 { font-size: 42px; font-weight: 700; color: #fff; line-height: 1.3; max-width: 700px; margin: 0 auto 24px; }
+.hero-sub { color: #a0a0c0; font-style: italic; font-size: 20px; max-width: 620px; margin: 0 auto; }
+
+section { padding: 50px 0; border-top: 1px solid #1e1e30; }
+h2 { font-size: 30px; color: #fff; margin-bottom: 24px; line-height: 1.3; }
+h3 { font-size: 20px; color: #ccc; margin: 32px 0 12px; }
+p { margin-bottom: 20px; color: #ccc; }
+a { color: #80b4f0; }
+em { color: #e0e0f0; font-style: italic; }
+code { font-family: 'Courier New', monospace; font-size: 15px; background: #1c1c2e; padding: 1px 6px; border-radius: 3px; color: #a0c0a0; }
+
+blockquote { border-left: 3px solid #4a4a70; padding: 16px 24px; margin: 28px 0; color: #a0a0c0; font-style: italic; font-size: 19px; line-height: 1.7; }
+blockquote cite { display: block; margin-top: 12px; font-size: 14px; color: #555; font-style: normal; }
+
+/* TASK BOXES */
+.task { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px; padding: 28px; margin: 28px 0; }
+.task-number { font-family: sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #5050a0; margin-bottom: 12px; }
+.task-question { font-size: 17px; color: #e0e0f0; margin-bottom: 16px; line-height: 1.7; }
+.task-tip { background: #141420; border: 1px solid #2a2a40; border-radius: 6px; padding: 12px 16px; margin-bottom: 20px; font-family: sans-serif; font-size: 13px; color: #555; line-height: 1.6; }
+.task-tip span { color: #6060a0; }
+.task-input-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.task-input { background: #141420; border: 1px solid #3a3a55; border-radius: 6px; padding: 10px 14px; color: #e0e0f0; font-size: 16px; font-family: Georgia,'Times New Roman',serif; width: 140px; outline: none; transition: border-color 0.2s; }
+.task-input:focus { border-color: #6060a0; }
+.task-btn { background: #2a2a44; border: 1px solid #4a4a70; border-radius: 6px; padding: 10px 22px; color: #a0a0d0; font-size: 15px; font-family: Georgia,'Times New Roman',serif; cursor: pointer; transition: background 0.2s; }
+.task-btn:hover { background: #363658; }
+.task-feedback { margin-top: 18px; font-size: 16px; line-height: 1.8; color: #ccc; display: none; }
+.task-feedback.visible { display: block; }
+.task-feedback.correct em.verdict { color: #70e898; font-style: normal; }
+.task-feedback.close em.verdict { color: #f0c060; font-style: normal; }
+.task-feedback.invalid em.verdict { color: #a88ef0; font-style: normal; }
+.task-feedback.wrong em.verdict { color: #e08080; font-style: normal; }
+.task-unit { font-size: 16px; color: #666; font-family: sans-serif; }
+.task-reset { margin-top: 12px; font-family: sans-serif; font-size: 12px; color: #444; cursor: pointer; background: none; border: none; text-decoration: underline; display: none; }
+.task-reset:hover { color: #888; }
+
+/* FORMULA BOX */
+.formula-box { background: #0e0e1a; border: 1px solid #2a2a40; border-radius: 8px; padding: 18px 22px; margin: 20px 0; }
+.formula-main { font-family: 'Courier New', monospace; font-size: 15px; color: #c0d0a0; text-align: center; letter-spacing: 0.5px; margin-bottom: 10px; }
+.formula-terms { border-top: 1px solid #2a2a40; padding-top: 10px; display: grid; gap: 6px; }
+.ft { display: flex; gap: 12px; align-items: baseline; font-family: sans-serif; font-size: 13px; }
+.ft .sym { font-family: 'Courier New', monospace; color: #c0d0a0; min-width: 110px; }
+.ft .def { color: #777; line-height: 1.5; }
+
+/* CHART */
+.chart-wrap { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px; padding: 20px; margin: 28px 0; }
+.chart-label { font-family: sans-serif; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: #5050a0; margin-bottom: 14px; }
+.chart-reveal { display: none; margin-top: 20px; }
+.chart-reveal.visible { display: block; }
+canvas.chart { display: block; border: 1px solid #2a2a40; border-radius: 4px; background: #141420; max-width: 100%; cursor: default; }
+
+/* ALGO LIST */
+.algo-list { display: grid; gap: 10px; margin: 20px 0; }
+.algo { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 8px; padding: 14px 18px; display: flex; gap: 14px; align-items: flex-start; }
+.algo-tag { font-family: 'Courier New', monospace; font-size: 11px; color: #6060a0; background: #141420; border: 1px solid #2a2a40; border-radius: 4px; padding: 2px 8px; flex-shrink: 0; margin-top: 3px; white-space: nowrap; }
+.algo-body { font-size: 14px; color: #aaa; line-height: 1.6; }
+.algo-body strong { color: #ccc; font-weight: normal; display: block; margin-bottom: 2px; }
+
+/* KNN COVERAGE CHART */
+.ctrl-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
+.ctrl-row label { font-family: sans-serif; font-size: 13px; color: #7070a0; }
+.ctrl-row input[type=range] { width: 100px; accent-color: #6060b0; }
+.ctrl-row .val { font-family: 'Courier New', monospace; font-size: 13px; color: #a0a0d0; min-width: 24px; }
+.demo-note { font-family: sans-serif; font-size: 12px; color: #444; margin-top: 10px; line-height: 1.6; }
+.img-wrap { margin: 28px 0; }
+.img-wrap img { width: 100%; border-radius: 8px; display: block; border: 1px solid #2a2a40; }
+.img-credit { font-family: sans-serif; font-size: 12px; color: #444; margin-top: 8px; }
+
+/* PUNCHLINE */
+.punchline { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px; padding: 32px 36px; text-align: center; margin: 32px 0; }
+.punchline h3 { font-size: 22px; color: #fff; margin-bottom: 12px; }
+.punchline p { font-size: 15px; color: #666; max-width: 500px; margin: 0 auto; font-family: sans-serif; line-height: 1.7; }
+
+footer { padding: 40px 0 20px; border-top: 1px solid #1e1e30; font-family: sans-serif; font-size: 13px; color: #3a3a60; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+footer a { color: #3a3a60; }
+
+/* LANG */
+[data-lang] { display: none; }
+body.lang-en [data-lang="en"] { display: block; }
+body.lang-en [data-lang="en"].inl { display: inline; }
+body.lang-de [data-lang="de"] { display: block; }
+body.lang-de [data-lang="de"].inl { display: inline; }
+.en-i { display: inline; } .de-i { display: none; }
+body.lang-de .en-i { display: none; } body.lang-de .de-i { display: inline; }
+
+@media (max-width: 560px) { .hero h1 { font-size: 28px; } }
+</style>
+</head>
+<body class="lang-en">
+
+<button class="lang-toggle" onclick="toggleLang()">DE</button>
+<div class="container">
+
+<!-- HERO -->
+<div class="hero">
+  <div class="tags">
+    <span class="tag">mini-module</span>
+    <span class="tag">no-code</span>
+    <span class="tag">try-without-ai</span>
+    <span class="tag">ml-fundamentals</span>
+    <span class="tag">~20 min</span>
+  </div>
+  <h1>
+    <span class="en-i">The Curse of Dimensionality</span>
+    <span class="de-i">Der Fluch der Dimensionalität</span>
+  </h1>
+  <p class="hero-sub">
+    <span class="en-i">High-dimensional space does not behave like the space you can draw on paper. Three puzzles to convince you.</span>
+    <span class="de-i">Hochdimensionaler Raum verhält sich nicht wie der Raum, den du auf Papier zeichnen kannst. Drei Rätsel als Beweis.</span>
+  </p>
+</div>
+
+<!-- INTRO -->
+<section>
+  <h2><span class="en-i">What the curse actually is</span><span class="de-i">Was der Fluch eigentlich ist</span></h2>
+
+  <p data-lang="en">When Richard Bellman coined the phrase "curse of dimensionality" in 1957, he was describing a specific problem in dynamic programming. The name stuck because it captures something more general: as the number of dimensions grows, the geometry of space changes in ways that break nearly every intuition you have built from living in three dimensions.</p>
+  <p data-lang="de">Als Richard Bellman 1957 den Begriff „Fluch der Dimensionalität“ prägte, beschrieb er ein bestimmtes Problem der dynamischen Programmierung. Der Name blieb, weil er etwas Allgemeineres trifft. Mit wachsender Dimensionszahl verändert sich die Geometrie des Raums. Sie bricht dabei fast jede Intuition, die du aus dem Leben in drei Dimensionen mitbringst.</p>
+
+  <p data-lang="en">This is not a metaphor. The mathematics is exact. The effects are counterintuitive in a specific, measurable, reproducible way. The three puzzles below are not trick questions, they have correct numerical answers. Try to guess before you look.</p>
+  <p data-lang="de">Das ist keine Metapher. Die Mathematik ist exakt. Die Effekte sind auf eine genau messbare und wiederholbare Weise kontraintuitiv. Die drei Rätsel unten sind keine Fangfragen. Sie haben korrekte numerische Antworten. Rate zuerst, bevor du nachsiehst.</p>
+</section>
+
+<!-- PUZZLE 1: SPHERE IN CUBE -->
+<section>
+  <h2><span class="en-i">Puzzle 1, the vanishing sphere</span><span class="de-i">Rätsel 1: die verschwindende Kugel</span></h2>
+
+  <p data-lang="en">Take a d-dimensional cube with side length 2. Place a d-dimensional sphere of radius 1 inside it, touching all faces. In 2D this is a circle inside a square, taking up 78% of the area. In 3D a ball inside a cube takes up 52%. What happens as d grows?</p>
+  <p data-lang="de">Nimm einen d-dimensionalen Würfel mit Seitenlänge 2. Leg eine d-dimensionale Kugel mit Radius 1 hinein, die alle Seiten berührt. In 2D ist das ein Kreis in einem Quadrat, und er nimmt 78 % der Fläche ein. In 3D nimmt eine Kugel im Würfel 52 % ein. Was passiert, wenn d wächst?</p>
+
+  <div class="formula-box">
+    <div class="formula-main">V_sphere(d) / V_cube(d) = π^(d/2) / (2^d · Γ(d/2 + 1))</div>
+    <div class="formula-terms">
+      <div class="ft"><span class="sym">π^(d/2)</span><span class="def"><span class="en-i">the numerator of the sphere volume formula, grows with d</span><span class="de-i">der Zähler der Kugelvolumenformel, wächst mit d</span></span></div>
+      <div class="ft"><span class="sym">2^d</span><span class="def"><span class="en-i">the cube volume (side = 2), grows exponentially with d</span><span class="de-i">das Würfelvolumen (Seite = 2), wächst exponentiell mit d</span></span></div>
+      <div class="ft"><span class="sym">Γ(d/2 + 1)</span><span class="def"><span class="en-i">the gamma function, grows faster than exponential, ensuring the ratio collapses to zero</span><span class="de-i">die Gammafunktion, wächst schneller als exponentiell und drückt das Verhältnis auf null</span></span></div>
+    </div>
+  </div>
+
+  <div class="task" id="task1">
+    <div class="task-number"><span class="en-i">Your estimate</span><span class="de-i">Deine Schätzung</span></div>
+    <div class="task-question">
+      <span class="en-i">Consider a 1000-dimensional cube and the sphere inscribed inside it. What percentage of the cube's volume does the sphere occupy?</span>
+      <span class="de-i">Betrachte einen 1000-dimensionalen Würfel und die Kugel darin. Welchen Prozentsatz des Würfelvolumens nimmt die Kugel ein?</span>
+    </div>
+    <div class="task-tip">
+      <span class="en-i"><span>Tip:</span> In d=2 it is 78%. In d=3 it is 52%. Enter a number between 0 and 100.</span>
+      <span class="de-i"><span>Tipp:</span> Bei d=2 sind es 78 %. Bei d=3 sind es 52 %. Gib eine Zahl zwischen 0 und 100 ein.</span>
+    </div>
+    <div class="task-input-row">
+      <input class="task-input" id="task1-input" type="number" min="0" max="100" step="any" placeholder="0–100">
+      <span class="task-unit">%</span>
+      <button class="task-btn" onclick="checkTask1()"><span class="en-i">Check</span><span class="de-i">Prüfen</span></button>
+    </div>
+    <div class="task-feedback" id="task1-feedback"></div>
+    <button class="task-reset" id="task1-reset" onclick="resetTask('task1')"><span class="en-i">Try again</span><span class="de-i">Nochmal</span></button>
+  </div>
+
+  <div class="chart-reveal" id="chart1-reveal">
+    <div class="chart-wrap">
+      <div class="chart-label"><span class="en-i">Sphere/cube volume ratio as dimensions grow</span><span class="de-i">Verhältnis von Kugel- zu Würfelvolumen bei wachsender Dimension</span></div>
+      <canvas id="chart1" class="chart" width="740" height="260"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- PUZZLE 2: SHELL -->
+<section>
+  <h2><span class="en-i">Puzzle 2, everything is on the surface</span><span class="de-i">Rätsel 2: alles liegt an der Oberfläche</span></h2>
+
+  <p data-lang="en">Take a sphere of radius 1 in d dimensions. Now consider a thin shell just inside the surface, the region between radius 0.995 and radius 1 (thickness 0.5% of the radius). What fraction of the sphere's volume is inside this shell?</p>
+  <p data-lang="de">Nimm eine Kugel mit Radius 1 in d Dimensionen. Betrachte nun eine dünne Schale direkt unter der Oberfläche. Gemeint ist der Bereich zwischen Radius 0,995 und Radius 1. Die Schale ist also 0,5 % des Radius dick. Welcher Bruchteil des Kugelvolumens liegt in dieser Schale?</p>
+
+  <div class="formula-box">
+    <div class="formula-main">Shell fraction = 1 − (1 − t)^d</div>
+    <div class="formula-terms">
+      <div class="ft"><span class="sym">t</span><span class="def"><span class="en-i">shell thickness as a fraction of radius (here t = 0.005)</span><span class="de-i">Schalendicke als Bruchteil des Radius (hier t = 0,005)</span></span></div>
+      <div class="ft"><span class="sym">d</span><span class="def"><span class="en-i">number of dimensions, as d grows, (1−t)^d shrinks to zero, so the shell approaches 100%</span><span class="de-i">Anzahl der Dimensionen: wächst d, so geht (1-t)^d gegen null, und die Schale geht gegen 100 %</span></span></div>
+    </div>
+  </div>
+
+  <div class="task" id="task2">
+    <div class="task-number"><span class="en-i">Your estimate</span><span class="de-i">Deine Schätzung</span></div>
+    <div class="task-question">
+      <span class="en-i">In a 1000-dimensional sphere, what percentage of the volume lies within a shell of thickness 0.5% of the radius (between r = 0.995 and r = 1)?</span>
+      <span class="de-i">In einer 1000-dimensionalen Kugel: Welcher Prozentsatz des Volumens liegt in einer Schale, die 0,5 % des Radius dick ist (zwischen r = 0,995 und r = 1)?</span>
+    </div>
+    <div class="task-tip">
+      <span class="en-i"><span>Tip:</span> In d=3 it is about 1.5%. Enter a number between 0 and 100.</span>
+      <span class="de-i"><span>Tipp:</span> Bei d=3 sind es etwa 1,5 %. Gib eine Zahl zwischen 0 und 100 ein.</span>
+    </div>
+    <div class="task-input-row">
+      <input class="task-input" id="task2-input" type="number" min="0" max="100" step="any" placeholder="0–100">
+      <span class="task-unit">%</span>
+      <button class="task-btn" onclick="checkTask2()"><span class="en-i">Check</span><span class="de-i">Prüfen</span></button>
+    </div>
+    <div class="task-feedback" id="task2-feedback"></div>
+    <button class="task-reset" id="task2-reset" onclick="resetTask('task2')"><span class="en-i">Try again</span><span class="de-i">Nochmal</span></button>
+  </div>
+
+  <div class="chart-reveal" id="chart2-reveal">
+    <div class="chart-wrap">
+      <div class="chart-label"><span class="en-i">Shell fraction as dimensions grow (t = 0.5%)</span><span class="de-i">Schalenanteil bei wachsender Dimension (t = 0,5 %)</span></div>
+      <canvas id="chart2" class="chart" width="740" height="260"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- PUZZLE 3: ANGLES -->
+<section>
+  <h2><span class="en-i">Puzzle 3, all vectors are perpendicular</span><span class="de-i">Rätsel 3: alle Vektoren stehen senkrecht</span></h2>
+
+  <p data-lang="en">Pick two points at random on the surface of a d-dimensional unit sphere. Draw vectors from the origin to each point. What is the probability that the angle between these two vectors is between 89° and 91°, within one degree of a right angle?</p>
+  <p data-lang="de">Wähle zwei zufällige Punkte auf der Oberfläche einer d-dimensionalen Einheitskugel. Zieh vom Ursprung einen Vektor zu jedem Punkt. Mit welcher Wahrscheinlichkeit liegt der Winkel zwischen diesen Vektoren zwischen 89° und 91°? Das ist höchstens ein Grad vom rechten Winkel entfernt.</p>
+
+  <p data-lang="en">In 3D, two random vectors are almost never near-perpendicular. Angles are spread across the full range. The probability of landing exactly between 89° and 91° is tiny, roughly 1.75%.</p>
+  <p data-lang="de">In 3D sind zwei zufällige Vektoren fast nie nahezu senkrecht. Die Winkel verteilen sich über den gesamten Bereich. Genau zwischen 89° und 91° zu landen ist sehr unwahrscheinlich, nämlich ungefähr 1,75 %.</p>
+
+  <div class="task" id="task3">
+    <div class="task-number"><span class="en-i">Your estimate</span><span class="de-i">Deine Schätzung</span></div>
+    <div class="task-question">
+      <span class="en-i">In a 1000-dimensional sphere, what is the probability (as a value between 0 and 1) that two random vectors from the origin to the surface form an angle between 89° and 91°?</span>
+      <span class="de-i">In einer 1000-dimensionalen Kugel: Mit welcher Wahrscheinlichkeit bilden zwei zufällige Vektoren vom Ursprung zur Oberfläche einen Winkel zwischen 89° und 91°? Gib den Wert zwischen 0 und 1 an.</span>
+    </div>
+    <div class="task-tip">
+      <span class="en-i"><span>Tip:</span> In d=3 it is about 0.017. Enter a number between 0 and 1.</span>
+      <span class="de-i"><span>Tipp:</span> Bei d=3 sind es etwa 0,017. Gib eine Zahl zwischen 0 und 1 ein.</span>
+    </div>
+    <div class="task-input-row">
+      <input class="task-input" id="task3-input" type="number" min="0" max="1" step="any" placeholder="0–1">
+      <button class="task-btn" onclick="checkTask3()"><span class="en-i">Check</span><span class="de-i">Prüfen</span></button>
+    </div>
+    <div class="task-feedback" id="task3-feedback"></div>
+    <button class="task-reset" id="task3-reset" onclick="resetTask('task3')"><span class="en-i">Try again</span><span class="de-i">Nochmal</span></button>
+  </div>
+
+  <div class="chart-reveal" id="chart3-reveal">
+    <div class="chart-wrap">
+      <div class="chart-label"><span class="en-i">Probability of near-perpendicular angle (89°–91°) vs dimensions</span><span class="de-i">Wahrscheinlichkeit für nahezu rechtwinklige Vektoren (89°–91°) nach Dimension</span></div>
+      <canvas id="chart3" class="chart" width="740" height="260"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- PUNCHLINE -->
+<section>
+  <div class="punchline">
+    <h3>
+      <span class="en-i">Did the tips help?</span>
+      <span class="de-i">Haben die Tipps geholfen?</span>
+    </h3>
+    <p data-lang="en">Probably not much. That is the point. N-dimensional geometry is not intuitive, no matter how good a mental picture you start from, the numbers come out wrong. The intuition you built in 2D and 3D actively misleads you in high dimensions. This is not a failure of imagination. It is a mathematical fact.</p>
+    <p data-lang="de">Wahrscheinlich nicht viel. Genau das ist der Punkt. Geometrie in n Dimensionen ist nicht intuitiv. Egal, von welchem mentalen Bild du ausgehst, die Zahlen kommen anders heraus. Die Intuition aus 2D und 3D führt dich in hohen Dimensionen aktiv in die Irre. Das ist kein Versagen der Vorstellungskraft. Es ist eine mathematische Tatsache.</p>
+  </div>
+</section>
+
+<!-- WHAT TO DO -->
+<section>
+  <h2><span class="en-i">What to do about it</span><span class="de-i">Was du dagegen tun kannst</span></h2>
+
+  <p data-lang="en">Two strategies exist. The first is to reduce the dimensions before applying any model. The second is to use algorithms that are specifically designed to work well in high dimensions, where the neighbourhood concept is replaced by something more robust.</p>
+  <p data-lang="de">Es gibt zwei Strategien. Die erste reduziert die Dimensionen, bevor überhaupt ein Modell darauf läuft. Die zweite nutzt Algorithmen, die eigens für hohe Dimensionen gebaut sind. Dort ersetzt etwas Robusteres den Begriff der Nachbarschaft.</p>
+
+  <h3><span class="en-i">Dimensionality reduction</span><span class="de-i">Dimensionsreduktion</span></h3>
+
+  <div class="algo-list">
+    <div class="algo">
+      <span class="algo-tag">PCA</span>
+      <div class="algo-body">
+        <strong><span class="en-i">Principal Component Analysis</span><span class="de-i">Hauptkomponentenanalyse</span></strong>
+        <span data-lang="en">Finds the directions of maximum variance and projects the data onto a lower-dimensional subspace. Linear, fast, interpretable. The classic starting point.</span>
+        <span data-lang="de">Findet die Richtungen maximaler Varianz und projiziert die Daten auf einen niedrigdimensionalen Unterraum. Linear, schnell, interpretierbar. Der klassische Ausgangspunkt.</span>
+      </div>
+    </div>
+    <div class="algo">
+      <span class="algo-tag">t-SNE</span>
+      <div class="algo-body">
+        <strong><span class="en-i">t-Distributed Stochastic Neighbour Embedding</span><span class="de-i">t-Verteilte stochastische Nachbareinbettung</span></strong>
+        <span data-lang="en">Preserves local structure, points that are close in high dimensions stay close in 2D. Excellent for visualisation. Not suitable for downstream modelling.</span>
+        <span data-lang="de">Erhält die lokale Struktur: Punkte, die in hohen Dimensionen nah beieinander liegen, bleiben auch in 2D nah. Hervorragend für die Visualisierung. Für die weitere Modellierung nicht geeignet.</span>
+      </div>
+    </div>
+    <div class="algo">
+      <span class="algo-tag">UMAP</span>
+      <div class="algo-body">
+        <strong><span class="en-i">Uniform Manifold Approximation and Projection</span><span class="de-i">Gleichmäßige Mannigfaltigkeitsapproximation und Projektion</span></strong>
+        <span data-lang="en">Faster than t-SNE, better at preserving global structure. Increasingly used as a first-look visualisation tool and sometimes as a preprocessing step.</span>
+        <span data-lang="de">Schneller als t-SNE und erhält die globale Struktur besser. Wird zunehmend als Werkzeug für den ersten Blick genutzt, manchmal auch als Vorverarbeitungsschritt.</span>
+      </div>
+    </div>
+    <div class="algo">
+      <span class="algo-tag">Autoencoders</span>
+      <div class="algo-body">
+        <strong><span class="en-i">Neural network compression</span><span class="de-i">Neuronale Netzwerkkomprimierung</span></strong>
+        <span data-lang="en">A neural network trained to compress data to a bottleneck and reconstruct it. The bottleneck is the reduced representation. Nonlinear and powerful, but less interpretable.</span>
+        <span data-lang="de">Ein neuronales Netz, das lernt, Daten auf einen Engpass zu komprimieren und wieder zu rekonstruieren. Dieser Engpass ist die reduzierte Darstellung. Nichtlinear und leistungsfähig, aber weniger interpretierbar.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="img-wrap">
+    <img src="images/angle.jpg" alt="A sculpture that reads NO from one angle and YES from another">
+    <div class="img-credit"><span class="en-i">The same object, different perspectives. Dimensionality reduction does the same to data, and faces the same risk.</span><span class="de-i">Dasselbe Objekt, verschiedene Perspektiven. Die Dimensionsreduktion macht dasselbe mit Daten, und sie birgt dieselbe Gefahr.</span></div>
+  </div>
+
+  <h3><span class="en-i">Reduction is not free</span><span class="de-i">Reduktion ist nicht kostenlos</span></h3>
+
+  <p data-lang="en">The algorithms above make it sound straightforward: feed in 1000 dimensions, get out 2. But what you get out depends entirely on what those 2 dimensions are capturing, and there is no guarantee they capture what matters for your problem. Dimensionality reduction is itself a modelling decision, with its own assumptions, its own failure modes, and its own version of the bias-variance trade-off.</p>
+  <p data-lang="de">Die Algorithmen oben klingen unkompliziert: 1000 Dimensionen rein, 2 raus. Was herauskommt, hängt aber ganz davon ab, was diese 2 Dimensionen erfassen. Eine Garantie, dass sie das Wichtige für dein Problem erfassen, gibt es nicht. Die Dimensionsreduktion ist selbst eine Modellierungsentscheidung. Sie hat eigene Annahmen, eigene Fehlerquellen und eine eigene Version des Kompromisses zwischen Verzerrung und Varianz.</p>
+
+  <p data-lang="en">The sculpture above says "NO" from one angle and "YES" from another. Both views are truthful projections of the same object. Neither is the full story. Every dimensionality reduction technique makes a bet about which angle to look from, which directions of variation in the data are worth keeping and which are noise. PCA bets on linear variance. t-SNE bets on local proximity. An autoencoder bets on whatever the reconstruction loss rewards. These are not neutral choices.</p>
+  <p data-lang="de">Die Skulptur oben zeigt aus einem Blickwinkel „NEIN“ und aus einem anderen „JA“. Beide Ansichten sind ehrliche Projektionen desselben Objekts. Keine von beiden ist die ganze Geschichte. Jede Technik zur Dimensionsreduktion wettet darauf, aus welchem Winkel du schaust. Sie entscheidet, welche Variationsrichtungen in den Daten es wert sind, behalten zu werden, und welche nur Rauschen sind. PCA setzt auf lineare Varianz. t-SNE setzt auf lokale Nähe. Ein Autoencoder setzt auf das, was der Rekonstruktionsverlust belohnt. Neutral ist keine dieser Entscheidungen.</p>
+
+  <p data-lang="en">In practice this means: always verify that the reduced representation preserves what actually matters for your downstream task. A beautiful 2D visualisation that groups points in visually appealing clusters may be hiding the variation your classifier needs. The curse of dimensionality does not disappear when you reduce dimensions, you have simply traded one set of problems for another.</p>
+  <p data-lang="de">In der Praxis heißt das: Prüf immer, ob die reduzierte Darstellung das bewahrt, worauf es bei deiner Aufgabe ankommt. Eine hübsche 2D-Visualisierung mit schön gruppierten Clustern kann genau die Variation verbergen, die dein Klassifikator braucht. Der Fluch der Dimensionalität verschwindet nicht, wenn du Dimensionen reduzierst. Du hast dann nur einen Satz Probleme gegen einen anderen getauscht.</p>
+
+  <h3><span class="en-i">How KNN degrades as dimensions grow</span><span class="de-i">Wie KNN mit wachsenden Dimensionen abbaut</span></h3>
+
+  <p data-lang="en">KNN depends on the idea that nearby points have similar outputs. In high dimensions, all points become approximately equidistant, so "nearest neighbour" loses its meaning. The chart below shows how much of the data range you must cover just to find K neighbours, as dimensions increase.</p>
+  <p data-lang="de">KNN beruht auf der Idee, dass nahe Punkte ähnliche Ausgaben haben. In hohen Dimensionen sind alle Punkte ungefähr gleich weit voneinander entfernt. Damit verliert „nächster Nachbar“ seine Bedeutung. Das Diagramm unten zeigt, wie viel des Datenbereichs du abdecken musst, um K Nachbarn zu finden, wenn die Dimensionen wachsen.</p>
+
+  <div class="chart-wrap">
+    <div class="chart-label"><span class="en-i">Required neighbourhood radius to cover 10% of data vs dimensions</span><span class="de-i">Benötigter Nachbarschaftsradius für 10 % der Daten, nach Dimension</span></div>
+    <canvas id="chart4" class="chart" width="740" height="260"></canvas>
+    <div class="ctrl-row">
+      <label><span class="en-i">Coverage target:</span><span class="de-i">Abdeckungsziel:</span></label>
+      <input type="range" id="cover-slider" min="1" max="50" step="1" value="10" oninput="updateCoverChart()">
+      <span class="val" id="cover-out">10</span>
+      <span style="font-size:12px;color:#555;font-family:sans-serif;">%</span>
+    </div>
+    <div class="demo-note" id="cover-note"></div>
+  </div>
+</section>
+
+<footer>
+  <span>
+    <span class="en-i">Part of</span><span class="de-i">Teil von</span>
+    <a href="../../">Passt</a>
+    · Class 04, Local Models &amp; Geometry
+  </span>
+  <a href="https://github.com/i-yam/passt/tree/main/modules/dimcurse" target="_blank">github.com/i-yam/passt</a>
+</footer>
+
+</div>
+
+<script>
+var currentLang = 'en';
+function toggleLang() {
+  currentLang = currentLang === 'en' ? 'de' : 'en';
+  document.body.className = 'lang-' + currentLang;
+  document.querySelector('.lang-toggle').textContent = currentLang === 'en' ? 'DE' : 'EN';
+  updateCoverChart();
+}
+
+/* ── MATH HELPERS ── */
+// Log gamma using Stirling for large values
+function logGamma(x) {
+  if (x < 0.5) return Math.log(Math.PI / Math.sin(Math.PI * x)) - logGamma(1 - x);
+  x -= 1;
+  var a = [1,0.5772156649015329,-0.6558780715202538,-0.0420026350340952,0.1665386113822915,-0.0421977345555443,-0.009621971527876973,0.007218943246663099];
+  // Use Lanczos for small x, Stirling for large
+  if (x < 12) {
+    // simple iterative log gamma
+    var res = 0, n = x;
+    while (n < 12) { res -= Math.log(n); n++; }
+    x = n;
+    res += (x - 0.5) * Math.log(x) - x + 0.5 * Math.log(2 * Math.PI);
+    res += 1/(12*x) - 1/(360*x*x*x);
+    return res;
+  }
+  return (x - 0.5) * Math.log(x) - x + 0.5 * Math.log(2 * Math.PI) + 1/(12*x);
+}
+
+function sphereCubeRatio(d) {
+  // V_sphere / V_cube = pi^(d/2) / (2^d * Gamma(d/2+1))
+  var logNum = (d / 2) * Math.log(Math.PI);
+  var logDen = d * Math.log(2) + logGamma(d / 2 + 1);
+  return Math.exp(logNum - logDen) * 100; // as %
+}
+
+function shellFraction(d, t) {
+  // 1 - (1-t)^d
+  return (1 - Math.pow(1 - t, d)) * 100;
+}
+
+// Probability of angle in [89,91] degrees for d-dimensional random vectors
+// Standard deviation of angle for d dims: sigma ≈ 1/sqrt(d-1) radians
+function angleProbability(d) {
+  if (d < 2) return 0;
+  var sigma = 1.0 / Math.sqrt(d - 1); // radians
+  var lo = (89 - 90) * Math.PI / 180; // radians from 90deg
+  var hi = (91 - 90) * Math.PI / 180;
+  // normal CDF approximation
+  function normalCDF(x) {
+    var t2 = 1 / (1 + 0.2316419 * Math.abs(x));
+    var poly = t2*(0.319381530 + t2*(-0.356563782 + t2*(1.781477937 + t2*(-1.821255978 + t2*1.330274429))));
+    var p = 1 - (1/Math.sqrt(2*Math.PI)) * Math.exp(-0.5*x*x) * poly;
+    return x >= 0 ? p : 1 - p;
+  }
+  return normalCDF(hi / sigma) - normalCDF(lo / sigma);
+}
+
+/* ── CANVAS HELPERS ── */
+var PAD = {l:52, r:20, t:22, b:40};
+
+function drawChart(canvasId, data, yLabel, yMin, yMax, color, refPoints) {
+  var cv = document.getElementById(canvasId);
+  var ctx = cv.getContext('2d');
+  var W = cv.width, H = cv.height;
+  ctx.fillStyle = '#141420'; ctx.fillRect(0, 0, W, H);
+
+  var xW = W - PAD.l - PAD.r, yH = H - PAD.t - PAD.b;
+
+  // Grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)'; ctx.lineWidth = 0.5;
+  for (var i = 1; i <= 9; i++) {
+    var tx = PAD.l + i / 10 * xW;
+    ctx.beginPath(); ctx.moveTo(tx, PAD.t); ctx.lineTo(tx, H - PAD.b); ctx.stroke();
+  }
+  for (var j = 0; j <= 4; j++) {
+    var ty = PAD.t + j / 4 * yH;
+    ctx.beginPath(); ctx.moveTo(PAD.l, ty); ctx.lineTo(W - PAD.r, ty); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,0.2)'; ctx.font = '11px sans-serif'; ctx.textAlign = 'right';
+    var yVal = yMax - j / 4 * (yMax - yMin);
+    ctx.fillText(yVal.toFixed(yMax > 10 ? 0 : 2), PAD.l - 6, ty + 4);
+  }
+
+  // Axes
+  ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(PAD.l, PAD.t); ctx.lineTo(PAD.l, H - PAD.b); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(PAD.l, H - PAD.b); ctx.lineTo(W - PAD.r, H - PAD.b); ctx.stroke();
+
+  // Axis labels
+  ctx.fillStyle = 'rgba(255,255,255,0.2)'; ctx.font = '12px sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText(currentLang === 'de' ? 'Dimensionen' : 'dimensions', W - PAD.r - 30, H - PAD.b + 18);
+  ctx.save(); ctx.translate(14, PAD.t + 12); ctx.rotate(-Math.PI / 2);
+  ctx.fillText(yLabel, 0, 0); ctx.restore();
+
+  // X axis ticks
+  var maxD = data.length;
+  [1, 5, 10, 20, 50, 100, 200, 500, 1000].forEach(function(d) {
+    if (d > maxD) return;
+    var px = PAD.l + (d - 1) / (maxD - 1) * xW;
+    ctx.fillStyle = 'rgba(255,255,255,0.2)'; ctx.font = '11px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(d, px, H - PAD.b + 16);
+  });
+
+  // Curve
+  ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.setLineDash([]);
+  var started = false;
+  data.forEach(function(v, i) {
+    var px = PAD.l + i / (maxD - 1) * xW;
+    var py = PAD.t + (1 - (v - yMin) / (yMax - yMin)) * yH;
+    if (!started) { ctx.moveTo(px, py); started = true; } else ctx.lineTo(px, py);
+  });
+  ctx.stroke();
+
+  // Reference points
+  if (refPoints) {
+    refPoints.forEach(function(rp) {
+      var px = PAD.l + (rp.d - 1) / (maxD - 1) * xW;
+      var py = PAD.t + (1 - (rp.v - yMin) / (yMax - yMin)) * yH;
+      ctx.beginPath(); ctx.arc(px, py, 4, 0, Math.PI * 2);
+      ctx.fillStyle = color; ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '11px sans-serif';
+      ctx.textAlign = rp.d > 500 ? 'right' : 'left';
+      ctx.fillText('d=' + rp.d + ': ' + rp.label, px + (rp.d > 500 ? -8 : 8), py - 8);
+    });
+  }
+}
+
+function buildData(fn, maxD) {
+  var arr = [];
+  for (var d = 1; d <= maxD; d++) arr.push(fn(d));
+  return arr;
+}
+
+/* ── CHART 1: sphere/cube ── */
+function drawChart1() {
+  var data = buildData(function(d) { return Math.max(0, sphereCubeRatio(d)); }, 30);
+  drawChart('chart1', data, '%', 0, 100, 'rgba(100,180,220,0.9)', [
+    {d:2, v:sphereCubeRatio(2), label:'78%'},
+    {d:3, v:sphereCubeRatio(3), label:'52%'},
+    {d:10, v:sphereCubeRatio(10), label: sphereCubeRatio(10).toFixed(1)+'%'}
+  ]);
+}
+
+/* ── CHART 2: shell ── */
+function drawChart2() {
+  var t = 0.005;
+  var data = buildData(function(d) { return shellFraction(d, t); }, 200);
+  drawChart('chart2', data, '%', 0, 100, 'rgba(220,130,80,0.9)', [
+    {d:3, v:shellFraction(3,t), label:'~1.5%'},
+    {d:100, v:shellFraction(100,t), label: shellFraction(100,t).toFixed(0)+'%'},
+    {d:200, v:shellFraction(200,t), label:'~100%'}
+  ]);
+}
+
+/* ── CHART 3: angles ── */
+function drawChart3() {
+  var data = buildData(function(d) { return d < 2 ? 0 : angleProbability(d); }, 1000);
+  drawChart('chart3', data, 'prob.', 0, 1, 'rgba(180,120,220,0.9)', [
+    {d:3, v:angleProbability(3), label:'~0.017'},
+    {d:100, v:angleProbability(100), label: angleProbability(100).toFixed(2)},
+    {d:1000, v:angleProbability(1000), label:'≈0.42'}
+  ]);
+}
+
+/* ── CHART 4: KNN neighbourhood ── */
+function updateCoverChart() {
+  var pct = parseInt(document.getElementById('cover-slider').value);
+  document.getElementById('cover-out').textContent = pct;
+  var cover = pct / 100;
+  var maxD = 30;
+  var data = buildData(function(d) { return Math.pow(cover, 1/d); }, maxD);
+
+  var cv = document.getElementById('chart4');
+  var ctx = cv.getContext('2d');
+  var W = cv.width, H = cv.height;
+  ctx.fillStyle = '#141420'; ctx.fillRect(0, 0, W, H);
+  var xW = W - PAD.l - PAD.r, yH = H - PAD.t - PAD.b;
+
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)'; ctx.lineWidth = 0.5;
+  for (var i=1;i<=9;i++){var tx=PAD.l+i/10*xW;ctx.beginPath();ctx.moveTo(tx,PAD.t);ctx.lineTo(tx,H-PAD.b);ctx.stroke();}
+  for (var j=0;j<=4;j++){var ty=PAD.t+j/4*yH;ctx.beginPath();ctx.moveTo(PAD.l,ty);ctx.lineTo(W-PAD.r,ty);ctx.stroke();
+    ctx.fillStyle='rgba(255,255,255,0.2)';ctx.font='11px sans-serif';ctx.textAlign='right';
+    ctx.fillText(((1-j/4)*100).toFixed(0)+'%',PAD.l-6,ty+4);}
+
+  ctx.strokeStyle='rgba(255,255,255,0.12)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(PAD.l,PAD.t);ctx.lineTo(PAD.l,H-PAD.b);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(PAD.l,H-PAD.b);ctx.lineTo(W-PAD.r,H-PAD.b);ctx.stroke();
+
+  ctx.fillStyle='rgba(255,255,255,0.2)';ctx.font='12px sans-serif';ctx.textAlign='center';
+  ctx.fillText(currentLang==='de'?'Dimensionen':'dimensions',W-PAD.r-30,H-PAD.b+18);
+  ctx.save();ctx.translate(14,PAD.t+12);ctx.rotate(-Math.PI/2);
+  ctx.fillText(currentLang==='de'?'benötigte Reichweite':'required range', 0, 0); ctx.restore();
+
+  [1,3,5,10,15,20,25,30].forEach(function(d){
+    var px=PAD.l+(d-1)/(maxD-1)*xW;
+    ctx.fillStyle='rgba(255,255,255,0.2)';ctx.font='11px sans-serif';ctx.textAlign='center';
+    ctx.fillText(d,px,H-PAD.b+16);
+  });
+
+  ctx.beginPath();ctx.strokeStyle='rgba(100,200,160,0.9)';ctx.lineWidth=2;
+  var started=false;
+  data.forEach(function(v,i){
+    var px=PAD.l+i/(maxD-1)*xW, py=PAD.t+(1-v)*yH;
+    if(!started){ctx.moveTo(px,py);started=true;}else ctx.lineTo(px,py);
+  });
+  ctx.stroke();
+
+  [1,3,5,10,20].forEach(function(d){
+    var v=Math.pow(cover,1/d);
+    var px=PAD.l+(d-1)/(maxD-1)*xW, py=PAD.t+(1-v)*yH;
+    ctx.beginPath();ctx.arc(px,py,4,0,Math.PI*2);
+    ctx.fillStyle='rgba(100,200,160,0.9)';ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='11px sans-serif';
+    ctx.textAlign=d>15?'right':'left';
+    ctx.fillText('d='+d+': '+(v*100).toFixed(0)+'%',px+(d>15?-8:8),py-8);
+  });
+
+  var de = currentLang === 'de';
+  document.getElementById('cover-note').textContent = de
+    ? 'Um '+pct+' % der Datenpunkte abzudecken, musst du in 10 Dimensionen '+(Math.pow(cover,0.1)*100).toFixed(0)+' % der Reichweite jedes Merkmals abdecken. In 20 Dimensionen sind es '+(Math.pow(cover,0.05)*100).toFixed(0)+' %.'
+    : 'To cover '+pct+'% of data points, in 10 dimensions you must span '+(Math.pow(cover,0.1)*100).toFixed(0)+'% of each feature\'s range. In 20 dimensions: '+(Math.pow(cover,0.05)*100).toFixed(0)+'%.';
+}
+
+/* ── TASK CHECKING ── */
+var FEEDBACK = {
+  task1: {
+    correct: {
+      en: '<em class="verdict">Correct.</em> The answer is essentially 0%, so small it cannot be expressed as a percentage in standard notation. The gamma function in the denominator grows faster than the numerator, collapsing the ratio to zero. All the volume of the cube concentrates in its corners. The sphere, which is smooth and centred, becomes vanishingly small relative to the jagged high-dimensional cube.',
+      de: '<em class="verdict">Richtig.</em> Die Antwort ist praktisch 0 %. Sie ist so klein, dass man sie in Standardnotation gar nicht als Prozentsatz schreiben kann. Die Gammafunktion im Nenner wächst schneller als der Zähler. Das Verhältnis kollabiert gegen null. Das gesamte Volumen des Würfels sitzt in seinen Ecken.'
+    },
+    close: {
+      en: '<em class="verdict">Very close to right, but not quite.</em> You guessed a small number, which shows correct intuition. The actual answer for d=1000 is not just small, it is astronomically small, far below any percentage you can write. The ratio goes to zero so fast that even 0.0001% would be an enormous overestimate. The sphere essentially disappears inside the cube.',
+      de: '<em class="verdict">Sehr nah, aber nicht ganz.</em> Du hast eine kleine Zahl geschätzt, und die Intuition stimmt. Die tatsächliche Antwort für d=1000 ist aber nicht nur klein. Sie ist astronomisch klein, weit unter jedem Prozentsatz, den man schreiben kann.'
+    },
+    wrong: {
+      en: '<em class="verdict">Not quite.</em> The answer is much smaller than you might expect. In d=2 it is 78%. In d=3 it is 52%. By d=10 it is already below 0.3%. By d=1000 the sphere has essentially vanished, the ratio is so close to zero that no standard percentage notation can express it. The cube\'s volume has entirely migrated to its corners.',
+      de: '<em class="verdict">Nicht ganz.</em> Die Antwort ist viel kleiner als erwartet. Bei d=2 sind es 78 %, bei d=3 sind es 52 %, bei d=10 schon unter 0,3 %. Bei d=1000 ist die Kugel praktisch verschwunden.'
+    }
+  },
+  task2: {
+    correct: {
+      en: '<em class="verdict">Correct.</em> In 1000 dimensions, 1 − (0.995)^1000 ≈ 99.3%. Nearly all the volume of the sphere sits within 0.5% of its surface. The sphere\'s interior is essentially empty. This is why KNN struggles in high dimensions: your training points all cluster near the surface of the search space, not distributed through its interior.',
+      de: '<em class="verdict">Richtig.</em> In 1000 Dimensionen gilt 1 − (0,995)^1000 ≈ 99,3 %. Fast das gesamte Volumen der Kugel liegt innerhalb von 0,5 % ihrer Oberfläche. Das Innere ist praktisch leer. Deshalb hat KNN in hohen Dimensionen Probleme.'
+    },
+    close: {
+      en: '<em class="verdict">Close, the right intuition, but the number is higher still.</em> The actual value is about 99.3%. The formula is exact: 1 − (1−t)^d. With t=0.005 and d=1000, the interior fraction (0.995)^1000 is tiny. Nearly everything is shell.',
+      de: '<em class="verdict">Nah dran, die Intuition stimmt.</em> Die Zahl ist aber noch höher. Der tatsächliche Wert liegt bei etwa 99,3 %. Die Formel ist exakt: 1 − (1−t)^d. Mit t=0,005 und d=1000 ist der Innenanteil (0,995)^1000 winzig.'
+    },
+    wrong: {
+      en: '<em class="verdict">Not quite, the answer is much larger.</em> In 3D a 0.5%-thick shell holds about 1.5% of the volume. In 1000 dimensions the same shell holds 99.3%. The formula 1 − (1−t)^d tells you: as d grows, the exponent crushes the interior fraction to nothing. Almost all the volume migrates to the thin outer shell.',
+      de: '<em class="verdict">Nicht ganz, die Antwort ist viel größer.</em> In 3D enthält eine Schale von 0,5 % Dicke etwa 1,5 % des Volumens. In 1000 Dimensionen enthält dieselbe Schale 99,3 %. Fast das gesamte Volumen wandert in die dünne äußere Schale.'
+    }
+  },
+  task3: {
+    correct: {
+      en: '<em class="verdict">Approximately correct.</em> The precise value is about 0.418. The standard deviation of the angle between two random 1000-dimensional vectors is approximately 1/√999 ≈ 1.83°. The 2° window from 89° to 91° captures about 42% of the distribution, not a near-certainty, but already striking given how spread-out the distribution is in 3D.',
+      de: '<em class="verdict">Ungefähr richtig.</em> Der genaue Wert liegt bei etwa 0,418. Die Standardabweichung des Winkels zwischen zwei zufälligen 1000-dimensionalen Vektoren beträgt etwa 1/√999 ≈ 1,83°. Das 2°-Fenster von 89° bis 91° erfasst etwa 42 % der Verteilung.'
+    },
+    close: {
+      en: '<em class="verdict">In the right direction.</em> The actual value is approximately 0.418. The angular distribution concentrates around 90° as dimensions grow, with standard deviation ≈ 1/√(d−1). At d=1000 that is about 1.83°, so the 89°–91° window captures a substantial fraction of all random vector pairs.',
+      de: '<em class="verdict">In der richtigen Richtung.</em> Der tatsächliche Wert liegt bei etwa 0,418. Die Winkelverteilung konzentriert sich mit wachsender Dimension um 90°. Die Standardabweichung ist ungefähr 1/√(d−1). Bei d=1000 sind das etwa 1,83°.'
+    },
+    wrong: {
+      en: '<em class="verdict">Not quite.</em> In 3D, angles between random vectors are spread across the full range, landing between 89° and 91° has probability only about 1.75%. In 1000 dimensions the distribution concentrates sharply around 90°. The exact probability for the 89°–91° window is approximately 0.418, about 42% of random vector pairs.',
+      de: '<em class="verdict">Nicht ganz.</em> In 3D verteilen sich die Winkel zwischen zufälligen Vektoren über den gesamten Bereich. Zwischen 89° und 91° zu landen hat dort nur eine Wahrscheinlichkeit von etwa 1,75 %. In 1000 Dimensionen konzentriert sich die Verteilung scharf um 90°. Für das Fenster von 89° bis 91° liegt sie dann bei etwa 0,418.'
+    }
+  }
+};
+
+var TASK_CHARTS = { task1: drawChart1, task2: drawChart2, task3: drawChart3 };
+
+function showFeedback(taskId, type, customText) {
+  var fb = document.getElementById(taskId + '-feedback');
+  var text = customText || (FEEDBACK[taskId][type] && FEEDBACK[taskId][type][currentLang]) || FEEDBACK[taskId][type]['en'];
+  fb.className = 'task-feedback visible ' + type;
+  fb.innerHTML = text;
+  // Only show reset and chart if a real answer was given (not invalid input)
+  if (type !== 'invalid') {
+    document.getElementById(taskId + '-reset').style.display = 'inline';
+    var chartNum = taskId.replace('task','');
+    var reveal = document.getElementById('chart' + chartNum + '-reveal');
+    if (reveal) {
+      reveal.classList.add('visible');
+      if (TASK_CHARTS[taskId]) TASK_CHARTS[taskId]();
+    }
+  }
+}
+
+function resetTask(taskId) {
+  var fb = document.getElementById(taskId + '-feedback');
+  fb.className = 'task-feedback'; fb.innerHTML = '';
+  document.getElementById(taskId + '-reset').style.display = 'none';
+  document.getElementById(taskId + '-input').value = '';
+  document.getElementById(taskId + '-input').disabled = false;
+  document.getElementById(taskId + '-input').closest('.task').querySelector('.task-btn').disabled = false;
+  var chartNum = taskId.replace('task','');
+  var reveal = document.getElementById('chart' + chartNum + '-reveal');
+  if (reveal) reveal.classList.remove('visible');
+}
+
+function lockTask(taskId) {
+  document.getElementById(taskId + '-input').disabled = true;
+  document.getElementById(taskId + '-input').closest('.task').querySelector('.task-btn').disabled = true;
+}
+
+var INVALID = {
+  en: '<em class="verdict">Please enter a number between 0 and 100.</em>',
+  de: '<em class="verdict">Bitte gib eine Zahl zwischen 0 und 100 ein.</em>'
+};
+var INVALID3 = {
+  en: '<em class="verdict">Please enter a number between 0 and 1.</em>',
+  de: '<em class="verdict">Bitte gib eine Zahl zwischen 0 und 1 ein.</em>'
+};
+
+function checkTask1() {
+  var v = parseFloat(document.getElementById('task1-input').value);
+  if (isNaN(v) || v < 0 || v > 100) { showFeedback('task1','invalid', INVALID[currentLang]); return; }
+  lockTask('task1');
+  if (v < 1) showFeedback('task1', 'correct');
+  else if (v < 10) showFeedback('task1', 'close');
+  else showFeedback('task1', 'wrong');
+}
+
+function checkTask2() {
+  var v = parseFloat(document.getElementById('task2-input').value);
+  if (isNaN(v) || v < 0 || v > 100) { showFeedback('task2','invalid', INVALID[currentLang]); return; }
+  lockTask('task2');
+  if (v >= 90) showFeedback('task2', 'correct');
+  else if (v >= 60) showFeedback('task2', 'close');
+  else showFeedback('task2', 'wrong');
+}
+
+function checkTask3() {
+  var v = parseFloat(document.getElementById('task3-input').value);
+  if (isNaN(v) || v < 0 || v > 1) { showFeedback('task3','invalid', INVALID3[currentLang]); return; }
+  lockTask('task3');
+  if (v >= 0.4 && v <= 0.45) showFeedback('task3', 'correct');
+  else if ((v >= 0.3 && v < 0.4) || (v > 0.45 && v <= 0.6)) showFeedback('task3', 'close');
+  else showFeedback('task3', 'wrong');
+}
+
+// Enter key support
+['task1-input','task2-input','task3-input'].forEach(function(id, i) {
+  document.getElementById(id).addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') [checkTask1, checkTask2, checkTask3][i]();
+  });
+});
+
+/* ── INIT ── */
+updateCoverChart();
+</script>
+</body>
+</html>

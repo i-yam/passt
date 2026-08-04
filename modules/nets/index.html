@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Networks</title>
+
+    <!-- KaTeX -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #141420;
+            color: #e8e8f0;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            line-height: 1.8;
+            font-size: 18px;
+        }
+
+        .container { max-width: 820px; margin: 0 auto; padding: 0 24px; }
+
+        /* Language toggle */
+        .lang-toggle {
+            position: fixed; top: 16px; right: 16px;
+            background: #2a2a44; border: 1px solid #4a4a70;
+            border-radius: 20px; padding: 6px 14px;
+            cursor: pointer; font-size: 13px; font-family: sans-serif;
+            color: #a0a0d0; z-index: 100; transition: background 0.2s;
+        }
+        .lang-toggle:hover { background: #363658; }
+
+        /* Hero */
+        .hero { text-align: center; padding: 80px 24px 40px; }
+        .hero h1 { font-size: 42px; font-weight: 700; color: #fff; line-height: 1.3; max-width: 700px; margin: 0 auto; }
+        .hero .subtitle { margin-top: 16px; color: #888; font-size: 16px; font-style: italic; }
+
+        /* Sections */
+        section { padding: 50px 0; }
+        h2 { font-size: 30px; color: #fff; margin-bottom: 24px; line-height: 1.3; }
+        h3 { font-size: 20px; color: #ccc; margin: 28px 0 12px; }
+        p { margin-bottom: 20px; color: #ccc; }
+
+        .formula-block { margin: 24px auto; text-align: center; overflow-x: auto; padding: 10px 0; }
+        .caption { margin-top: 8px; font-size: 14px; color: #777; font-style: italic; text-align: center; }
+
+        /* Quiz */
+        .quiz { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px; padding: 28px; margin: 36px 0; }
+        .quiz-question { font-size: 18px; color: #e0e0f0; margin-bottom: 18px; font-style: italic; }
+        .quiz-options { display: flex; gap: 12px; flex-wrap: wrap; }
+        .quiz-btn {
+            background: #2a2a44; color: #e0e0f0; border: 1px solid #3a3a55;
+            border-radius: 8px; padding: 12px 24px; font-size: 16px; font-family: inherit;
+            cursor: pointer; transition: background 0.2s, border-color 0.2s;
+            flex: 1; min-width: 160px; text-align: center;
+        }
+        .quiz-btn:hover { background: #363658; border-color: #5a5a80; }
+        .quiz-btn.correct { background: #1a4a2a; border-color: #50b878; color: #70e898; }
+        .quiz-btn.wrong { background: #2a2248; border-color: #8264dc; color: #a88ef0; }
+        .quiz-btn.disabled { pointer-events: none; opacity: 0.6; }
+        .quiz-feedback { margin-top: 14px; font-size: 16px; min-height: 24px; line-height: 1.5; }
+        .quiz-feedback.success { color: #70e898; }
+        .quiz-feedback.fail { color: #a88ef0; }
+
+        /* Interactive panels */
+        .demo { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px; padding: 28px; margin: 36px 0; }
+        .demo h3 { margin-top: 0; color: #e0e0f0; font-family: sans-serif; font-size: 16px; letter-spacing: 0.3px; }
+        .demo-cols { display: flex; gap: 28px; flex-wrap: wrap; align-items: center; justify-content: center; margin: 18px 0 6px; }
+        .demo-cols svg { width: 100%; height: auto; }
+        .demo-net { flex: 1 1 300px; max-width: 360px; }
+        .demo-sig { flex: 1 1 280px; max-width: 330px; }
+
+        .sliders { margin: 8px 0 6px; }
+        .slider-row { display: grid; grid-template-columns: 1fr 150px 56px; align-items: center; gap: 14px; margin-bottom: 14px; }
+        .slider-label { font-family: sans-serif; font-size: 14px; color: #ccc; }
+        .slider-val { font-family: sans-serif; font-size: 14px; color: #80b4f0; text-align: right; }
+        input[type="range"] { width: 100%; accent-color: #80b4f0; cursor: pointer; }
+
+        .readouts { display: flex; gap: 26px; flex-wrap: wrap; font-family: sans-serif; font-size: 14px; color: #888; margin-top: 6px; }
+        .readouts b { color: #80b4f0; font-weight: 600; }
+        .verdict { margin-top: 16px; font-family: sans-serif; font-size: 15px; padding: 12px 16px; border-radius: 8px; text-align: center; }
+        .verdict.fire { background: #1a4a2a; border: 1px solid #50b878; color: #70e898; }
+        .verdict.quiet { background: #20202e; border: 1px solid #3a3a55; color: #999; }
+
+        /* Animation network */
+        .anim-stage svg { width: 100%; height: auto; max-width: 460px; display: block; margin: 0 auto; }
+        .anim-svg .edge { stroke: #2a2a40; stroke-width: 2; transition: stroke .3s, stroke-width .3s; }
+        .anim-svg .edge.fwd { stroke: #80b4f0; stroke-width: 4; }
+        .anim-svg .edge.bwd { stroke: #a88ef0; stroke-width: 4; }
+        .anim-svg .edge.upd { stroke: #70e898; stroke-width: 4; }
+        .anim-svg .node { fill: #1c1c2e; stroke: #3a3a55; stroke-width: 1.5; transition: stroke .3s, stroke-width .3s; }
+        .anim-svg .node.fwd { stroke: #80b4f0; stroke-width: 3.5; }
+        .anim-svg .node.bwd { stroke: #a88ef0; stroke-width: 3.5; }
+        .anim-svg .node.err { stroke: #a88ef0; stroke-width: 3.5; }
+        .anim-svg .node.upd { stroke: #70e898; stroke-width: 3.5; }
+
+        .anim-phase { text-align: center; font-family: sans-serif; font-size: 15px; color: #e0e0f0; min-height: 22px; margin: 6px 0 14px; }
+        .anim-controls { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
+        .ctrl-btn {
+            background: #2a2a44; color: #e0e0f0; border: 1px solid #3a3a55;
+            border-radius: 8px; padding: 9px 20px; font-size: 14px; font-family: sans-serif;
+            cursor: pointer; transition: background 0.2s, border-color 0.2s;
+        }
+        .ctrl-btn:hover { background: #363658; border-color: #5a5a80; }
+        .anim-stats { display: flex; gap: 26px; justify-content: center; flex-wrap: wrap; font-family: sans-serif; font-size: 14px; color: #888; }
+        .anim-stats b { color: #80b4f0; font-weight: 600; }
+
+        /* Deep-dive */
+        details { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px; padding: 0 28px; margin: 36px 0; }
+        details summary { cursor: pointer; padding: 22px 0; color: #80b4f0; font-family: sans-serif; font-size: 15px; list-style: none; }
+        details summary::-webkit-details-marker { display: none; }
+        details summary::before { content: "\25B8  "; color: #80b4f0; }
+        details[open] summary::before { content: "\25BE  "; }
+        details[open] summary { border-bottom: 1px solid #2a2a40; }
+        details .dd-body { padding: 8px 0 24px; }
+        details .dd-body p { color: #ccc; }
+        details .dd-body h3 { color: #ccc; }
+
+        .section-rule { border: none; border-top: 1px solid #2a2a40; margin: 0; }
+
+        a { color: #80b4f0; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        footer { text-align: center; padding: 40px 24px; color: #444; font-size: 14px; }
+
+        @media (max-width: 680px) {
+            .hero h1 { font-size: 28px; }
+            h2 { font-size: 24px; }
+            body { font-size: 16px; }
+            .quiz-options { flex-direction: column; }
+            .slider-row { grid-template-columns: 1fr 100px 48px; gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+
+<button class="lang-toggle" onclick="toggleLang()">DE</button>
+
+<!-- Hero -->
+<div class="hero">
+    <h1 data-i18n="hero.title">Neural Networks</h1>
+    <p class="subtitle" data-i18n="hero.subtitle">A conceptual introduction, from a single neuron to deep learning</p>
+</div>
+
+<div class="container">
+
+<!-- Part 1: one neuron + interactive demo -->
+<section>
+    <h2 data-i18n="s1.h2">One Neuron</h2>
+
+    <p data-i18n="s1.p1">A single neuron is almost embarrassingly simple. It takes a few numbers in. It multiplies each one by a weight. It adds them up, adds one more number called a bias, and passes the total through a function that squashes it into a clean output.</p>
+
+    <p data-i18n="s1.p2">Say you are deciding whether to send a customer a win-back coupon. You look at a few things. Days since their last order. How many support tickets they opened. Whether they still open your emails. Each of those gets a weight, depending on how much you think it matters. You add up the weighted evidence. If the total clears a threshold, you send the coupon. If not, you do not. That is a neuron.</p>
+
+    <div class="formula-block">$$z = w_1 x_1 + w_2 x_2 + \dots + w_n x_n + b \qquad a = \sigma(z)$$</div>
+
+    <p data-i18n="s1.p3">The weights decide what the neuron pays attention to. The bias decides how easily it fires. The function at the end, often the sigmoid, turns the raw total into a number between 0 and 1, a kind of confidence.</p>
+
+    <!-- Interactive neuron -->
+    <div class="demo" id="neuron-demo">
+        <h3 data-i18n="nd.h3">Move the inputs. Watch the neuron decide.</h3>
+
+        <div class="sliders">
+            <div class="slider-row">
+                <span class="slider-label" data-i18n="nd.x1">Days since last order</span>
+                <input type="range" min="0" max="100" value="55" id="nx0" oninput="updateNeuron()">
+                <span class="slider-val" id="vx0">0.55</span>
+            </div>
+            <div class="slider-row">
+                <span class="slider-label" data-i18n="nd.x2">Open support tickets</span>
+                <input type="range" min="0" max="100" value="30" id="nx1" oninput="updateNeuron()">
+                <span class="slider-val" id="vx1">0.30</span>
+            </div>
+            <div class="slider-row">
+                <span class="slider-label" data-i18n="nd.x3">Email open rate</span>
+                <input type="range" min="0" max="100" value="60" id="nx2" oninput="updateNeuron()">
+                <span class="slider-val" id="vx2">0.60</span>
+            </div>
+        </div>
+
+        <div class="demo-cols">
+            <div class="demo-net">
+                <svg viewBox="0 0 340 260" xmlns="http://www.w3.org/2000/svg">
+                    <line x1="46" y1="55"  x2="240" y2="130" stroke="#80b4f0" stroke-width="4"/>
+                    <line x1="46" y1="130" x2="240" y2="130" stroke="#80b4f0" stroke-width="3"/>
+                    <line x1="46" y1="205" x2="240" y2="130" stroke="#a88ef0" stroke-width="5"/>
+                    <text x="14" y="60"  fill="#888" font-size="14" font-family="sans-serif">x&#8321;</text>
+                    <text x="14" y="135" fill="#888" font-size="14" font-family="sans-serif">x&#8322;</text>
+                    <text x="14" y="210" fill="#888" font-size="14" font-family="sans-serif">x&#8323;</text>
+                    <circle cx="46" cy="55"  r="20" fill="#1c1c2e" stroke="#3a3a55" stroke-width="1.5"/>
+                    <circle cx="46" cy="55"  r="20" fill="#80b4f0" fill-opacity="0.55" stroke="none" id="infill0"/>
+                    <circle cx="46" cy="130" r="20" fill="#1c1c2e" stroke="#3a3a55" stroke-width="1.5"/>
+                    <circle cx="46" cy="130" r="20" fill="#80b4f0" fill-opacity="0.30" stroke="none" id="infill1"/>
+                    <circle cx="46" cy="205" r="20" fill="#1c1c2e" stroke="#3a3a55" stroke-width="1.5"/>
+                    <circle cx="46" cy="205" r="20" fill="#80b4f0" fill-opacity="0.60" stroke="none" id="infill2"/>
+                    <circle cx="240" cy="130" r="32" fill="#1c1c2e" stroke="#80b4f0" stroke-width="2"/>
+                    <circle cx="240" cy="130" r="32" fill="#50b878" fill-opacity="0.4" stroke="none" id="neuronfill"/>
+                    <text x="240" y="136" fill="#fff" font-size="17" font-family="sans-serif" text-anchor="middle" id="neuronval">0.40</text>
+                </svg>
+            </div>
+            <div class="demo-sig">
+                <svg viewBox="0 0 330 220" xmlns="http://www.w3.org/2000/svg">
+                    <line x1="30" y1="190" x2="312" y2="190" stroke="#3a3a55" stroke-width="1"/>
+                    <line x1="34" y1="20"  x2="34"  y2="196" stroke="#3a3a55" stroke-width="1"/>
+                    <line x1="30" y1="107" x2="312" y2="107" stroke="#555" stroke-width="1" stroke-dasharray="4 4"/>
+                    <text x="300" y="103" fill="#666" font-size="11" font-family="sans-serif" text-anchor="end">0.5</text>
+                    <path id="sigpath" d="" fill="none" stroke="#80b4f0" stroke-width="2"/>
+                    <circle id="sigdot" cx="180" cy="120" r="5" fill="#70e898"/>
+                    <text x="171" y="214" fill="#666" font-size="12" font-family="sans-serif" text-anchor="middle">z</text>
+                </svg>
+                <div class="caption" data-i18n="nd.sigcap">Where the weighted sum lands on the sigmoid.</div>
+            </div>
+        </div>
+
+        <div class="readouts">
+            <span data-i18n="nd.zlabel">weighted sum z</span>&nbsp;=&nbsp;<b id="zval">0.00</b>
+            <span><span data-i18n="nd.alabel">output a</span>&nbsp;=&nbsp;<b id="aval">0.40</b></span>
+        </div>
+        <div class="verdict quiet" id="verdict">Customer looks fine for now</div>
+        <div class="caption" data-i18n="nd.weights">The three weights are fixed knobs we picked in advance: more idle days and more tickets push toward churn, more email opens pull away from it. Training is what sets those knobs for real.</div>
+    </div>
+
+    <p data-i18n="s1.p4">If this feels familiar, it should. One neuron with a sigmoid on the end is logistic regression from Class 6, wearing a different hat.</p>
+
+    <div class="quiz" id="quiz1">
+        <div class="quiz-question" data-i18n="quiz1.q">A single neuron with a sigmoid activation is basically the same as which model you already know?</div>
+        <div class="quiz-options">
+            <button class="quiz-btn" onclick="answerQuiz('quiz1', this, true)" data-i18n="quiz1.a1">Logistic regression</button>
+            <button class="quiz-btn" onclick="answerQuiz('quiz1', this, false)" data-i18n="quiz1.a2">A decision tree</button>
+        </div>
+        <div class="quiz-feedback" id="quiz1-feedback"></div>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- Part 2: layers -->
+<section>
+    <h2 data-i18n="s2.h2">A Layer, Then Another</h2>
+
+    <p data-i18n="s2.p1">One neuron makes one decision. Put a row of them side by side, each looking at the same inputs but with its own weights, and you have a layer. One neuron might learn to watch for "has not ordered in a while." Another watches for "still reading the emails." Each one becomes sensitive to a different pattern in the same data.</p>
+
+    <p data-i18n="s2.p2">Now take the outputs of that layer and feed them as inputs to a second layer. The second layer never sees the raw customer data. It only sees what the first layer made of it. A third layer sees what the second made of that. Each layer works on the layer below, building on what came before. This is what people mean when they say a network composes transformations.</p>
+
+    <p data-i18n="s2.p3">The squashing function is doing quiet, heavy work here. Take it out and something embarrassing happens. A stack of plain weighted sums, one feeding the next, collapses back into a single weighted sum. Ten thousand linear layers are still one straight line. The bend in the activation function is the only reason depth buys you anything at all.</p>
+
+    <div class="quiz" id="quiz2">
+        <div class="quiz-question" data-i18n="quiz2.q">Why does a deep network need a non-linear activation function between layers?</div>
+        <div class="quiz-options">
+            <button class="quiz-btn" onclick="answerQuiz('quiz2', this, true)" data-i18n="quiz2.a1">Without it, stacked layers collapse into a single linear model and depth gains nothing</button>
+            <button class="quiz-btn" onclick="answerQuiz('quiz2', this, false)" data-i18n="quiz2.a2">Without it, the network trains too quickly to be useful</button>
+        </div>
+        <div class="quiz-feedback" id="quiz2-feedback"></div>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- Part 3: why depth helps -->
+<section>
+    <h2 data-i18n="s3.h2">Why Depth Helps</h2>
+
+    <p data-i18n="s3.p1">Show a neural network a million photos, told only which ones contain a cat and which do not. Watch what the layers learn. The first layer learns to notice edges, small slants of light against dark. The next layer puts edges together into corners and curves. The one above that assembles curves into eyes, ears, the texture of fur. By the top, some neuron has quietly become a cat detector.</p>
+
+    <p data-i18n="s3.p2">Nobody wrote "look for ears." Nobody wrote "fur goes here." The only instruction was the loop you already know from linear regression. Make a guess, measure how wrong it is, nudge every weight a little in the direction that lowers the error, repeat a few million times.</p>
+
+    <p data-i18n="s3.p3">That is the whole idea behind deep learning. Deep means many layers stacked up. Learning means the weights were tuned by that loop, not set by a person. The useful structure, the edge finders and the cat finders, falls out of the training on its own.</p>
+
+    <div class="quiz" id="quiz3">
+        <div class="quiz-question" data-i18n="quiz3.q">In "deep learning," what does the word "deep" refer to?</div>
+        <div class="quiz-options">
+            <button class="quiz-btn" onclick="answerQuiz('quiz3', this, true)" data-i18n="quiz3.a1">The network has many layers stacked on top of one another</button>
+            <button class="quiz-btn" onclick="answerQuiz('quiz3', this, false)" data-i18n="quiz3.a2">The model understands the data on a profound level</button>
+        </div>
+        <div class="quiz-feedback" id="quiz3-feedback"></div>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- Part 4: the perceptron + feed-forward / backprop animation -->
+<section>
+    <h2 data-i18n="s4.h2">The Perceptron, and How It Learns</h2>
+
+    <p data-i18n="s4.p1">In 1958, Frank Rosenblatt built a machine called the Perceptron at the Cornell Aeronautical Laboratory. It was a single layer of these units wired to a grid of light sensors, and it learned to tell simple shapes apart by adjusting the strength of its connections. The press got carried away and wrote about machines that would soon walk and talk.</p>
+
+    <p data-i18n="s4.p2">Then in 1969, Minsky and Papert proved a single layer could not even learn exclusive-or, the simplest "one or the other but not both" rule. Funding dried up. The fix came later. Stack a hidden layer in the middle, and send the error backwards through the network to decide how much each weight was to blame. That trick is backpropagation, popularised by Rumelhart, Hinton, and Williams in 1986, and it is still how almost every network learns today.</p>
+
+    <p data-i18n="s4.p3">Press play. The signal runs forward to make a guess, the guess is compared to the right answer, and the error walks back through the weights to correct them. One pass of that is one step of training. Real networks run it millions of times.</p>
+
+    <!-- Animation -->
+    <div class="demo">
+        <h3 data-i18n="an.h3">One step of training, slowed down</h3>
+
+        <div class="anim-phase" id="an-phase">Forward pass: the inputs go in</div>
+
+        <div class="anim-stage">
+            <svg class="anim-svg" viewBox="0 0 440 240" xmlns="http://www.w3.org/2000/svg">
+                <line class="edge" id="fe0" x1="60" y1="80"  x2="220" y2="55"/>
+                <line class="edge" id="fe1" x1="60" y1="80"  x2="220" y2="185"/>
+                <line class="edge" id="fe2" x1="60" y1="160" x2="220" y2="55"/>
+                <line class="edge" id="fe3" x1="60" y1="160" x2="220" y2="185"/>
+                <line class="edge" id="fe4" x1="220" y1="55"  x2="380" y2="120"/>
+                <line class="edge" id="fe5" x1="220" y1="185" x2="380" y2="120"/>
+                <circle class="node" id="ni0" cx="60"  cy="80"  r="18"/>
+                <circle class="node" id="ni1" cx="60"  cy="160" r="18"/>
+                <circle class="node" id="nh0" cx="220" cy="55"  r="18"/>
+                <circle class="node" id="nh1" cx="220" cy="185" r="18"/>
+                <circle class="node" id="no"  cx="380" cy="120" r="18"/>
+                <text x="60"  y="34"  fill="#888" font-size="12" font-family="sans-serif" text-anchor="middle">in</text>
+                <text x="220" y="20"  fill="#888" font-size="12" font-family="sans-serif" text-anchor="middle">hidden</text>
+                <text x="380" y="98"  fill="#888" font-size="12" font-family="sans-serif" text-anchor="middle">out</text>
+            </svg>
+        </div>
+
+        <div class="anim-controls">
+            <button class="ctrl-btn" id="an-play" onclick="toggleAnim()">Play</button>
+            <button class="ctrl-btn" id="an-step" onclick="stepAnim()" data-i18n="an.step">Step</button>
+            <button class="ctrl-btn" id="an-reset" onclick="resetAnim()" data-i18n="an.reset">Reset</button>
+        </div>
+
+        <div class="anim-stats">
+            <span><span data-i18n="an.predLabel">prediction</span> <b id="an-pred">0.310</b></span>
+            <span><span data-i18n="an.targetLabel">target</span> <b>1.000</b></span>
+            <span><span data-i18n="an.errLabel">error</span> <b id="an-err">0.690</b></span>
+            <span><span data-i18n="an.epochLabel">step</span> <b id="an-epoch">0</b></span>
+        </div>
+        <div class="caption" data-i18n="an.hint">Blue is the forward pass, purple is the error walking back, green is the moment the weights move.</div>
+    </div>
+
+    <div class="quiz" id="quiz4">
+        <div class="quiz-question" data-i18n="quiz4.q">What is the backward pass (backpropagation) actually doing?</div>
+        <div class="quiz-options">
+            <button class="quiz-btn" onclick="answerQuiz('quiz4', this, true)" data-i18n="quiz4.a1">Working out how much each weight contributed to the error, so each can be nudged</button>
+            <button class="quiz-btn" onclick="answerQuiz('quiz4', this, false)" data-i18n="quiz4.a2">Running the inputs through the network a second time to double-check the answer</button>
+        </div>
+        <div class="quiz-feedback" id="quiz4-feedback"></div>
+    </div>
+
+    <!-- Deep-dive -->
+    <details>
+        <summary data-i18n="dd.summary">For the curious: the function that does the bending</summary>
+        <div class="dd-body">
+            <p data-i18n="dd.p1">The activation function is the squash at the end of each neuron, the bend that keeps a deep stack from collapsing into one line. The classic one is the sigmoid, which maps any number into the range between 0 and 1:</p>
+
+            <div class="formula-block">$$\sigma(z) = \frac{1}{1 + e^{-z}}$$</div>
+
+            <p data-i18n="dd.p2">It has a problem. For large positive or large negative inputs, the curve goes flat, and a flat curve has almost no slope. Gradient descent learns from slope. When the slope vanishes, the backward pass carries almost nothing, and learning stalls. Tanh has the same shape but runs from minus 1 to 1 and sits centred on zero, which helps a little:</p>
+
+            <div class="formula-block">$$\tanh(z) = \frac{e^{z} - e^{-z}}{e^{z} + e^{-z}}$$</div>
+
+            <p data-i18n="dd.p3">The function that took over modern networks is plainer than both. ReLU. It returns zero for anything negative and passes positive numbers through untouched:</p>
+
+            <div class="formula-block">$$\mathrm{ReLU}(z) = \max(0,\, z)$$</div>
+
+            <p data-i18n="dd.p4">It is the cheapest of the three to compute, and its slope on the positive side never flattens, so the error keeps flowing back through deep stacks instead of dying out. That is most of why deep networks became trainable in the first place.</p>
+        </div>
+    </details>
+</section>
+
+</div>
+
+<footer>
+    <span data-i18n="footer.title">Neural Networks</span>
+    <br>&copy; All rights reserved
+</footer>
+
+<!-- Scripts -->
+<script>
+
+const T = {
+    en: {
+        'hero.title':    'Neural Networks',
+        'hero.subtitle': 'A conceptual introduction, from a single neuron to deep learning',
+
+        's1.h2': 'One Neuron',
+        's1.p1': 'A single neuron is almost embarrassingly simple. It takes a few numbers in. It multiplies each one by a weight. It adds them up, adds one more number called a bias, and passes the total through a function that squashes it into a clean output.',
+        's1.p2': 'Say you are deciding whether to send a customer a win-back coupon. You look at a few things. Days since their last order. How many support tickets they opened. Whether they still open your emails. Each of those gets a weight, depending on how much you think it matters. You add up the weighted evidence. If the total clears a threshold, you send the coupon. If not, you do not. That is a neuron.',
+        's1.p3': 'The weights decide what the neuron pays attention to. The bias decides how easily it fires. The function at the end, often the sigmoid, turns the raw total into a number between 0 and 1, a kind of confidence.',
+        's1.p4': 'If this feels familiar, it should. One neuron with a sigmoid on the end is logistic regression from Class 6, wearing a different hat.',
+
+        'nd.h3':     'Move the inputs. Watch the neuron decide.',
+        'nd.x1':     'Days since last order',
+        'nd.x2':     'Open support tickets',
+        'nd.x3':     'Email open rate',
+        'nd.zlabel': 'weighted sum z',
+        'nd.alabel': 'output a',
+        'nd.sigcap': 'Where the weighted sum lands on the sigmoid.',
+        'nd.weights':'The three weights are fixed knobs we picked in advance: more idle days and more tickets push toward churn, more email opens pull away from it. Training is what sets those knobs for real.',
+        'nd.fire':   'Send a win-back coupon',
+        'nd.quiet':  'Customer looks fine for now',
+
+        'quiz1.q':  'A single neuron with a sigmoid activation is basically the same as which model you already know?',
+        'quiz1.a1': 'Logistic regression',
+        'quiz1.a2': 'A decision tree',
+        'quiz1.ok': 'Exactly. Weighted sum of the inputs, plus a bias, squashed by a sigmoid into a probability. That is logistic regression, line for line.',
+        'quiz1.no': 'Not this time. A decision tree splits the data with yes or no questions. A neuron takes a weighted sum and squashes it, which is the logistic regression recipe.',
+
+        's2.h2': 'A Layer, Then Another',
+        's2.p1': 'One neuron makes one decision. Put a row of them side by side, each looking at the same inputs but with its own weights, and you have a layer. One neuron might learn to watch for "has not ordered in a while." Another watches for "still reading the emails." Each one becomes sensitive to a different pattern in the same data.',
+        's2.p2': 'Now take the outputs of that layer and feed them as inputs to a second layer. The second layer never sees the raw customer data. It only sees what the first layer made of it. A third layer sees what the second made of that. Each layer works on the layer below, building on what came before. This is what people mean when they say a network composes transformations.',
+        's2.p3': 'The squashing function is doing quiet, heavy work here. Take it out and something embarrassing happens. A stack of plain weighted sums, one feeding the next, collapses back into a single weighted sum. Ten thousand linear layers are still one straight line. The bend in the activation function is the only reason depth buys you anything at all.',
+
+        'quiz2.q':  'Why does a deep network need a non-linear activation function between layers?',
+        'quiz2.a1': 'Without it, stacked layers collapse into a single linear model and depth gains nothing',
+        'quiz2.a2': 'Without it, the network trains too quickly to be useful',
+        'quiz2.ok': 'Right. Stack linear steps and you get one more linear step. The bend is what lets each layer add something the line below could not express.',
+        'quiz2.no': 'Not the issue. Without the bend, the whole stack reduces to a single straight-line model no matter how many layers you add. Depth only pays off because the activation can bend.',
+
+        's3.h2': 'Why Depth Helps',
+        's3.p1': 'Show a neural network a million photos, told only which ones contain a cat and which do not. Watch what the layers learn. The first layer learns to notice edges, small slants of light against dark. The next layer puts edges together into corners and curves. The one above that assembles curves into eyes, ears, the texture of fur. By the top, some neuron has quietly become a cat detector.',
+        's3.p2': 'Nobody wrote "look for ears." Nobody wrote "fur goes here." The only instruction was the loop you already know from linear regression. Make a guess, measure how wrong it is, nudge every weight a little in the direction that lowers the error, repeat a few million times.',
+        's3.p3': 'That is the whole idea behind deep learning. Deep means many layers stacked up. Learning means the weights were tuned by that loop, not set by a person. The useful structure, the edge finders and the cat finders, falls out of the training on its own.',
+
+        'quiz3.q':  'In "deep learning," what does the word "deep" refer to?',
+        'quiz3.a1': 'The network has many layers stacked on top of one another',
+        'quiz3.a2': 'The model understands the data on a profound level',
+        'quiz3.ok': 'Yes. Deep is a count, not a compliment. It means a lot of layers between the input and the output.',
+        'quiz3.no': 'A tempting reading, but no. Deep is literal. It counts the layers between input and output, nothing more.',
+
+        's4.h2': 'The Perceptron, and How It Learns',
+        's4.p1': 'In 1958, Frank Rosenblatt built a machine called the Perceptron at the Cornell Aeronautical Laboratory. It was a single layer of these units wired to a grid of light sensors, and it learned to tell simple shapes apart by adjusting the strength of its connections. The press got carried away and wrote about machines that would soon walk and talk.',
+        's4.p2': 'Then in 1969, Minsky and Papert proved a single layer could not even learn exclusive-or, the simplest "one or the other but not both" rule. Funding dried up. The fix came later. Stack a hidden layer in the middle, and send the error backwards through the network to decide how much each weight was to blame. That trick is backpropagation, popularised by Rumelhart, Hinton, and Williams in 1986, and it is still how almost every network learns today.',
+        's4.p3': 'Press play. The signal runs forward to make a guess, the guess is compared to the right answer, and the error walks back through the weights to correct them. One pass of that is one step of training. Real networks run it millions of times.',
+
+        'an.h3':         'One step of training, slowed down',
+        'an.step':       'Step',
+        'an.reset':      'Reset',
+        'an.play':       'Play',
+        'an.pause':      'Pause',
+        'an.predLabel':  'prediction',
+        'an.targetLabel':'target',
+        'an.errLabel':   'error',
+        'an.epochLabel': 'step',
+        'an.hint':       'Blue is the forward pass, purple is the error walking back, green is the moment the weights move.',
+        'an.phase0':     'Forward pass: the inputs go in',
+        'an.phase1':     'Forward pass: the hidden layer fires',
+        'an.phase2':     'The output makes its guess',
+        'an.phase3':     'Compare the guess to the target. That gap is the error',
+        'an.phase4':     'Backward pass: blame the output weights',
+        'an.phase5':     'Backward pass: blame the hidden weights',
+        'an.phase6':     'Nudge every weight, then go again',
+
+        'quiz4.q':  'What is the backward pass (backpropagation) actually doing?',
+        'quiz4.a1': 'Working out how much each weight contributed to the error, so each can be nudged',
+        'quiz4.a2': 'Running the inputs through the network a second time to double-check the answer',
+        'quiz4.ok': 'Right. The backward pass hands each weight its share of the blame for the error, which is exactly what gradient descent needs to know which way to nudge it.',
+        'quiz4.no': 'Not quite. That second forward run would tell you nothing new. The backward pass carries the error, not the inputs, and it works out each weight\u0027s share of the mistake.',
+
+        'dd.summary': 'For the curious: the function that does the bending',
+        'dd.p1': 'The activation function is the squash at the end of each neuron, the bend that keeps a deep stack from collapsing into one line. The classic one is the sigmoid, which maps any number into the range between 0 and 1:',
+        'dd.p2': 'It has a problem. For large positive or large negative inputs, the curve goes flat, and a flat curve has almost no slope. Gradient descent learns from slope. When the slope vanishes, the backward pass carries almost nothing, and learning stalls. Tanh has the same shape but runs from minus 1 to 1 and sits centred on zero, which helps a little:',
+        'dd.p3': 'The function that took over modern networks is plainer than both. ReLU. It returns zero for anything negative and passes positive numbers through untouched:',
+        'dd.p4': 'It is the cheapest of the three to compute, and its slope on the positive side never flattens, so the error keeps flowing back through deep stacks instead of dying out. That is most of why deep networks became trainable in the first place.',
+
+        'footer.title': 'Neural Networks',
+    },
+
+    de: {
+        'hero.title':    'Neuronale Netze',
+        'hero.subtitle': 'Eine konzeptionelle Einführung, vom einzelnen Neuron bis zum Deep Learning',
+
+        's1.h2': 'Ein Neuron',
+        's1.p1': 'Ein einzelnes Neuron ist fast schon peinlich einfach. Es nimmt ein paar Zahlen entgegen. Es multipliziert jede mit einem Gewicht. Es zählt sie zusammen und addiert eine weitere Zahl namens Bias. Dann schickt es die Summe durch eine Funktion, die sie zu einer sauberen Ausgabe quetscht.',
+        's1.p2': 'Angenommen, du entscheidest, ob du einem Kunden einen Rückhol-Gutschein schickst. Du schaust auf ein paar Dinge. Tage seit der letzten Bestellung. Wie viele Support-Tickets er geöffnet hat. Ob er deine E-Mails noch öffnet. Jedes davon bekommt ein Gewicht, je nachdem, für wie wichtig du es hältst. Du zählst die gewichteten Hinweise zusammen. Überschreitet die Summe eine Schwelle, schickst du den Gutschein. Wenn nicht, dann nicht. Das ist ein Neuron.',
+        's1.p3': 'Die Gewichte entscheiden, worauf das Neuron achtet. Der Bias entscheidet, wie leicht es feuert. Am Ende steht oft die Sigmoid-Funktion. Sie macht aus der rohen Summe eine Zahl zwischen 0 und 1, eine Art Zuversicht.',
+        's1.p4': 'Wenn dir das bekannt vorkommt, sollte es das auch. Ein Neuron mit einer Sigmoid-Funktion am Ende ist die logistische Regression aus Klasse 6, nur mit einem anderen Hut.',
+
+        'nd.h3':     'Verschieb die Eingaben. Sieh dem Neuron beim Entscheiden zu.',
+        'nd.x1':     'Tage seit der letzten Bestellung',
+        'nd.x2':     'Offene Support-Tickets',
+        'nd.x3':     'E-Mail-Öffnungsrate',
+        'nd.zlabel': 'gewichtete Summe z',
+        'nd.alabel': 'Ausgabe a',
+        'nd.sigcap': 'Wo die gewichtete Summe auf der Sigmoid-Kurve landet.',
+        'nd.weights':'Die drei Gewichte sind feste Regler. Wir haben sie vorab gewählt. Mehr untätige Tage und mehr Tickets drücken Richtung Abwanderung. Mehr E-Mail-Öffnungen ziehen davon weg. In der Praxis stellt das Training diese Regler ein.',
+        'nd.fire':   'Rückhol-Gutschein schicken',
+        'nd.quiet':  'Kunde sieht vorerst gut aus',
+
+        'quiz1.q':  'Ein einzelnes Neuron mit Sigmoid-Aktivierung entspricht im Grunde einem Modell, das du schon kennst. Welchem?',
+        'quiz1.a1': 'Logistische Regression',
+        'quiz1.a2': 'Ein Entscheidungsbaum',
+        'quiz1.ok': 'Genau. Gewichtete Summe der Eingaben, plus ein Bias, durch eine Sigmoid-Funktion in eine Wahrscheinlichkeit gequetscht. Das ist die logistische Regression, Zeile für Zeile.',
+        'quiz1.no': 'Diesmal nicht. Ein Entscheidungsbaum teilt die Daten mit Ja-oder-Nein-Fragen. Ein Neuron bildet eine gewichtete Summe und quetscht sie. Genau das ist das Rezept der logistischen Regression.',
+
+        's2.h2': 'Eine Schicht, dann noch eine',
+        's2.p1': 'Ein Neuron trifft eine Entscheidung. Stell nun eine ganze Reihe davon nebeneinander. Jedes schaut auf dieselben Eingaben, aber mit eigenen Gewichten. Zusammen sind sie eine Schicht. Ein Neuron lernt vielleicht, auf „hat lange nicht bestellt“ zu achten. Ein anderes achtet auf „liest die E-Mails noch“. Jedes wird empfindlich für ein anderes Muster in denselben Daten.',
+        's2.p2': 'Nimm nun die Ausgaben dieser Schicht und gib sie als Eingaben in eine zweite Schicht. Die zweite Schicht sieht die rohen Kundendaten nie. Sie sieht nur, was die erste daraus gemacht hat. Eine dritte Schicht sieht, was die zweite daraus gemacht hat. Jede Schicht arbeitet an der Schicht darunter und baut auf dem auf, was vorher kam. Genau das meinen Leute, wenn sie sagen: Ein Netz setzt Transformationen zusammen.',
+        's2.p3': 'Die quetschende Funktion leistet hier stille, schwere Arbeit. Nimm sie weg, und etwas Peinliches passiert. Staple einfache gewichtete Summen aufeinander, eine speist die nächste. Am Ende fällt alles zu einer einzigen gewichteten Summe zusammen. Zehntausend lineare Schichten sind immer noch eine gerade Linie. Der Knick in der Aktivierungsfunktion ist der einzige Grund, warum Tiefe überhaupt etwas bringt.',
+
+        'quiz2.q':  'Warum braucht ein tiefes Netz eine nichtlineare Aktivierungsfunktion zwischen den Schichten?',
+        'quiz2.a1': 'Ohne sie fallen gestapelte Schichten zu einem einzigen linearen Modell zusammen, und Tiefe bringt nichts',
+        'quiz2.a2': 'Ohne sie trainiert das Netz zu schnell, um nützlich zu sein',
+        'quiz2.ok': 'Richtig. Stapelt man lineare Schritte, bekommt man einen weiteren linearen Schritt. Erst der Knick lässt jede Schicht etwas Neues beitragen. Die Schicht darunter konnte das nicht ausdrücken.',
+        'quiz2.no': 'Das ist nicht das Problem. Ohne den Knick schrumpft der ganze Stapel auf ein einziges geradliniges Modell. Egal, wie viele Schichten du hinzufügst. Tiefe zahlt sich nur deshalb aus, weil die Aktivierung biegen kann.',
+
+        's3.h2': 'Warum Tiefe hilft',
+        's3.p1': 'Zeig einem neuronalen Netz eine Million Fotos, und sag ihm nur, welche eine Katze enthalten und welche nicht. Sieh dir an, was die Schichten lernen. Die erste Schicht lernt, Kanten zu bemerken, kleine Neigungen von Hell gegen Dunkel. Die nächste Schicht setzt Kanten zu Ecken und Kurven zusammen. Die darüber baut aus Kurven Augen, Ohren, die Textur von Fell. Ganz oben ist irgendein Neuron still und leise zu einem Katzen-Detektor geworden.',
+        's3.p2': 'Niemand hat „such nach Ohren“ geschrieben. Niemand hat „hier kommt Fell hin“ geschrieben. Die einzige Anweisung war die Schleife, die du schon aus der linearen Regression kennst. Rate. Miss, wie falsch du liegst. Schieb jedes Gewicht ein wenig in die Richtung, die den Fehler senkt. Wiederhole das ein paar Millionen Mal.',
+        's3.p3': 'Das ist die ganze Idee hinter dem Deep Learning. Tief bedeutet viele gestapelte Schichten. Lernen bedeutet: Die Gewichte hat diese Schleife eingestellt, kein Mensch. Die nützliche Struktur fällt von selbst aus dem Training, die Kantenfinder ebenso wie die Katzenfinder.',
+
+        'quiz3.q':  'Worauf bezieht sich beim „Deep Learning“ das Wort „tief“?',
+        'quiz3.a1': 'Das Netz hat viele Schichten, eine auf der anderen gestapelt',
+        'quiz3.a2': 'Das Modell versteht die Daten auf einer tiefgründigen Ebene',
+        'quiz3.ok': 'Ja. Tief ist eine Zählung, kein Kompliment. Es bedeutet viele Schichten zwischen Eingabe und Ausgabe.',
+        'quiz3.no': 'Eine verlockende Lesart, aber nein. Tief ist wörtlich gemeint. Es zählt die Schichten zwischen Eingabe und Ausgabe, mehr nicht.',
+
+        's4.h2': 'Das Perzeptron, und wie es lernt',
+        's4.p1': '1958 baute Frank Rosenblatt am Cornell Aeronautical Laboratory eine Maschine namens Perzeptron. Es war eine einzelne Schicht solcher Einheiten, verdrahtet mit einem Raster aus Lichtsensoren. Es lernte, einfache Formen auseinanderzuhalten. Dazu passte es die Stärke seiner Verbindungen an. Die Presse überschlug sich und schrieb über Maschinen, die bald laufen und sprechen würden.',
+        's4.p2': 'Dann bewiesen Minsky und Papert 1969 etwas Unangenehmes. Eine einzelne Schicht konnte nicht einmal das Exklusiv-Oder lernen. Das ist die einfachste Regel überhaupt: das eine oder das andere, aber nicht beides. Die Fördergelder versiegten. Die Lösung kam später. Bau eine verborgene Schicht in die Mitte. Schick den Fehler rückwärts durch das Netz. So siehst du, wie viel Schuld jedes Gewicht trug. Dieser Trick heißt Backpropagation. Rumelhart, Hinton und Williams haben ihn 1986 bekannt gemacht. So lernt noch heute fast jedes Netz.',
+        's4.p3': 'Drück auf Play. Das Signal läuft vorwärts und macht eine Schätzung. Die Schätzung wird mit der richtigen Antwort verglichen. Dann läuft der Fehler zurück durch die Gewichte und korrigiert sie. Ein solcher Durchlauf ist ein Trainingsschritt. Echte Netze machen ihn millionenfach.',
+
+        'an.h3':         'Ein Trainingsschritt, verlangsamt',
+        'an.step':       'Schritt',
+        'an.reset':      'Zurücksetzen',
+        'an.play':       'Play',
+        'an.pause':      'Pause',
+        'an.predLabel':  'Schätzung',
+        'an.targetLabel':'Ziel',
+        'an.errLabel':   'Fehler',
+        'an.epochLabel': 'Schritt',
+        'an.hint':       'Blau ist der Vorwärtslauf, Lila der Fehler auf dem Rückweg, Grün der Moment, in dem sich die Gewichte bewegen.',
+        'an.phase0':     'Vorwärtslauf: die Eingaben gehen hinein',
+        'an.phase1':     'Vorwärtslauf: die verborgene Schicht feuert',
+        'an.phase2':     'Die Ausgabe macht ihre Schätzung',
+        'an.phase3':     'Vergleiche die Schätzung mit dem Ziel. Diese Lücke ist der Fehler',
+        'an.phase4':     'Rückwärtslauf: die Ausgabe-Gewichte zur Verantwortung ziehen',
+        'an.phase5':     'Rückwärtslauf: die verborgenen Gewichte zur Verantwortung ziehen',
+        'an.phase6':     'Jedes Gewicht ein wenig schieben, dann von vorn',
+
+        'quiz4.q':  'Was macht der Rückwärtslauf (Backpropagation) eigentlich?',
+        'quiz4.a1': 'Er ermittelt, wie viel jedes Gewicht zum Fehler beigetragen hat, damit jedes nachjustiert werden kann',
+        'quiz4.a2': 'Er schickt die Eingaben ein zweites Mal durch das Netz, um die Antwort zu überprüfen',
+        'quiz4.ok': 'Richtig. Der Rückwärtslauf gibt jedem Gewicht seinen Anteil an der Schuld für den Fehler. Genau das braucht der Gradientenabstieg. Erst dann weiß er, in welche Richtung er das Gewicht schieben muss.',
+        'quiz4.no': 'Nicht ganz. Ein zweiter Vorwärtslauf würde nichts Neues verraten. Der Rückwärtslauf trägt den Fehler, nicht die Eingaben, und ermittelt den Anteil jedes Gewichts am Fehler.',
+
+        'dd.summary': 'Für die Neugierigen: die Funktion, die den Knick macht',
+        'dd.p1': 'Die Aktivierungsfunktion ist die Quetschung am Ende jedes Neurons. Dieser Knick bewahrt einen tiefen Stapel davor, zu einer einzigen Linie zusammenzufallen. Die klassische Wahl ist die Sigmoid-Funktion, die jede Zahl auf den Bereich zwischen 0 und 1 abbildet:',
+        'dd.p2': 'Diese Funktion hat ein Problem. Bei großen positiven oder großen negativen Eingaben wird die Kurve flach. Eine flache Kurve hat fast keine Steigung. Der Gradientenabstieg lernt aber aus der Steigung. Verschwindet sie, trägt der Rückwärtslauf fast nichts mehr. Das Lernen kommt zum Stillstand. Tanh hat dieselbe Form, läuft aber von minus 1 bis 1 und liegt um null zentriert. Das hilft ein wenig:',
+        'dd.p3': 'Die Funktion, die moderne Netze übernommen hat, ist schlichter als beide. ReLU. Für alles Negative gibt sie null zurück, positive Zahlen lässt sie unverändert durch:',
+        'dd.p4': 'ReLU ist von den dreien am billigsten zu berechnen. Auf der positiven Seite wird ihre Steigung nie flach. So fließt der Fehler weiter durch tiefe Stapel zurück, statt zu versiegen. Das erklärt zum großen Teil, warum tiefe Netze überhaupt trainierbar wurden.',
+
+        'footer.title': 'Neuronale Netze',
+    }
+};
+
+let currentLang = 'en';
+
+function toggleLang() {
+    currentLang = currentLang === 'en' ? 'de' : 'en';
+    document.documentElement.lang = currentLang;
+    document.querySelector('.lang-toggle').textContent = currentLang === 'en' ? 'DE' : 'EN';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (T[currentLang] && T[currentLang][key]) el.innerHTML = T[currentLang][key];
+    });
+    if (typeof updateNeuron === 'function') updateNeuron();
+    if (typeof refreshAnim === 'function') refreshAnim();
+    if (typeof renderMathInElement !== 'undefined') {
+        renderMathInElement(document.body, {
+            delimiters: [
+                { left: '$$', right: '$$', display: true  },
+                { left: '\\(', right: '\\)', display: false }
+            ],
+            throwOnError: false
+        });
+    }
+}
+
+function answerQuiz(quizId, btn, isCorrect) {
+    const quiz     = document.getElementById(quizId);
+    const feedback = document.getElementById(quizId + '-feedback');
+    quiz.querySelectorAll('.quiz-btn').forEach(b => b.classList.add('disabled'));
+    btn.classList.add(isCorrect ? 'correct' : 'wrong');
+    feedback.className = 'quiz-feedback ' + (isCorrect ? 'success' : 'fail');
+    const key = quizId + (isCorrect ? '.ok' : '.no');
+    feedback.innerHTML = (T[currentLang] && T[currentLang][key]) ? T[currentLang][key] : T.en[key];
+}
+
+/* ─── Interactive neuron ─────────────────────────────────────────────────── */
+const NW = [2.0, 1.4, -2.6];
+const NB = 0.2;
+function sigmoid(z) { return 1 / (1 + Math.exp(-z)); }
+function zToX(z) { const zmin = -6, zmax = 6, x0 = 34, x1 = 300; const zc = Math.max(zmin, Math.min(zmax, z)); return x0 + (zc - zmin) / (zmax - zmin) * (x1 - x0); }
+function aToY(a) { return 190 + a * (24 - 190); }
+function buildSigPath() {
+    const p = document.getElementById('sigpath'); if (!p) return;
+    let d = '';
+    for (let i = 0; i <= 60; i++) { const z = -6 + 12 * i / 60; d += (i ? 'L' : 'M') + zToX(z).toFixed(1) + ' ' + aToY(sigmoid(z)).toFixed(1) + ' '; }
+    p.setAttribute('d', d.trim());
+}
+function updateNeuron() {
+    const xs = ['nx0', 'nx1', 'nx2'].map(id => { const el = document.getElementById(id); return el ? el.value / 100 : 0; });
+    ['vx0', 'vx1', 'vx2'].forEach((id, i) => { const el = document.getElementById(id); if (el) el.textContent = xs[i].toFixed(2); });
+    xs.forEach((v, i) => { const c = document.getElementById('infill' + i); if (c) c.setAttribute('fill-opacity', (0.12 + 0.78 * v).toFixed(3)); });
+    const z = NW[0] * xs[0] + NW[1] * xs[1] + NW[2] * xs[2] + NB;
+    const a = sigmoid(z);
+    const nf = document.getElementById('neuronfill'); if (nf) nf.setAttribute('fill-opacity', a.toFixed(3));
+    const nv = document.getElementById('neuronval'); if (nv) nv.textContent = a.toFixed(2);
+    const zt = document.getElementById('zval'); if (zt) zt.textContent = z.toFixed(2);
+    const at = document.getElementById('aval'); if (at) at.textContent = a.toFixed(2);
+    const dot = document.getElementById('sigdot'); if (dot) { dot.setAttribute('cx', zToX(z).toFixed(1)); dot.setAttribute('cy', aToY(a).toFixed(1)); }
+    const ver = document.getElementById('verdict');
+    if (ver) { const fire = a >= 0.5; ver.textContent = (T[currentLang] && T[currentLang][fire ? 'nd.fire' : 'nd.quiet']) || ''; ver.className = 'verdict ' + (fire ? 'fire' : 'quiet'); }
+}
+
+/* ─── Feed-forward / backprop animation ──────────────────────────────────── */
+const AN = { phase: 0, step: 0, loss: 0.690, playing: false, timer: null };
+const PHASES = [
+    { label: 'an.phase0', nodes: ['ni0', 'ni1'], edges: ['fe0', 'fe1', 'fe2', 'fe3'], cls: 'fwd' },
+    { label: 'an.phase1', nodes: ['nh0', 'nh1'], edges: ['fe4', 'fe5'], cls: 'fwd' },
+    { label: 'an.phase2', nodes: ['no'], edges: [], cls: 'fwd' },
+    { label: 'an.phase3', nodes: ['no'], edges: [], cls: 'err' },
+    { label: 'an.phase4', nodes: ['no', 'nh0', 'nh1'], edges: ['fe4', 'fe5'], cls: 'bwd' },
+    { label: 'an.phase5', nodes: ['nh0', 'nh1', 'ni0', 'ni1'], edges: ['fe0', 'fe1', 'fe2', 'fe3'], cls: 'bwd' },
+    { label: 'an.phase6', nodes: ['ni0', 'ni1', 'nh0', 'nh1', 'no'], edges: ['fe0', 'fe1', 'fe2', 'fe3', 'fe4', 'fe5'], cls: 'upd' }
+];
+function clearAnim() {
+    document.querySelectorAll('.anim-svg .node.anim-svg .edge').forEach(e => e.classList.remove('fwd', 'bwd', 'err', 'upd'));
+}
+function setAnimText() {
+    const ph = PHASES[AN.phase];
+    const lab = document.getElementById('an-phase'); if (lab) lab.textContent = (T[currentLang] && T[currentLang][ph.label]) || '';
+    const pred = 1 - AN.loss;
+    const sp = document.getElementById('an-pred'); if (sp) sp.textContent = pred.toFixed(3);
+    const se = document.getElementById('an-err'); if (se) se.textContent = AN.loss.toFixed(3);
+    const st = document.getElementById('an-epoch'); if (st) st.textContent = AN.step;
+    const pb = document.getElementById('an-play'); if (pb) pb.textContent = (T[currentLang] && T[currentLang][AN.playing ? 'an.pause' : 'an.play']) || 'Play';
+}
+function renderPhase() {
+    clearAnim();
+    const ph = PHASES[AN.phase];
+    ph.nodes.forEach(id => { const e = document.getElementById(id); if (e) e.classList.add(ph.cls); });
+    ph.edges.forEach(id => { const e = document.getElementById(id); if (e) e.classList.add(ph.cls); });
+    setAnimText();
+}
+function refreshAnim() { setAnimText(); }
+function stepAnim() {
+    AN.phase = (AN.phase + 1) % PHASES.length;
+    if (PHASES[AN.phase].cls === 'upd') { AN.step++; AN.loss = Math.max(0.001, AN.loss * 0.80); }
+    renderPhase();
+}
+function playAnim() {
+    if (AN.playing) return;
+    AN.playing = true;
+    AN.timer = setInterval(stepAnim, 1100);
+    setAnimText();
+}
+function pauseAnim() {
+    AN.playing = false;
+    if (AN.timer) { clearInterval(AN.timer); AN.timer = null; }
+    setAnimText();
+}
+function toggleAnim() { AN.playing ? pauseAnim() : playAnim(); }
+function resetAnim() { pauseAnim(); AN.phase = 0; AN.step = 0; AN.loss = 0.690; renderPhase(); }
+
+window.addEventListener('load', function () {
+    buildSigPath();
+    updateNeuron();
+    resetAnim();
+    if (typeof renderMathInElement !== 'undefined') {
+        renderMathInElement(document.body, {
+            delimiters: [
+                { left: '$$', right: '$$', display: true  },
+                { left: '\\(', right: '\\)', display: false }
+            ],
+            throwOnError: false
+        });
+    }
+});
+</script>
+</body>
+</html>

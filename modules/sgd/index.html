@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Downhill in the Dark</title>
+
+    <!-- KaTeX -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #141420;
+            color: #e8e8f0;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            line-height: 1.8;
+            font-size: 18px;
+        }
+
+        .container {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* === Language toggle === */
+        .lang-toggle {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            background: #2a2a44;
+            border: 1px solid #4a4a70;
+            border-radius: 20px;
+            padding: 6px 14px;
+            cursor: pointer;
+            font-size: 13px;
+            font-family: sans-serif;
+            color: #a0a0d0;
+            z-index: 100;
+            transition: background 0.2s;
+        }
+        .lang-toggle:hover { background: #363658; }
+
+        /* === Hero === */
+        .hero {
+            text-align: center;
+            padding: 80px 24px 50px;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 28px;
+        }
+
+        .tag {
+            background: #1c1c2e;
+            color: #8888b0;
+            border: 1px solid #2a2a40;
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 12px;
+            font-family: sans-serif;
+            letter-spacing: 0.3px;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.3;
+            max-width: 700px;
+            margin: 0 auto 20px;
+        }
+
+        .hero .subtitle {
+            color: #888;
+            font-size: 16px;
+            font-style: italic;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* === Sections === */
+        section { padding: 50px 0; }
+
+        h2 {
+            font-size: 30px;
+            color: #fff;
+            margin-bottom: 24px;
+            line-height: 1.3;
+        }
+
+        h3 {
+            font-size: 20px;
+            color: #ccc;
+            margin: 24px 0 10px;
+        }
+
+        p { margin-bottom: 20px; color: #ccc; }
+
+        /* === Figure === */
+        .figure {
+            margin: 32px 0;
+            text-align: center;
+        }
+
+        .figure img {
+            max-width: 100%;
+            border-radius: 8px;
+            border: 1px solid #2a2a40;
+        }
+
+        .caption {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #555;
+            font-style: italic;
+            font-family: sans-serif;
+        }
+
+        /* === Formula === */
+        .formula-block {
+            margin: 24px auto;
+            text-align: center;
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+
+        /* === Highlight === */
+        .highlight {
+            background: #1c1c2e;
+            border-left: 3px solid #5050a0;
+            padding: 20px 24px;
+            margin: 28px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .highlight p { margin-bottom: 0; color: #b0b0d0; }
+
+        /* === Quiz === */
+        .quiz {
+            background: #1c1c2e;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            padding: 28px;
+            margin: 36px 0;
+        }
+
+        .quiz-question {
+            font-size: 18px;
+            color: #e0e0f0;
+            margin-bottom: 18px;
+            font-style: italic;
+        }
+
+        .quiz-options {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .quiz-btn {
+            background: #2a2a44;
+            color: #e0e0f0;
+            border: 1px solid #3a3a55;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+            flex: 1;
+            min-width: 180px;
+            text-align: center;
+        }
+
+        .quiz-btn:hover { background: #363658; border-color: #5a5a80; }
+
+        .quiz-btn.correct {
+            background: #1a4a2a;
+            border-color: #50b878;
+            color: #70e898;
+        }
+
+        .quiz-btn.wrong {
+            background: #2a2248;
+            border-color: #8264dc;
+            color: #a88ef0;
+        }
+
+        .quiz-btn.disabled { pointer-events: none; opacity: 0.6; }
+
+        .quiz-feedback {
+            margin-top: 14px;
+            font-size: 16px;
+            min-height: 24px;
+            line-height: 1.5;
+        }
+
+        .quiz-feedback.success { color: #70e898; }
+        .quiz-feedback.fail    { color: #a88ef0; }
+
+        /* === Deep dive === */
+        details {
+            background: #1c1c2e;
+            border: 1px solid #2a2a40;
+            border-radius: 8px;
+            padding: 16px 22px;
+            margin: 0 0 50px;
+        }
+
+        details summary {
+            cursor: pointer;
+            color: #8080c0;
+            font-size: 15px;
+            font-family: sans-serif;
+            user-select: none;
+            list-style: none;
+            padding: 4px 0;
+        }
+
+        details summary::before { content: "▸  "; }
+        details[open] summary::before { content: "▾  "; }
+        details[open] summary { margin-bottom: 18px; }
+
+        details p    { font-size: 16px; color: #888; margin-bottom: 12px; }
+        details h3   { font-size: 16px; color: #a0a0c0; margin: 20px 0 6px; font-family: sans-serif; }
+        details h3:first-of-type { margin-top: 4px; }
+
+        /* === Closing box === */
+        .closing-box {
+            background: #1c1c2e;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .closing-box h3 {
+            font-size: 22px;
+            color: #fff;
+            margin-bottom: 16px;
+        }
+
+        .closing-box p {
+            font-size: 16px;
+            color: #777;
+            max-width: 540px;
+            margin: 0 auto;
+        }
+
+        /* === Divider === */
+        .section-rule {
+            border: none;
+            border-top: 1px solid #2a2a40;
+            margin: 0;
+        }
+
+        /* === Links === */
+        a { color: #80b4f0; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* === Footer === */
+        footer {
+            text-align: center;
+            padding: 40px 24px;
+            color: #444;
+            font-size: 14px;
+        }
+
+        footer a { color: #555; text-decoration: none; }
+        footer a:hover { color: #a0a0d0; text-decoration: underline; }
+
+        /* === Interactive: gradient-descent landscape === */
+        .demo {
+            background: #1c1c2e;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            padding: 24px;
+            margin: 36px 0;
+        }
+
+        .demo-canvas-wrap {
+            position: relative;
+            border: 1px solid #2a2a40;
+            border-radius: 8px;
+            background: #141420;
+            overflow: hidden;
+        }
+
+        .demo-canvas-wrap canvas { display: block; width: 100%; height: auto; cursor: crosshair; }
+
+        .demo-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px 18px;
+            align-items: center;
+            margin-top: 18px;
+        }
+
+        .demo-seg {
+            display: inline-flex;
+            border: 1px solid #3a3a55;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .demo-seg button {
+            background: #2a2a44;
+            color: #a0a0d0;
+            border: none;
+            border-right: 1px solid #3a3a55;
+            padding: 9px 16px;
+            font-family: sans-serif;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .demo-seg button:last-child { border-right: none; }
+        .demo-seg button.active { background: #80b4f0; color: #141420; }
+
+        .demo-btn {
+            background: #2a2a44;
+            color: #e0e0f0;
+            border: 1px solid #3a3a55;
+            border-radius: 8px;
+            padding: 9px 18px;
+            font-family: sans-serif;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+        }
+
+        .demo-btn:hover { background: #363658; border-color: #5a5a80; }
+
+        .demo-slider {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-family: sans-serif;
+            font-size: 13px;
+            color: #888;
+        }
+
+        .demo-slider input[type=range] { width: 110px; accent-color: #80b4f0; }
+        .demo-slider .val {
+            color: #a0a0d0;
+            min-width: 34px;
+            display: inline-block;
+            font-variant-numeric: tabular-nums;
+        }
+        .demo-slider.disabled { opacity: 0.4; pointer-events: none; }
+
+        .demo-readout {
+            display: flex;
+            gap: 28px;
+            flex-wrap: wrap;
+            margin-top: 18px;
+            font-family: sans-serif;
+        }
+
+        .demo-readout .lbl {
+            color: #666;
+            display: block;
+            font-size: 11px;
+            letter-spacing: 0.6px;
+            margin-bottom: 2px;
+        }
+
+        .demo-readout .num {
+            color: #e8e8f0;
+            font-size: 20px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .demo-status {
+            margin-top: 14px;
+            font-family: sans-serif;
+            font-size: 14px;
+            color: #80b4f0;
+            min-height: 20px;
+            line-height: 1.5;
+        }
+
+        .demo-hint {
+            font-family: sans-serif;
+            font-size: 12px;
+            color: #555;
+            margin-top: 12px;
+            font-style: italic;
+        }
+
+        .demo-cap {
+            font-family: sans-serif;
+            font-size: 12px;
+            color: #555;
+            margin-top: 14px;
+            font-style: italic;
+            line-height: 1.6;
+        }
+
+        /* === Responsive === */
+        @media (max-width: 680px) {
+            .hero h1 { font-size: 28px; }
+            h2 { font-size: 24px; }
+            body { font-size: 16px; }
+            .quiz-options { flex-direction: column; }
+            .demo-slider input[type=range] { width: 88px; }
+            .demo-readout { gap: 18px; }
+        }
+    </style>
+</head>
+<body>
+
+<button class="lang-toggle" onclick="toggleLang()">DE</button>
+
+<!-- ── Hero ───────────────────────────────────────────────────────────────── -->
+<div class="hero">
+    <div class="tags">
+        <span class="tag">all</span>
+        <span class="tag">no-code</span>
+        <span class="tag">~20 min</span>
+        <span class="tag">mini-module</span>
+        <span class="tag">try-without-ai</span>
+        <span class="tag">regression</span>
+        <span class="tag">ml-fundamentals</span>
+    </div>
+    <h1 data-i18n="hero.title">Downhill in the Dark</h1>
+    <p class="subtitle" data-i18n="hero.subtitle">Gradient descent, local minima, and why controlled noise usually beats precision</p>
+</div>
+
+<div class="container">
+
+<!-- ── Opening ────────────────────────────────────────────────────────────── -->
+<section>
+
+    <p data-i18n="s0.p1">You need an apartment in Würzburg. One strategy is to collect every listing, build a complete picture of the market, calculate the optimal sequence of viewings, and then act. Another is to open the site, send three messages today, follow up tomorrow, and pick the best response you get.</p>
+
+    <div class="figure">
+        <img src="images/wg.jpg" alt="WG-Gesucht apartment listings in Würzburg">
+        <div class="caption" data-i18n="s0.caption">36 listings. The optimal one will be rented by the time you finish evaluating all of them.</div>
+    </div>
+
+    <p data-i18n="s0.p2">The first strategy is more correct. It is also slower, and the market does not wait. The apartment your calculation identified as optimal was rented while you were still optimizing. The person using the second strategy signed a lease on Tuesday.</p>
+
+    <p data-i18n="s0.p3">This is the difference in spirit between two versions of gradient descent. One computes carefully, using all available data before each step. The other acts on a small random sample, moves fast, and accepts that each step will be imprecise. In machine learning, the second version almost always wins.</p>
+
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Part 1: The terrain ────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s1.title">The Terrain</h2>
+
+    <p data-i18n="s1.p1">Training a model is a search problem. You are looking for the values of its parameters that produce the lowest possible prediction error. Visualize that error as a landscape. The horizontal axes are parameter values. The height at any point is the loss: how wrong the model currently is. Your goal is to reach the lowest point in that landscape.</p>
+
+    <p data-i18n="s1.p2">Gradient descent navigates this terrain by feel. At each step, it checks the slope at the current position, which direction goes downhill fastest?, and takes one step that way. The update rule:</p>
+
+    <div class="formula-block">$$w \;\leftarrow\; w \;-\; \alpha \cdot \frac{\partial L}{\partial w}$$</div>
+
+    <p data-i18n="s1.p3">α is the learning rate: the size of each step. The gradient ∂L/∂w gives the local slope. Move against it and you move downhill. Repeat until the loss stops decreasing. If you have seen the linear regression module, you have already seen this loop.</p>
+
+    <!-- Quiz 1 -->
+    <div class="quiz" id="quiz1">
+        <div class="quiz-question" data-i18n="quiz1.q">In gradient descent, what does the gradient tell you?</div>
+        <div class="quiz-options">
+            <button class="quiz-btn" onclick="answerQuiz('quiz1', this, true)" data-i18n="quiz1.a1">The direction of steepest ascent, so you move against it</button>
+            <button class="quiz-btn" onclick="answerQuiz('quiz1', this, false)" data-i18n="quiz1.a2">The exact location of the minimum</button>
+        </div>
+        <div class="quiz-feedback" id="quiz1-feedback"></div>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Part 2: Local minima ───────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s2.title">The Nearest Valley Is Not the Deepest One</h2>
+
+    <p data-i18n="s2.p1">The loss landscape of a real model is not a single smooth bowl. It is closer to a mountain range: multiple valleys, ridges, and plateaus where the slope is nearly zero. A ball rolled carefully downhill will find the nearest valley and stop. It has no reason to leave.</p>
+
+    <p data-i18n="s2.p2">This is a local minimum. A point where every direction looks uphill, but a better solution exists somewhere else on the landscape. Batch gradient descent, which computes an exact gradient on all training data before each step, is vulnerable to this. It follows the slope precisely and gets stuck.</p>
+
+    <p data-i18n="s2.p3">On simple problems like linear regression the loss surface is a single smooth bowl with one minimum and this does not matter. On the kind of landscapes that arise when training neural networks, with millions of parameters and complex interactions, local minima are everywhere and precision alone does not save you.</p>
+
+    <!-- Quiz 2 -->
+    <div class="quiz" id="quiz2">
+        <div class="quiz-question" data-i18n="quiz2.q">Batch gradient descent computes the exact gradient using all training data. What is the main risk?</div>
+        <div class="quiz-options">
+            <button class="quiz-btn" onclick="answerQuiz('quiz2', this, true)" data-i18n="quiz2.a1">Getting trapped in a local minimum</button>
+            <button class="quiz-btn" onclick="answerQuiz('quiz2', this, false)" data-i18n="quiz2.a2">Computing an inaccurate gradient</button>
+        </div>
+        <div class="quiz-feedback" id="quiz2-feedback"></div>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Part 3: SGD ────────────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s3.title">The Sloppy Version</h2>
+
+    <p data-i18n="s3.p1">Stochastic gradient descent changes one thing: instead of computing the gradient on all the data, it picks a random sample and computes the gradient on that. The result is a noisy estimate of the true gradient. The step you take is not exactly downhill. It is roughly downhill, with some randomness in it.</p>
+
+    <p data-i18n="s3.p2">The practical version used in most real systems is mini-batch SGD: a small random subset of the data, typically 32 to 512 examples. The dataset is shuffled before each pass through it, so the sequence of mini-batches is different every time. The gradient estimates are imprecise. The path through the landscape is jittery.</p>
+
+    <div class="highlight">
+        <p data-i18n="s3.highlight">That jitter is the point. A ball that wobbles occasionally gets nudged out of shallow valleys. It overshoots small local minima. It keeps moving rather than settling. On a landscape with many imperfect valleys, a slightly noisy path finds better solutions than a perfectly smooth one.</p>
+    </div>
+
+    <p data-i18n="s3.p3">There is a second benefit. Because each step is computed on a different random sample, the model is constantly exposed to different parts of the data. It cannot memorize one particular pattern and call it done. The noise acts as a form of regularization, the model becomes harder to overfit.</p>
+
+    <p data-i18n="s3.p4">This is the part that surprises most people. You would expect precision to lead to better results. In optimization over complex landscapes, it often does not. The sloppiness is not a compromise forced by limited computing power. It is a design choice, kept deliberately after people noticed it works better.</p>
+
+    <!-- Quiz 3 -->
+    <div class="quiz" id="quiz3">
+        <div class="quiz-question" data-i18n="quiz3.q">SGD uses a random sample to estimate the gradient, making each step imprecise. What does this imprecision do?</div>
+        <div class="quiz-options">
+            <button class="quiz-btn" onclick="answerQuiz('quiz3', this, true)" data-i18n="quiz3.a1">It helps escape local minima and reduces overfitting</button>
+            <button class="quiz-btn" onclick="answerQuiz('quiz3', this, false)" data-i18n="quiz3.a2">It makes the final model less accurate</button>
+        </div>
+        <div class="quiz-feedback" id="quiz3-feedback"></div>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Interactive: gradient-descent landscape ─────────────────────────────── -->
+<section>
+    <h2 data-i18n="demo.title">See It Get Stuck</h2>
+
+    <p data-i18n="demo.intro">Here is a loss landscape with two valleys. The left one is shallow. The deep one on the right is the global minimum, the answer you actually want. Drop the ball. Batch gradient descent rolls into the nearest valley and stops, even though a better one sits next door. Switch to the stochastic version and drop again. The noise shakes the ball until it stumbles over the ridge and into the deeper valley.</p>
+
+    <div class="demo" id="sgd-demo">
+        <div class="demo-canvas-wrap">
+            <canvas id="sgd-canvas" width="760" height="360"></canvas>
+        </div>
+
+        <div class="demo-controls">
+            <div class="demo-seg" id="sgd-mode">
+                <button type="button" data-mode="batch" class="active" data-i18n="demo.mode.batch">Batch GD</button>
+                <button type="button" data-mode="sgd" data-i18n="demo.mode.sgd">Stochastic GD</button>
+            </div>
+            <button type="button" class="demo-btn" id="sgd-run" data-i18n="demo.drop">Drop the ball</button>
+            <button type="button" class="demo-btn" id="sgd-step" data-i18n="demo.step">Step</button>
+            <button type="button" class="demo-btn" id="sgd-reset" data-i18n="demo.reset">Reset</button>
+
+            <label class="demo-slider">
+                <span data-i18n="demo.lr">Learning rate</span>
+                <input type="range" id="sgd-lr" min="5" max="80" value="30">
+                <span class="val" id="sgd-lr-val">0.30</span>
+            </label>
+            <label class="demo-slider" id="sgd-noise-wrap">
+                <span data-i18n="demo.noise">Noise</span>
+                <input type="range" id="sgd-noise" min="0" max="70" value="45">
+                <span class="val" id="sgd-noise-val">0.45</span>
+            </label>
+        </div>
+
+        <div class="demo-readout">
+            <div><span class="lbl" data-i18n="demo.lblStep">STEP</span><span class="num" id="sgd-step-num">0</span></div>
+            <div><span class="lbl" data-i18n="demo.lblLoss">LOSS</span><span class="num" id="sgd-loss-num">&mdash;</span></div>
+        </div>
+
+        <div class="demo-status" id="sgd-status">Ready. Drop the ball.</div>
+
+        <div class="demo-hint" data-i18n="demo.hint">Click anywhere on the landscape to move the ball, then drop it.</div>
+        <div class="demo-cap" data-i18n="demo.cap">A one-parameter caricature. Height is the loss; the gradient is read straight off the curve. Stochastic mode adds random noise to each gradient reading, the same effect a small random sample has on the real thing.</div>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Part 4: Why it matters ─────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s4.title">Every Major AI System Was Trained This Way</h2>
+
+    <p data-i18n="s4.p1">Language models. Image generators. Recommendation engines. Fraud detection systems. Every one of these was trained with some version of stochastic gradient descent. Not because the teams could not afford to compute the exact gradient, but because they knew the noisy version produces better results.</p>
+
+    <p data-i18n="s4.p2">The step from "minimize error on training data" to "build something that works on new data" is not automatic. Precision on the training set is not the same as usefulness in the world. The noise in SGD is one of the main mechanisms that bridges that gap.</p>
+
+    <p data-i18n="s4.p3">Batch gradient descent finds the deepest valley in the training landscape. Stochastic gradient descent finds a valley that holds up across many slightly different samples of the world. The second is almost always what you want.</p>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Deep dive ──────────────────────────────────────────────────────────── -->
+<section>
+<details>
+    <summary data-i18n="dd.summary">For the curious: momentum, adaptive rates, and why the landscape is stranger than you think</summary>
+
+    <h3 data-i18n="dd.h1">Momentum</h3>
+    <p data-i18n="dd.p1">Plain SGD moves based only on the current gradient. Momentum adds memory: the update step carries some velocity from the previous step, like a ball that keeps rolling in roughly the same direction even when the slope changes slightly. This smooths the path and helps cross small uphill bumps without getting stopped by them.</p>
+
+    <h3 data-i18n="dd.h2">The Adam Optimizer</h3>
+    <p data-i18n="dd.p2">Adam combines momentum with adaptive learning rates: each parameter gets its own step size, adjusted based on how much that parameter has been changing. Parameters updated frequently get smaller steps. Parameters that have barely moved get larger ones. Adam is the default optimizer for most modern deep learning. When a paper says "we trained with Adam," this is what it means.</p>
+
+    <h3 data-i18n="dd.h3">Learning Rate Schedules</h3>
+    <p data-i18n="dd.p3">A fixed learning rate is always a compromise. Start too large and you overshoot. End too large and you never settle. Schedules begin with a larger rate to explore the landscape quickly, then decay it over time so the model can converge precisely toward the end of training. Warmup, cosine decay, step decay: different schedules for different problems, the same logic underneath all of them.</p>
+
+    <h3 data-i18n="dd.h4">The Landscape Is Stranger Than You Think</h3>
+    <p data-i18n="dd.p4">In very high-dimensional spaces, local minima are less common than intuition suggests. More common are saddle points: locations where the surface curves downward in some dimensions and upward in others. Gradient descent can stall at saddle points because the gradient is nearly zero there. SGD's noise tends to escape them naturally, which is another reason the noisy version outperforms the exact one on large models.</p>
+</details>
+</section>
+
+<!-- ── Closing ─────────────────────────────────────────────────────────────── -->
+<div class="closing-box">
+    <h3 data-i18n="closing.title">A model you use every day got its parameters from this process.</h3>
+    <p data-i18n="closing.text">Pick any AI product you interact with regularly. Behind its outputs is a loss landscape, a learning rate someone chose, and millions of noisy gradient steps. If the model surprises you, or fails you, the landscape is often where the explanation lives.</p>
+</div>
+
+</div>
+
+<footer>
+    <a href="https://github.com/i-yam/passt/tree/main/modules/sgd" target="_blank">github.com/i-yam/passt</a>
+    &nbsp;·&nbsp;
+    <a href="../../" target="_blank">overfit &amp; chill</a>
+    <br>&copy; All rights reserved
+</footer>
+
+<!-- ── Scripts ─────────────────────────────────────────────────────────────── -->
+<script>
+
+// ─── Language data ────────────────────────────────────────────────────────────
+const T = {
+    en: {
+        'hero.title':    'Downhill in the Dark',
+        'hero.subtitle': 'Gradient descent, local minima, and why controlled noise usually beats precision',
+
+        's0.p1':    'You need an apartment in Würzburg. One strategy is to collect every listing, build a complete picture of the market, calculate the optimal sequence of viewings, and then act. Another is to open the site, send three messages today, follow up tomorrow, and pick the best response you get.',
+        's0.caption':'36 listings. The optimal one will be rented by the time you finish evaluating all of them.',
+        's0.p2':    'The first strategy is more correct. It is also slower, and the market does not wait. The apartment your calculation identified as optimal was rented while you were still optimizing. The person using the second strategy signed a lease on Tuesday.',
+        's0.p3':    'This is the difference in spirit between two versions of gradient descent. One computes carefully, using all available data before each step. The other acts on a small random sample, moves fast, and accepts that each step will be imprecise. In machine learning, the second version almost always wins.',
+
+        's1.title': 'The Terrain',
+        's1.p1':    'Training a model is a search problem. You are looking for the values of its parameters that produce the lowest possible prediction error. Visualize that error as a landscape. The horizontal axes are parameter values. The height at any point is the loss: how wrong the model currently is. Your goal is to reach the lowest point in that landscape.',
+        's1.p2':    'Gradient descent navigates this terrain by feel. At each step, it checks the slope at the current position, which direction goes downhill fastest?, and takes one step that way. The update rule:',
+        's1.p3':    'α is the learning rate: the size of each step. The gradient ∂L/∂w gives the local slope. Move against it and you move downhill. Repeat until the loss stops decreasing. If you have seen the linear regression module, you have already seen this loop.',
+
+        'quiz1.q':  'In gradient descent, what does the gradient tell you?',
+        'quiz1.a1': 'The direction of steepest ascent, so you move against it',
+        'quiz1.a2': 'The exact location of the minimum',
+        'quiz1.ok': 'Correct. The gradient points uphill. You move against it to go downhill. The minimum is not directly revealed, you find it by taking many small steps and recalculating each time.',
+        'quiz1.no': 'Not quite. The gradient gives you the local slope at your current position, not the destination. You use it to take one step downhill, then recalculate.',
+
+        's2.title': 'The Nearest Valley Is Not the Deepest One',
+        's2.p1':    'The loss landscape of a real model is not a single smooth bowl. It is closer to a mountain range: multiple valleys, ridges, and plateaus where the slope is nearly zero. A ball rolled carefully downhill will find the nearest valley and stop. It has no reason to leave.',
+        's2.p2':    'This is a local minimum. A point where every direction looks uphill, but a better solution exists somewhere else on the landscape. Batch gradient descent, which computes an exact gradient on all training data before each step, is vulnerable to this. It follows the slope precisely and gets stuck.',
+        's2.p3':    'On simple problems like linear regression the loss surface is a single smooth bowl with one minimum and this does not matter. On the kind of landscapes that arise when training neural networks, with millions of parameters and complex interactions, local minima are everywhere and precision alone does not save you.',
+
+        'quiz2.q':  'Batch gradient descent computes the exact gradient using all training data. What is the main risk?',
+        'quiz2.a1': 'Getting trapped in a local minimum',
+        'quiz2.a2': 'Computing an inaccurate gradient',
+        'quiz2.ok': 'Correct. Precision guarantees you follow the slope exactly. It does not guarantee the slope leads somewhere good. On complex landscapes, the nearest valley is often not the best one.',
+        'quiz2.no': 'Not quite. The batch gradient is computed on all the data, so by definition it is accurate. The problem is not the calculation, it is where the calculation leads you.',
+
+        's3.title':     'The Sloppy Version',
+        's3.p1':        'Stochastic gradient descent changes one thing: instead of computing the gradient on all the data, it picks a random sample and computes the gradient on that. The result is a noisy estimate of the true gradient. The step you take is not exactly downhill. It is roughly downhill, with some randomness in it.',
+        's3.p2':        'The practical version used in most real systems is mini-batch SGD: a small random subset of the data, typically 32 to 512 examples. The dataset is shuffled before each pass through it, so the sequence of mini-batches is different every time. The gradient estimates are imprecise. The path through the landscape is jittery.',
+        's3.highlight': 'That jitter is the point. A ball that wobbles occasionally gets nudged out of shallow valleys. It overshoots small local minima. It keeps moving rather than settling. On a landscape with many imperfect valleys, a slightly noisy path finds better solutions than a perfectly smooth one.',
+        's3.p3':        'There is a second benefit. Because each step is computed on a different random sample, the model is constantly exposed to different parts of the data. It cannot memorize one particular pattern and call it done. The noise acts as a form of regularization, the model becomes harder to overfit.',
+        's3.p4':        'This is the part that surprises most people. You would expect precision to lead to better results. In optimization over complex landscapes, it often does not. The sloppiness is not a compromise forced by limited computing power. It is a design choice, kept deliberately after people noticed it works better.',
+
+        'quiz3.q':  'SGD uses a random sample to estimate the gradient, making each step imprecise. What does this imprecision do?',
+        'quiz3.a1': 'It helps escape local minima and reduces overfitting',
+        'quiz3.a2': 'It makes the final model less accurate',
+        'quiz3.ok': 'Correct. The imprecision is not a flaw. The noise keeps the optimization moving, prevents settling in bad valleys, and acts as regularization against overfitting.',
+        'quiz3.no': 'Not quite. On training data, SGD may be less precise. On new data, which is what actually matters, it is often better, because the noise prevents the model from memorizing the training set.',
+
+        'demo.title':     'See It Get Stuck',
+        'demo.intro':     'Here is a loss landscape with two valleys. The left one is shallow. The deep one on the right is the global minimum, the answer you actually want. Drop the ball. Batch gradient descent rolls into the nearest valley and stops, even though a better one sits next door. Switch to the stochastic version and drop again. The noise shakes the ball until it stumbles over the ridge and into the deeper valley.',
+        'demo.mode.batch':'Batch GD',
+        'demo.mode.sgd':  'Stochastic GD',
+        'demo.drop':      'Drop the ball',
+        'demo.step':      'Step',
+        'demo.reset':     'Reset',
+        'demo.lr':        'Learning rate',
+        'demo.noise':     'Noise',
+        'demo.lblStep':   'STEP',
+        'demo.lblLoss':   'LOSS',
+        'demo.hint':      'Click anywhere on the landscape to move the ball, then drop it.',
+        'demo.cap':       'A one-parameter caricature. Height is the loss; the gradient is read straight off the curve. Stochastic mode adds random noise to each gradient reading, the same effect a small random sample has on the real thing.',
+        'demo.st.ready':    'Ready. Drop the ball.',
+        'demo.st.rolling':  'Rolling downhill, following the exact slope.',
+        'demo.st.searching':'Searching, with noise in every step.',
+        'demo.st.shallow':  'Settled in the shallow valley. A local minimum, not the best one. Try the stochastic version.',
+        'demo.st.deep':     'Found the deepest valley. The global minimum.',
+        'demo.canvas.local':  'local minimum',
+        'demo.canvas.global': 'global minimum',
+
+        's4.title': 'Every Major AI System Was Trained This Way',
+        's4.p1':    'Language models. Image generators. Recommendation engines. Fraud detection systems. Every one of these was trained with some version of stochastic gradient descent. Not because the teams could not afford to compute the exact gradient, but because they knew the noisy version produces better results.',
+        's4.p2':    'The step from "minimize error on training data" to "build something that works on new data" is not automatic. Precision on the training set is not the same as usefulness in the world. The noise in SGD is one of the main mechanisms that bridges that gap.',
+        's4.p3':    'Batch gradient descent finds the deepest valley in the training landscape. Stochastic gradient descent finds a valley that holds up across many slightly different samples of the world. The second is almost always what you want.',
+
+        'dd.summary': 'For the curious: momentum, adaptive rates, and why the landscape is stranger than you think',
+        'dd.h1': 'Momentum',
+        'dd.p1': 'Plain SGD moves based only on the current gradient. Momentum adds memory: the update step carries some velocity from the previous step, like a ball that keeps rolling in roughly the same direction even when the slope changes slightly. This smooths the path and helps cross small uphill bumps without getting stopped by them.',
+        'dd.h2': 'The Adam Optimizer',
+        'dd.p2': 'Adam combines momentum with adaptive learning rates: each parameter gets its own step size, adjusted based on how much that parameter has been changing. Parameters updated frequently get smaller steps. Parameters that have barely moved get larger ones. Adam is the default optimizer for most modern deep learning. When a paper says "we trained with Adam," this is what it means.',
+        'dd.h3': 'Learning Rate Schedules',
+        'dd.p3': 'A fixed learning rate is always a compromise. Start too large and you overshoot. End too large and you never settle. Schedules begin with a larger rate to explore the landscape quickly, then decay it over time so the model can converge precisely toward the end of training. Warmup, cosine decay, step decay: different schedules for different problems, the same logic underneath all of them.',
+        'dd.h4': 'The Landscape Is Stranger Than You Think',
+        'dd.p4': 'In very high-dimensional spaces, local minima are less common than intuition suggests. More common are saddle points: locations where the surface curves downward in some dimensions and upward in others. Gradient descent can stall at saddle points because the gradient is nearly zero there. SGD\'s noise tends to escape them naturally, which is another reason the noisy version outperforms the exact one on large models.',
+
+        'closing.title': 'A model you use every day got its parameters from this process.',
+        'closing.text':  'Pick any AI product you interact with regularly. Behind its outputs is a loss landscape, a learning rate someone chose, and millions of noisy gradient steps. If the model surprises you, or fails you, the landscape is often where the explanation lives.',
+    },
+
+    de: {
+        'hero.title':    'Im Dunkeln bergab',
+        'hero.subtitle': 'Gradientenabstieg, lokale Minima und warum kontrolliertes Rauschen die Präzision meist schlägt',
+
+        's0.p1':    'Du brauchst eine Wohnung in Würzburg. Eine Möglichkeit: alle Anzeigen sammeln, ein vollständiges Bild des Markts erstellen, die optimale Besichtigungsreihenfolge berechnen und dann handeln. Die andere: die Seite öffnen, heute drei Nachrichten schicken, morgen nachfragen und das beste Angebot nehmen.',
+        's0.caption':'36 Anzeigen. Die optimale ist vermietet, bevor du alle bewertet hast.',
+        's0.p2':    'Die erste Strategie ist korrekter. Sie ist aber auch langsamer, und der Markt wartet nicht. Deine Berechnung hat eine Wohnung als optimal eingestuft. Die war längst vermietet, während du noch optimiert hast. Die Person mit der zweiten Strategie hat letzten Dienstag den Mietvertrag unterschrieben.',
+        's0.p3':    'Dieser Unterschied im Geist trennt zwei Varianten des Gradientenabstiegs. Die eine berechnet sorgfältig und nutzt vor jedem Schritt alle verfügbaren Daten. Die andere handelt auf Basis einer kleinen Zufallsstichprobe. Sie bewegt sich schnell und nimmt in Kauf, dass jeder Schritt ungenau ist. Im maschinellen Lernen gewinnt fast immer die zweite Variante.',
+
+        's1.title': 'Das Gelände',
+        's1.p1':    'Ein Modell zu trainieren ist ein Suchproblem. Du suchst die Parameterwerte, die den Vorhersagefehler minimieren. Stell dir diesen Fehler als Landschaft vor. Die horizontalen Achsen sind Parameterwerte. Die Höhe an jedem Punkt ist der Verlust, also wie sehr das Modell gerade daneben liegt. Dein Ziel ist der tiefste Punkt dieser Landschaft.',
+        's1.p2':    'Der Gradientenabstieg navigiert dieses Gelände nach Gefühl. Bei jedem Schritt prüft er die Steigung an der aktuellen Position. Welche Richtung geht am steilsten bergab? Dorthin macht er einen Schritt. Die Update-Regel:',
+        's1.p3':    'α ist die Lernrate, also die Schrittgröße. Der Gradient ∂L/∂w gibt die lokale Steigung an. Bewegst du dich gegen ihn, gehst du bergab. Wiederhole das, bis der Verlust nicht mehr sinkt. Wer das Modul zur linearen Regression kennt, hat diese Schleife schon gesehen.',
+
+        'quiz1.q':  'Was sagt dir der Gradient beim Gradientenabstieg?',
+        'quiz1.a1': 'Die Richtung des steilsten Anstiegs, und du bewegst dich dagegen',
+        'quiz1.a2': 'Die genaue Position des Minimums',
+        'quiz1.ok': 'Richtig. Der Gradient zeigt bergauf. Du bewegst dich dagegen, um bergab zu gehen. Das Minimum zeigt er dir nicht. Du findest es durch viele kleine Schritte und ständiges Neuberechnen.',
+        'quiz1.no': 'Nicht ganz. Der Gradient gibt nur die lokale Steigung an deiner aktuellen Position an, nicht das Ziel. Du nutzt ihn für einen Schritt bergab und berechnest dann neu.',
+
+        's2.title': 'Das nächste Tal ist nicht das tiefste',
+        's2.p1':    'Die Verlustlandschaft eines echten Modells ist keine glatte Schale. Sie ähnelt eher einem Gebirge, mit mehreren Tälern, Graten und Plateaus. Auf den Plateaus ist die Steigung fast null. Eine Kugel, die sorgfältig bergab rollt, findet das nächste Tal und bleibt dort. Sie hat keinen Grund, es zu verlassen.',
+        's2.p2':    'Das ist ein lokales Minimum. Von dort aus sieht jede Richtung bergauf aus, obwohl es anderswo eine bessere Lösung gibt. Der Batch-Gradientenabstieg berechnet vor jedem Schritt den exakten Gradienten auf allen Trainingsdaten. Genau deshalb ist er anfällig dafür. Er folgt der Steigung präzise und steckt fest.',
+        's2.p3':    'Bei einfachen Problemen wie der linearen Regression ist die Verlustfläche eine einzige glatte Schale mit einem Minimum. Dort spielt das keine Rolle. Beim Training neuronaler Netze mit Millionen von Parametern sieht die Landschaft anders aus. Lokale Minima sind überall, und Präzision allein rettet dich nicht.',
+
+        'quiz2.q':  'Batch-Gradientenabstieg berechnet den exakten Gradienten auf allen Trainingsdaten. Was ist das Hauptrisiko?',
+        'quiz2.a1': 'In einem lokalen Minimum steckenzubleiben',
+        'quiz2.a2': 'Einen ungenauen Gradienten zu berechnen',
+        'quiz2.ok': 'Richtig. Präzision garantiert dir, dass du der Steigung exakt folgst. Sie garantiert dir nicht, dass die Steigung irgendwo Gutes hinführt. Auf komplexen Landschaften ist das nächste Tal oft nicht das beste.',
+        'quiz2.no': 'Nicht ganz. Der Batch-Gradient wird auf allen Daten berechnet und ist damit per Definition genau. Das Problem ist nicht die Berechnung, sondern wohin sie führt.',
+
+        's3.title':     'Die ungenaue Variante',
+        's3.p1':        'Der stochastische Gradientenabstieg ändert eine einzige Sache. Er berechnet den Gradienten nicht auf allen Daten, sondern auf einer Zufallsstichprobe. Das Ergebnis ist eine verrauschte Schätzung des wahren Gradienten. Der Schritt geht nicht exakt bergab. Er geht ungefähr bergab, mit etwas Zufall.',
+        's3.p2':        'In den meisten Systemen läuft die praktische Version, Mini-Batch-SGD. Sie nimmt eine kleine zufällige Teilmenge der Daten, typischerweise 32 bis 512 Beispiele. Vor jedem Durchlauf wird der Datensatz gemischt. So ist die Reihenfolge der Mini-Batches jedes Mal anders. Die Schätzungen der Gradienten sind ungenau, und der Weg durch die Landschaft wird holprig.',
+        's3.highlight': 'Genau dieser holprige Weg ist der Punkt. Eine Kugel, die gelegentlich wackelt, wird aus flachen Tälern herausgestoßen. Sie überschießt kleine lokale Minima. Sie bleibt in Bewegung, statt sich niederzulassen. Auf einer Landschaft mit vielen mittelmäßigen Tälern findet ein leicht verrauschter Weg bessere Lösungen als ein perfekt glatter.',
+        's3.p3':        'Es gibt einen zweiten Vorteil. Jeder Schritt beruht auf einer anderen Zufallsstichprobe. Das Modell sieht also ständig andere Teile der Daten. Es kann sich nicht auf ein einzelnes Muster einschießen. Das Rauschen wirkt wie eine Regularisierung, und die Überanpassung wird schwerer.',
+        's3.p4':        'Das ist der Teil, der die meisten überrascht. Man würde erwarten, dass Präzision zu besseren Ergebnissen führt. Bei komplexen Landschaften tut sie das oft nicht. Die Ungenauigkeit ist kein Kompromiss, den knappe Rechenleistung erzwingt. Sie ist eine bewusste Entscheidung. Man hat sie behalten, weil sie besser funktioniert.',
+
+        'quiz3.q':  'SGD schätzt den Gradienten anhand einer Zufallsstichprobe, was jeden Schritt ungenau macht. Was bewirkt diese Ungenauigkeit?',
+        'quiz3.a1': 'Sie hilft, lokalen Minima zu entkommen, und bremst die Überanpassung',
+        'quiz3.a2': 'Sie macht das endgültige Modell weniger genau',
+        'quiz3.ok': 'Richtig. Die Ungenauigkeit ist kein Fehler. Das Rauschen hält die Optimierung in Bewegung. So setzt sie sich nicht in schlechten Tälern fest, und es wirkt zugleich als Regularisierung gegen Überanpassung.',
+        'quiz3.no': 'Nicht ganz. Auf den Trainingsdaten ist SGD vielleicht weniger präzise. Auf neuen Daten ist es oft besser, und darauf kommt es an. Das Rauschen hindert das Modell daran, die Trainingsdaten auswendig zu lernen.',
+
+        'demo.title':     'Sieh zu, wie sie stecken bleibt',
+        'demo.intro':     'Hier ist eine Verlustlandschaft mit zwei Tälern. Das linke ist flach. Das tiefe rechts ist das globale Minimum, also die Lösung, die du eigentlich willst. Lass die Kugel los. Der Batch-Gradientenabstieg rollt ins nächste Tal und bleibt stehen, obwohl gleich nebenan ein besseres liegt. Wechsle zur stochastischen Variante und lass sie erneut los. Das Rauschen schüttelt die Kugel, bis sie über den Grat stolpert und ins tiefere Tal fällt.',
+        'demo.mode.batch':'Batch-GD',
+        'demo.mode.sgd':  'Stochastischer GD',
+        'demo.drop':      'Kugel loslassen',
+        'demo.step':      'Schritt',
+        'demo.reset':     'Zurücksetzen',
+        'demo.lr':        'Lernrate',
+        'demo.noise':     'Rauschen',
+        'demo.lblStep':   'SCHRITT',
+        'demo.lblLoss':   'VERLUST',
+        'demo.hint':      'Klicke irgendwo auf die Landschaft, um die Kugel zu platzieren, dann lass sie los.',
+        'demo.cap':       'Eine Karikatur mit einem Parameter. Die Höhe ist der Verlust, und der Gradient wird direkt von der Kurve abgelesen. Der stochastische Modus addiert zu jeder Ablesung zufälliges Rauschen. Beim echten Modell hat eine kleine Zufallsstichprobe denselben Effekt.',
+        'demo.st.ready':    'Bereit. Lass die Kugel los.',
+        'demo.st.rolling':  'Rollt bergab, folgt der exakten Steigung.',
+        'demo.st.searching':'Sucht, mit Rauschen in jedem Schritt.',
+        'demo.st.shallow':  'Im flachen Tal gelandet. Ein lokales Minimum, nicht das beste. Probier die stochastische Variante.',
+        'demo.st.deep':     'Das tiefste Tal gefunden. Das globale Minimum.',
+        'demo.canvas.local':  'lokales Minimum',
+        'demo.canvas.global': 'globales Minimum',
+
+        's4.title': 'Jedes große KI-System wurde so trainiert',
+        's4.p1':    'Sprachmodelle. Bildgeneratoren. Empfehlungssysteme. Betrugserkennung. Jedes davon wurde mit einer Variante des stochastischen Gradientenabstiegs trainiert. Die Teams hätten sich den exakten Gradienten leisten können. Sie wussten nur, dass die verrauschte Variante bessere Ergebnisse liefert.',
+        's4.p2':    'Von „den Fehler auf den Trainingsdaten minimieren“ zu „etwas bauen, das auf neuen Daten funktioniert“ ist es ein weiter Weg. Präzision auf den Trainingsdaten ist nicht dasselbe wie Nützlichkeit in der Welt. Das Rauschen in SGD ist einer der wichtigsten Mechanismen, die diese Lücke überbrücken.',
+        's4.p3':    'Der Batch-Gradientenabstieg findet das tiefste Tal in der Trainingslandschaft. Der stochastische Gradientenabstieg findet ein Tal, das auf vielen leicht verschiedenen Stichproben aus der Welt standhält. Das zweite ist fast immer das, was du haben willst.',
+
+        'dd.summary': 'Für Neugierige: Momentum, adaptive Lernraten und warum die Landschaft seltsamer ist als gedacht',
+        'dd.h1': 'Momentum',
+        'dd.p1': 'Normaler SGD bewegt sich nur auf Basis des aktuellen Gradienten. Momentum fügt ein Gedächtnis hinzu. Der Update-Schritt trägt etwas Geschwindigkeit vom vorherigen Schritt mit. Das ist wie eine Kugel, die in ungefähr dieselbe Richtung weiterrollt, auch wenn sich die Steigung leicht ändert. Das glättet den Weg und hilft über kleine Anstiege hinweg.',
+        'dd.h2': 'Der Adam-Optimierer',
+        'dd.p2': 'Adam kombiniert Momentum mit adaptiven Lernraten. Jeder Parameter bekommt seine eigene Schrittgröße, passend dazu, wie stark er sich bisher verändert hat. Häufig aktualisierte Parameter bekommen kleinere Schritte. Kaum veränderte Parameter bekommen größere. Adam ist der Standard im modernen Deep Learning. Wenn ein Paper sagt „wir haben mit Adam trainiert“, ist das damit gemeint.',
+        'dd.h3': 'Lernraten-Schedules',
+        'dd.p3': 'Eine feste Lernrate ist immer ein Kompromiss. Ist sie am Anfang zu groß, schießt du über das Ziel hinaus. Ist sie am Ende zu groß, kommst du nie zur Ruhe. Schedules starten mit einer größeren Rate und erkunden die Landschaft schnell. Später verringern sie die Rate, damit das Modell am Ende präzise konvergiert. Warmup, Cosine Decay, Step Decay: verschiedene Schedules für verschiedene Probleme, dieselbe Logik darunter.',
+        'dd.h4': 'Die Landschaft ist seltsamer als gedacht',
+        'dd.p4': 'In sehr hochdimensionalen Räumen sind lokale Minima seltener, als die Intuition vermuten lässt. Häufiger sind Sattelpunkte. Dort verläuft die Fläche in einigen Dimensionen bergab und in anderen bergauf. Der Gradientenabstieg gerät an Sattelpunkten ins Stocken, weil der Gradient fast null ist. Das Rauschen von SGD entkommt ihnen ganz von selbst. Auch deshalb schneidet die verrauschte Variante bei großen Modellen besser ab.',
+
+        'closing.title': 'Ein Modell, das du jeden Tag nutzt, hat seine Parameter durch diesen Prozess bekommen.',
+        'closing.text':  'Nimm ein beliebiges KI-Produkt, das du regelmäßig benutzt. Hinter seinen Ausgaben steckt eine Verlustlandschaft, eine Lernrate, die jemand gewählt hat, und Millionen verrauschter Gradientenschritte. Wenn das Modell dich überrascht oder im Stich lässt, liegt die Erklärung oft in der Landschaft.',
+    }
+};
+
+let currentLang = 'en';
+
+function toggleLang() {
+    currentLang = currentLang === 'en' ? 'de' : 'en';
+    document.documentElement.lang = currentLang;
+    document.querySelector('.lang-toggle').textContent = currentLang === 'en' ? 'DE' : 'EN';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (T[currentLang] && T[currentLang][key]) el.innerHTML = T[currentLang][key];
+    });
+    if (window.SGDDemo && window.SGDDemo.relang) window.SGDDemo.relang();
+}
+
+// ─── Quiz ─────────────────────────────────────────────────────────────────────
+function answerQuiz(quizId, btn, isCorrect) {
+    const quiz     = document.getElementById(quizId);
+    const feedback = document.getElementById(quizId + '-feedback');
+    quiz.querySelectorAll('.quiz-btn').forEach(b => b.classList.add('disabled'));
+    btn.classList.add(isCorrect ? 'correct' : 'wrong');
+    feedback.className = 'quiz-feedback ' + (isCorrect ? 'success' : 'fail');
+    const key = quizId + (isCorrect ? '.ok' : '.no');
+    feedback.innerHTML = (T[currentLang] && T[currentLang][key]) ? T[currentLang][key] : T.en[key];
+}
+
+// ─── KaTeX ────────────────────────────────────────────────────────────────────
+window.addEventListener('load', function () {
+    if (typeof renderMathInElement !== 'undefined') {
+        renderMathInElement(document.body, {
+            delimiters: [
+                { left: '$$', right: '$$', display: true  },
+                { left: '\\(', right: '\\)', display: false }
+            ],
+            throwOnError: false
+        });
+    }
+});
+
+</script>
+
+<!-- ── Interactive: gradient-descent landscape (script) ────────────────────── -->
+<script>
+(function () {
+    'use strict';
+
+    // ── Landscape: gentle bowl + shallow left dimple + deep right basin ──────
+    const W_MIN = -5, W_MAX = 5;
+    const BOWL = 0.05;
+    const SH_AMP = 0.18, SH_SIG = 0.6, SH_C = -1.7;   // shallow dimple
+    const DP_AMP = 1.9,  DP_SIG = 0.8, DP_C = 2.0;    // deep basin
+    const START = -3.2;
+
+    function lossAt(w) {
+        return BOWL * w * w
+            - SH_AMP * Math.exp(-((w - SH_C) * (w - SH_C)) / (2 * SH_SIG * SH_SIG))
+            - DP_AMP * Math.exp(-((w - DP_C) * (w - DP_C)) / (2 * DP_SIG * DP_SIG));
+    }
+    function gradAt(w) {
+        const h = 1e-3;
+        return (lossAt(w + h) - lossAt(w - h)) / (2 * h);
+    }
+    function gauss() {
+        let u = 0, v = 0;
+        while (u === 0) u = Math.random();
+        while (v === 0) v = Math.random();
+        return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    }
+
+    // Scan once for the two minima and the loss range (for scaling + labels)
+    let LMIN = Infinity, LMAX = -Infinity;
+    const localMins = [];
+    let prev2 = null, prev1 = null;
+    for (let w = W_MIN; w <= W_MAX + 1e-9; w += 0.004) {
+        const L = lossAt(w);
+        if (L < LMIN) LMIN = L;
+        if (L > LMAX) LMAX = L;
+        if (prev1 !== null && prev2 !== null && prev1[1] < prev2[1] && prev1[1] < L) {
+            localMins.push(prev1.slice());
+        }
+        prev2 = prev1; prev1 = [w, L];
+    }
+    let W_DEEP, W_SHALLOW;
+    if (localMins.length >= 2) {
+        const byLoss = localMins.slice().sort((a, b) => a[1] - b[1]);
+        W_DEEP = byLoss[0][0];                       // lowest loss = deepest
+        W_SHALLOW = byLoss[byLoss.length - 1][0];    // highest loss among minima
+    } else if (localMins.length === 1) {
+        W_DEEP = localMins[0][0]; W_SHALLOW = SH_C;
+    } else {
+        W_DEEP = DP_C; W_SHALLOW = SH_C;
+    }
+    const LPAD = (LMAX - LMIN) * 0.12;
+    const LO = LMIN - LPAD, HI = LMAX + LPAD;
+
+    // ── State ────────────────────────────────────────────────────────────────
+    let mode = 'batch';
+    let w = START;
+    let steps = 0;
+    let lr = 0.30;
+    let noise = 0.45;
+    let running = false;
+    let raf = null;
+    let settled = false;
+    let settleCount = 0;
+    let statusKey = 'demo.st.ready';
+    const trail = [];
+    const MAXD = 0.6;     // cap on a single step so the ball cannot teleport
+    const STEP_CAP = 1500;
+
+    // ── DOM ────────────────────────────────────────────────────────────────--
+    let canvas, ctx, CW = 760, CH = 360, dpr = 1;
+    let elStep, elLoss, elStatus, elLrVal, elNoiseVal, elNoiseWrap, modeEl;
+    const TOPM = 26;
+
+    function t(key) {
+        const lang = (typeof currentLang !== 'undefined') ? currentLang : 'en';
+        return (typeof T !== 'undefined' && T[lang] && T[lang][key]) ? T[lang][key]
+             : (typeof T !== 'undefined' && T.en && T.en[key]) ? T.en[key] : key;
+    }
+
+    function px(wv) { return ((wv - W_MIN) / (W_MAX - W_MIN)) * CW; }
+    function py(L)  { return TOPM + ((HI - L) / (HI - LO)) * (CH - TOPM - 8); }
+
+    function fitCanvas() {
+        if (!canvas) return;
+        const cssW = canvas.clientWidth || 760;
+        const cssH = Math.max(220, Math.round(cssW * 360 / 760));
+        dpr = window.devicePixelRatio || 1;
+        canvas.width = Math.round(cssW * dpr);
+        canvas.height = Math.round(cssH * dpr);
+        canvas.style.height = cssH + 'px';
+        CW = cssW; CH = cssH;
+        if (ctx && ctx.setTransform) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function draw() {
+        if (!ctx) return;
+        ctx.clearRect(0, 0, CW, CH);
+
+        // curve points
+        const pts = [];
+        for (let i = 0; i <= CW; i += 2) {
+            const wv = W_MIN + (i / CW) * (W_MAX - W_MIN);
+            pts.push([i, py(lossAt(wv))]);
+        }
+
+        // fill under curve
+        let grad = null;
+        if (ctx.createLinearGradient) {
+            grad = ctx.createLinearGradient(0, TOPM, 0, CH);
+            grad.addColorStop(0, 'rgba(128,180,240,0.10)');
+            grad.addColorStop(1, 'rgba(128,180,240,0.00)');
+        }
+        ctx.beginPath();
+        ctx.moveTo(0, CH);
+        for (const p of pts) ctx.lineTo(p[0], p[1]);
+        ctx.lineTo(CW, CH);
+        ctx.closePath();
+        ctx.fillStyle = grad || 'rgba(128,180,240,0.07)';
+        ctx.fill();
+
+        // curve line
+        ctx.beginPath();
+        ctx.moveTo(pts[0][0], pts[0][1]);
+        for (const p of pts) ctx.lineTo(p[0], p[1]);
+        ctx.strokeStyle = '#6a6aa0';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.font = '12px sans-serif';
+        ctx.textAlign = 'center';
+
+        // local-minimum marker (purple = suboptimal)
+        if (ctx.setLineDash) ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(px(W_SHALLOW), py(lossAt(W_SHALLOW)));
+        ctx.lineTo(px(W_SHALLOW), TOPM - 4);
+        ctx.strokeStyle = '#8264dc';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.fillStyle = '#a88ef0';
+        ctx.fillText(t('demo.canvas.local'), px(W_SHALLOW), TOPM - 10);
+
+        // global-minimum marker (green = the target)
+        ctx.beginPath();
+        ctx.moveTo(px(W_DEEP), py(lossAt(W_DEEP)));
+        ctx.lineTo(px(W_DEEP), TOPM - 4);
+        ctx.strokeStyle = '#50b878';
+        ctx.stroke();
+        ctx.fillStyle = '#70e898';
+        ctx.fillText(t('demo.canvas.global'), px(W_DEEP), TOPM - 10);
+        if (ctx.setLineDash) ctx.setLineDash([]);
+
+        // trail
+        for (let i = 0; i < trail.length; i++) {
+            const a = (i + 1) / trail.length;
+            ctx.beginPath();
+            ctx.globalAlpha = 0.06 + a * 0.35;
+            ctx.arc(px(trail[i]), py(lossAt(trail[i])), 2.5, 0, Math.PI * 2);
+            ctx.fillStyle = '#80b4f0';
+            ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+
+        // ball
+        const bx = px(w), by = py(lossAt(w));
+        ctx.beginPath();
+        ctx.arc(bx, by, 9, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(128,180,240,0.25)';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(bx, by, 6, 0, Math.PI * 2);
+        ctx.fillStyle = '#80b4f0';
+        ctx.fill();
+        ctx.textAlign = 'start';
+    }
+
+    function setStatus() {
+        if (!running && steps === 0) { statusKey = 'demo.st.ready'; return; }
+        if (settled) {
+            statusKey = (Math.abs(w - W_DEEP) < 0.6) ? 'demo.st.deep' : 'demo.st.shallow';
+        } else {
+            statusKey = (mode === 'sgd') ? 'demo.st.searching' : 'demo.st.rolling';
+        }
+    }
+
+    function updateReadout() {
+        if (elStep)   elStep.textContent = steps;
+        if (elLoss)   elLoss.textContent = lossAt(w).toFixed(2);
+        if (elStatus) elStatus.textContent = t(statusKey);
+    }
+
+    function doStep() {
+        const g = gradAt(w);
+        let dw = (mode === 'sgd') ? -lr * (g + gauss() * noise) : -lr * g;
+        if (dw > MAXD) dw = MAXD;
+        if (dw < -MAXD) dw = -MAXD;
+        w += dw;
+        if (w < W_MIN) w = W_MIN;
+        if (w > W_MAX) w = W_MAX;
+        steps++;
+        trail.push(w);
+        if (trail.length > 90) trail.shift();
+
+        if (mode === 'batch') {
+            if (Math.abs(dw) < 0.002) settleCount++; else settleCount = 0;
+            if (settleCount > 8) settled = true;
+        } else {
+            if (Math.abs(w - W_DEEP) < 0.5) settleCount++; else settleCount = Math.max(0, settleCount - 1);
+            if (settleCount > 30) settled = true;
+        }
+        if (steps >= STEP_CAP) settled = true;
+        setStatus();
+    }
+
+    function frame() {
+        if (!running) return;
+        doStep();
+        updateReadout();
+        draw();
+        if (settled) { running = false; raf = null; return; }
+        raf = window.requestAnimationFrame(frame);
+    }
+
+    function run() {
+        if (running) return;
+        steps = 0; settleCount = 0; settled = false; trail.length = 0;
+        running = true;
+        setStatus();
+        updateReadout();
+        draw();
+        raf = window.requestAnimationFrame(frame);
+    }
+
+    function stepOnce() {
+        if (running || settled) return;
+        doStep();
+        updateReadout();
+        draw();
+    }
+
+    function reset() {
+        running = false;
+        if (raf) window.cancelAnimationFrame(raf);
+        raf = null;
+        w = START; steps = 0; settleCount = 0; settled = false; trail.length = 0;
+        statusKey = 'demo.st.ready';
+        updateReadout();
+        draw();
+    }
+
+    function placeBall(clientX) {
+        if (running || !canvas) return;
+        const rect = canvas.getBoundingClientRect();
+        const xcss = clientX - rect.left;
+        let nw = W_MIN + (xcss / (rect.width || CW)) * (W_MAX - W_MIN);
+        if (nw < W_MIN) nw = W_MIN;
+        if (nw > W_MAX) nw = W_MAX;
+        w = nw; steps = 0; settleCount = 0; settled = false; trail.length = 0;
+        statusKey = 'demo.st.ready';
+        updateReadout();
+        draw();
+    }
+
+    function init() {
+        canvas = document.getElementById('sgd-canvas');
+        if (!canvas) return;
+        ctx = canvas.getContext('2d');
+        elStep      = document.getElementById('sgd-step-num');
+        elLoss      = document.getElementById('sgd-loss-num');
+        elStatus    = document.getElementById('sgd-status');
+        elLrVal     = document.getElementById('sgd-lr-val');
+        elNoiseVal  = document.getElementById('sgd-noise-val');
+        elNoiseWrap = document.getElementById('sgd-noise-wrap');
+        modeEl      = document.getElementById('sgd-mode');
+
+        const lrEl = document.getElementById('sgd-lr');
+        const noiseEl = document.getElementById('sgd-noise');
+        const runBtn = document.getElementById('sgd-run');
+        const stepBtn = document.getElementById('sgd-step');
+        const resetBtn = document.getElementById('sgd-reset');
+
+        if (modeEl) modeEl.querySelectorAll('button').forEach(b => {
+            b.addEventListener('click', () => {
+                mode = b.getAttribute('data-mode');
+                modeEl.querySelectorAll('button').forEach(x => x.classList.toggle('active', x === b));
+                if (elNoiseWrap) elNoiseWrap.classList.toggle('disabled', mode !== 'sgd');
+                reset();
+            });
+        });
+        if (lrEl) lrEl.addEventListener('input', () => {
+            lr = (+lrEl.value) / 100;
+            if (elLrVal) elLrVal.textContent = lr.toFixed(2);
+        });
+        if (noiseEl) noiseEl.addEventListener('input', () => {
+            noise = (+noiseEl.value) / 100;
+            if (elNoiseVal) elNoiseVal.textContent = noise.toFixed(2);
+        });
+        if (runBtn)   runBtn.addEventListener('click', run);
+        if (stepBtn)  stepBtn.addEventListener('click', stepOnce);
+        if (resetBtn) resetBtn.addEventListener('click', reset);
+        if (canvas)   canvas.addEventListener('click', e => placeBall(e.clientX));
+        window.addEventListener('resize', () => { fitCanvas(); draw(); });
+
+        if (elNoiseWrap) elNoiseWrap.classList.toggle('disabled', mode !== 'sgd');
+        fitCanvas();
+        reset();
+    }
+
+    // Test + toggle hooks
+    window.SGDDemo = {
+        lossAt: lossAt, gradAt: gradAt, gauss: gauss,
+        W_MIN: W_MIN, W_MAX: W_MAX, W_DEEP: W_DEEP, W_SHALLOW: W_SHALLOW, START: START,
+        simulate: function (m, start, n, lrr, nz) {
+            let ww = start;
+            for (let i = 0; i < n; i++) {
+                const g = gradAt(ww);
+                let dw = (m === 'sgd') ? -lrr * (g + gauss() * nz) : -lrr * g;
+                if (dw > MAXD) dw = MAXD; if (dw < -MAXD) dw = -MAXD;
+                ww += dw;
+                if (ww < W_MIN) ww = W_MIN; if (ww > W_MAX) ww = W_MAX;
+            }
+            return ww;
+        },
+        reset: reset,
+        relang: function () { updateReadout(); draw(); },
+        _state: function () { return { mode: mode, w: w, steps: steps, settled: settled, statusKey: statusKey }; },
+        _init: init
+    };
+
+    window.addEventListener('load', init);
+})();
+</script>
+</body>
+</html>

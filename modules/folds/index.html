@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Knobs and the Folds</title>
+
+    <!-- KaTeX -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #141420;
+            color: #e8e8f0;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            line-height: 1.8;
+            font-size: 18px;
+        }
+
+        .container {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* === Language toggle === */
+        .lang-toggle {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            background: #2a2a44;
+            border: 1px solid #4a4a70;
+            border-radius: 20px;
+            padding: 6px 14px;
+            cursor: pointer;
+            font-size: 13px;
+            font-family: sans-serif;
+            color: #a0a0d0;
+            z-index: 100;
+            transition: background 0.2s;
+        }
+        .lang-toggle:hover { background: #363658; }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: 80px 24px 40px;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.3;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .hero .subtitle {
+            margin-top: 16px;
+            color: #888;
+            font-size: 16px;
+            font-style: italic;
+        }
+
+        /* Sections */
+        section { padding: 50px 0; }
+
+        h2 {
+            font-size: 30px;
+            color: #fff;
+            margin-bottom: 24px;
+            line-height: 1.3;
+        }
+
+        h3 {
+            font-size: 20px;
+            color: #ccc;
+            margin: 28px 0 12px;
+        }
+
+        p { margin-bottom: 20px; color: #ccc; }
+
+        em { color: #e0e0f0; }
+
+        /* Definition list */
+        .def-list {
+            margin: 16px 0 20px 20px;
+            color: #ccc;
+        }
+
+        .def-list li {
+            margin-bottom: 10px;
+            list-style: none;
+        }
+
+        .def-list li::before {
+            content: "\2013 ";
+            color: #666;
+        }
+
+        /* Formula blocks */
+        .formula-block {
+            margin: 24px auto;
+            text-align: center;
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+
+        /* Code blocks */
+        .code-label {
+            font-family: sans-serif;
+            font-size: 13px;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: #888;
+            margin: 28px 0 8px;
+        }
+
+        pre.code-block {
+            background: #1c1c2e;
+            border: 1px solid #2a2a40;
+            border-left: 3px solid #4a4a70;
+            border-radius: 10px;
+            padding: 20px 22px;
+            margin: 0 0 12px;
+            overflow-x: auto;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 14.5px;
+            line-height: 1.65;
+            color: #e8e8f0;
+        }
+
+        pre.code-block .cmt { color: #7c7ca0; font-style: italic; }
+        pre.code-block .kw  { color: #80b4f0; }
+
+        /* Quiz */
+        .quiz {
+            background: #1c1c2e;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            padding: 28px;
+            margin: 36px 0;
+        }
+
+        .quiz-question {
+            font-size: 18px;
+            color: #e0e0f0;
+            margin-bottom: 18px;
+            font-style: italic;
+        }
+
+        .quiz-options {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .quiz-btn {
+            background: #2a2a44;
+            color: #e0e0f0;
+            border: 1px solid #3a3a55;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+            flex: 1;
+            min-width: 160px;
+            text-align: center;
+        }
+
+        .quiz-btn:hover { background: #363658; border-color: #5a5a80; }
+
+        .quiz-btn.correct {
+            background: #1a4a2a;
+            border-color: #50b878;
+            color: #70e898;
+        }
+
+        .quiz-btn.wrong {
+            background: #2a2248;
+            border-color: #8264dc;
+            color: #a88ef0;
+        }
+
+        .quiz-btn.disabled { pointer-events: none; opacity: 0.6; }
+
+        .quiz-feedback {
+            margin-top: 14px;
+            font-size: 16px;
+            min-height: 24px;
+            line-height: 1.5;
+        }
+
+        .quiz-feedback.success { color: #70e898; }
+        .quiz-feedback.fail    { color: #a88ef0; }
+
+        /* Divider */
+        .section-rule {
+            border: none;
+            border-top: 1px solid #2a2a40;
+            margin: 0;
+        }
+
+        /* Links */
+        a { color: #80b4f0; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 24px;
+            color: #444;
+            font-size: 14px;
+        }
+        footer a { color: #666; }
+
+        /* Responsive */
+        @media (max-width: 680px) {
+            .hero h1 { font-size: 28px; }
+            h2 { font-size: 24px; }
+            body { font-size: 16px; }
+            .quiz-options { flex-direction: column; }
+            pre.code-block { font-size: 13px; }
+        }
+    </style>
+</head>
+<body>
+
+<button class="lang-toggle" onclick="toggleLang()">DE</button>
+
+<!-- Hero -->
+<div class="hero">
+    <h1 data-i18n="hero.title">The Knobs and the Folds</h1>
+    <p class="subtitle" data-i18n="hero.subtitle">Choosing the settings, then checking you did not fool yourself</p>
+</div>
+
+<div class="container">
+
+<!-- ── Part 1: parameters vs hyperparameters ───────────────────────────────── -->
+<section>
+    <h2 data-i18n="s1.h2">The Number You Picked Yourself</h2>
+
+    <p data-i18n="s1.p1">Back in logistic regression, the model handed you a probability. A 0.72 chance this customer churns. Then you had to decide whether 0.72 counts as a yes. You picked a cutoff. Maybe 0.5. Maybe 0.3, because missing a churner costs more than a false alarm. The model never chose that number. You did.</p>
+
+    <p data-i18n="s1.p2">That cutoff is a <em>hyperparameter</em>. The weights inside the model are <em>parameters</em>. The difference is who sets them.</p>
+
+    <p data-i18n="s1.p3">Parameters are learned from the data while the model trains. The slope of a regression line. The split points in a tree. The coefficients in logistic regression. You never touch them by hand.</p>
+
+    <p data-i18n="s1.p4">Hyperparameters are set before training starts. The classification threshold. The \(k\) in k-nearest neighbours. A tree's maximum depth. The regularization strength. The number of trees in a forest. One is found by the algorithm. The other is found by you, or by a search you run on your behalf.</p>
+
+    <!-- Quiz 1 -->
+    <div class="quiz" id="q1">
+        <div class="quiz-question" data-i18n="q1.q">You fix a decision tree's maximum depth at 5 before training. Parameter or hyperparameter?</div>
+        <div class="quiz-options">
+            <button class="quiz-btn" onclick="answerQuiz('q1', this, true)" data-i18n="q1.a1">Hyperparameter</button>
+            <button class="quiz-btn" onclick="answerQuiz('q1', this, false)" data-i18n="q1.a2">Parameter</button>
+        </div>
+        <div class="quiz-feedback" id="q1-feedback"></div>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Part 2: grid search ──────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s2.h2">Grid Search: Brute Force With a Tidy Name</h2>
+
+    <p data-i18n="s2.p1">You rarely know the right hyperparameters up front. So you guess a few candidates for each and try them all. Three values of regularization strength, four values of tree depth. Twelve combinations. Train a model for each, keep the one that scores best. That is grid search.</p>
+
+    <p data-i18n="s2.p2">The cost is the product of the candidate counts, not the sum. Add one more knob and the grid multiplies:</p>
+
+    <div class="formula-block">$$\text{models} = \prod_{i} |H_i|$$</div>
+
+    <p data-i18n="s2.p3">Five hyperparameters with five values each is 3125 models. This is why people reach for randomized search, which samples combinations at random instead of trying every one. It usually finds something nearly as good for a fraction of the work.</p>
+
+    <!-- Quiz 2 -->
+    <div class="quiz" id="q2">
+        <div class="quiz-question" data-i18n="q2.q">You search 3 learning rates, 2 depths, and 4 values of min_samples. How many models does an exhaustive grid train?</div>
+        <div class="quiz-options">
+            <button class="quiz-btn" onclick="answerQuiz('q2', this, false)" data-i18n="q2.a1">9</button>
+            <button class="quiz-btn" onclick="answerQuiz('q2', this, true)" data-i18n="q2.a2">24</button>
+            <button class="quiz-btn" onclick="answerQuiz('q2', this, false)" data-i18n="q2.a3">3</button>
+        </div>
+        <div class="quiz-feedback" id="q2-feedback"></div>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Part 3: the trap ─────────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s3.h2">Where the Trap Hides</h2>
+
+    <p data-i18n="s3.p1">To pick the best combination, you score each one. Score it on what? Not the test set. Spend the test set here and it is no longer unseen, and the final number you report becomes a lie. So you hold out a separate validation set and score on that.</p>
+
+    <p data-i18n="s3.p2">But you try many combinations. Twenty, a hundred, three thousand. Score that many models on one fixed validation set and one of them looks great by luck. You did not find the best model. You found the model that happened to fit the noise in that particular split. You overfit to the validation set. The more you search, the worse it gets.</p>
+
+    <p data-i18n="s3.p3">The fix is to stop trusting a single split.</p>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Part 4: cross-validation ─────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s4.h2">Cross-Validation: Rotate the Split</h2>
+
+    <p data-i18n="s4.p1">Instead of one validation set, rotate. Split the training data into \(K\) parts, called folds. Train on \(K-1\) of them, score on the one left out. Do it \(K\) times, each fold taking its turn as the held-out part. Average the \(K\) scores. Now every point has been used for both training and scoring, and your estimate rests on \(K\) measurements instead of one. That is K-fold cross-validation.</p>
+
+    <p class="code-label" data-i18n="code.kfold.label">K-Fold</p>
+<pre class="code-block"><span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> KFold, cross_val_score
+<span class="kw">from</span> sklearn.tree <span class="kw">import</span> DecisionTreeClassifier
+
+model = DecisionTreeClassifier(max_depth=5)
+kf = KFold(n_splits=5, shuffle=True, random_state=42)
+
+scores = cross_val_score(model, X, y, cv=kf)
+<span class="kw">print</span>(scores.mean(), scores.std())</pre>
+
+    <p data-i18n="s4.p2">Push \(K\) to its limit and each fold is a single row. Train on everything except one point, predict that point, repeat \(n\) times. This is leave-one-out. It wrings the most out of a small dataset and gives an almost unbiased estimate. It also trains \(n\) models. On anything large it is too slow to bother with.</p>
+
+    <p class="code-label" data-i18n="code.loo.label">Leave-One-Out</p>
+<pre class="code-block"><span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> LeaveOneOut, cross_val_score
+
+loo = LeaveOneOut()
+scores = cross_val_score(model, X, y, cv=loo)   <span class="cmt"># trains len(X) models</span>
+<span class="kw">print</span>(scores.mean())</pre>
+
+    <p data-i18n="s4.p3">Plain K-fold splits at random. If your classes are imbalanced, say 8 percent churn, a random fold can land with almost no churners in it, and that fold's score means nothing. Stratified K-fold keeps the class proportions the same in every fold. For classification, especially imbalanced classification, this is the default you want.</p>
+
+    <p class="code-label" data-i18n="code.skf.label">Stratified K-Fold</p>
+<pre class="code-block"><span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> StratifiedKFold, cross_val_score
+
+skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+scores = cross_val_score(model, X, y, cv=skf)   <span class="cmt"># class ratio kept per fold</span>
+<span class="kw">print</span>(scores.mean(), scores.std())</pre>
+
+    <p data-i18n="s4.p4">Grid search and cross-validation are usually one move. You hand the search a cross-validator and it scores every combination by averaging across folds, not on one fragile split. That is the whole point of <code>GridSearchCV</code>.</p>
+
+    <p class="code-label" data-i18n="code.gridcv.label">Grid Search + Cross-Validation</p>
+<pre class="code-block"><span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> GridSearchCV, StratifiedKFold
+
+grid = {<span class="cmt">'max_depth'</span>: [3, 5, 7], <span class="cmt">'min_samples_leaf'</span>: [1, 5, 10]}
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+
+search = GridSearchCV(DecisionTreeClassifier(), grid, cv=cv)
+search.fit(X, y)
+<span class="kw">print</span>(search.best_params_, search.best_score_)</pre>
+
+    <!-- Quiz 3 -->
+    <div class="quiz" id="q3">
+        <div class="quiz-question" data-i18n="q3.q">Your churn dataset is 8 percent positive. Which splitter protects against a fold that ends up with no churners?</div>
+        <div class="quiz-options">
+            <button class="quiz-btn" onclick="answerQuiz('q3', this, false)" data-i18n="q3.a1">Plain KFold</button>
+            <button class="quiz-btn" onclick="answerQuiz('q3', this, true)" data-i18n="q3.a2">StratifiedKFold</button>
+            <button class="quiz-btn" onclick="answerQuiz('q3', this, false)" data-i18n="q3.a3">LeaveOneOut</button>
+        </div>
+        <div class="quiz-feedback" id="q3-feedback"></div>
+    </div>
+</section>
+
+</div>
+
+<footer>
+    <p data-i18n="footer.line1">Part of the Passt course. Class 9: Validation &amp; Model Selection.</p>
+    <p><a href="https://github.com/i-yam/passt/tree/main/modules/folds" data-i18n="footer.src">Source on GitHub</a> &middot; <a href="../../" data-i18n="footer.home">Course home</a></p>
+</footer>
+
+<script>
+
+// ─── German (first pass, needs voice review) ─────────────────────────────────
+const T = {
+    en: {
+        // quiz feedback only; body English comes from the DOM cache
+        'q1.ok': 'Right. You set it before training, so it is a hyperparameter.',
+        'q1.no': 'Not quite. You chose the depth yourself before training, which makes it a hyperparameter. Parameters are the split points the tree learns.',
+        'q2.ok': 'Yes. 3 \u00d7 2 \u00d7 4 = 24. The grid multiplies.',
+        'q2.no': 'The grid multiplies, it does not add. 3 \u00d7 2 \u00d7 4 = 24.',
+        'q3.ok': 'Right. Stratified folds hold the 8 percent ratio in every fold.',
+        'q3.no': 'A random split can leave a fold with no churners. StratifiedKFold keeps the class ratio in each fold.'
+    },
+    de: {
+        'hero.title': 'Die Regler und die Folds',
+        'hero.subtitle': 'Erst die Einstellungen w\u00e4hlen. Dann pr\u00fcfen, ob du dich selbst get\u00e4uscht hast.',
+        's1.h2': 'Die Zahl, die du selbst gew\u00e4hlt hast',
+        's1.p1': 'Bei der logistischen Regression hat dir das Modell eine Wahrscheinlichkeit gegeben. Eine Chance von 0,72, dass dieser Kunde abwandert. Dann musstest du entscheiden: Z\u00e4hlt 0,72 als Ja? Du hast eine Schwelle gew\u00e4hlt. Vielleicht 0,5. Vielleicht 0,3. Denn einen Abwanderer zu verpassen kostet mehr als ein Fehlalarm. Das Modell hat diese Zahl nie gew\u00e4hlt. Du hast sie gew\u00e4hlt.',
+        's1.p2': 'Diese Schwelle ist ein <em>Hyperparameter</em>. Die Gewichte im Modell sind <em>Parameter</em>. Der Unterschied liegt darin, wer sie festlegt.',
+        's1.p3': 'Parameter werden beim Training aus den Daten gelernt. Die Steigung einer Regressionsgeraden. Die Aufteilungen in einem Baum. Die Gewichte in der logistischen Regression. Du fasst sie nie von Hand an.',
+        's1.p4': 'Hyperparameter legst du vor dem Training fest. Die Klassifikationsschwelle. Das \\(k\\) bei k-nearest neighbours. Die maximale Tiefe eines Baums. Die St\u00e4rke der Regularisierung. Die Anzahl der B\u00e4ume in einem Wald. Das eine findet der Algorithmus. Das andere findest du. Oder eine Suche, die du in deinem Auftrag laufen l\u00e4sst.',
+        'q1.q': 'Du legst die maximale Tiefe eines Entscheidungsbaums vor dem Training auf 5 fest. Parameter oder Hyperparameter?',
+        'q1.a1': 'Hyperparameter',
+        'q1.a2': 'Parameter',
+        's2.h2': 'Grid Search: rohe Gewalt mit ordentlichem Namen',
+        's2.p1': 'Die richtigen Hyperparameter kennst du selten im Voraus. Also r\u00e4tst du f\u00fcr jeden ein paar Kandidaten und probierst sie alle durch. Drei Werte f\u00fcr die St\u00e4rke der Regularisierung, vier Werte f\u00fcr die Baumtiefe. Zw\u00f6lf Kombinationen. F\u00fcr jede trainierst du ein Modell. Das beste beh\u00e4ltst du. Das ist Grid Search.',
+        's2.p2': 'Die Kosten sind das Produkt der Kandidatenzahlen, nicht die Summe. Ein Regler mehr, und das Gitter multipliziert sich:',
+        's2.p3': 'F\u00fcnf Hyperparameter mit je f\u00fcnf Werten sind 3.125 Modelle. Deshalb greifen viele zur randomisierten Suche. Sie zieht Kombinationen zuf\u00e4llig, statt jede einzelne zu testen. Meist findet sie etwas fast genauso Gutes, und das f\u00fcr einen Bruchteil des Aufwands.',
+        'q2.q': 'Du durchsuchst 3 Lernraten, 2 Tiefen und 4 Werte f\u00fcr min_samples. Wie viele Modelle trainiert ein vollst\u00e4ndiges Gitter?',
+        'q2.a1': '9',
+        'q2.a2': '24',
+        'q2.a3': '3',
+        's3.h2': 'Wo die Falle steckt',
+        's3.p1': 'Um die beste Kombination zu w\u00e4hlen, bewertest du jede einzelne. Aber womit? Nicht mit den Testdaten. Verbrauchst du die Testdaten hier, sind sie nicht mehr ungesehen. Deine Endzahl wird dann zur L\u00fcge. Also legst du eigene Validierungsdaten beiseite und bewertest darauf.',
+        's3.p2': 'Aber du probierst viele Kombinationen. Zwanzig, hundert, dreitausend. Bewerte so viele Modelle auf denselben Validierungsdaten, und eines sieht durch reinen Zufall gro\u00dfartig aus. Du hast dann nicht das beste Modell gefunden. Du hast das Modell gefunden, das zuf\u00e4llig zum Rauschen in genau diesem Split passte. Du hast dich an die Validierungsdaten \u00fcberangepasst. Je mehr du suchst, desto schlimmer wird es.',
+        's3.p3': 'Die L\u00f6sung: Trau einem einzelnen Split nicht mehr.',
+        's4.h2': 'Kreuzvalidierung: den Split rotieren',
+        's4.p1': 'Statt fester Validierungsdaten rotierst du. Teile die Trainingsdaten in \\(K\\) Teile, genannt Folds. Trainiere auf \\(K-1\\) davon und bewerte auf dem ausgelassenen. Mach das \\(K\\)-mal. Jeder Fold kommt einmal als ausgelassener Teil dran. Dann mittle die \\(K\\) Werte. Jetzt diente jeder Punkt einmal zum Trainieren und einmal zum Bewerten. Deine Sch\u00e4tzung ruht auf \\(K\\) Messungen statt auf einer. Das ist K-Fold-Kreuzvalidierung.',
+        's4.p2': 'Treib \\(K\\) an seine Grenze, und jeder Fold ist eine einzelne Zeile. Trainiere auf allem au\u00dfer einem Punkt. Sage diesen Punkt vorher. Wiederhole das \\(n\\)-mal. Das ist Leave-One-Out. Es holt das Meiste aus einem kleinen Datensatz und liefert eine fast unverzerrte Sch\u00e4tzung. Es trainiert aber auch \\(n\\) Modelle. Bei gro\u00dfen Datens\u00e4tzen ist es zu langsam, um sich zu lohnen.',
+        's4.p3': 'Einfaches K-Fold trennt zuf\u00e4llig. Sind deine Klassen unausgewogen, sagen wir 8 Prozent Abwanderung, kann ein zuf\u00e4lliger Fold fast keine Abwanderer enthalten. Der Wert dieses Folds bedeutet dann nichts. Stratified K-Fold h\u00e4lt die Klassenanteile in jedem Fold gleich. Bei der Klassifikation ist das die Voreinstellung, die du willst. Bei unausgewogenen Klassen erst recht.',
+        's4.p4': 'Grid Search und Kreuzvalidierung sind meist ein einziger Schritt. Du gibst der Suche einen Kreuzvalidierer. Sie bewertet dann jede Kombination als Mittel \u00fcber die Folds. Nicht auf einem einzigen br\u00fcchigen Split. Genau daf\u00fcr ist <code>GridSearchCV</code> da.',
+        'q3.q': 'Dein Abwanderungsdatensatz ist zu 8 Prozent positiv. Welcher Splitter sch\u00fctzt vor einem Fold ohne Abwanderer?',
+        'q3.a1': 'Einfaches KFold',
+        'q3.a2': 'StratifiedKFold',
+        'q3.a3': 'LeaveOneOut',
+        'code.kfold.label': 'K-Fold',
+        'code.loo.label': 'Leave-One-Out',
+        'code.skf.label': 'Stratified K-Fold',
+        'code.gridcv.label': 'Grid Search + Kreuzvalidierung',
+        'footer.line1': 'Teil des Kurses Passt. Klasse 9: Validierung &amp; Modellauswahl.',
+        'footer.src': 'Quellcode auf GitHub',
+        'footer.home': 'Kurs-Startseite',
+        'q1.ok': 'Richtig. Du legst sie vor dem Training fest, also ist sie ein Hyperparameter.',
+        'q1.no': 'Nicht ganz. Du hast die Tiefe vor dem Training selbst gew\u00e4hlt. Damit ist sie ein Hyperparameter. Parameter sind die Aufteilungen, die der Baum lernt.',
+        'q2.ok': 'Ja. 3 \u00d7 2 \u00d7 4 = 24. Das Gitter multipliziert.',
+        'q2.no': 'Das Gitter multipliziert, es addiert nicht. 3 \u00d7 2 \u00d7 4 = 24.',
+        'q3.ok': 'Richtig. Stratifizierte Folds halten den Anteil von 8 Prozent in jedem Fold.',
+        'q3.no': 'Ein zuf\u00e4lliger Split kann einen Fold ohne Abwanderer hinterlassen. StratifiedKFold h\u00e4lt das Klassenverh\u00e4ltnis in jedem Fold.'
+    }
+};
+
+// ─── i18n engine ──────────────────────────────────────────────────────────────
+const enCache = {};
+let currentLang = 'en';
+
+function renderMath() {
+    if (typeof renderMathInElement !== 'undefined') {
+        renderMathInElement(document.body, {
+            delimiters: [
+                { left: '$$', right: '$$', display: true  },
+                { left: '\\(', right: '\\)', display: false }
+            ],
+            throwOnError: false
+        });
+    }
+}
+
+function setLang(lang) {
+    currentLang = lang;
+    document.documentElement.lang = lang;
+    document.querySelector('.lang-toggle').textContent = lang === 'en' ? 'DE' : 'EN';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (lang === 'en') {
+            if (enCache[key] !== undefined) el.innerHTML = enCache[key];
+        } else if (T.de[key] !== undefined) {
+            el.innerHTML = T.de[key];
+        }
+    });
+    renderMath();
+}
+
+function toggleLang() {
+    setLang(currentLang === 'en' ? 'de' : 'en');
+}
+
+// ─── Quiz ─────────────────────────────────────────────────────────────────────
+function answerQuiz(quizId, btn, isCorrect) {
+    const quiz     = document.getElementById(quizId);
+    const feedback = document.getElementById(quizId + '-feedback');
+    quiz.querySelectorAll('.quiz-btn').forEach(b => b.classList.add('disabled'));
+    btn.classList.add(isCorrect ? 'correct' : 'wrong');
+    feedback.className = 'quiz-feedback ' + (isCorrect ? 'success' : 'fail');
+    const key  = quizId + (isCorrect ? '.ok' : '.no');
+    const dict = T[currentLang] || {};
+    feedback.innerHTML = dict[key] !== undefined ? dict[key] : (T.en[key] || '');
+    renderMath();
+}
+
+// ─── Boot: cache English from DOM (raw, pre-KaTeX), then typeset ──────────────
+window.addEventListener('load', function () {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        enCache[el.getAttribute('data-i18n')] = el.innerHTML;
+    });
+    renderMath();
+});
+</script>
+</body>
+</html>

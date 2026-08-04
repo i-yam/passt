@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Knowledge Check, Class 1</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background-color: #141420;
+  color: #e8e8f0;
+  font-family: 'Georgia', 'Times New Roman', serif;
+  line-height: 1.8;
+  font-size: 18px;
+}
+
+.container {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Lang toggle */
+.lang-toggle {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  background: #2a2a44;
+  border: 1px solid #4a4a70;
+  border-radius: 20px;
+  padding: 6px 14px;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: sans-serif;
+  color: #a0a0d0;
+  z-index: 100;
+  transition: background 0.2s;
+}
+.lang-toggle:hover { background: #363658; }
+
+/* Hero */
+.hero {
+  text-align: center;
+  padding: 80px 24px 50px;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 28px;
+}
+
+.tag {
+  background: #1c1c2e;
+  color: #8888b0;
+  border: 1px solid #2a2a40;
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-family: sans-serif;
+  letter-spacing: 0.3px;
+}
+
+.hero h1 {
+  font-size: 42px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.3;
+  max-width: 700px;
+  margin: 0 auto 16px;
+}
+
+.hero .subtitle {
+  color: #666;
+  font-size: 16px;
+  font-style: italic;
+}
+
+/* Progress */
+.progress-section {
+  margin-bottom: 32px;
+}
+
+.progress-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.p-label {
+  font-family: sans-serif;
+  font-size: 13px;
+  color: #666;
+}
+
+.p-score {
+  font-family: sans-serif;
+  font-size: 13px;
+  color: #a0a0d0;
+  font-weight: 500;
+}
+
+.progress-track {
+  height: 2px;
+  background: #2a2a40;
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #a0a0d0;
+  border-radius: 1px;
+  transition: width 0.4s ease;
+}
+
+/* Streak dots */
+.streak-row {
+  display: flex;
+  gap: 5px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.s-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: #2a2a40;
+  border: 1px solid #3a3a55;
+  transition: background 0.25s, border-color 0.25s;
+}
+
+.s-dot.hit  { background: #50b878; border-color: #50b878; }
+.s-dot.miss { background: #8264dc; border-color: #8264dc; }
+
+/* Section rule */
+.section-rule {
+  border: none;
+  border-top: 1px solid #2a2a40;
+  margin: 0;
+}
+
+/* Question block */
+.question-block {
+  margin: 40px 0 24px;
+}
+
+.q-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.q-counter {
+  font-family: sans-serif;
+  font-size: 12px;
+  color: #444;
+  letter-spacing: 0.06em;
+}
+
+.q-source {
+  font-family: sans-serif;
+  font-size: 11px;
+  background: #1c1c2e;
+  color: #6666a0;
+  border: 1px solid #2a2a40;
+  padding: 2px 10px;
+  border-radius: 20px;
+}
+
+.q-text {
+  font-size: clamp(18px, 2.6vw, 22px);
+  font-weight: 400;
+  line-height: 1.6;
+  color: #e0e0f0;
+}
+
+/* Options */
+.options-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.opt {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 18px;
+  background: #1c1c2e;
+  border: 1px solid #2a2a40;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-size: 16px;
+  color: #ccc;
+  line-height: 1.55;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.opt:hover:not(:disabled) {
+  background: #222238;
+  border-color: #4a4a70;
+}
+
+.opt:disabled { cursor: default; }
+
+.opt-letter {
+  font-family: sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #444;
+  margin-top: 2px;
+  flex-shrink: 0;
+  width: 18px;
+  transition: color 0.15s;
+}
+
+.opt.correct {
+  background: #1a4a2a;
+  border-color: #50b878;
+  color: #70e898;
+}
+.opt.correct .opt-letter { color: #50b878; }
+
+.opt.wrong {
+  background: #2a2248;
+  border-color: #8264dc;
+  color: #a88ef0;
+}
+.opt.wrong .opt-letter { color: #8264dc; }
+
+/* Feedback box */
+.feedback-box {
+  border-left: 3px solid #3a3a55;
+  padding: 14px 20px;
+  background: #1c1c2e;
+  margin-bottom: 20px;
+  display: none;
+  font-size: 15px;
+  line-height: 1.65;
+  color: #888;
+}
+
+.feedback-box.show { display: block; }
+.feedback-box.correct-fb { border-left-color: #50b878; }
+.feedback-box.wrong-fb   { border-left-color: #8264dc; }
+
+.feedback-verdict {
+  font-family: sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+}
+
+.correct-fb .feedback-verdict { color: #70e898; }
+.wrong-fb   .feedback-verdict { color: #a88ef0; }
+
+/* Next button */
+.next-btn {
+  display: none;
+  background: #2a2a44;
+  color: #a0a0d0;
+  border: 1px solid #4a4a70;
+  border-radius: 6px;
+  padding: 10px 28px;
+  font-family: sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: background 0.15s;
+  text-transform: uppercase;
+}
+.next-btn.show { display: inline-block; }
+.next-btn:hover { background: #363658; }
+
+/* Results */
+#results { display: none; }
+
+.result-header {
+  padding: 50px 0 24px;
+}
+
+.result-header h2 {
+  font-size: clamp(28px, 4vw, 38px);
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.3;
+  margin-bottom: 16px;
+}
+
+.result-score-display {
+  font-family: sans-serif;
+  font-size: clamp(36px, 6vw, 56px);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: #a0a0d0;
+  margin: 20px 0 8px;
+}
+
+.result-sub {
+  font-size: 15px;
+  color: #555;
+  font-style: italic;
+}
+
+.result-body {
+  font-size: 16px;
+  line-height: 1.75;
+  color: #888;
+  margin: 24px 0 32px;
+}
+
+.result-body strong { color: #e0e0f0; }
+
+.restart-btn {
+  background: transparent;
+  color: #6666a0;
+  border: 1px solid #2a2a40;
+  border-radius: 6px;
+  padding: 9px 22px;
+  font-family: sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.restart-btn:hover {
+  background: #1c1c2e;
+  border-color: #4a4a70;
+  color: #a0a0d0;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 60px 24px 40px;
+  color: #444;
+  font-size: 14px;
+}
+
+footer a { color: #555; text-decoration: none; }
+footer a:hover { color: #a0a0d0; text-decoration: underline; }
+
+/* Responsive */
+@media (max-width: 680px) {
+  .hero h1 { font-size: 28px; }
+  body { font-size: 16px; }
+}
+</style>
+</head>
+<body>
+
+<button class="lang-toggle" id="lang-btn" onclick="setLang(lang === 'en' ? 'de' : 'en')">DE</button>
+
+<div class="hero">
+  <div class="tags">
+    <span class="tag">all</span>
+    <span class="tag">no-code</span>
+    <span class="tag">~15 min</span>
+    <span class="tag">knowledge-check</span>
+    <span class="tag">ml-fundamentals</span>
+  </div>
+  <h1 id="heading-title">Knowledge Check</h1>
+  <p class="subtitle" id="heading-sub">Can Machines Think? &nbsp;·&nbsp; Spiders Have Six Legs &nbsp;·&nbsp; Is This AI?</p>
+</div>
+
+<div class="container">
+
+  <div id="quiz-area">
+
+    <div class="progress-section">
+      <div class="progress-meta">
+        <span class="p-label" id="p-label">Question 1 of 12</span>
+        <span class="p-score" id="p-score">0 pts</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+      <div class="streak-row" id="streak-row"></div>
+    </div>
+
+    <hr class="section-rule">
+
+    <div class="question-block">
+      <div class="q-header">
+        <span class="q-counter" id="q-counter">01, </span>
+        <span class="q-source" id="q-source">module</span>
+      </div>
+      <p class="q-text" id="q-text">Loading…</p>
+    </div>
+
+    <ul class="options-list" id="options-list"></ul>
+
+    <div class="feedback-box" id="feedback-box">
+      <div class="feedback-verdict" id="feedback-verdict"></div>
+      <div id="feedback-explain"></div>
+    </div>
+
+    <button class="next-btn" id="next-btn" onclick="nextQuestion()">
+      <span id="next-label">Next →</span>
+    </button>
+
+  </div>
+
+  <div id="results">
+    <div class="result-header">
+      <h2 id="result-title">Quiz Complete</h2>
+      <div class="result-score-display" id="result-score">0 / 1200</div>
+      <p class="result-sub" id="result-sub">12 questions · 3 modules</p>
+    </div>
+    <p class="result-body" id="result-body"></p>
+    <button class="restart-btn" id="restart-btn" onclick="restart()">Try Again</button>
+  </div>
+
+</div>
+
+<footer>
+  <a href="../can_machines_think/">Can Machines Think?</a>
+  &nbsp;·&nbsp;
+  <a href="../spiders_and_legs/">Spiders Have Six Legs</a>
+  &nbsp;·&nbsp;
+  <a href="../is_ai/">Is This AI?</a>
+  &nbsp;·&nbsp;
+  <a href="../../">overfit &amp; chill</a>
+  <br>&copy; All rights reserved
+</footer>
+
+<script>
+/* ───────────────────────────────────────────
+   CONTENT, bilingual question bank
+─────────────────────────────────────────── */
+const content = {
+  en: {
+    headingTitle: "Knowledge Check",
+    headingSub: "Can Machines Think? \u00b7 Spiders Have Six Legs \u00b7 Is This AI?",
+    progressLabel: (cur, tot) => `Question ${cur} of ${tot}`,
+    nextLabel: "Next →",
+    resultTitle: "Quiz Complete",
+    resultSub: (n) => `${n} questions · 3 modules`,
+    restartLabel: "Try Again",
+    langBtnLabel: "DE",
+    verdictCorrect: "✓ Correct",
+    verdictWrong: "✗ Not quite",
+    resultMsg: (correct, total, score) => {
+      const msgs = [
+        `You scored <strong>${score} out of ${total * 100} points</strong>, ${correct} correct answers out of ${total}.`,
+        correct >= 10 ? "Excellent command of all three modules." :
+        correct >= 7  ? "Good understanding. Review the modules you missed and try again." :
+                        "Worth revisiting the source material, the concepts are worth knowing well."
+      ];
+      return msgs.join(' ');
+    },
+    questions: [
+      {
+        source: "Can Machines Think?",
+        q: "Alan Turing proposed a practical alternative to asking 'Can machines think?', what was it?",
+        opts: [
+          "A machine that can perform surgery without error",
+          "A machine indistinguishable from a human in text conversation",
+          "A machine that can solve all mathematical problems",
+          "A machine that can replicate human emotions"
+        ],
+        correct: 1,
+        explain: "Turing sidestepped the philosophical debate entirely. His test: if you cannot tell a machine apart from a human in conversation, does the internal mechanism matter?"
+      },
+      {
+        source: "Can Machines Think?",
+        q: "AlphaGo learned to play Go without a labelled dataset of 'good moves'. Which type of machine learning does this describe?",
+        opts: [
+          "Supervised Learning",
+          "Unsupervised Learning",
+          "Reinforcement Learning",
+          "Transfer Learning"
+        ],
+        correct: 2,
+        explain: "AlphaGo used Reinforcement Learning, playing millions of games against itself and learning from the win/loss reward signal alone. No human labels required."
+      },
+      {
+        source: "Can Machines Think?",
+        q: "After Deep Blue beat the chess world champion in 1997, people said: 'Chess is just calculation, not real intelligence.' What cognitive pattern does this illustrate?",
+        opts: [
+          "The Dunning-Kruger effect",
+          "Confirmation bias",
+          "Moving the goalposts",
+          "Overfitting"
+        ],
+        correct: 2,
+        explain: "Every time a machine achieves something we thought required intelligence, we redefine intelligence to exclude it. The module calls this 'moving the goalposts.'"
+      },
+      {
+        source: "Can Machines Think?",
+        q: "Spotify groups listeners with similar taste without being told what categories exist. Which type of ML is this?",
+        opts: [
+          "Supervised Learning",
+          "Unsupervised Learning",
+          "Reinforcement Learning",
+          "Semi-supervised Learning"
+        ],
+        correct: 1,
+        explain: "Unsupervised Learning: no predefined categories, no labels. The algorithm discovers structure, clusters, in the data itself."
+      },
+      {
+        source: "Can Machines Think?",
+        q: "HAL 9000, Samantha (Her), and Skynet are sorted as 'Strong AI' in the module. What capability distinguishes them from Narrow AI?",
+        opts: [
+          "They are villains in their stories",
+          "They are physically embodied robots",
+          "They reason, adapt, and pursue goals across many domains, not just one",
+          "They were built by government organisations"
+        ],
+        correct: 2,
+        explain: "Strong AI (AGI) generalises across all tasks, models goals, and adapts. Narrow AI excels in one domain and fails outside it, like a spam filter or chess engine."
+      },
+      {
+        source: "Spiders Have Six Legs",
+        q: "The module opens with a story: Aristotle claimed spiders have six legs, and nobody checked for centuries. What is the twist?",
+        opts: [
+          "Aristotle was actually correct, spider anatomy has changed",
+          "The story itself is false, there is no evidence Aristotle ever wrote this",
+          "Aristotle wrote it but retracted it later",
+          "The claim was made by Pliny the Elder, not Aristotle"
+        ],
+        correct: 1,
+        explain: "The Aristotle-spider story is a modern invention. A lesson about accepting claims without checking, told as an unchecked claim. The lesson applies to itself."
+      },
+      {
+        source: "Spiders Have Six Legs",
+        q: "Karl Popper observed that Freud's and Marx's theories could explain any outcome. Why did he consider this a fatal flaw?",
+        opts: [
+          "Their theories were too difficult to understand",
+          "A theory that can explain everything cannot be proved wrong, and therefore is not scientific",
+          "Psychology and sociology are not natural sciences",
+          "They refused to engage with experimental evidence"
+        ],
+        correct: 1,
+        explain: "Popper's falsifiability criterion: a claim is scientific only if an observation could in principle prove it wrong. A theory that accommodates every outcome is a dogma."
+      },
+      {
+        source: "Spiders Have Six Legs",
+        q: "A model reports 99% accuracy. According to the module, what is the single most important follow-up question?",
+        opts: [
+          "Which algorithm was used?",
+          "How large is the team?",
+          "Was that measured on training data or on held-out test data?",
+          "How long did training take?"
+        ],
+        correct: 2,
+        explain: "The train/test split is Popper's criterion applied to ML. Accuracy on training data tells you nothing. Only performance on held-out data, data the model never saw, is a real test."
+      },
+      {
+        source: "Spiders Have Six Legs",
+        q: "Which of these claims is NOT falsifiable, and therefore outside the domain of science?",
+        opts: [
+          "Short email subject lines get more opens",
+          "Exercising three times a week improves sleep quality",
+          "Everything happens for a reason",
+          "More training data reduces prediction error"
+        ],
+        correct: 2,
+        explain: "'Everything happens for a reason' accommodates any observation, good or bad. Nothing can threaten it. There is no experiment that could prove it wrong."
+      },
+      {
+        source: "Spiders Have Six Legs",
+        q: "Overfitting in machine learning is the direct ML parallel of which concept from Popper's philosophy?",
+        opts: [
+          "A falsifiable theory, it can be disproved on new data",
+          "A theory that explains everything, it memorised noise instead of real structure",
+          "Occam's razor, simplest model wins",
+          "Peer review, validation by independent researchers"
+        ],
+        correct: 1,
+        explain: "An overfit model explains everything in training data, including noise, and fails on new observations. Like a Freudian theory: infinitely flexible, scientifically empty."
+      },
+      {
+        source: "Is This AI?",
+        q: "Which of the following best describes Narrow AI (Weak AI)?",
+        opts: [
+          "An AI that refuses certain requests for safety reasons",
+          "An AI that is not connected to the internet",
+          "An AI that performs excellently within one specific task but cannot generalise beyond it",
+          "An AI running on dedicated hardware"
+        ],
+        correct: 2,
+        explain: "Narrow AI is built for one domain. A spam filter is excellent at spam, and useless outside that. This contrasts with AGI, which would generalise across all tasks."
+      },
+      {
+        source: "Is This AI?",
+        q: "The module places 'This AI understands what it is saying' in the NOT-falsifiable category. Why?",
+        opts: [
+          "Because AI systems are too complex to evaluate fairly",
+          "'Understands' has no agreed definition or measurement threshold, every time a test is passed, the goalposts move",
+          "Because understanding requires a biological brain",
+          "Because large language models have already proven they do understand"
+        ],
+        correct: 1,
+        explain: "No agreed definition, no agreed measure, no threshold. Every new behavioural test can be dismissed as 'not real understanding.' The claim cannot be settled empirically, making it unfalsifiable."
+      }
+    ]
+  },
+
+  de: {
+    headingTitle: "Wissenscheck",
+    headingSub: "Können Maschinen denken? \u00b7 Spinnen haben sechs Beine \u00b7 Ist das KI?",
+    progressLabel: (cur, tot) => `Frage ${cur} von ${tot}`,
+    nextLabel: "Weiter →",
+    resultTitle: "Quiz abgeschlossen",
+    resultSub: (n) => `${n} Fragen · 3 Module`,
+    restartLabel: "Nochmal versuchen",
+    langBtnLabel: "EN",
+    verdictCorrect: "✓ Richtig",
+    verdictWrong: "✗ Leider nicht",
+    resultMsg: (correct, total, score) => {
+      const msgs = [
+        `Du hast <strong>${score} von ${total * 100} Punkten</strong> erreicht, ${correct} von ${total} Fragen richtig beantwortet.`,
+        correct >= 10 ? "Ausgezeichnete Beherrschung aller drei Module." :
+        correct >= 7  ? "Gutes Verständnis. Schau dir die verpassten Module nochmal an." :
+                        "Es lohnt sich, die Materialien nochmals durchzugehen, die Konzepte sind es wert."
+      ];
+      return msgs.join(' ');
+    },
+    questions: [
+      {
+        source: "Können Maschinen denken?",
+        q: "Alan Turing schlug 1950 eine praktische Alternative zur Frage 'Können Maschinen denken?' vor, welche?",
+        opts: [
+          "Eine Maschine, die fehlerlos operieren kann",
+          "Eine Maschine, die im Textgespräch nicht von einem Menschen zu unterscheiden ist",
+          "Eine Maschine, die alle mathematischen Probleme lösen kann",
+          "Eine Maschine, die menschliche Emotionen nachahmen kann"
+        ],
+        correct: 1,
+        explain: "Turing umging die philosophische Debatte. Sein Test: Wenn man eine Maschine im Gespräch nicht von einem Menschen unterscheiden kann, spielt der innere Mechanismus dann noch eine Rolle?"
+      },
+      {
+        source: "Können Maschinen denken?",
+        q: "AlphaGo lernte Go ohne beschriftete Datensätze mit 'guten Zügen'. Welche Art von maschinellem Lernen beschreibt das?",
+        opts: [
+          "Überwachtes Lernen",
+          "Unüberwachtes Lernen",
+          "Bestärkendes Lernen",
+          "Transfer Learning"
+        ],
+        correct: 2,
+        explain: "AlphaGo nutzte Bestärkendes Lernen, es spielte Millionen von Partien gegen sich selbst und lernte ausschließlich aus dem Gewinn/Verlust-Signal. Keine menschlichen Labels nötig."
+      },
+      {
+        source: "Können Maschinen denken?",
+        q: "Als Deep Blue 1997 den Schachweltmeister besiegte, sagten viele: 'Schach ist nur Berechnung, keine echte Intelligenz.' Welches Denkmuster zeigt das?",
+        opts: [
+          "Der Dunning-Kruger-Effekt",
+          "Bestätigungsfehler",
+          "Verschieben der Zielpfosten",
+          "Overfitting"
+        ],
+        correct: 2,
+        explain: "Jedes Mal, wenn eine Maschine etwas erreicht, das wir für intelligent hielten, definieren wir Intelligenz neu, um es auszuschließen. Das Modul nennt das 'Verschieben der Zielpfosten'."
+      },
+      {
+        source: "Können Maschinen denken?",
+        q: "Spotify gruppiert Hörer mit ähnlichem Geschmack, ohne dass vorgegeben wurde, welche Kategorien existieren. Welcher ML-Typ ist das?",
+        opts: [
+          "Überwachtes Lernen",
+          "Unüberwachtes Lernen",
+          "Bestärkendes Lernen",
+          "Halbüberwachtes Lernen"
+        ],
+        correct: 1,
+        explain: "Unüberwachtes Lernen: keine vordefinierten Kategorien, keine Labels. Der Algorithmus entdeckt selbst Strukturen, Cluster, in den Daten."
+      },
+      {
+        source: "Können Maschinen denken?",
+        q: "HAL 9000, Samantha (Her) und Skynet werden im Modul als 'Starke KI' eingestuft. Was unterscheidet sie von schwacher KI?",
+        opts: [
+          "Sie sind Bösewichte in ihren Geschichten",
+          "Sie sind physisch verkörperte Roboter",
+          "Sie schlussfolgern, passen sich an und verfolgen Ziele über viele Bereiche hinweg",
+          "Sie wurden von Regierungsorganisationen entwickelt"
+        ],
+        correct: 2,
+        explain: "Starke KI (AGI) generalisiert über alle Aufgaben, modelliert Ziele und passt sich an. Schwache KI ist in einer Domäne hervorragend und versagt außerhalb davon."
+      },
+      {
+        source: "Spinnen haben sechs Beine",
+        q: "Das Modul beginnt mit der Geschichte, Aristoteles habe behauptet, Spinnen hätten sechs Beine, und niemand habe es jahrhundertelang überprüft. Was ist der Twist?",
+        opts: [
+          "Aristoteles hatte recht, die Anatomie der Spinnen hat sich verändert",
+          "Die Geschichte selbst ist falsch, es gibt keinen Beleg, dass Aristoteles das je geschrieben hat",
+          "Aristoteles schrieb es, widerrief es aber später",
+          "Die Behauptung stammt von Plinius dem Älteren, nicht von Aristoteles"
+        ],
+        correct: 1,
+        explain: "Die Aristoteles-Spinnen-Geschichte ist eine moderne Erfindung. Eine Lektion über das Akzeptieren ungeprüfter Behauptungen, als ungeprüfte Behauptung erzählt. Die Lektion gilt für sich selbst."
+      },
+      {
+        source: "Spinnen haben sechs Beine",
+        q: "Karl Popper bemerkte, dass die Theorien von Freud und Marx jedes Ergebnis erklären konnten. Warum betrachtete er das als fundamentalen Fehler?",
+        opts: [
+          "Ihre Theorien waren zu kompliziert zum Verstehen",
+          "Eine Theorie, die alles erklären kann, kann nicht widerlegt werden, und ist daher unwissenschaftlich",
+          "Psychologie und Soziologie sind keine Naturwissenschaften",
+          "Sie lehnten experimentelle Evidenz grundsätzlich ab"
+        ],
+        correct: 1,
+        explain: "Poppers Falsifizierbarkeitskriterium: Eine Behauptung ist nur dann wissenschaftlich, wenn eine Beobachtung sie prinzipiell widerlegen könnte. Eine Theorie, die alles erklärt, ist ein Dogma."
+      },
+      {
+        source: "Spinnen haben sechs Beine",
+        q: "Ein Modell meldet 99 % Genauigkeit. Laut Modul: Was ist die wichtigste Anschlussfrage?",
+        opts: [
+          "Welcher Algorithmus wurde verwendet?",
+          "Wie groß ist das Team?",
+          "Wurde das auf Trainingsdaten oder auf zurückgehaltenen Testdaten gemessen?",
+          "Wie lange dauerte das Training?"
+        ],
+        correct: 2,
+        explain: "Der Train/Test-Split ist Poppers Kriterium, auf ML angewendet. Genauigkeit auf Trainingsdaten sagt nichts aus. Nur die Leistung auf zurückgehaltenen Testdaten ist ein echter Test."
+      },
+      {
+        source: "Spinnen haben sechs Beine",
+        q: "Welche dieser Aussagen ist NICHT falsifizierbar und liegt daher außerhalb des Bereichs der Wissenschaft?",
+        opts: [
+          "Kurze E-Mail-Betreffzeilen erzielen mehr Öffnungen",
+          "Dreimal wöchentliches Training verbessert den Schlaf",
+          "Alles hat einen Grund",
+          "Mehr Trainingsdaten reduziert den Vorhersagefehler"
+        ],
+        correct: 2,
+        explain: "'Alles hat einen Grund' passt zu jeder Beobachtung, guten wie schlechten. Nichts kann diese Behauptung gefährden. Es gibt kein Experiment, das sie widerlegen könnte."
+      },
+      {
+        source: "Spinnen haben sechs Beine",
+        q: "Overfitting beim maschinellen Lernen ist das direkte ML-Pendant zu welchem Konzept aus Poppers Philosophie?",
+        opts: [
+          "Einer falsifizierbaren Theorie, sie kann durch neue Daten widerlegt werden",
+          "Einer Theorie, die alles erklärt, sie hat Rauschen statt echter Struktur auswendig gelernt",
+          "Occams Rasiermesser, das einfachste Modell gewinnt",
+          "Peer Review, Validierung durch unabhängige Forscher"
+        ],
+        correct: 1,
+        explain: "Ein überangepasstes Modell erklärt alles in den Trainingsdaten, einschließlich Rauschen, und versagt bei neuen Beobachtungen. Wie eine Freudsche Theorie: unendlich flexibel, wissenschaftlich leer."
+      },
+      {
+        source: "Ist das KI?",
+        q: "Welche Beschreibung trifft auf schwache KI (Narrow AI) am besten zu?",
+        opts: [
+          "Eine KI, die aus Sicherheitsgründen bestimmte Anfragen ablehnt",
+          "Eine KI ohne Internetverbindung",
+          "Eine KI, die in einer bestimmten Aufgabe hervorragend ist, aber nicht darüber hinaus generalisieren kann",
+          "Eine KI, die auf dedizierter Hardware läuft"
+        ],
+        correct: 2,
+        explain: "Schwache KI ist für eine Domäne gebaut. Ein Spam-Filter ist exzellent bei Spam, und unbrauchbar außerhalb davon. Das steht im Gegensatz zu AGI, das über alle Aufgaben generalisieren würde."
+      },
+      {
+        source: "Ist das KI?",
+        q: "Das Modul ordnet 'Diese KI versteht, was sie sagt' der Kategorie NICHT falsifizierbar zu. Warum?",
+        opts: [
+          "Weil KI-Systeme zu komplex sind, um fair bewertet zu werden",
+          "'Versteht' hat keine einheitliche Definition oder Messschwelle, jedes Mal, wenn ein Test bestanden wird, verschieben sich die Zielpfosten",
+          "Weil Verstehen ein biologisches Gehirn erfordert",
+          "Weil große Sprachmodelle bereits bewiesen haben, dass sie verstehen"
+        ],
+        correct: 1,
+        explain: "Keine einheitliche Definition, kein einheitliches Maß, keine Schwelle. Jeder neue Verhaltenstest kann als 'kein echtes Verstehen' abgetan werden. Die Behauptung lässt sich empirisch nicht klären, sie ist nicht falsifizierbar."
+      }
+    ]
+  }
+};
+
+/* ───────────────────────────────────────────
+   STATE
+─────────────────────────────────────────── */
+let lang = 'en';
+let current = 0;
+let score = 0;
+let answered = false;
+let streakState = [];
+
+/* ───────────────────────────────────────────
+   LANG SWITCH
+─────────────────────────────────────────── */
+function setLang(l) {
+  lang = l;
+  document.getElementById('lang-btn').textContent = content[lang].langBtnLabel;
+  document.documentElement.lang = l;
+
+  const c = content[lang];
+  document.getElementById('heading-title').textContent = c.headingTitle;
+  document.getElementById('heading-sub').textContent   = c.headingSub;
+  document.getElementById('next-label').textContent    = c.nextLabel;
+  document.getElementById('restart-btn').textContent   = c.restartLabel;
+
+  renderQuestion();
+}
+
+/* ───────────────────────────────────────────
+   RENDER
+─────────────────────────────────────────── */
+function renderStreakRow() {
+  const row = document.getElementById('streak-row');
+  row.innerHTML = '';
+  const total = content[lang].questions.length;
+  for (let i = 0; i < total; i++) {
+    const d = document.createElement('div');
+    d.className = 's-dot' +
+      (streakState[i] === true ? ' hit' : streakState[i] === false ? ' miss' : '');
+    row.appendChild(d);
+  }
+}
+
+function renderQuestion() {
+  const c = content[lang];
+  const qs = c.questions;
+  const q  = qs[current];
+  const total = qs.length;
+
+  document.getElementById('p-label').textContent = c.progressLabel(current + 1, total);
+  document.getElementById('p-score').textContent = `${score} pts`;
+  document.getElementById('progress-fill').style.width = `${(current / total) * 100}%`;
+  renderStreakRow();
+
+  const pad = n => String(n).padStart(2, '0');
+  document.getElementById('q-counter').textContent = `${pad(current + 1)}, `;
+  document.getElementById('q-source').textContent  = q.source;
+  document.getElementById('q-text').textContent    = q.q;
+
+  const list = document.getElementById('options-list');
+  list.innerHTML = '';
+  const letters = ['A', 'B', 'C', 'D'];
+  q.opts.forEach((opt, i) => {
+    const li  = document.createElement('li');
+    const btn = document.createElement('button');
+    btn.className = 'opt';
+    btn.innerHTML = `<span class="opt-letter">${letters[i]}</span><span>${opt}</span>`;
+    btn.onclick = () => selectAnswer(i);
+    li.appendChild(btn);
+    list.appendChild(li);
+  });
+
+  const fb = document.getElementById('feedback-box');
+  fb.className = 'feedback-box';
+  document.getElementById('next-btn').className = 'next-btn';
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  const c    = content[lang];
+  const q    = c.questions[current];
+  const btns = document.querySelectorAll('.opt');
+  btns.forEach(b => b.disabled = true);
+
+  const correct = idx === q.correct;
+  streakState[current] = correct;
+
+  btns[idx].classList.add(correct ? 'correct' : 'wrong');
+  if (!correct) btns[q.correct].classList.add('correct');
+
+  if (correct) score += 100;
+  document.getElementById('p-score').textContent = `${score} pts`;
+  renderStreakRow();
+
+  const fb      = document.getElementById('feedback-box');
+  const verdict = document.getElementById('feedback-verdict');
+  const explain = document.getElementById('feedback-explain');
+  fb.className  = `feedback-box show ${correct ? 'correct-fb' : 'wrong-fb'}`;
+  verdict.textContent = correct ? c.verdictCorrect : c.verdictWrong;
+  explain.textContent = q.explain;
+
+  document.getElementById('next-btn').className = 'next-btn show';
+}
+
+function nextQuestion() {
+  current++;
+  const total = content[lang].questions.length;
+  if (current >= total) { showResults(); return; }
+  answered = false;
+  renderQuestion();
+}
+
+function showResults() {
+  document.getElementById('quiz-area').style.display = 'none';
+  document.getElementById('results').style.display   = 'block';
+  const c     = content[lang];
+  const total = c.questions.length;
+  const corr  = streakState.filter(Boolean).length;
+  document.getElementById('result-title').textContent = c.resultTitle;
+  document.getElementById('result-score').textContent  = `${score} / ${total * 100}`;
+  document.getElementById('result-sub').textContent    = c.resultSub(total);
+  document.getElementById('result-body').innerHTML     = c.resultMsg(corr, total, score);
+  document.getElementById('progress-fill').style.width = '100%';
+  renderStreakRow();
+}
+
+function restart() {
+  current = 0; score = 0; answered = false; streakState = [];
+  document.getElementById('results').style.display   = 'none';
+  document.getElementById('quiz-area').style.display = 'block';
+  renderQuestion();
+}
+
+renderQuestion();
+</script>
+</body>
+</html>

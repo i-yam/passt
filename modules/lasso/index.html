@@ -1,0 +1,1606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lasso: Some Coefficients Die</title>
+
+    <!-- KaTeX -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #141420;
+            color: #e8e8f0;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            line-height: 1.8;
+            font-size: 18px;
+        }
+
+        .container {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* === Language toggle === */
+        .lang-toggle {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            background: #2a2a44;
+            border: 1px solid #4a4a70;
+            border-radius: 20px;
+            padding: 6px 14px;
+            cursor: pointer;
+            font-size: 13px;
+            font-family: sans-serif;
+            color: #a0a0d0;
+            z-index: 100;
+            transition: background 0.2s;
+        }
+        .lang-toggle:hover { background: #363658; }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: 80px 24px 40px;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.3;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .hero .subtitle {
+            margin-top: 16px;
+            color: #888;
+            font-size: 16px;
+            font-style: italic;
+        }
+
+        /* Sections */
+        section { padding: 50px 0; }
+
+        h2 {
+            font-size: 30px;
+            color: #fff;
+            margin-bottom: 24px;
+            line-height: 1.3;
+        }
+
+        h3 {
+            font-size: 20px;
+            color: #ccc;
+            margin: 28px 0 12px;
+        }
+
+        p { margin-bottom: 20px; color: #ccc; }
+
+        /* Images */
+        .figure {
+            margin: 28px 0;
+            text-align: center;
+        }
+
+        .figure img {
+            max-width: 100%;
+            border-radius: 8px;
+        }
+
+        .caption {
+            margin-top: 8px;
+            font-size: 14px;
+            color: #777;
+            font-style: italic;
+        }
+
+        /* Formula blocks */
+        .formula-block {
+            margin: 24px auto;
+            text-align: center;
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+
+        /* Definition list */
+        .def-list {
+            margin: 16px 0 20px 20px;
+            color: #ccc;
+        }
+
+        .def-list li {
+            margin-bottom: 8px;
+            list-style: none;
+        }
+
+        .def-list li::before {
+            content: "– ";
+            color: #666;
+        }
+
+        /* Ingredient list */
+        .step-list {
+            counter-reset: steps;
+            margin: 16px 0;
+            padding: 0;
+        }
+
+        .step-list li {
+            list-style: none;
+            counter-increment: steps;
+            margin-bottom: 24px;
+            padding-left: 48px;
+            position: relative;
+            color: #ccc;
+        }
+
+        .step-list li::before {
+            content: counter(steps);
+            position: absolute;
+            left: 0;
+            top: 2px;
+            width: 32px;
+            height: 32px;
+            background: #2a2a44;
+            border: 1px solid #4a4a70;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            font-family: sans-serif;
+            color: #a0a0d0;
+        }
+
+        .step-list li strong {
+            display: block;
+            color: #e0e0f0;
+            margin-bottom: 4px;
+        }
+
+        /* Quiz */
+        .quiz {
+            background: #1c1c2e;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            padding: 28px;
+            margin: 36px 0;
+        }
+
+        .quiz-question {
+            font-size: 18px;
+            color: #e0e0f0;
+            margin-bottom: 18px;
+            font-style: italic;
+        }
+
+        .quiz-options {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .quiz-btn {
+            background: #2a2a44;
+            color: #e0e0f0;
+            border: 1px solid #3a3a55;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+            flex: 1;
+            min-width: 160px;
+            text-align: center;
+        }
+
+        .quiz-btn:hover { background: #363658; border-color: #5a5a80; }
+
+        .quiz-btn.correct {
+            background: #1a4a2a;
+            border-color: #50b878;
+            color: #70e898;
+        }
+
+        .quiz-btn.wrong {
+            background: #2a2248;
+            border-color: #8264dc;
+            color: #a88ef0;
+        }
+
+        .quiz-btn.disabled { pointer-events: none; opacity: 0.6; }
+
+        .quiz-feedback {
+            margin-top: 14px;
+            font-size: 16px;
+            min-height: 24px;
+            line-height: 1.5;
+        }
+
+        .quiz-feedback.success { color: #70e898; }
+        .quiz-feedback.fail    { color: #a88ef0; }
+
+        /* Game embed */
+        .game-section { padding: 50px 0; }
+
+        .game-frame-wrap {
+            width: 100%;
+            max-width: 820px;
+            margin: 30px auto;
+            aspect-ratio: 820 / 700;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #2a2a40;
+        }
+
+        .game-frame-wrap iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Divider */
+        .section-rule {
+            border: none;
+            border-top: 1px solid #2a2a40;
+            margin: 0;
+        }
+
+        /* Links */
+        a { color: #80b4f0; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 24px;
+            color: #444;
+            font-size: 14px;
+        }
+
+        /* === Module-specific === */
+
+        /* Where you are in Class 5 */
+        .prereq {
+            background: #1a1a2c;
+            border: 1px solid #2a2a40;
+            border-left: 3px solid #4a4a70;
+            border-radius: 8px;
+            padding: 18px 22px;
+            margin: 0 0 34px;
+            font-size: 16px;
+            color: #aaa;
+        }
+        .prereq p { margin-bottom: 8px; color: #aaa; }
+        .prereq p:last-child { margin-bottom: 0; }
+
+        /* Comparison table */
+        .cmp-wrap { overflow-x: auto; margin: 28px 0; }
+
+        table.cmp {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 16px;
+            font-family: 'Georgia', serif;
+            color: #ccc;
+        }
+
+        table.cmp th {
+            text-align: left;
+            color: #e0e0f0;
+            font-weight: 700;
+            border-bottom: 1px solid #4a4a70;
+            padding: 10px 12px;
+            vertical-align: bottom;
+        }
+
+        table.cmp td {
+            border-bottom: 1px solid #24243a;
+            padding: 10px 12px;
+            vertical-align: top;
+            line-height: 1.6;
+        }
+
+        table.cmp tr:last-child td { border-bottom: none; }
+        table.cmp td.num { font-family: 'Courier New', monospace; color: #a0a0d0; white-space: nowrap; }
+        table.cmp td strong { color: #e0e0f0; }
+        table.cmp .zero { color: #70e898; }
+
+        /* Big sentence */
+        .keyline {
+            text-align: center;
+            font-size: 22px;
+            color: #e8e8f0;
+            margin: 34px auto;
+            line-height: 1.5;
+            max-width: 620px;
+        }
+
+        /* Pull quote */
+        .pullquote {
+            border-left: 3px solid #4a4a70;
+            padding: 4px 0 4px 22px;
+            margin: 26px 0;
+            color: #d8d8e8;
+            font-style: italic;
+        }
+        .pullquote .attrib {
+            display: block;
+            margin-top: 8px;
+            font-style: normal;
+            font-size: 14px;
+            color: #777;
+        }
+
+        /* Footnote */
+        .footnote {
+            font-size: 14px;
+            color: #777;
+            border-top: 1px solid #24243a;
+            padding-top: 12px;
+            margin-top: 26px;
+        }
+
+        /* Interactive shell */
+        .lab {
+            background: #1a1a2c;
+            border: 1px solid #2a2a40;
+            border-radius: 12px;
+            padding: 26px 22px;
+            margin: 34px 0;
+        }
+
+        .lab-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+
+        .lab-controls label {
+            font-family: sans-serif;
+            font-size: 14px;
+            color: #a0a0d0;
+            white-space: nowrap;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            appearance: none;
+            flex: 1;
+            min-width: 180px;
+            height: 4px;
+            background: #33334f;
+            border-radius: 2px;
+            outline: none;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            background: #a0a0d0;
+            border: 2px solid #141420;
+            cursor: pointer;
+        }
+        input[type=range]::-moz-range-thumb {
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            background: #a0a0d0;
+            border: 2px solid #141420;
+            cursor: pointer;
+        }
+
+        .readout {
+            font-family: 'Courier New', monospace;
+            font-size: 15px;
+            color: #e0e0f0;
+            min-width: 128px;
+            text-align: right;
+        }
+
+        .panels {
+            display: flex;
+            gap: 18px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        .panel {
+            flex: 1 1 300px;
+            min-width: 280px;
+            background: #16162a;
+            border: 1px solid #26263e;
+            border-radius: 10px;
+            padding: 14px 12px 10px;
+        }
+
+        .panel h4 {
+            font-family: sans-serif;
+            font-size: 14px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #8a8ab0;
+            margin-bottom: 2px;
+        }
+
+        .panel .sub {
+            font-family: sans-serif;
+            font-size: 13px;
+            color: #6a6a8a;
+            margin-bottom: 6px;
+            min-height: 34px;
+        }
+
+        .panel svg { width: 100%; height: auto; display: block; }
+
+        .alive-counter {
+            font-family: sans-serif;
+            font-size: 15px;
+            color: #70e898;
+            margin-top: 6px;
+            text-align: center;
+        }
+        .alive-counter .n {
+            font-size: 26px;
+            font-weight: 700;
+            vertical-align: -2px;
+        }
+        .alive-counter.flat { color: #80b4f0; }
+
+        /* Death order strip */
+        .deathlist {
+            margin-top: 18px;
+            font-family: sans-serif;
+            font-size: 13px;
+            color: #8a8ab0;
+        }
+        .deathlist .title {
+            display: block;
+            margin-bottom: 8px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            font-size: 12px;
+            color: #6a6a8a;
+        }
+        .deathrow {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .chip {
+            border: 1px solid #33334f;
+            border-radius: 14px;
+            padding: 3px 11px;
+            color: #55557a;
+            background: #191930;
+            transition: color 0.15s, border-color 0.15s, background 0.15s;
+            white-space: nowrap;
+        }
+        .chip .ord { opacity: 0.7; margin-right: 5px; }
+        .chip.gone {
+            color: #a88ef0;
+            border-color: #6a53b0;
+            background: #221a3a;
+        }
+
+        /* Geometry lab */
+        .geo-panels {
+            display: flex;
+            gap: 18px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+        .geo-panel {
+            flex: 1 1 280px;
+            min-width: 260px;
+            background: #16162a;
+            border: 1px solid #26263e;
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+        }
+        .geo-panel svg { width: 100%; height: auto; }
+        .geo-verdict {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin-top: 6px;
+            color: #a0a0d0;
+            min-height: 44px;
+        }
+        .geo-verdict.hit { color: #70e898; }
+
+        /* For the curious */
+        details.curious {
+            background: #1a1a2c;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            padding: 4px 24px;
+            margin: 34px 0;
+        }
+        details.curious summary {
+            cursor: pointer;
+            font-size: 19px;
+            color: #e0e0f0;
+            padding: 18px 0;
+            list-style: none;
+        }
+        details.curious summary::-webkit-details-marker { display: none; }
+        details.curious summary::before {
+            content: "▸ ";
+            color: #8264dc;
+        }
+        details.curious[open] summary::before { content: "▾ "; }
+        details.curious[open] summary { border-bottom: 1px solid #2a2a40; margin-bottom: 14px; }
+        details.curious p:last-child { margin-bottom: 20px; }
+
+        /* Stakes block */
+        .stakes {
+            border-left: 3px solid #8264dc;
+            padding-left: 22px;
+            margin: 28px 0;
+        }
+        .stakes p { color: #d0d0e0; }
+
+        /* Open question */
+        .openq {
+            background: #1c1c2e;
+            border: 1px solid #3a3a55;
+            border-radius: 10px;
+            padding: 26px 28px;
+            margin: 34px 0;
+        }
+        .openq p:last-child { margin-bottom: 0; }
+        .openq .ask {
+            font-size: 22px;
+            color: #fff;
+            text-align: center;
+            margin: 22px 0;
+        }
+
+        .navlinks {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            font-family: sans-serif;
+            font-size: 15px;
+            margin-top: 10px;
+        }
+
+        /* Responsive */
+        @media (max-width: 680px) {
+            .hero h1 { font-size: 28px; }
+            h2 { font-size: 24px; }
+            body { font-size: 16px; }
+            .quiz-options { flex-direction: column; }
+            .keyline { font-size: 19px; }
+            .readout { text-align: left; }
+        }
+    </style>
+</head>
+<body>
+
+<button class="lang-toggle" onclick="toggleLang()">DE</button>
+
+<!-- Hero -->
+<div class="hero">
+    <h1 data-i18n="hero.title">Lasso: Some Coefficients Die</h1>
+    <p class="subtitle" data-i18n="hero.subtitle">Class 5, module three of three. Ridge made everything small. Lasso makes some of it gone.</p>
+</div>
+
+<div class="container">
+
+<!-- ── Part 1: cold open ────────────────────────────────────────────────────── -->
+<section>
+
+    <div class="prereq">
+        <p data-i18n="prereq.p1"><strong>Coming from the other two.</strong> In <a href="../regularisation/">Regularisation</a> you traded a little shift for a lot less spread. In <a href="../ridge/">Ridge</a> you watched the ridge trace and learned the rule: ridge multiplies every coefficient by a number smaller than one.</p>
+        <p data-i18n="prereq.p2">So ridge shrank everything and deleted nothing. Seven channels went in and seven channels came out, all smaller, all still there.</p>
+    </div>
+
+    <h2 data-i18n="s1.h2">Seven smaller numbers is not an answer</h2>
+
+    <p data-i18n="s1.p1">The marketing director has a budget meeting on Thursday and one decision to make. Spend is coming down by fifteen percent and three channels have to go. She has asked you which three.</p>
+
+    <p data-i18n="s1.p2">You hand her the ridge output. Search 2.7, Shopping 1.8, Meta 1.9, TikTok 1.1, affiliate 0.6, display 0.3, email 0.3. Every number smaller than it was, every number stable, every number defensible. She reads it, and then she asks the question again.</p>
+
+    <p data-i18n="s1.p3">Ridge cannot answer it. It has an opinion about all seven channels and it holds all seven opinions at once. Nothing in that list is zero, so nothing in that list is a name you can cross out. The method that refuses to pick a favourite also refuses to name a loser, and those turn out to be the same refusal.</p>
+
+    <p data-i18n="s1.p4">What she wants is a shorter list. Not smaller numbers. Fewer of them.</p>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Part 2: the mechanism ────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s2.h2">Ridge multiplies, lasso subtracts</h2>
+
+    <p data-i18n="s2.p1">Three rules for what to do with one coefficient. Take the clean case first, where the columns do not overlap at all, because there the arithmetic finishes and you can check every step by hand.</p>
+
+    <div class="cmp-wrap">
+    <table class="cmp">
+        <thead>
+        <tr>
+            <th data-i18n="tbl.h1">Method</th>
+            <th data-i18n="tbl.h2">What it does to one coefficient</th>
+            <th data-i18n="tbl.h3">Behaviour</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td data-i18n="tbl.r1c1"><strong>Best subset</strong></td>
+            <td data-i18n="tbl.r1c2">Keep it if it is bigger than the threshold. Otherwise kill it.</td>
+            <td data-i18n="tbl.r1c3">An abrupt cut. Nothing in between.</td>
+        </tr>
+        <tr>
+            <td data-i18n="tbl.r2c1"><strong>Ridge</strong></td>
+            <td data-i18n="tbl.r2c2">Divide it by \(1 + \lambda\).</td>
+            <td data-i18n="tbl.r2c3">Proportional shrinkage. Never exactly zero.</td>
+        </tr>
+        <tr>
+            <td data-i18n="tbl.r3c1"><strong>Lasso</strong></td>
+            <td data-i18n="tbl.r3c2">Subtract \(\lambda\). If that would cross zero, stop at zero and keep the sign.</td>
+            <td data-i18n="tbl.r3c3">Everything moves in by the same amount, and the small ones hit the wall.</td>
+        </tr>
+        </tbody>
+    </table>
+    </div>
+
+    <p data-i18n="s2.p2">Now say the difference out loud, because it needs no geometry and no picture. Eight halved is four. Four halved is two. Two halved is one. Halve it as often as you like and it never arrives. Multiplying by a number smaller than one shrinks forever without landing on zero.</p>
+
+    <p data-i18n="s2.p3">Subtracting arrives. Take away a fixed amount often enough and you run out of coefficient.</p>
+
+    <div class="keyline" data-i18n="s2.key">Multiplication cannot produce a zero. Subtraction can. That is the whole reason lasso makes zeros and ridge does not.</div>
+
+    <h3 data-i18n="s2.h3">One coefficient, three settings of the dial</h3>
+
+    <p data-i18n="s2.p4">A channel comes back with a coefficient of 0.30. Watch what each method reports as you turn \(\lambda\) up.</p>
+
+    <div class="cmp-wrap">
+    <table class="cmp">
+        <thead>
+        <tr>
+            <th data-i18n="tbl2.h1">Penalty \(\lambda\)</th>
+            <th data-i18n="tbl2.h2">Ridge: divide 0.30 by \(1+\lambda\)</th>
+            <th data-i18n="tbl2.h3">Lasso: subtract \(\lambda\) from 0.30</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td class="num">0.10</td>
+            <td class="num" data-i18n="tbl2.r1c2">0.30 / 1.10 = 0.27</td>
+            <td class="num" data-i18n="tbl2.r1c3">0.30 − 0.10 = <strong>0.20</strong></td>
+        </tr>
+        <tr>
+            <td class="num">0.30</td>
+            <td class="num" data-i18n="tbl2.r2c2">0.30 / 1.30 = 0.23</td>
+            <td class="num" data-i18n="tbl2.r2c3">0.30 − 0.30 = <strong class="zero">0</strong></td>
+        </tr>
+        <tr>
+            <td class="num">0.50</td>
+            <td class="num" data-i18n="tbl2.r3c2">0.30 / 1.50 = 0.20</td>
+            <td class="num" data-i18n="tbl2.r3c3">would be −0.20, so <strong class="zero">0</strong>, and it stays 0</td>
+        </tr>
+        </tbody>
+    </table>
+    </div>
+
+    <p data-i18n="s2.p5">Ridge goes 0.27, then 0.23, then 0.20. It is heading somewhere and it is not getting there. Lasso goes 0.20, then zero, then zero. Once a coefficient has been pushed to the wall it stays at the wall for every larger \(\lambda\), so a channel that dies stays dead.</p>
+
+    <p data-i18n="s2.p6">The rule written once, and you never need to write it again:</p>
+
+    <div class="formula-block">$$\hat\beta_{\text{lasso}} = \operatorname{sign}(\hat\beta)\,\bigl(|\hat\beta| - \lambda\bigr)_{+}$$</div>
+
+    <p data-i18n="s2.p7">The little plus sign at the bottom right means "and if that came out negative, use zero instead". That is the entire wall.</p>
+
+    <p data-i18n="s2.p8">One honest caveat, said once and not buried. This exact arithmetic holds when the columns do not overlap, and real columns always overlap, which is the reason you are reading this at all. It is still the right picture. The next section gives you a second and independent argument that covers the messy case.</p>
+
+    <p data-i18n="s2.p9">The version that lives in your bank account: cut every subscription by a fifth and you are still subscribed to all of them, still paying, still annoyed. Take a flat five euros off each one and the ones you had forgotten about disappear.</p>
+
+    <!-- Quiz 1 -->
+    <div class="quiz" id="quiz1">
+        <div class="quiz-question" data-i18n="quiz1.q">A coefficient sits at 0.30 and you set \(\lambda = 0.40\). Which method reports exactly zero, and why?</div>
+        <div class="quiz-options">
+            <button class="quiz-btn" onclick="answerQuiz('quiz1', this, true)" data-i18n="quiz1.a1">Lasso, because it subtracts and would cross zero</button>
+            <button class="quiz-btn" onclick="answerQuiz('quiz1', this, false)" data-i18n="quiz1.a2">Ridge, because 0.30 is already small</button>
+        </div>
+        <div class="quiz-feedback" id="quiz1-feedback"></div>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Part 3: the paired interactive ───────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s3.h2">One slider, two methods, one difference</h2>
+
+    <p data-i18n="s3.p1">Same seven channels as the ridge module, same 104 weeks, same correlations. Search and Shopping move together at 0.88 in this brand, because they are set in the same meeting by the same team.</p>
+
+    <p data-i18n="s3.p2">One slider drives both panels. Drag it slowly and watch the left side and the right side stop agreeing.</p>
+
+    <div class="lab">
+        <div class="lab-controls">
+            <label for="lam" data-i18n="lab.label">Penalty \(\lambda\)</label>
+            <input type="range" id="lam" min="0" max="1000" value="0" step="1" oninput="drawPaths()">
+            <span class="readout" id="lam-out">&lambda; = 0.000</span>
+        </div>
+
+        <div class="panels">
+            <div class="panel">
+                <h4 data-i18n="lab.ridge.h">Ridge</h4>
+                <div class="sub" data-i18n="lab.ridge.sub">Squared sizes are charged for. Every bar shrinks. No bar arrives.</div>
+                <svg id="svg-ridge" viewBox="0 0 320 236" role="img" aria-label="ridge coefficients"></svg>
+                <div class="alive-counter flat" id="ridge-count"></div>
+            </div>
+            <div class="panel">
+                <h4 data-i18n="lab.lasso.h">Lasso</h4>
+                <div class="sub" data-i18n="lab.lasso.sub">Absolute sizes are charged for. Bars shrink, hit the wall, and stay there.</div>
+                <svg id="svg-lasso" viewBox="0 0 320 236" role="img" aria-label="lasso coefficients"></svg>
+                <div class="alive-counter" id="lasso-count"></div>
+            </div>
+        </div>
+
+        <div class="deathlist">
+            <span class="title" data-i18n="lab.order.title">The order they die in</span>
+            <div class="deathrow" id="deathrow"></div>
+        </div>
+    </div>
+
+    <p data-i18n="s3.p3">Push the slider to the far right and the left panel still has seven bars. Small ones, but seven. The right panel has one, and the one it kept is Search.</p>
+
+    <p data-i18n="s3.p4">The strip underneath is the part a marketing director can use. Lasso does not only produce a shorter list. It produces the list in an order, because the dial tells you which channel gave up first, which gave up second, and which was the last one standing. That is a ranked shortlist, and it fell out of a penalty rather than out of anybody's opinion.</p>
+
+    <p data-i18n="s3.p5">Notice also what the left panel is doing to Search and Shopping. As \(\lambda\) rises, ridge pulls the two of them toward each other and hands them roughly equal credit. It cannot tell them apart, so it refuses to choose. Hold on to that, because in a moment it stops being a virtue.</p>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Part 4: the geometry ─────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s4.h2">A second door: the diamond has corners</h2>
+
+    <p data-i18n="s4.p1">What follows is a second explanation of the same fact, and it is independent of the first. If the arithmetic above slid past you, this one still works. If the picture below does nothing for you, the arithmetic above is already a complete argument. Nobody has to get through both doors.</p>
+
+    <p data-i18n="s4.p2">Two coefficients, so the whole thing fits on a page. Instead of charging a price for size, put a budget on it. The coefficients have to fit inside the budget, and you take the best fit you can get inside it.</p>
+
+    <ul class="def-list">
+        <li data-i18n="s4.def1">All the pairs whose <strong>absolute values</strong> add up to the budget: that set is a <strong>diamond</strong>. This is lasso.</li>
+        <li data-i18n="s4.def2">All the pairs whose <strong>squares</strong> add up to the budget: that set is a <strong>circle</strong>. This is ridge.</li>
+    </ul>
+
+    <p data-i18n="s4.p3">The error surface is a bowl and its lowest point is the least squares answer. Slice the bowl and you get a closed curve of pairs that fit equally well, and for squared error that curve is an ellipse. Slice higher and the ellipse is bigger. So the ellipses grow outward from the least squares answer, and the first place one of them touches your budget region is the answer you get. Before it touches, nothing in the region fits that well. After it touches, you have left the budget.</p>
+
+    <p data-i18n="s4.p4">A diamond has four corners and every corner sits exactly on an axis, which means one of the two coefficients is exactly zero there. A corner also sticks out, which is what makes it a corner, so an ellipse arriving from a generic direction meets a corner far more often than it meets any particular stretch of flat edge. A circle has no corners at all and no distinguished point anywhere on its boundary, so the touch point has both coordinates non-zero, and it does so essentially always.</p>
+
+    <!-- Quiz 2 -->
+    <div class="quiz" id="quiz2">
+        <div class="quiz-question" data-i18n="quiz2.q">An ellipse grows outward until it first touches the budget region. On which shape is that first contact most likely to sit exactly on an axis, meaning one coefficient is exactly zero?</div>
+        <div class="quiz-options">
+            <button class="quiz-btn" onclick="answerQuiz('quiz2', this, true)" data-i18n="quiz2.a1">The diamond</button>
+            <button class="quiz-btn" onclick="answerQuiz('quiz2', this, false)" data-i18n="quiz2.a2">The circle</button>
+        </div>
+        <div class="quiz-feedback" id="quiz2-feedback"></div>
+    </div>
+
+    <p data-i18n="s4.p5">Drag the least squares answer around and watch both touch points. The number under each panel is the second coefficient at the solution.</p>
+
+    <div class="lab">
+        <div class="lab-controls">
+            <label for="ang" data-i18n="geo.label">Where the least squares answer sits</label>
+            <input type="range" id="ang" min="0" max="90" value="16" step="1" oninput="drawGeo()">
+            <span class="readout" id="ang-out">16&deg;</span>
+        </div>
+        <div class="geo-panels">
+            <div class="geo-panel">
+                <h4 style="font-family:sans-serif;font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:#8a8ab0;" data-i18n="geo.ridge.h">Ridge: the circle</h4>
+                <svg id="svg-geo-ridge" viewBox="0 0 300 300" role="img" aria-label="ridge circle geometry"></svg>
+                <div class="geo-verdict" id="geo-ridge-out"></div>
+            </div>
+            <div class="geo-panel">
+                <h4 style="font-family:sans-serif;font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:#8a8ab0;" data-i18n="geo.lasso.h">Lasso: the diamond</h4>
+                <svg id="svg-geo-lasso" viewBox="0 0 300 300" role="img" aria-label="lasso diamond geometry"></svg>
+                <div class="geo-verdict" id="geo-lasso-out"></div>
+            </div>
+        </div>
+    </div>
+
+    <p data-i18n="s4.p6">Here is Tibshirani in 1996, describing his own Figure 2. Lasso first:</p>
+
+    <div class="pullquote">
+        <span data-i18n="s4.q1">"The lasso solution is the first place that the contours touch the square, and this will sometimes occur at a corner, corresponding to a zero coefficient."</span>
+        <span class="attrib" data-i18n="s4.q1attr">Tibshirani 1996, Journal of the Royal Statistical Society B 58(1)</span>
+    </div>
+
+    <p data-i18n="s4.p7">And ridge, in the same passage, has</p>
+
+    <div class="pullquote">
+        <span data-i18n="s4.q2">"no corners for the contours to hit and hence zero solutions will rarely result."</span>
+        <span class="attrib" data-i18n="s4.q2attr">Tibshirani 1996, same page</span>
+    </div>
+
+    <p data-i18n="s4.p8">If you picked the diamond in the box above, you got there on your own, before reading it, and you agree with the man who invented the method.</p>
+
+    <p class="footnote" data-i18n="s4.fn">He calls the diamond a square, and he is right: a square turned forty-five degrees is still a square. We quote him as he wrote it rather than quietly correcting him, because a book that improves its quotations is a book you cannot check.</p>
+
+    <p data-i18n="s4.p9">And it scales, which is the part that matters, because your real problem has ninety-one coefficients and not two. In ninety-one dimensions the same shape has corners, edges and flat faces of every dimension from zero up to ninety. A corner is where ninety coefficients are zero. A flat face is where one is. Every subset of your channels has a piece of that boundary belonging to it, which is why lasso can zero out any subset at all.</p>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Part 5: the name ─────────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s5.h2">The word came first, the acronym came second</h2>
+
+    <p data-i18n="s5.p1">Least Absolute Shrinkage and Selection Operator, says every textbook. The expansion was fitted to the word afterwards and Tibshirani has said so. He picked the word because a lasso is the thing you throw over something to drag it in. The paper is Tibshirani, "Regression Shrinkage and Selection via the Lasso", 1996.</p>
+
+    <p data-i18n="s5.p2">It exists because the two options already on the table were both bad, each in its own direction.</p>
+
+    <ul class="def-list">
+        <li data-i18n="s5.def1"><strong>Subset selection</strong> gives you a model you can read out loud. It is also a discrete process: drop one observation, refit, and you can get a completely different set of variables. That is high variance in exactly the sense you learned to worry about.</li>
+        <li data-i18n="s5.def2"><strong>Ridge</strong> is stable. It never simplifies anything. You are still holding every column you started with.</li>
+    </ul>
+
+    <p data-i18n="s5.p3">The immediate precursor is Breiman's non-negative garrote, which starts from the least squares estimates and shrinks them by non-negative factors whose sum is capped. Tibshirani's stated improvement is that the lasso "avoids the explicit use of the OLS estimates". Read that with the first module in mind. Not leaning on the least squares estimates matters precisely when the least squares estimates are broken, which is the DuPont situation, which is your marketing meeting. The two halves of this class are historically connected and not merely next to each other.</p>
+
+    <p data-i18n="s5.p4">The worked example in the paper is the prostate cancer data. Eight predictors go in. Three come out: lcavol, lweight and svi. Subset selection had picked the same three. Three is a sentence. Eight is a spreadsheet.</p>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Part 6: the honest warning ───────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s6.h2">It dropped Shopping, and that was almost a coin flip</h2>
+
+    <p data-i18n="s6.p1">Now the bill, and do not let anybody soften this for you.</p>
+
+    <p data-i18n="s6.p2">Give lasso two predictors that say nearly the same thing and it keeps one and sets the other to exactly zero. Which one it keeps is close to arbitrary, because the two answers score almost the same, and a near tie gets broken by whatever noise happened to be in the window. Search and Shopping correlate at about 0.9 in this brand. Same team, same budget, same seasonal push.</p>
+
+    <p data-i18n="s6.p3">Slide the two-year window forward by a few months, refit, and the model makes the opposite choice with exactly the same apparent confidence. Nothing about the business changed. The tie-break changed.</p>
+
+    <p data-i18n="s6.p4">And "the model dropped Shopping" is a sentence somebody will act on. It is a budget line, a quarterly target, a team, possibly a job. A number that came from a tie-break gets read in the room as a finding.</p>
+
+    <p data-i18n="s6.p5">That instability is real and it is the reason elastic net exists. Charge for the absolute values and for the squares at the same time, with a dial between them. The diamond keeps its corners so you still get zeros, and the corners get less pointy, so correlated predictors enter and leave together instead of one of them being deleted by a rounding error. That last property has a name, the grouping effect, and it is the only thing you need to remember about elastic net today.</p>
+
+    <p data-i18n="s6.p6">Which leaves the sentence this section exists for, and it is not a technical sentence. Lasso says drop TikTok, which is a budget line somebody loses and a meeting somebody has to sit through. Ridge says keep everything and trust nothing individually, which is a different meeting with a different outcome. Choosing between the two is not a modelling preference.</p>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Part 7: for the curious ──────────────────────────────────────────────── -->
+<section>
+    <details class="curious">
+        <summary data-i18n="cur.summary">For the curious: why anybody wanted zeros in the first place</summary>
+
+        <p data-i18n="cur.p1">Sparsity is not a tidiness preference. It is the thing that makes some reconstructions possible at all.</p>
+
+        <p data-i18n="cur.p2">In 2006 Candes, Romberg and Tao took a standard test image, the Logan-Shepp phantom, and sampled it in the frequency domain at "512 samples along each of 22 radial lines". Far fewer measurements than the classical sampling theorem says you need.</p>
+
+        <p data-i18n="cur.p3">The textbook reconstruction, which fills in the unobserved coefficients with zeros, comes back with what the paper calls "severe nonlocal artifacts caused by the angular undersampling". A mess.</p>
+
+        <p data-i18n="cur.p4">Then they minimised the sum of absolute values instead, on the same measurements, with nothing added. Their sentence: "The reconstruction is an exact replica of the image." Not approximately. Exactly. It works because the image is sparse in the right basis, and the sum of absolute values is the penalty that finds the sparse answer.</p>
+
+        <p data-i18n="cur.p5">Ten years later, the same idea with a patient in it. Kido and colleagues scanned eighty-one participants with both protocols, eight slices, identical spatial and temporal resolution. Conventional multi-breath-hold cardiac cine took 113 seconds, give or take 7. Compressed sensing in a single breath-hold took 24 seconds, give or take 4, with excellent agreement on left ventricular volumes and function.</p>
+
+        <p data-i18n="cur.p6">For a healthy adult that is a shorter appointment. For a child, or for somebody in heart failure who cannot hold a breath over and over, 24 seconds is a scan that works and 113 seconds is a scan that fails and has to be attempted again another day.</p>
+
+        <p data-i18n="cur.p7">GE's HyperSense was cleared in April 2017 (K162722). Siemens' MAGNETOM Vida with Compressed Sensing GRASP-VIBE was cleared in March 2018 (K173617).</p>
+    </details>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Part 8: the stakes ───────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s8.h2">Ninety percent of random gene lists worked</h2>
+
+    <p data-i18n="s8.p1">You have far more columns than rows. So does cancer genomics, by a much wider margin, and it has already run the experiment you would not be allowed to run.</p>
+
+    <div class="stakes">
+        <p data-i18n="s8.p2">Venet, Dumont and Detours, in 2011, generated gene signatures at random and tested them for association with breast cancer outcome. More than ninety percent of randomly chosen signatures with over a hundred genes were significant predictors. At the two largest sizes they tried, 714 genes and 1345 genes, all one thousand random signatures were significant.</p>
+
+        <p data-i18n="s8.p3">They then took forty-seven published breast cancer signatures. Twenty-eight of them were not significantly better than random. Eleven were worse than the median random signature.</p>
+    </div>
+
+    <p data-i18n="s8.p4">When you have far more columns than rows, "my model found a signature and it validated" is nearly worthless as evidence, because a list of randomly drawn genes validates too.</p>
+
+    <p data-i18n="s8.p5">A test that almost everything passes carries no information, and you cannot see that from the inside. It only becomes visible when somebody feeds the test nonsense on purpose and the nonsense passes. So when you are told that a model was validated, ask what would have failed.</p>
+
+    <p data-i18n="s8.p6">Real patients were treated on the basis of lists like these.</p>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Part 9: closing Class 5 ──────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s9.h2">Where this leaves you</h2>
+
+    <p data-i18n="s9.p1">Three modules in, you have a dial that trades a little shift for a lot less spread, and two shapes of penalty that behave differently at the same setting of it. Squares shrink everything and keep everything. Absolute values shrink everything and then start deleting, in an order you can read off the slider.</p>
+
+    <p data-i18n="s9.p2">Now look at what you actually did to choose \(\lambda\).</p>
+
+    <div class="openq">
+        <p data-i18n="s9.op1">You fitted the model at forty values of \(\lambda\). You measured the error on the held-out weeks for each one. You picked the \(\lambda\) where that error was lowest. Then you reported that error as the model's performance.</p>
+
+        <p data-i18n="s9.op2">Read that again. The held-out weeks were supposed to be the weeks the model had never seen. You used them to make a decision. Not a big decision. One number, chosen from a list of forty. But the number you reported afterwards is the score of the winner of a competition you ran on the very data that was supposed to be the judge.</p>
+
+        <p class="ask" data-i18n="s9.ask">Was that cheating?</p>
+
+        <p data-i18n="s9.op3">Write down today's date and write down your answer. Do not go looking for ours, because we are not giving you one here. Settling it needs something this class does not have yet: a way to say how much of the gap between two numbers is real and how much is the luck of which weeks landed in which pile. Nothing you have seen so far has an error bar on it. Not one number.</p>
+
+        <p data-i18n="s9.op4">That is the validation class, and this debt comes due there.</p>
+    </div>
+
+    <div class="navlinks">
+        <a href="../regularisation/" data-i18n="nav.reg">← Regularisation: shift versus spread</a>
+        <a href="../ridge/" data-i18n="nav.ridge">← Ridge: everything shrinks, nothing dies</a>
+    </div>
+</section>
+
+</div>
+
+<footer>
+    <span data-i18n="footer.title">Lasso: Some Coefficients Die</span>
+    <br>&copy; All rights reserved
+</footer>
+
+<!-- ── Scripts ─────────────────────────────────────────────────────────────── -->
+<script>
+
+// ─── Language data ────────────────────────────────────────────────────────────
+const T = {
+    en: {
+        'hero.title':    'Lasso: Some Coefficients Die',
+        'hero.subtitle': 'Class 5, module three of three. Ridge made everything small. Lasso makes some of it gone.',
+
+        'prereq.p1': '<strong>Coming from the other two.</strong> In <a href="../regularisation/">Regularisation</a> you traded a little shift for a lot less spread. In <a href="../ridge/">Ridge</a> you watched the ridge trace and learned the rule: ridge multiplies every coefficient by a number smaller than one.',
+        'prereq.p2': 'So ridge shrank everything and deleted nothing. Seven channels went in and seven channels came out, all smaller, all still there.',
+
+        's1.h2': 'Seven smaller numbers is not an answer',
+        's1.p1': 'The marketing director has a budget meeting on Thursday and one decision to make. Spend is coming down by fifteen percent and three channels have to go. She has asked you which three.',
+        's1.p2': 'You hand her the ridge output. Search 2.7, Shopping 1.8, Meta 1.9, TikTok 1.1, affiliate 0.6, display 0.3, email 0.3. Every number smaller than it was, every number stable, every number defensible. She reads it, and then she asks the question again.',
+        's1.p3': 'Ridge cannot answer it. It has an opinion about all seven channels and it holds all seven opinions at once. Nothing in that list is zero, so nothing in that list is a name you can cross out. The method that refuses to pick a favourite also refuses to name a loser, and those turn out to be the same refusal.',
+        's1.p4': 'What she wants is a shorter list. Not smaller numbers. Fewer of them.',
+
+        's2.h2': 'Ridge multiplies, lasso subtracts',
+        's2.p1': 'Three rules for what to do with one coefficient. Take the clean case first, where the columns do not overlap at all, because there the arithmetic finishes and you can check every step by hand.',
+
+        'tbl.h1':   'Method',
+        'tbl.h2':   'What it does to one coefficient',
+        'tbl.h3':   'Behaviour',
+        'tbl.r1c1': '<strong>Best subset</strong>',
+        'tbl.r1c2': 'Keep it if it is bigger than the threshold. Otherwise kill it.',
+        'tbl.r1c3': 'An abrupt cut. Nothing in between.',
+        'tbl.r2c1': '<strong>Ridge</strong>',
+        'tbl.r2c2': 'Divide it by \\(1 + \\lambda\\).',
+        'tbl.r2c3': 'Proportional shrinkage. Never exactly zero.',
+        'tbl.r3c1': '<strong>Lasso</strong>',
+        'tbl.r3c2': 'Subtract \\(\\lambda\\). If that would cross zero, stop at zero and keep the sign.',
+        'tbl.r3c3': 'Everything moves in by the same amount, and the small ones hit the wall.',
+
+        's2.p2':  'Now say the difference out loud, because it needs no geometry and no picture. Eight halved is four. Four halved is two. Two halved is one. Halve it as often as you like and it never arrives. Multiplying by a number smaller than one shrinks forever without landing on zero.',
+        's2.p3':  'Subtracting arrives. Take away a fixed amount often enough and you run out of coefficient.',
+        's2.key': 'Multiplication cannot produce a zero. Subtraction can. That is the whole reason lasso makes zeros and ridge does not.',
+        's2.h3':  'One coefficient, three settings of the dial',
+        's2.p4':  'A channel comes back with a coefficient of 0.30. Watch what each method reports as you turn \\(\\lambda\\) up.',
+
+        'tbl2.h1':   'Penalty \\(\\lambda\\)',
+        'tbl2.h2':   'Ridge: divide 0.30 by \\(1+\\lambda\\)',
+        'tbl2.h3':   'Lasso: subtract \\(\\lambda\\) from 0.30',
+        'tbl2.r1c2': '0.30 / 1.10 = 0.27',
+        'tbl2.r1c3': '0.30 − 0.10 = <strong>0.20</strong>',
+        'tbl2.r2c2': '0.30 / 1.30 = 0.23',
+        'tbl2.r2c3': '0.30 − 0.30 = <strong class="zero">0</strong>',
+        'tbl2.r3c2': '0.30 / 1.50 = 0.20',
+        'tbl2.r3c3': 'would be −0.20, so <strong class="zero">0</strong>, and it stays 0',
+
+        's2.p5': 'Ridge goes 0.27, then 0.23, then 0.20. It is heading somewhere and it is not getting there. Lasso goes 0.20, then zero, then zero. Once a coefficient has been pushed to the wall it stays at the wall for every larger \\(\\lambda\\), so a channel that dies stays dead.',
+        's2.p6': 'The rule written once, and you never need to write it again:',
+        's2.p7': 'The little plus sign at the bottom right means “and if that came out negative, use zero instead”. That is the entire wall.',
+        's2.p8': 'One honest caveat, said once and not buried. This exact arithmetic holds when the columns do not overlap, and real columns always overlap, which is the reason you are reading this at all. It is still the right picture. The next section gives you a second and independent argument that covers the messy case.',
+        's2.p9': 'The version that lives in your bank account: cut every subscription by a fifth and you are still subscribed to all of them, still paying, still annoyed. Take a flat five euros off each one and the ones you had forgotten about disappear.',
+
+        'quiz1.q':  'A coefficient sits at 0.30 and you set \\(\\lambda = 0.40\\). Which method reports exactly zero, and why?',
+        'quiz1.a1': 'Lasso, because it subtracts and would cross zero',
+        'quiz1.a2': 'Ridge, because 0.30 is already small',
+        'quiz1.ok': 'Right. Lasso subtracts 0.40, would land on minus 0.10, and stops at the wall instead. Ridge divides: 0.30 over 1.4 is 0.214, then 0.15, then 0.07. Divide as often as you like and you never arrive.',
+        'quiz1.no': 'Ridge divides, and division by a number bigger than one never produces zero. 0.30 over 1.4 is 0.214. Halve it forever and it is still not zero. Lasso subtracts 0.40, would cross into minus 0.10, and clips at zero instead. Size is not what decides it. The operation is.',
+
+        's3.h2': 'One slider, two methods, one difference',
+        's3.p1': 'Same seven channels as the ridge module, same 104 weeks, same correlations. Search and Shopping move together at 0.88 in this brand, because they are set in the same meeting by the same team.',
+        's3.p2': 'One slider drives both panels. Drag it slowly and watch the left side and the right side stop agreeing.',
+
+        'lab.label':       'Penalty \\(\\lambda\\)',
+        'lab.ridge.h':     'Ridge',
+        'lab.ridge.sub':   'Squared sizes are charged for. Every bar shrinks. No bar arrives.',
+        'lab.lasso.h':     'Lasso',
+        'lab.lasso.sub':   'Absolute sizes are charged for. Bars shrink, hit the wall, and stay there.',
+        'lab.order.title': 'The order they die in',
+        'lab.alive':       'features still alive',
+        'lab.alive1':      'feature still alive',
+        'lab.allalive':    'features still alive, all of them, always',
+
+        's3.p3': 'Push the slider to the far right and the left panel still has seven bars. Small ones, but seven. The right panel has one, and the one it kept is Search.',
+        's3.p4': 'The strip underneath is the part a marketing director can use. Lasso does not only produce a shorter list. It produces the list in an order, because the dial tells you which channel gave up first, which gave up second, and which was the last one standing. That is a ranked shortlist, and it fell out of a penalty rather than out of anybody’s opinion.',
+        's3.p5': 'Notice also what the left panel is doing to Search and Shopping. As \\(\\lambda\\) rises, ridge pulls the two of them toward each other and hands them roughly equal credit. It cannot tell them apart, so it refuses to choose. Hold on to that, because in a moment it stops being a virtue.',
+
+        'ch.search':    'Search',
+        'ch.shopping':  'Shopping',
+        'ch.meta':      'Meta',
+        'ch.tiktok':    'TikTok',
+        'ch.display':   'Display',
+        'ch.affiliate': 'Affiliate',
+        'ch.email':     'Email',
+
+        's4.h2':   'A second door: the diamond has corners',
+        's4.p1':   'What follows is a second explanation of the same fact, and it is independent of the first. If the arithmetic above slid past you, this one still works. If the picture below does nothing for you, the arithmetic above is already a complete argument. Nobody has to get through both doors.',
+        's4.p2':   'Two coefficients, so the whole thing fits on a page. Instead of charging a price for size, put a budget on it. The coefficients have to fit inside the budget, and you take the best fit you can get inside it.',
+        's4.def1': 'All the pairs whose <strong>absolute values</strong> add up to the budget: that set is a <strong>diamond</strong>. This is lasso.',
+        's4.def2': 'All the pairs whose <strong>squares</strong> add up to the budget: that set is a <strong>circle</strong>. This is ridge.',
+        's4.p3':   'The error surface is a bowl and its lowest point is the least squares answer. Slice the bowl and you get a closed curve of pairs that fit equally well, and for squared error that curve is an ellipse. Slice higher and the ellipse is bigger. So the ellipses grow outward from the least squares answer, and the first place one of them touches your budget region is the answer you get. Before it touches, nothing in the region fits that well. After it touches, you have left the budget.',
+        's4.p4':   'A diamond has four corners and every corner sits exactly on an axis, which means one of the two coefficients is exactly zero there. A corner also sticks out, which is what makes it a corner, so an ellipse arriving from a generic direction meets a corner far more often than it meets any particular stretch of flat edge. A circle has no corners at all and no distinguished point anywhere on its boundary, so the touch point has both coordinates non-zero, and it does so essentially always.',
+
+        'quiz2.q':  'An ellipse grows outward until it first touches the budget region. On which shape is that first contact most likely to sit exactly on an axis, meaning one coefficient is exactly zero?',
+        'quiz2.a1': 'The diamond',
+        'quiz2.a2': 'The circle',
+        'quiz2.ok': 'Yes. The corners of the diamond sit on the axes and they stick out, so an ellipse arriving from a generic direction lands on one of them a large fraction of the time. Drag the slider below and count how often the second coefficient reads exactly zero.',
+        'quiz2.no': 'The circle is the one that cannot do it. It has no corners and no distinguished point anywhere on its boundary, so the touch point almost never lands on an axis. The diamond has four corners, each one sitting exactly on an axis, and a corner sticks out, so an ellipse meets it disproportionately often.',
+
+        's4.p5':      'Drag the least squares answer around and watch both touch points. The number under each panel is the second coefficient at the solution.',
+        'geo.label':  'Where the least squares answer sits',
+        'geo.ridge.h':'Ridge: the circle',
+        'geo.lasso.h':'Lasso: the diamond',
+        'geo.beta2':  'second coefficient',
+        'geo.corner': 'exactly zero, on a corner',
+        'geo.nonzero':'not zero, and it never is',
+        'geo.edge':   'not zero, on a flat edge',
+
+        's4.p6':     'Here is Tibshirani in 1996, describing his own Figure 2. Lasso first:',
+        's4.q1':     '“The lasso solution is the first place that the contours touch the square, and this will sometimes occur at a corner, corresponding to a zero coefficient.”',
+        's4.q1attr': 'Tibshirani 1996, Journal of the Royal Statistical Society B 58(1)',
+        's4.p7':     'And ridge, in the same passage, has',
+        's4.q2':     '“no corners for the contours to hit and hence zero solutions will rarely result.”',
+        's4.q2attr': 'Tibshirani 1996, same page',
+        's4.p8':     'If you picked the diamond in the box above, you got there on your own, before reading it, and you agree with the man who invented the method.',
+        's4.fn':     'He calls the diamond a square, and he is right: a square turned forty-five degrees is still a square. We quote him as he wrote it rather than quietly correcting him, because a book that improves its quotations is a book you cannot check.',
+        's4.p9':     'And it scales, which is the part that matters, because your real problem has ninety-one coefficients and not two. In ninety-one dimensions the same shape has corners, edges and flat faces of every dimension from zero up to ninety. A corner is where ninety coefficients are zero. A flat face is where one is. Every subset of your channels has a piece of that boundary belonging to it, which is why lasso can zero out any subset at all.',
+
+        's5.h2':   'The word came first, the acronym came second',
+        's5.p1':   'Least Absolute Shrinkage and Selection Operator, says every textbook. The expansion was fitted to the word afterwards and Tibshirani has said so. He picked the word because a lasso is the thing you throw over something to drag it in. The paper is Tibshirani, “Regression Shrinkage and Selection via the Lasso”, 1996.',
+        's5.p2':   'It exists because the two options already on the table were both bad, each in its own direction.',
+        's5.def1': '<strong>Subset selection</strong> gives you a model you can read out loud. It is also a discrete process: drop one observation, refit, and you can get a completely different set of variables. That is high variance in exactly the sense you learned to worry about.',
+        's5.def2': '<strong>Ridge</strong> is stable. It never simplifies anything. You are still holding every column you started with.',
+        's5.p3':   'The immediate precursor is Breiman’s non-negative garrote, which starts from the least squares estimates and shrinks them by non-negative factors whose sum is capped. Tibshirani’s stated improvement is that the lasso “avoids the explicit use of the OLS estimates”. Read that with the first module in mind. Not leaning on the least squares estimates matters precisely when the least squares estimates are broken, which is the DuPont situation, which is your marketing meeting. The two halves of this class are historically connected and not merely next to each other.',
+        's5.p4':   'The worked example in the paper is the prostate cancer data. Eight predictors go in. Three come out: lcavol, lweight and svi. Subset selection had picked the same three. Three is a sentence. Eight is a spreadsheet.',
+
+        's6.h2': 'It dropped Shopping, and that was almost a coin flip',
+        's6.p1': 'Now the bill, and do not let anybody soften this for you.',
+        's6.p2': 'Give lasso two predictors that say nearly the same thing and it keeps one and sets the other to exactly zero. Which one it keeps is close to arbitrary, because the two answers score almost the same, and a near tie gets broken by whatever noise happened to be in the window. Search and Shopping correlate at about 0.9 in this brand. Same team, same budget, same seasonal push.',
+        's6.p3': 'Slide the two-year window forward by a few months, refit, and the model makes the opposite choice with exactly the same apparent confidence. Nothing about the business changed. The tie-break changed.',
+        's6.p4': 'And “the model dropped Shopping” is a sentence somebody will act on. It is a budget line, a quarterly target, a team, possibly a job. A number that came from a tie-break gets read in the room as a finding.',
+        's6.p5': 'That instability is real and it is the reason elastic net exists. Charge for the absolute values and for the squares at the same time, with a dial between them. The diamond keeps its corners so you still get zeros, and the corners get less pointy, so correlated predictors enter and leave together instead of one of them being deleted by a rounding error. That last property has a name, the grouping effect, and it is the only thing you need to remember about elastic net today.',
+        's6.p6': 'Which leaves the sentence this section exists for, and it is not a technical sentence. Lasso says drop TikTok, which is a budget line somebody loses and a meeting somebody has to sit through. Ridge says keep everything and trust nothing individually, which is a different meeting with a different outcome. Choosing between the two is not a modelling preference.',
+
+        'cur.summary': 'For the curious: why anybody wanted zeros in the first place',
+        'cur.p1': 'Sparsity is not a tidiness preference. It is the thing that makes some reconstructions possible at all.',
+        'cur.p2': 'In 2006 Candes, Romberg and Tao took a standard test image, the Logan-Shepp phantom, and sampled it in the frequency domain at “512 samples along each of 22 radial lines”. Far fewer measurements than the classical sampling theorem says you need.',
+        'cur.p3': 'The textbook reconstruction, which fills in the unobserved coefficients with zeros, comes back with what the paper calls “severe nonlocal artifacts caused by the angular undersampling”. A mess.',
+        'cur.p4': 'Then they minimised the sum of absolute values instead, on the same measurements, with nothing added. Their sentence: “The reconstruction is an exact replica of the image.” Not approximately. Exactly. It works because the image is sparse in the right basis, and the sum of absolute values is the penalty that finds the sparse answer.',
+        'cur.p5': 'Ten years later, the same idea with a patient in it. Kido and colleagues scanned eighty-one participants with both protocols, eight slices, identical spatial and temporal resolution. Conventional multi-breath-hold cardiac cine took 113 seconds, give or take 7. Compressed sensing in a single breath-hold took 24 seconds, give or take 4, with excellent agreement on left ventricular volumes and function.',
+        'cur.p6': 'For a healthy adult that is a shorter appointment. For a child, or for somebody in heart failure who cannot hold a breath over and over, 24 seconds is a scan that works and 113 seconds is a scan that fails and has to be attempted again another day.',
+        'cur.p7': 'GE’s HyperSense was cleared in April 2017 (K162722). Siemens’ MAGNETOM Vida with Compressed Sensing GRASP-VIBE was cleared in March 2018 (K173617).',
+
+        's8.h2': 'Ninety percent of random gene lists worked',
+        's8.p1': 'You have far more columns than rows. So does cancer genomics, by a much wider margin, and it has already run the experiment you would not be allowed to run.',
+        's8.p2': 'Venet, Dumont and Detours, in 2011, generated gene signatures at random and tested them for association with breast cancer outcome. More than ninety percent of randomly chosen signatures with over a hundred genes were significant predictors. At the two largest sizes they tried, 714 genes and 1345 genes, all one thousand random signatures were significant.',
+        's8.p3': 'They then took forty-seven published breast cancer signatures. Twenty-eight of them were not significantly better than random. Eleven were worse than the median random signature.',
+        's8.p4': 'When you have far more columns than rows, “my model found a signature and it validated” is nearly worthless as evidence, because a list of randomly drawn genes validates too.',
+        's8.p5': 'A test that almost everything passes carries no information, and you cannot see that from the inside. It only becomes visible when somebody feeds the test nonsense on purpose and the nonsense passes. So when you are told that a model was validated, ask what would have failed.',
+        's8.p6': 'Real patients were treated on the basis of lists like these.',
+
+        's9.h2':  'Where this leaves you',
+        's9.p1':  'Three modules in, you have a dial that trades a little shift for a lot less spread, and two shapes of penalty that behave differently at the same setting of it. Squares shrink everything and keep everything. Absolute values shrink everything and then start deleting, in an order you can read off the slider.',
+        's9.p2':  'Now look at what you actually did to choose \\(\\lambda\\).',
+        's9.op1': 'You fitted the model at forty values of \\(\\lambda\\). You measured the error on the held-out weeks for each one. You picked the \\(\\lambda\\) where that error was lowest. Then you reported that error as the model’s performance.',
+        's9.op2': 'Read that again. The held-out weeks were supposed to be the weeks the model had never seen. You used them to make a decision. Not a big decision. One number, chosen from a list of forty. But the number you reported afterwards is the score of the winner of a competition you ran on the very data that was supposed to be the judge.',
+        's9.ask': 'Was that cheating?',
+        's9.op3': 'Write down today’s date and write down your answer. Do not go looking for ours, because we are not giving you one here. Settling it needs something this class does not have yet: a way to say how much of the gap between two numbers is real and how much is the luck of which weeks landed in which pile. Nothing you have seen so far has an error bar on it. Not one number.',
+        's9.op4': 'That is the validation class, and this debt comes due there.',
+
+        'nav.reg':   '← Regularisation: shift versus spread',
+        'nav.ridge': '← Ridge: everything shrinks, nothing dies',
+
+        'footer.title': 'Lasso: Some Coefficients Die',
+    },
+
+    de: {
+        'hero.title':    'Lasso: Manche Gewichte sterben',
+        'hero.subtitle': 'Klasse 5, Modul drei von drei. Ridge macht alles klein. Lasso macht manches weg.',
+
+        'prereq.p1': '<strong>Du kommst von den anderen beiden.</strong> In <a href="../regularisation/">Regularisierung</a> hast du etwas Verschiebung gegen viel weniger Streuung getauscht. In <a href="../ridge/">Ridge</a> hast du die Ridge-Spur gesehen. Die Regel dort: Ridge multipliziert jedes Gewicht mit einer Zahl kleiner als eins.',
+        'prereq.p2': 'Ridge hat also alles verkleinert und nichts gelöscht. Sieben Kanäle gingen hinein, sieben kamen heraus. Alle kleiner. Alle noch da.',
+
+        's1.h2': 'Sieben kleinere Zahlen sind keine Antwort',
+        's1.p1': 'Die Marketingleiterin hat am Donnerstag eine Budgetsitzung. Sie muss eine Entscheidung treffen. Das Budget sinkt um fünfzehn Prozent. Drei Kanäle müssen weg. Sie fragt dich, welche drei.',
+        's1.p2': 'Du gibst ihr die Ridge-Ausgabe. Suche 2,7. Shopping 1,8. Meta 1,9. TikTok 1,1. Affiliate 0,6. Display 0,3. E-Mail 0,3. Jede Zahl ist kleiner als vorher. Jede Zahl ist stabil. Jede Zahl ist verteidigbar. Sie liest die Liste. Dann stellt sie ihre Frage noch einmal.',
+        's1.p3': 'Ridge kann sie nicht beantworten. Ridge hat eine Meinung zu allen sieben Kanälen. Und es hält alle sieben Meinungen gleichzeitig fest. Keine Zahl in der Liste ist null. Also steht in der Liste kein Name, den du streichen könntest. Die Methode weigert sich, einen Liebling zu wählen. Genau deshalb weigert sie sich auch, einen Verlierer zu nennen.',
+        's1.p4': 'Sie will eine kürzere Liste. Nicht kleinere Zahlen. Weniger davon.',
+
+        's2.h2': 'Ridge multipliziert, Lasso subtrahiert',
+        's2.p1': 'Drei Regeln dafür, was mit einem einzelnen Gewicht passiert. Wir nehmen zuerst den sauberen Fall. Dort überlappen sich die Spalten gar nicht. Die Rechnung geht auf, und du kannst jeden Schritt selbst nachrechnen.',
+
+        'tbl.h1':   'Methode',
+        'tbl.h2':   'Was sie mit einem Gewicht macht',
+        'tbl.h3':   'Verhalten',
+        'tbl.r1c1': '<strong>Beste Teilmenge</strong>',
+        'tbl.r1c2': 'Behalte es, wenn es über der Schwelle liegt. Sonst wirf es weg.',
+        'tbl.r1c3': 'Ein harter Schnitt. Nichts dazwischen.',
+        'tbl.r2c1': '<strong>Ridge</strong>',
+        'tbl.r2c2': 'Teile es durch \\(1 + \\lambda\\).',
+        'tbl.r2c3': 'Anteilige Schrumpfung. Nie genau null.',
+        'tbl.r3c1': '<strong>Lasso</strong>',
+        'tbl.r3c2': 'Ziehe \\(\\lambda\\) ab. Würde das die Null überschreiten, halte bei null an. Das Vorzeichen bleibt.',
+        'tbl.r3c3': 'Alles rückt um denselben Betrag ein. Die Kleinen stoßen an die Wand.',
+
+        's2.p2':  'Sag den Unterschied einmal laut. Du brauchst dafür keine Geometrie und kein Bild. Acht halbiert ist vier. Vier halbiert ist zwei. Zwei halbiert ist eins. Halbiere so oft du willst. Es kommt nie an. Multiplikation mit einer Zahl kleiner als eins schrumpft ewig und landet nie auf null.',
+        's2.p3':  'Subtraktion kommt an. Zieh oft genug einen festen Betrag ab, und das Gewicht ist aufgebraucht.',
+        's2.key': 'Multiplikation kann keine Null erzeugen. Subtraktion schon. Genau deshalb macht Lasso Nullen und Ridge nicht.',
+        's2.h3':  'Ein Gewicht, drei Stellungen des Reglers',
+        's2.p4':  'Ein Kanal kommt mit dem Gewicht 0,30 zurück. Schau, was jede Methode meldet, wenn du \\(\\lambda\\) hochdrehst.',
+
+        'tbl2.h1':   'Strafterm \\(\\lambda\\)',
+        'tbl2.h2':   'Ridge: 0,30 geteilt durch \\(1+\\lambda\\)',
+        'tbl2.h3':   'Lasso: \\(\\lambda\\) von 0,30 abziehen',
+        'tbl2.r1c2': '0,30 / 1,10 = 0,27',
+        'tbl2.r1c3': '0,30 − 0,10 = <strong>0,20</strong>',
+        'tbl2.r2c2': '0,30 / 1,30 = 0,23',
+        'tbl2.r2c3': '0,30 − 0,30 = <strong class="zero">0</strong>',
+        'tbl2.r3c2': '0,30 / 1,50 = 0,20',
+        'tbl2.r3c3': 'wäre −0,20, also <strong class="zero">0</strong>, und es bleibt 0',
+
+        's2.p5': 'Ridge geht 0,27, dann 0,23, dann 0,20. Es ist unterwegs, aber es kommt nicht an. Lasso geht 0,20, dann null, dann null. Ist ein Gewicht einmal an der Wand, bleibt es dort für jedes größere \\(\\lambda\\). Ein toter Kanal bleibt tot.',
+        's2.p6': 'Die Regel einmal aufgeschrieben. Du musst sie nie wieder schreiben:',
+        's2.p7': 'Das kleine Pluszeichen unten rechts bedeutet: „Kam etwas Negatives heraus, nimm null.“ Das ist die ganze Wand.',
+        's2.p8': 'Ein ehrlicher Vorbehalt, einmal gesagt und nicht versteckt. Diese Rechnung gilt genau so, wenn die Spalten sich nicht überlappen. Echte Spalten überlappen sich immer. Genau deshalb liest du das hier. Das Bild stimmt trotzdem. Der nächste Abschnitt liefert ein zweites, unabhängiges Argument für den unsauberen Fall.',
+        's2.p9': 'Die Fassung für dein Konto: Kürze jedes Abo um ein Fünftel, und du hast immer noch jedes Abo. Du zahlst weiter und ärgerst dich weiter. Zieh von jedem Abo fünf Euro ab, und die vergessenen sind verschwunden.',
+
+        'quiz1.q':  'Ein Gewicht liegt bei 0,30. Du setzt \\(\\lambda = 0{,}40\\). Welche Methode meldet genau null, und warum?',
+        'quiz1.a1': 'Lasso, weil es subtrahiert und die Null überschreiten würde',
+        'quiz1.a2': 'Ridge, weil 0,30 schon klein ist',
+        'quiz1.ok': 'Richtig. Lasso zieht 0,40 ab. Es würde bei minus 0,10 landen und hält stattdessen an der Wand. Ridge teilt: 0,30 durch 1,4 ist 0,214, dann 0,15, dann 0,07. Teile so oft du willst. Du kommst nie an.',
+        'quiz1.no': 'Ridge teilt. Teilen durch eine Zahl größer als eins ergibt nie null. 0,30 durch 1,4 ist 0,214. Halbiere ewig weiter, und es ist immer noch nicht null. Lasso zieht 0,40 ab, würde bei minus 0,10 landen und schneidet bei null ab. Die Größe entscheidet nicht. Die Rechenart entscheidet.',
+
+        's3.h2': 'Ein Regler, zwei Methoden, ein Unterschied',
+        's3.p1': 'Dieselben sieben Kanäle wie im Ridge-Modul. Dieselben 104 Wochen. Dieselben Zusammenhänge. Suche und Shopping laufen bei dieser Marke mit 0,88 im Gleichschritt. Dasselbe Team, dieselbe Sitzung, dasselbe Budget.',
+        's3.p2': 'Ein Regler steuert beide Felder. Zieh ihn langsam und schau zu, wie die linke und die rechte Seite aufhören, sich einig zu sein.',
+
+        'lab.label':       'Strafterm \\(\\lambda\\)',
+        'lab.ridge.h':     'Ridge',
+        'lab.ridge.sub':   'Bezahlt wird die Quadratsumme. Jeder Balken schrumpft. Keiner kommt an.',
+        'lab.lasso.h':     'Lasso',
+        'lab.lasso.sub':   'Bezahlt wird die Betragssumme. Balken schrumpfen, stoßen an die Wand und bleiben dort.',
+        'lab.order.title': 'Die Reihenfolge des Sterbens',
+        'lab.alive':       'Merkmale noch am Leben',
+        'lab.alive1':      'Merkmal noch am Leben',
+        'lab.allalive':    'Merkmale noch am Leben, alle, immer',
+
+        's3.p3': 'Zieh den Regler ganz nach rechts. Links stehen immer noch sieben Balken. Klein, aber sieben. Rechts steht einer, und das ist die Suche.',
+        's3.p4': 'Der Streifen darunter ist der Teil, mit dem eine Marketingleiterin arbeiten kann. Lasso liefert nicht nur eine kürzere Liste. Es liefert die Liste in einer Reihenfolge. Der Regler zeigt dir, welcher Kanal zuerst aufgibt, welcher als Zweiter und welcher am längsten steht. Das ist eine Rangliste, und sie kommt aus einem Strafterm, nicht aus einer Meinung.',
+        's3.p5': 'Schau auch, was links mit Suche und Shopping passiert. Steigt \\(\\lambda\\), zieht Ridge die beiden aufeinander zu und gibt ihnen ungefähr gleich viel Anteil. Ridge kann sie nicht unterscheiden und weigert sich zu wählen. Merk dir das. Gleich ist es keine Tugend mehr.',
+
+        'ch.search':    'Suche',
+        'ch.shopping':  'Shopping',
+        'ch.meta':      'Meta',
+        'ch.tiktok':    'TikTok',
+        'ch.display':   'Display',
+        'ch.affiliate': 'Affiliate',
+        'ch.email':     'E-Mail',
+
+        's4.h2':   'Eine zweite Tür: die Raute hat Ecken',
+        's4.p1':   'Jetzt kommt eine zweite Erklärung für dieselbe Sache. Sie ist unabhängig von der ersten. Ist dir die Rechnung oben entglitten, funktioniert diese hier trotzdem. Sagt dir das Bild unten nichts, ist die Rechnung oben schon ein vollständiges Argument. Niemand muss durch beide Türen.',
+        's4.p2':   'Zwei Gewichte, damit alles auf eine Seite passt. Statt einen Preis für Größe zu verlangen, setzen wir ein Budget. Die Gewichte müssen ins Budget passen. Du nimmst die beste Anpassung, die darin möglich ist.',
+        's4.def1': 'Alle Paare, deren <strong>Betragssumme</strong> gleich dem Budget ist: diese Menge ist eine <strong>Raute</strong>. Das ist Lasso.',
+        's4.def2': 'Alle Paare, deren <strong>Quadratsumme</strong> gleich dem Budget ist: diese Menge ist ein <strong>Kreis</strong>. Das ist Ridge.',
+        's4.p3':   'Die Fehlerfläche ist eine Schale. Ihr tiefster Punkt ist die Kleinste-Quadrate-Lösung. Schneide die Schale waagerecht durch, und du bekommst eine geschlossene Kurve. Alle Paare darauf passen gleich gut. Bei quadratischem Fehler ist diese Kurve eine Ellipse. Schneide höher, und die Ellipse wird größer. Die Ellipsen wachsen also nach außen. Wo eine von ihnen dein Budgetgebiet zuerst berührt, dort liegt deine Antwort. Vorher passt nichts im Gebiet so gut. Danach bist du über dem Budget.',
+        's4.p4':   'Eine Raute hat vier Ecken. Jede Ecke liegt genau auf einer Achse. Dort ist eines der beiden Gewichte genau null. Eine Ecke steht außerdem hervor. Das macht sie zur Ecke. Eine Ellipse, die aus einer beliebigen Richtung kommt, trifft deshalb viel häufiger eine Ecke als irgendein Stück der geraden Kante. Ein Kreis hat gar keine Ecken. Er hat nirgends einen ausgezeichneten Punkt. Der Berührpunkt hat also beide Koordinaten ungleich null, und zwar praktisch immer.',
+
+        'quiz2.q':  'Eine Ellipse wächst nach außen, bis sie das Budgetgebiet zuerst berührt. Bei welcher Form liegt dieser erste Kontakt am ehesten genau auf einer Achse, ein Gewicht also genau bei null?',
+        'quiz2.a1': 'Bei der Raute',
+        'quiz2.a2': 'Beim Kreis',
+        'quiz2.ok': 'Ja. Die Ecken der Raute liegen auf den Achsen und stehen hervor. Eine Ellipse aus beliebiger Richtung landet deshalb oft auf einer Ecke. Zieh den Regler unten und zähle, wie oft das zweite Gewicht genau null anzeigt.',
+        'quiz2.no': 'Der Kreis ist genau der, der es nicht kann. Er hat keine Ecken und nirgends einen ausgezeichneten Punkt. Der Berührpunkt landet fast nie auf einer Achse. Die Raute hat vier Ecken, jede genau auf einer Achse. Und eine Ecke steht hervor, also wird sie überproportional oft getroffen.',
+
+        's4.p5':      'Zieh die Kleinste-Quadrate-Lösung herum und beobachte beide Berührpunkte. Die Zahl unter jedem Feld ist das zweite Gewicht der Lösung.',
+        'geo.label':  'Wo die Kleinste-Quadrate-Lösung liegt',
+        'geo.ridge.h':'Ridge: der Kreis',
+        'geo.lasso.h':'Lasso: die Raute',
+        'geo.beta2':  'zweites Gewicht',
+        'geo.corner': 'genau null, auf einer Ecke',
+        'geo.nonzero':'nicht null, und wird es nie',
+        'geo.edge':   'nicht null, auf einer geraden Kante',
+
+        's4.p6':     'Hier ist Tibshirani im Jahr 1996. Er beschreibt seine eigene Abbildung 2. Zuerst Lasso:',
+        's4.q1':     '„The lasso solution is the first place that the contours touch the square, and this will sometimes occur at a corner, corresponding to a zero coefficient.“',
+        's4.q1attr': 'Tibshirani 1996, Journal of the Royal Statistical Society B 58(1)',
+        's4.p7':     'Und Ridge hat, in derselben Passage,',
+        's4.q2':     '„no corners for the contours to hit and hence zero solutions will rarely result.“',
+        's4.q2attr': 'Tibshirani 1996, dieselbe Seite',
+        's4.p8':     'Hast du oben die Raute gewählt, bist du selbst darauf gekommen. Vor dem Lesen. Und du stimmst mit dem Erfinder der Methode überein.',
+        's4.fn':     'Er nennt die Raute ein Quadrat, und er hat recht: ein um fünfundvierzig Grad gedrehtes Quadrat bleibt ein Quadrat. Wir zitieren ihn so, wie er es geschrieben hat, statt ihn still zu korrigieren. Ein Buch, das seine Zitate verbessert, kannst du nicht mehr prüfen.',
+        's4.p9':     'Und das Bild skaliert. Das ist der wichtige Teil, denn dein echtes Problem hat einundneunzig Gewichte und nicht zwei. In einundneunzig Dimensionen hat dieselbe Form Ecken, Kanten und flache Flächen jeder Dimension von null bis neunzig. Eine Ecke ist der Ort, an dem neunzig Gewichte null sind. Eine flache Fläche ist der Ort, an dem eines null ist. Zu jeder Teilmenge deiner Kanäle gehört ein Stück dieses Randes. Deshalb kann Lasso jede beliebige Teilmenge auf null setzen.',
+
+        's5.h2':   'Zuerst kam das Wort, dann die Abkürzung',
+        's5.p1':   'Least Absolute Shrinkage and Selection Operator, sagt jedes Lehrbuch. Die Auflösung wurde nachträglich auf das Wort gebaut, und Tibshirani hat das selbst gesagt. Er wählte das Wort, weil ein Lasso das ist, was man über etwas wirft, um es heranzuziehen. Die Arbeit ist Tibshirani, „Regression Shrinkage and Selection via the Lasso“, 1996.',
+        's5.p2':   'Lasso gibt es, weil die beiden vorhandenen Optionen beide schlecht waren. Jede auf ihre eigene Art.',
+        's5.def1': '<strong>Teilmengen-Auswahl</strong> liefert ein Modell, das du vorlesen kannst. Sie ist aber ein Alles-oder-nichts-Verfahren. Lass eine Beobachtung weg, rechne neu, und du bekommst eine ganz andere Auswahl an Merkmalen. Das ist hohe Varianz, genau in dem Sinn, den du gelernt hast zu fürchten.',
+        's5.def2': '<strong>Ridge</strong> ist stabil. Es vereinfacht nie etwas. Du hältst am Ende jede Spalte in der Hand, mit der du angefangen hast.',
+        's5.p3':   'Der direkte Vorläufer ist Breimans „non-negative garrote“. Sie startet bei den Kleinste-Quadrate-Schätzern und schrumpft sie mit Faktoren, deren Summe gedeckelt ist. Tibshiranis erklärte Verbesserung: das Lasso „avoids the explicit use of the OLS estimates“. Lies das mit dem ersten Modul im Kopf. Nicht auf die Kleinste-Quadrate-Schätzer angewiesen zu sein hilft genau dann, wenn diese Schätzer kaputt sind. Das ist der Fall bei DuPont. Das ist auch deine Marketingsitzung. Die beiden Hälften dieser Klasse hängen historisch zusammen.',
+        's5.p4':   'Das durchgerechnete Beispiel in der Arbeit sind Prostatakrebsdaten. Acht Merkmale gehen hinein. Drei kommen heraus: lcavol, lweight und svi. Die Teilmengen-Auswahl hatte dieselben drei gewählt. Drei ist ein Satz. Acht ist eine Tabelle.',
+
+        's6.h2': 'Es hat Shopping gestrichen, und das war fast ein Münzwurf',
+        's6.p1': 'Jetzt die Rechnung. Und lass sie dir von niemandem schönreden.',
+        's6.p2': 'Gib Lasso zwei Merkmale, die fast dasselbe sagen. Es behält eines und setzt das andere genau auf null. Welches es behält, ist fast willkürlich. Beide Antworten sind ungefähr gleich gut. Ein knappes Unentschieden entscheidet das Rauschen im Zeitfenster. Suche und Shopping hängen bei dieser Marke mit etwa 0,9 zusammen. Dasselbe Team, dasselbe Budget, derselbe Saisonschub.',
+        's6.p3': 'Schieb das Zweijahresfenster um ein paar Monate weiter und rechne neu. Das Modell trifft die umgekehrte Wahl, mit genau derselben scheinbaren Sicherheit. Am Geschäft hat sich nichts geändert. Das Unentschieden ist anders ausgegangen.',
+        's6.p4': 'Und „das Modell hat Shopping gestrichen“ ist ein Satz, nach dem jemand handeln wird. Es geht um eine Budgetzeile, ein Quartalsziel, ein Team, vielleicht eine Stelle. Eine Zahl aus einem Unentschieden wird im Raum als Befund gelesen.',
+        's6.p5': 'Diese Instabilität ist echt. Sie ist der Grund, warum es Elastic Net gibt. Bezahle Betragssumme und Quadratsumme gleichzeitig, mit einem Regler dazwischen. Die Raute behält ihre Ecken, du bekommst also weiter Nullen. Und die Ecken werden stumpfer. Zusammenhängende Merkmale kommen und gehen dann gemeinsam, statt dass eines per Rundungsfehler gelöscht wird. Diese Eigenschaft heißt Gruppeneffekt. Mehr musst du heute über Elastic Net nicht wissen.',
+        's6.p6': 'Bleibt der Satz, für den es diesen Abschnitt gibt. Er ist nicht technisch. Lasso sagt: streich TikTok. Das ist eine Budgetzeile, die jemand verliert, und eine Sitzung, die jemand aushalten muss. Ridge sagt: behalte alles und traue keiner Einzelzahl. Das ist eine andere Sitzung mit einem anderen Ausgang. Die Wahl zwischen beiden ist keine Modellierungsfrage.',
+
+        'cur.summary': 'Für Neugierige: warum überhaupt jemand Nullen wollte',
+        'cur.p1': 'Sparsamkeit ist keine Frage von Ordnungsliebe. Sie ist das, was manche Rekonstruktionen überhaupt erst möglich macht.',
+        'cur.p2': '2006 nahmen Candes, Romberg und Tao ein Standard-Testbild, das Logan-Shepp-Phantom. Sie tasteten es im Frequenzbereich ab, mit „512 samples along each of 22 radial lines“. Viel weniger Messungen, als das klassische Abtasttheorem verlangt.',
+        'cur.p3': 'Die Lehrbuch-Rekonstruktion füllt die nicht gemessenen Koeffizienten mit Nullen auf. Das Ergebnis nennt die Arbeit „severe nonlocal artifacts caused by the angular undersampling“. Ein Durcheinander.',
+        'cur.p4': 'Dann minimierten sie stattdessen die Betragssumme. Dieselben Messungen, nichts hinzugefügt. Ihr Satz: „The reconstruction is an exact replica of the image.“ Nicht ungefähr. Exakt. Es funktioniert, weil das Bild in der richtigen Basis dünn besetzt ist. Und die Betragssumme ist der Strafterm, der die dünn besetzte Antwort findet.',
+        'cur.p5': 'Zehn Jahre später dieselbe Idee, diesmal mit einem Patienten darin. Kido und Kollegen untersuchten einundachtzig Personen mit beiden Verfahren. Acht Schichten, gleiche räumliche und zeitliche Auflösung. Die herkömmliche Herz-Cine-Aufnahme mit mehreren Atemstopps dauerte 113 Sekunden, plus minus 7. Compressed Sensing in einem einzigen Atemstopp dauerte 24 Sekunden, plus minus 4. Die Werte für Volumen und Funktion der linken Herzkammer stimmten sehr gut überein.',
+        'cur.p6': 'Für einen gesunden Erwachsenen ist das ein kürzerer Termin. Für ein Kind oder für jemanden mit Herzschwäche, der die Luft nicht immer wieder anhalten kann, sind 24 Sekunden eine Untersuchung, die gelingt. 113 Sekunden sind eine Untersuchung, die scheitert und an einem anderen Tag wiederholt werden muss.',
+        'cur.p7': 'GEs HyperSense wurde im April 2017 zugelassen (K162722). Siemens’ MAGNETOM Vida mit Compressed Sensing GRASP-VIBE im März 2018 (K173617).',
+
+        's8.h2': 'Neunzig Prozent zufälliger Genlisten funktionierten',
+        's8.p1': 'Du hast viel mehr Spalten als Zeilen. Die Krebsgenomik auch, in einem viel größeren Maßstab. Und sie hat das Experiment schon durchgeführt, das du nicht durchführen dürftest.',
+        's8.p2': 'Venet, Dumont und Detours erzeugten 2011 Gensignaturen per Zufall. Dann testeten sie, ob diese mit dem Verlauf von Brustkrebs zusammenhängen. Mehr als neunzig Prozent der zufällig gewählten Signaturen mit über hundert Genen waren signifikante Prädiktoren. Bei den zwei größten getesteten Größen, 714 Gene und 1345 Gene, waren alle tausend Zufallssignaturen signifikant.',
+        's8.p3': 'Dann nahmen sie siebenundvierzig veröffentlichte Brustkrebs-Signaturen. Achtundzwanzig davon waren nicht signifikant besser als der Zufall. Elf waren schlechter als die mittlere Zufallssignatur.',
+        's8.p4': 'Wenn du viel mehr Spalten als Zeilen hast, ist der Satz „mein Modell hat eine Signatur gefunden und sie hat sich bestätigt“ fast wertlos als Beleg. Eine Liste zufällig gezogener Gene bestätigt sich nämlich auch.',
+        's8.p5': 'Ein Test, den fast alles besteht, trägt keine Information. Und von innen kannst du das nicht sehen. Sichtbar wird es erst, wenn jemand dem Test absichtlich Unsinn vorlegt und der Unsinn besteht. Wenn dir also jemand sagt, ein Modell sei validiert worden, frag, was durchgefallen wäre.',
+        's8.p6': 'Echte Patientinnen und Patienten wurden auf Grundlage solcher Listen behandelt.',
+
+        's9.h2':  'Wo dich das jetzt lässt',
+        's9.p1':  'Nach drei Modulen hast du einen Regler. Er tauscht etwas Verschiebung gegen viel weniger Streuung. Und du hast zwei Formen von Strafterm, die sich bei gleicher Einstellung verschieden verhalten. Quadrate verkleinern alles und behalten alles. Beträge verkleinern alles und fangen dann an zu löschen, in einer Reihenfolge, die du am Regler ablesen kannst.',
+        's9.p2':  'Jetzt schau dir an, wie du \\(\\lambda\\) tatsächlich gewählt hast.',
+        's9.op1': 'Du hast das Modell bei vierzig Werten von \\(\\lambda\\) angepasst. Du hast für jeden Wert den Fehler auf den zurückgehaltenen Wochen gemessen. Du hast das \\(\\lambda\\) mit dem kleinsten Fehler gewählt. Dann hast du diesen Fehler als Leistung des Modells berichtet.',
+        's9.op2': 'Lies das noch einmal. Die zurückgehaltenen Wochen sollten die Wochen sein, die das Modell nie gesehen hat. Du hast sie für eine Entscheidung benutzt. Keine große Entscheidung. Eine Zahl aus einer Liste von vierzig. Aber die Zahl, die du danach berichtet hast, ist das Ergebnis des Siegers eines Wettbewerbs. Und den hast du auf genau den Daten ausgetragen, die der Schiedsrichter sein sollten.',
+        's9.ask': 'War das geschummelt?',
+        's9.op3': 'Schreib das heutige Datum auf und schreib deine Antwort dazu. Such nicht nach unserer, denn wir geben hier keine. Um die Frage zu klären, fehlt dieser Klasse noch etwas: eine Methode, die sagt, wie viel vom Abstand zweier Zahlen echt ist und wie viel nur Glück bei der Aufteilung der Wochen. Nichts, was du bisher gesehen hast, hat einen Fehlerbalken. Keine einzige Zahl.',
+        's9.op4': 'Das ist die Validierungsklasse, und dort wird diese Schuld fällig.',
+
+        'nav.reg':   '← Regularisierung: Verschiebung gegen Streuung',
+        'nav.ridge': '← Ridge: alles schrumpft, nichts stirbt',
+
+        'footer.title': 'Lasso: Manche Gewichte sterben',
+    }
+};
+
+let currentLang = 'en';
+
+function toggleLang() {
+    currentLang = currentLang === 'en' ? 'de' : 'en';
+    document.documentElement.lang = currentLang;
+    document.querySelector('.lang-toggle').textContent = currentLang === 'en' ? 'DE' : 'EN';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (T[currentLang] && T[currentLang][key]) el.innerHTML = T[currentLang][key];
+    });
+    // Re-render KaTeX after language switch
+    if (typeof renderMathInElement !== 'undefined') {
+        renderMathInElement(document.body, {
+            delimiters: [
+                { left: '$$', right: '$$', display: true  },
+                { left: '\\(', right: '\\)', display: false }
+            ],
+            throwOnError: false
+        });
+    }
+    if (typeof onLangChange === 'function') onLangChange(currentLang);
+}
+
+/* Translate a key in the current language, with an English fallback. */
+function t(key) {
+    return (T[currentLang] && T[currentLang][key]) || (T.en && T.en[key]) || key;
+}
+
+// ─── Quiz ─────────────────────────────────────────────────────────────────────
+function answerQuiz(quizId, btn, isCorrect) {
+    const quiz     = document.getElementById(quizId);
+    const feedback = document.getElementById(quizId + '-feedback');
+    quiz.querySelectorAll('.quiz-btn').forEach(b => b.classList.add('disabled'));
+    btn.classList.add(isCorrect ? 'correct' : 'wrong');
+    feedback.className = 'quiz-feedback ' + (isCorrect ? 'success' : 'fail');
+    const fbKey = quizId + (isCorrect ? '.ok' : '.no');
+    feedback.setAttribute('data-i18n', fbKey);
+    feedback.innerHTML = t(fbKey);
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  THE PAIRED PATH: ridge and lasso on the same seven correlated channels.
+//  G is the correlation matrix of the standardized spend columns from the
+//  104-week marketing dataset; c is the vector of correlations with revenue.
+//  Both paths are solved live, so nothing here is a drawing of a result.
+// ══════════════════════════════════════════════════════════════════════════════
+
+const CHAN = [
+    { key: 'ch.search',    fallback: 'Search'    },
+    { key: 'ch.shopping',  fallback: 'Shopping'  },
+    { key: 'ch.meta',      fallback: 'Meta'      },
+    { key: 'ch.tiktok',    fallback: 'TikTok'    },
+    { key: 'ch.display',   fallback: 'Display'   },
+    { key: 'ch.affiliate', fallback: 'Affiliate' },
+    { key: 'ch.email',     fallback: 'Email'     }
+];
+
+const G = [
+    [1.000000, 0.884202, 0.398217, 0.298592, 0.385744, 0.284824, 0.420917],
+    [0.884202, 1.000000, 0.432430, 0.324932, 0.347220, 0.213675, 0.414364],
+    [0.398217, 0.432430, 1.000000, 0.201529, 0.210604, -0.032837, 0.110810],
+    [0.298592, 0.324932, 0.201529, 1.000000, 0.191882, 0.117550, 0.240183],
+    [0.385744, 0.347220, 0.210604, 0.191882, 1.000000, 0.087323, 0.280824],
+    [0.284824, 0.213675, -0.032837, 0.117550, 0.087323, 1.000000, 0.166455],
+    [0.420917, 0.414364, 0.110810, 0.240183, 0.280824, 0.166455, 1.000000]
+];
+const CVEC = [5.807764, 5.740527, 4.037742, 3.107912, 2.739131, 1.882385, 2.845474];
+
+const P = 7;
+const LAM_MAX = 5.6;
+const BAR_SCALE = 3.0;
+
+function solveLinear(A, b) {
+    const n = b.length;
+    const M = A.map((row, i) => row.slice().concat([b[i]]));
+    for (let i = 0; i < n; i++) {
+        let piv = i;
+        for (let r = i + 1; r < n; r++) if (Math.abs(M[r][i]) > Math.abs(M[piv][i])) piv = r;
+        const tmp = M[i]; M[i] = M[piv]; M[piv] = tmp;
+        for (let r = 0; r < n; r++) {
+            if (r === i) continue;
+            const f = M[r][i] / M[i][i];
+            for (let k = i; k <= n; k++) M[r][k] -= f * M[i][k];
+        }
+    }
+    return M.map((row, i) => row[n] / row[i]);
+}
+
+function ridgeFit(lam) {
+    const A = G.map((row, i) => row.map((v, j) => (i === j ? v + lam : v)));
+    return solveLinear(A, CVEC);
+}
+
+function lassoFit(lam) {
+    const b = new Array(P).fill(0);
+    for (let it = 0; it < 400; it++) {
+        let delta = 0;
+        for (let j = 0; j < P; j++) {
+            let r = CVEC[j];
+            for (let k = 0; k < P; k++) if (k !== j) r -= G[j][k] * b[k];
+            const shrunk = Math.sign(r) * Math.max(0, Math.abs(r) - lam) / G[j][j];
+            delta = Math.max(delta, Math.abs(shrunk - b[j]));
+            b[j] = shrunk;
+        }
+        if (delta < 1e-10) break;
+    }
+    return b;
+}
+
+// Death lambdas, swept once at load, so the order strip is a fact and not a guess.
+const DEATH = (function () {
+    const out = new Array(P).fill(Infinity);
+    for (let s = 1; s <= 2800; s++) {
+        const lam = LAM_MAX * s / 2800;
+        const b = lassoFit(lam);
+        for (let j = 0; j < P; j++) if (b[j] === 0 && out[j] === Infinity) out[j] = lam;
+    }
+    return out;
+})();
+
+const DEATH_ORDER = DEATH.map((lam, j) => ({ j: j, lam: lam }))
+                         .sort((a, b) => a.lam - b.lam);
+
+function sliderToLambda(v) {
+    return LAM_MAX * Math.pow(v / 1000, 1.8);
+}
+
+function barPanel(svg, coefs, mode) {
+    const W = 320, rowH = 30, top = 8;
+    const labelW = 84, x0 = labelW + 4, x1 = 306;
+    let out = '';
+    for (let j = 0; j < P; j++) {
+        const y = top + j * rowH;
+        const v = coefs[j];
+        const dead = (mode === 'lasso' && v === 0);
+        const len = Math.max(0, Math.min(1, Math.abs(v) / BAR_SCALE)) * (x1 - x0);
+        const fill = dead ? '#33334f' : (mode === 'ridge' ? '#80b4f0' : '#70e898');
+        const labCol = dead ? '#4a4a70' : '#b8b8d0';
+        const name = t(CHAN[j].key);
+        out += '<text x="' + labelW + '" y="' + (y + 15) + '" text-anchor="end" font-family="sans-serif" font-size="12" fill="' + labCol + '"' +
+               (dead ? ' text-decoration="line-through"' : '') + '>' + name + '</text>';
+        out += '<rect x="' + x0 + '" y="' + (y + 5) + '" width="' + (x1 - x0) + '" height="14" rx="3" fill="#1c1c30"/>';
+        out += '<rect x="' + x0 + '" y="' + (y + 5) + '" width="' + Math.max(dead ? 0 : 1.5, len).toFixed(2) + '" height="14" rx="3" fill="' + fill + '"/>';
+        const txt = dead ? '0' : v.toFixed(2);
+        out += '<text x="' + (x0 + Math.max(len, 4) + 6) + '" y="' + (y + 16) + '" font-family="monospace" font-size="11" fill="' + (dead ? '#55557a' : '#d0d0e0') + '">' + txt + '</text>';
+    }
+    out += '<line x1="' + x0 + '" y1="' + top + '" x2="' + x0 + '" y2="' + (top + P * rowH - 4) + '" stroke="#4a4a70" stroke-width="1"/>';
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + (top + P * rowH + 4));
+    svg.innerHTML = out;
+}
+
+function drawPaths() {
+    const v = +document.getElementById('lam').value;
+    const lam = sliderToLambda(v);
+    document.getElementById('lam-out').textContent = 'λ = ' + lam.toFixed(3);
+
+    const r = ridgeFit(lam);
+    const l = lassoFit(lam);
+
+    barPanel(document.getElementById('svg-ridge'), r, 'ridge');
+    barPanel(document.getElementById('svg-lasso'), l, 'lasso');
+
+    const aliveL = l.filter(x => x !== 0).length;
+    document.getElementById('ridge-count').innerHTML =
+        '<span class="n">7</span> ' + t('lab.allalive');
+    document.getElementById('lasso-count').innerHTML =
+        '<span class="n">' + aliveL + '</span> ' + t(aliveL === 1 ? 'lab.alive1' : 'lab.alive');
+
+    const row = document.getElementById('deathrow');
+    let html = '';
+    DEATH_ORDER.forEach(function (d, i) {
+        const gone = lam >= d.lam;
+        html += '<span class="chip' + (gone ? ' gone' : '') + '">' +
+                '<span class="ord">' + (i + 1) + '.</span>' + t(CHAN[d.j].key) + '</span>';
+    });
+    row.innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  THE GEOMETRY: expanding ellipses meeting a circle and meeting a diamond.
+// ══════════════════════════════════════════════════════════════════════════════
+
+const RHO = 0.75;                       // correlation baked into the error bowl
+const SIG = Math.sqrt(1 - RHO * RHO);
+const BUDGET = 1;
+const OLS_R = 2.15;
+
+function qform(b, a) {
+    const dx = b[0] - a[0], dy = b[1] - a[1];
+    return dx * dx + 2 * RHO * dx * dy + dy * dy;
+}
+
+function circleSolution(a) {
+    if (a[0] * a[0] + a[1] * a[1] <= BUDGET * BUDGET) return a.slice();
+    let best = null, bq = Infinity;
+    for (let i = 0; i < 2880; i++) {
+        const th = 2 * Math.PI * i / 2880;
+        const b = [BUDGET * Math.cos(th), BUDGET * Math.sin(th)];
+        const q = qform(b, a);
+        if (q < bq) { bq = q; best = b; }
+    }
+    return best;
+}
+
+function diamondSolution(a) {
+    if (Math.abs(a[0]) + Math.abs(a[1]) <= BUDGET) return a.slice();
+    const V = [[BUDGET, 0], [0, BUDGET], [-BUDGET, 0], [0, -BUDGET]];
+    let best = null, bq = Infinity;
+    for (let e = 0; e < 4; e++) {
+        const p0 = V[e], p1 = V[(e + 1) % 4];
+        for (let i = 0; i <= 900; i++) {
+            const s = i / 900;
+            const b = [p0[0] + s * (p1[0] - p0[0]), p0[1] + s * (p1[1] - p0[1])];
+            const q = qform(b, a);
+            if (q < bq - 1e-12) { bq = q; best = b; }
+        }
+    }
+    // snap onto the corner when the minimum is a corner, so exact means exact
+    for (let e = 0; e < 4; e++) {
+        if (Math.abs(best[0] - V[e][0]) < 2e-3 && Math.abs(best[1] - V[e][1]) < 2e-3) return V[e].slice();
+    }
+    return best;
+}
+
+const GX0 = -1.55, GX1 = 2.75, GY0 = -1.55, GY1 = 2.75, GS = 300;
+function gx(x) { return (x - GX0) / (GX1 - GX0) * GS; }
+function gy(y) { return GS - (y - GY0) / (GY1 - GY0) * GS; }
+
+function contourPath(a, level) {
+    const s = Math.sqrt(Math.max(level, 1e-9));
+    let d = '';
+    for (let i = 0; i <= 240; i++) {
+        const th = 2 * Math.PI * i / 240;
+        const dy = s * Math.sin(th) / SIG;
+        const dx = s * (Math.cos(th) - RHO * Math.sin(th) / SIG);
+        d += (i === 0 ? 'M' : 'L') + gx(a[0] + dx).toFixed(1) + ' ' + gy(a[1] + dy).toFixed(1);
+    }
+    return d + 'Z';
+}
+
+function drawGeoPanel(svgId, outId, a, sol, shape) {
+    const svg = document.getElementById(svgId);
+    let s = '';
+    // axes
+    s += '<line x1="' + gx(GX0) + '" y1="' + gy(0) + '" x2="' + gx(GX1) + '" y2="' + gy(0) + '" stroke="#33334f" stroke-width="1"/>';
+    s += '<line x1="' + gx(0) + '" y1="' + gy(GY0) + '" x2="' + gx(0) + '" y2="' + gy(GY1) + '" stroke="#33334f" stroke-width="1"/>';
+    // budget region
+    if (shape === 'circle') {
+        s += '<circle cx="' + gx(0) + '" cy="' + gy(0) + '" r="' + (gx(BUDGET) - gx(0)).toFixed(1) +
+             '" fill="#1e3450" stroke="#80b4f0" stroke-width="1.6"/>';
+    } else {
+        const pts = [[BUDGET, 0], [0, BUDGET], [-BUDGET, 0], [0, -BUDGET]]
+            .map(p => gx(p[0]).toFixed(1) + ',' + gy(p[1]).toFixed(1)).join(' ');
+        s += '<polygon points="' + pts + '" fill="#1c3a2a" stroke="#70e898" stroke-width="1.6"/>';
+    }
+    // growing contours, the last one is the one that touches
+    const lvl = qform(sol, a);
+    [0.22, 0.52, 1].forEach(function (f, i) {
+        s += '<path d="' + contourPath(a, lvl * f) + '" fill="none" stroke="#6a6a9a" stroke-width="' +
+             (i === 2 ? '1.6' : '0.9') + '" stroke-dasharray="' + (i === 2 ? 'none' : '3 4') + '" opacity="' + (i === 2 ? 1 : 0.55) + '"/>';
+    });
+    // light up the stretch of axis the answer is sitting on
+    const onAxis = Math.abs(sol[1]) < 1e-9 || Math.abs(sol[0]) < 1e-9;
+    if (onAxis) {
+        s += '<line x1="' + gx(0) + '" y1="' + gy(0) + '" x2="' + gx(sol[0]) + '" y2="' + gy(sol[1]) +
+             '" stroke="#70e898" stroke-width="3" opacity="0.55"/>';
+    }
+    // axis labels
+    s += '<text x="' + (gx(GX1) - 16) + '" y="' + (gy(0) - 6) + '" font-family="sans-serif" font-size="11" fill="#55557a">b1</text>';
+    s += '<text x="' + (gx(0) + 6) + '" y="' + (gy(GY1) + 14) + '" font-family="sans-serif" font-size="11" fill="#55557a">b2</text>';
+    // points
+    s += '<circle cx="' + gx(a[0]) + '" cy="' + gy(a[1]) + '" r="4" fill="#a88ef0"/>';
+    s += '<text x="' + (gx(a[0]) + 8) + '" y="' + (gy(a[1]) + 4) + '" font-family="sans-serif" font-size="10" fill="#a88ef0">OLS</text>';
+    s += '<circle cx="' + gx(sol[0]) + '" cy="' + gy(sol[1]) + '" r="5" fill="' + (onAxis ? '#70e898' : '#ffcf5c') + '" stroke="#141420" stroke-width="1.5"/>';
+    svg.innerHTML = s;
+
+    const beta2 = Math.abs(sol[1]) < 1e-9 ? 0 : sol[1];
+    let verdict;
+    if (shape === 'circle') verdict = t('geo.nonzero');
+    else verdict = onAxis ? t('geo.corner') : t('geo.edge');
+    const el = document.getElementById(outId);
+    el.className = 'geo-verdict' + (onAxis ? ' hit' : '');
+    el.innerHTML = t('geo.beta2') + ' = ' + beta2.toFixed(3) + '<br>' + verdict;
+}
+
+function drawGeo() {
+    const deg = +document.getElementById('ang').value;
+    document.getElementById('ang-out').textContent = deg + '°';
+    const th = deg * Math.PI / 180;
+    const a = [OLS_R * Math.cos(th), OLS_R * Math.sin(th)];
+    drawGeoPanel('svg-geo-ridge', 'geo-ridge-out', a, circleSolution(a), 'circle');
+    drawGeoPanel('svg-geo-lasso', 'geo-lasso-out', a, diamondSolution(a), 'diamond');
+}
+
+function onLangChange() {
+    drawPaths();
+    drawGeo();
+}
+
+// ─── KaTeX ────────────────────────────────────────────────────────────────────
+window.addEventListener('load', function () {
+    if (typeof renderMathInElement !== 'undefined') {
+        renderMathInElement(document.body, {
+            delimiters: [
+                { left: '$$', right: '$$', display: true  },
+                { left: '\\(', right: '\\)', display: false }
+            ],
+            throwOnError: false
+        });
+    }
+    drawPaths();
+    drawGeo();
+});
+</script>
+</body>
+</html>

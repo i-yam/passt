@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spiders Have Six Legs</title>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #141420;
+            color: #e8e8f0;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            line-height: 1.8;
+            font-size: 18px;
+        }
+
+        .container {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* === Language toggle === */
+        .lang-toggle {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            background: #2a2a44;
+            border: 1px solid #4a4a70;
+            border-radius: 20px;
+            padding: 6px 14px;
+            cursor: pointer;
+            font-size: 13px;
+            font-family: sans-serif;
+            color: #a0a0d0;
+            z-index: 100;
+            transition: background 0.2s;
+        }
+        .lang-toggle:hover { background: #363658; }
+
+        /* === Hero === */
+        .hero {
+            text-align: center;
+            padding: 80px 24px 50px;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 28px;
+        }
+
+        .tag {
+            background: #1c1c2e;
+            color: #8888b0;
+            border: 1px solid #2a2a40;
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 12px;
+            font-family: sans-serif;
+            letter-spacing: 0.3px;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.3;
+            max-width: 700px;
+            margin: 0 auto 32px;
+        }
+
+        .hero-quote {
+            max-width: 600px;
+            margin: 0 auto 36px;
+            color: #a0a0c0;
+            font-style: italic;
+            font-size: 22px;
+            line-height: 1.6;
+        }
+
+        .hero-quote cite {
+            display: block;
+            margin-top: 14px;
+            font-size: 15px;
+            color: #555;
+            font-style: normal;
+        }
+
+        /* === Sections === */
+        section { padding: 50px 0; }
+
+        h2 {
+            font-size: 30px;
+            color: #fff;
+            margin-bottom: 24px;
+            line-height: 1.3;
+        }
+
+        p { margin-bottom: 20px; color: #ccc; }
+
+        /* === Blockquote === */
+        blockquote {
+            border-left: 3px solid #4a4a70;
+            padding: 16px 24px;
+            margin: 28px 0;
+            color: #a0a0c0;
+            font-style: italic;
+            font-size: 17px;
+            line-height: 1.7;
+        }
+
+        blockquote cite {
+            display: block;
+            margin-top: 12px;
+            font-size: 14px;
+            color: #555;
+            font-style: normal;
+        }
+
+        /* === Details / deep-dive === */
+        details {
+            background: #1c1c2e;
+            border: 1px solid #2a2a40;
+            border-radius: 8px;
+            padding: 14px 20px;
+            margin: 20px 0;
+        }
+
+        details summary {
+            cursor: pointer;
+            color: #8080c0;
+            font-size: 14px;
+            font-family: sans-serif;
+            user-select: none;
+            list-style: none;
+        }
+
+        details summary::before { content: "▸  "; }
+        details[open] summary::before { content: "▾  "; }
+        details[open] summary { margin-bottom: 10px; }
+        details p { font-size: 14px; color: #888; margin-bottom: 0; }
+
+        /* === Card game === */
+        .game-instruction {
+            color: #999;
+            font-size: 16px;
+            margin-bottom: 24px;
+            font-style: italic;
+        }
+
+        .card-pool {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 20px;
+            background: #1c1c2e;
+            border-radius: 10px;
+            min-height: 80px;
+            border: 2px dashed #2a2a40;
+            margin-bottom: 20px;
+            transition: border-color 0.2s;
+        }
+        .card-pool.drag-over { border-color: #5050a0; }
+
+        .card {
+            background: #2a2a44;
+            border: 1px solid #4a4a70;
+            border-radius: 8px;
+            padding: 10px 16px;
+            cursor: grab;
+            user-select: none;
+            font-size: 15px;
+            font-family: sans-serif;
+            color: #e0e0f0;
+            transition: background 0.15s, box-shadow 0.15s;
+            white-space: nowrap;
+        }
+        .card:hover { background: #363658; border-color: #6060a0; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+        .card.dragging { opacity: 0.3; cursor: grabbing; }
+
+        .drop-zones-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .drop-zone {
+            background: #1c1c2e;
+            border: 2px dashed #2a2a40;
+            border-radius: 10px;
+            padding: 14px;
+            min-height: 120px;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .drop-zone.drag-over { border-color: #6060a0; background: #1e1e30; }
+
+        .drop-zone-label {
+            font-size: 12px;
+            color: #7070a0;
+            font-family: sans-serif;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #2a2a40;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+        }
+
+        .drop-zone .card {
+            margin-bottom: 8px;
+            display: block;
+            white-space: normal;
+            cursor: grab;
+        }
+
+        .game-controls { margin-top: 14px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+        .btn-reset {
+            background: transparent;
+            border: 1px solid #2a2a40;
+            border-radius: 6px;
+            padding: 7px 16px;
+            color: #666;
+            font-size: 13px;
+            font-family: sans-serif;
+            cursor: pointer;
+            transition: border-color 0.2s, color 0.2s;
+        }
+        .btn-reset:hover { border-color: #4a4a70; color: #aaa; }
+
+        /* === Password reveal === */
+        .reveal-box {
+            background: #1c1c2e;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            padding: 28px;
+            margin-top: 36px;
+        }
+
+        .reveal-box > p {
+            font-size: 15px;
+            color: #666;
+            font-style: italic;
+            margin-bottom: 16px;
+        }
+
+        .pw-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .pw-input {
+            background: #141420;
+            border: 1px solid #3a3a55;
+            border-radius: 6px;
+            padding: 8px 14px;
+            color: #e0e0f0;
+            font-size: 15px;
+            font-family: monospace;
+            width: 160px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .pw-input:focus { border-color: #6060a0; }
+
+        .btn-reveal {
+            background: #2a2a44;
+            border: 1px solid #4a4a70;
+            border-radius: 6px;
+            padding: 8px 20px;
+            color: #a0a0d0;
+            font-size: 15px;
+            font-family: sans-serif;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-reveal:hover { background: #363658; }
+
+        .pw-error {
+            color: #a88ef0;
+            font-size: 13px;
+            font-family: sans-serif;
+            margin-top: 8px;
+            min-height: 18px;
+        }
+
+        .reveal-content { display: none; }
+
+        .answer-group { padding: 16px 0; border-top: 1px solid #2a2a40; }
+        .answer-group:first-child { padding-top: 0; border-top: none; }
+
+        .answer-group h4 {
+            font-size: 15px;
+            color: #a0a0d0;
+            font-family: sans-serif;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .answer-item { margin-bottom: 12px; }
+        .answer-item strong { color: #e0e0f0; font-family: sans-serif; font-size: 14px; }
+        .answer-item p { font-size: 14px; color: #777; margin: 4px 0 0 0; line-height: 1.6; }
+
+        /* === Highlight box === */
+        .highlight-box {
+            background: #1c1c2e;
+            border-left: 3px solid #6060a0;
+            border-radius: 0 8px 8px 0;
+            padding: 20px 24px;
+            margin: 28px 0;
+        }
+        .highlight-box p { color: #aaa; margin-bottom: 0; font-size: 16px; }
+        .highlight-box p strong { color: #e0e0f0; }
+
+        /* === Closing question === */
+        .closing-box {
+            background: #1c1c2e;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+        }
+        .closing-box h3 { font-size: 26px; color: #fff; margin-bottom: 18px; }
+        .closing-box p { font-size: 16px; color: #777; max-width: 520px; margin: 0 auto; }
+
+        /* === Divider === */
+        .section-rule { border: none; border-top: 1px solid #2a2a40; margin: 0; }
+
+        /* === Links === */
+        a { color: #80b4f0; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* === Footer === */
+        footer { text-align: center; padding: 40px 24px; color: #444; font-size: 14px; }
+        footer a { color: #555; }
+
+        /* === Responsive === */
+        @media (max-width: 680px) {
+            .hero h1 { font-size: 28px; }
+            h2 { font-size: 24px; }
+            body { font-size: 16px; }
+            .drop-zones-2 { grid-template-columns: 1fr; }
+            .hero-quote { font-size: 18px; }
+            .card { white-space: normal; }
+        }
+    </style>
+</head>
+<body>
+
+<button class="lang-toggle" onclick="toggleLang()">DE</button>
+
+<!-- ── Hero ──────────────────────────────────────────────────────────────── -->
+<div class="hero">
+    <div class="tags">
+        <span class="tag">all</span>
+        <span class="tag">no-code</span>
+        <span class="tag">mini-module</span>
+        <span class="tag">try-without-ai</span>
+        <span class="tag">statistics</span>
+        <span class="tag">ai-in-practice</span>
+    </div>
+
+    <h1 data-i18n="hero.title">Spiders Have Six Legs</h1>
+
+    <div class="hero-quote">
+        <span data-i18n="hero.quote">"Irrefutability is not a virtue of a theory, it is a vice."</span>
+        <cite>,  Karl Popper, <em>Conjectures and Refutations</em>, 1963</cite>
+    </div>
+</div>
+
+<div class="container">
+
+<!-- ── Spider story ───────────────────────────────────────────────────────── -->
+<section>
+    <p data-i18n="s0.p1">Aristotle wrote a book called <em>History of Animals</em>. He described the physical characteristics of hundreds of species, their parts, their movements, their reproductive habits. It was careful, detailed, and mostly correct. It became the foundation of zoology for nearly two thousand years.</p>
+
+    <p data-i18n="s0.p2">According to a story that circulates widely, in classrooms, in popular science books, in articles about critical thinking, Aristotle stated in that book that spiders have six legs. Medieval monks, copying manuscripts by hand across centuries, reproduced the claim without question. Libraries across Europe confirmed it. Six legs. No one checked. Aristotle had said it.</p>
+
+    <p data-i18n="s0.p3">Then came the Enlightenment. Entomologists started looking at actual spiders. They counted. Eight legs. Anyone who cares to know can still count for themselves.</p>
+
+    <p data-i18n="s0.question">The story usually ends there, with a lesson about authority and the importance of checking things yourself. So: what does this story tell you?</p>
+
+    <!-- Password reveal -->
+    <div class="reveal-box">
+        <p data-i18n="s0.reveal.prompt">Think about it. Then enter the password to find out.</p>
+        <div class="pw-row" id="spider-pw-form">
+            <input class="pw-input" id="spider-pw-input" type="password" placeholder="password"
+                   onkeydown="if(event.key==='Enter') checkSpiderPassword()">
+            <button class="btn-reveal" onclick="checkSpiderPassword()" data-i18n="reveal.btn">Reveal</button>
+        </div>
+        <div class="pw-error" id="spider-pw-error"></div>
+
+        <div class="reveal-content" id="spider-reveal-content">
+            <div class="answer-group">
+                <p data-i18n="spider.p1">The story is false.</p>
+                <p data-i18n="spider.p2">There is no evidence that Aristotle ever wrote that spiders have six legs. Historians of science have looked. The claim does not appear in <em>History of Animals</em> or in any other text attributed to Aristotle. Medieval monks did not copy it across centuries because there was no such claim to copy. The whole narrative appears to be a modern invention, the kind of vivid, morally satisfying story that spreads easily because it fits what we already believe.</p>
+                <p data-i18n="spider.p3">A story used to warn against accepting claims without checking has itself been accepted, repeated, and taught without checking.</p>
+                <p data-i18n="spider.p4">You just did it. Three paragraphs about Aristotle and spiders, and you assumed they were true. Not because you verified them. Because they came from a plausible source. Because they fit. Because checking did not occur to you.</p>
+                <p data-i18n="spider.p5" style="color:#e0e0f0;">The lesson stands. It just applies to itself.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Section 1: Before the Method ─────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s1.title">Before the Method</h2>
+
+    <p data-i18n="s1.p1">In ancient Alexandria, doctors argued about how to know anything. The rationalists said: start from first principles. Understand the theory of the body, and the prescription follows. The empiricists thought first principles were a guess. Did the treatment work? Try it. Observe. Try again.</p>
+
+    <p data-i18n="s1.p2">One of the empiricists' leading voices was a Greek physician who became known as Sextus Empiricus, named after the school he practiced in. His position was simple: suspend judgment on any claim that cannot be tested by observation. Do not accept something as true because an authority said so. "We don't know why the drug works," the empiricists said. "We know that it does."</p>
+
+    <p data-i18n="s1.p3">The world does not owe us explanations. It does give us feedback.</p>
+
+    <figure style="margin: 32px 0; text-align: center;">
+        <img src="images/mythbusters.jpg" alt="MythBusters" style="max-width: 100%; border-radius: 8px; opacity: 0.9;">
+        <figcaption style="margin-top: 12px; font-size: 14px; font-family: sans-serif; color: #555;">
+            <a href="https://en.wikipedia.org/wiki/MythBusters" target="_blank" data-i18n="s1.mb.caption">MythBusters (2003–2016), build a hypothesis, design the test, accept whatever the data says.</a>
+        </figcaption>
+    </figure>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Section 2: Popper ──────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s2.title">Popper's Problem</h2>
+
+    <p data-i18n="s2.p1">In the 1920s, Karl Popper read Freud, Adler, and Marx. He noticed that all three theories had something in common. They could explain everything.</p>
+
+    <p data-i18n="s2.p2">A patient acts aggressively? The theory explains it. A patient acts passively? The theory explains that too. The predicted revolution doesn't materialize? Historical conditions were not yet ripe. Everything confirmed the theory. Popper found this suspicious.</p>
+
+    <blockquote>
+        <span data-i18n="s2.quote">"A theory that is compatible with every possible observation is not a scientific theory. It is a dogma."</span>
+        <cite>,  Karl Popper</cite>
+    </blockquote>
+
+    <p data-i18n="s2.p3">Einstein's theory of relativity made a specific prediction. Light bends around massive objects like the sun, by a precise, calculable amount. If you measured it and the numbers were wrong, the theory was wrong. Einstein was betting on a prediction that could fail.</p>
+
+    <p data-i18n="s2.p4">In 1919, Arthur Eddington measured starlight deflection during a solar eclipse. The numbers matched. They could have not.</p>
+
+    <p data-i18n="s2.p5">Popper's criterion: a claim is scientific only if an observation could prove it wrong. A claim that is at risk.</p>
+
+    <details>
+        <summary data-i18n="s2.deepdive.label">For the curious: the Duhem-Quine problem</summary>
+        <p data-i18n="s2.deepdive.text">Popper's criterion is clean. Pierre Duhem pointed out a wrinkle: you never test a single hypothesis in isolation. You test it together with a web of auxiliary assumptions. When an experiment fails, you cannot know whether the main theory is wrong or one of the auxiliary assumptions is. W.V.O. Quine extended this: any theory can be saved from refutation by adjusting something else in the web of beliefs. It makes falsifiability messier than Popper's original formulation suggests.</p>
+    </details>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Section 3: Card sort ───────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s3.title">Is It Science?</h2>
+
+    <p class="game-instruction" data-i18n="s3.instruction">Below are eight statements. Sort each one: is it a claim that could, in principle, be disproved by an observation? Drag each card into the correct zone. Some are harder than they look.</p>
+
+    <!-- Card pool -->
+    <div class="card-pool" id="falsify-pool"
+         ondragover="onDragOver(event)"
+         ondragleave="onDragLeave(event)"
+         ondrop="onDrop(event, 'falsify-pool')">
+        <div class="card" id="f1" draggable="true" ondragstart="onDragStart(event)" ondragend="onDragEnd(event)" data-i18n="f.1">Short email subject lines get more opens</div>
+        <div class="card" id="f2" draggable="true" ondragstart="onDragStart(event)" ondragend="onDragEnd(event)" data-i18n="f.2">Exercising three times a week improves sleep</div>
+        <div class="card" id="f3" draggable="true" ondragstart="onDragStart(event)" ondragend="onDragEnd(event)" data-i18n="f.3">More training data reduces prediction error</div>
+        <div class="card" id="f4" draggable="true" ondragstart="onDragStart(event)" ondragend="onDragEnd(event)" data-i18n="f.4">This fraud model outperforms the previous one</div>
+        <div class="card" id="f5" draggable="true" ondragstart="onDragStart(event)" ondragend="onDragEnd(event)" data-i18n="f.5">Everything happens for a reason</div>
+        <div class="card" id="f6" draggable="true" ondragstart="onDragStart(event)" ondragend="onDragEnd(event)" data-i18n="f.6">The universe was created with purpose</div>
+        <div class="card" id="f7" draggable="true" ondragstart="onDragStart(event)" ondragend="onDragEnd(event)" data-i18n="f.7">Some people are simply born lucky</div>
+        <div class="card" id="f8" draggable="true" ondragstart="onDragStart(event)" ondragend="onDragEnd(event)" data-i18n="f.8">This AI understands what it is saying</div>
+    </div>
+
+    <!-- Drop zones -->
+    <div class="drop-zones-2">
+        <div class="drop-zone" id="z-falsifiable"
+             ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event, 'z-falsifiable')">
+            <div class="drop-zone-label" data-i18n="game.falsifiable">Falsifiable, this is science</div>
+        </div>
+        <div class="drop-zone" id="z-notscience"
+             ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event, 'z-notscience')">
+            <div class="drop-zone-label" data-i18n="game.notscience">Not falsifiable, this is not science</div>
+        </div>
+    </div>
+
+    <div class="game-controls">
+        <button class="btn-reset" onclick="resetCards('falsify-pool', falsifyCards)" data-i18n="game.reset">Reset cards</button>
+    </div>
+
+    <!-- Password reveal -->
+    <div class="reveal-box">
+        <p data-i18n="reveal.prompt">Done? Enter the password to see the answers.</p>
+        <div class="pw-row" id="pw-form">
+            <input class="pw-input" id="pw-input" type="password" placeholder="password"
+                   onkeydown="if(event.key==='Enter') checkPassword()">
+            <button class="btn-reveal" onclick="checkPassword()" data-i18n="reveal.btn">Reveal</button>
+        </div>
+        <div class="pw-error" id="pw-error"></div>
+
+        <div class="reveal-content" id="reveal-content">
+            <div class="answer-group">
+                <h4 data-i18n="rev.yes.h">Falsifiable</h4>
+                <div class="answer-item">
+                    <strong>Short email subject lines get more opens</strong>
+                    <p data-i18n="rev.f1.p">Run an A/B test. Two groups, two subject line lengths, one metric. You can be wrong.</p>
+                </div>
+                <div class="answer-item">
+                    <strong>Exercising three times a week improves sleep</strong>
+                    <p data-i18n="rev.f2.p">Design a randomized trial. Assign participants to exercise and control groups, measure sleep quality before and after. The claim is at risk.</p>
+                </div>
+                <div class="answer-item">
+                    <strong>More training data reduces prediction error</strong>
+                    <p data-i18n="rev.f3.p">Train the same model on datasets of increasing size. Plot test error. The naive version of this claim, "always," turns out to be false for certain model-data combinations.</p>
+                </div>
+                <div class="answer-item">
+                    <strong>This fraud model outperforms the previous one</strong>
+                    <p data-i18n="rev.f4.p">Evaluate both on the same held-out test set. One number will be larger. The result can go either way.</p>
+                </div>
+            </div>
+            <div class="answer-group">
+                <h4 data-i18n="rev.no.h">Not Falsifiable</h4>
+                <div class="answer-item">
+                    <strong>Everything happens for a reason</strong>
+                    <p data-i18n="rev.f5.p">What observation would disprove it? If a tragedy happens, there was a reason, we just don't know it yet. If something good happens, there was a reason. Nothing can threaten the claim.</p>
+                </div>
+                <div class="answer-item">
+                    <strong>The universe was created with purpose</strong>
+                    <p data-i18n="rev.f6.p">Any observation fits. Orderly universe, evidence of purpose. Chaotic universe, mysterious ways. The claim is not in range of any experiment.</p>
+                </div>
+                <div class="answer-item">
+                    <strong>Some people are simply born lucky</strong>
+                    <p data-i18n="rev.f7.p">If lucky people tend to have good outcomes, the claim explains nothing new. If unlucky people succeed sometimes, it was not their lucky day. The claim is infinitely flexible.</p>
+                </div>
+                <div class="answer-item">
+                    <strong>This AI understands what it is saying</strong>
+                    <p data-i18n="rev.f8.p">"Understands" has no agreed definition, no agreed measurement, no agreed threshold. Behavioral tests have been designed. Every time a model passes one, the goalposts move. Sound familiar?</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Section 4: Connection to ML ──────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s4.title">Why Your Model Needs a Test Set</h2>
+
+    <p data-i18n="s4.p1">When you train a machine learning model, you fit it to observed data. The model finds patterns. Given enough capacity, it can fit any training dataset perfectly, including the noise, the outliers, the flukes. Evaluate it on the same data you trained it on and you learn nothing.</p>
+
+    <p data-i18n="s4.p2">The train/test split is Popper's falsification criterion, applied to predictive models. Hold back a portion of the data. Train on one part, evaluate on the other. The test set is the experiment. The test metric is the observation that can prove you wrong.</p>
+
+    <div class="highlight-box">
+        <p data-i18n="s4.highlight"><strong>Overfitting</strong> is the ML version of Freudian analysis. A model that fits everything explains nothing. It has memorized the training data. Put it in front of new observations and it fails.</p>
+    </div>
+
+    <p data-i18n="s4.p2b">It gets worse with less data. Give a powerful model only a handful of examples and it will find elaborate patterns in the noise. It has to. There is nothing else to work with. Smart people do the same thing. Feed them one ambiguous signal and they will construct an entire theory around it. The model is not wrong to look for structure. The problem is that it found structure where there was none.</p>
+
+    <p data-i18n="s4.p3">"99% accuracy" should prompt a question: on what data? A model that achieves 99% on its training set has not been tested. A model that achieves 85% on held-out data has. The second number is the one that matters.</p>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Closing question ───────────────────────────────────────────────────── -->
+<section>
+    <div class="closing-box">
+        <h3 data-i18n="closing.title">Name a claim in your field.</h3>
+        <p data-i18n="closing.text">Something that gets repeated with confidence. Now design the experiment that could disprove it.</p>
+        <img src="images/question.jpg" alt="" style="max-width: 100%; max-height: 260px; border-radius: 8px; margin-top: 28px; opacity: 0.85;">
+    </div>
+
+    <details style="margin-top: 36px; text-align: left;">
+        <summary data-i18n="hw.label" style="font-size: 15px; color: #8080c0; font-family: sans-serif; cursor: pointer; user-select: none; list-style: none;">Homework for critical thinkers</summary>
+        <p data-i18n="hw.text" style="margin-top: 16px; font-size: 16px; color: #888; line-height: 1.7;">Next week, keep a list. Every time you encounter a claim in the media, in advertising, in a conversation, ask one question: what observation would prove this wrong? Collect the ones that have no answer. Bring them to class.</p>
+    </details>
+</section>
+
+</div><!-- /container -->
+
+<footer>
+    <a href="https://github.com/i-yam/passt/tree/main/modules/spiders_and_legs" target="_blank">github.com/i-yam/passt</a>
+    &nbsp;·&nbsp;
+    <a href="../../" target="_blank">overfit &amp; chill</a>
+    <br>&copy; All rights reserved
+</footer>
+
+<!-- ── Scripts ────────────────────────────────────────────────────────────── -->
+<script>
+
+// ─── Card ID list for reset ───────────────────────────────────────────────────
+const falsifyCards = ['f1','f2','f3','f4','f5','f6','f7','f8'];
+
+// ─── Language toggle ─────────────────────────────────────────────────────────
+const T = {
+    en: {
+        'hero.title': 'Spiders Have Six Legs',
+        'hero.quote': '"Irrefutability is not a virtue of a theory, it is a vice."',
+        's0.p1': 'Aristotle wrote a book called <em>History of Animals</em>. He described the physical characteristics of hundreds of species, their parts, their movements, their reproductive habits. It was careful, detailed, and mostly correct. It became the foundation of zoology for nearly two thousand years.',
+        's0.p2': 'According to a story that circulates widely, in classrooms, in popular science books, in articles about critical thinking, Aristotle stated in that book that spiders have six legs. Medieval monks, copying manuscripts by hand across centuries, reproduced the claim without question. Libraries across Europe confirmed it. Six legs. No one checked. Aristotle had said it.',
+        's0.p3': 'Then came the Enlightenment. Entomologists started looking at actual spiders. They counted. Eight legs. Anyone who cares to know can still count for themselves.',
+        's0.question': 'The story usually ends there, with a lesson about authority and the importance of checking things yourself. So: what does this story tell you?',
+        's0.reveal.prompt': 'Think about it. Then enter the password to find out.',
+        'spider.p1': 'The story is false.',
+        'spider.p2': 'There is no evidence that Aristotle ever wrote that spiders have six legs. Historians of science have looked. The claim does not appear in <em>History of Animals</em> or in any other text attributed to Aristotle. Medieval monks did not copy it across centuries because there was no such claim to copy. The whole narrative appears to be a modern invention, the kind of vivid, morally satisfying story that spreads easily because it fits what we already believe.',
+        'spider.p3': 'A story used to warn against accepting claims without checking has itself been accepted, repeated, and taught without checking.',
+        'spider.p4': 'You just did it. Three paragraphs about Aristotle and spiders, and you assumed they were true. Not because you verified them. Because they came from a plausible source. Because they fit. Because checking did not occur to you.',
+        'spider.p5': 'The lesson stands. It just applies to itself.',
+        's1.title': 'Before the Method',
+        's1.p1': 'In ancient Alexandria, doctors argued about how to know anything. The rationalists said: start from first principles. Understand the theory of the body, and the prescription follows. The empiricists thought first principles were a guess. Did the treatment work? Try it. Observe. Try again.',
+        's1.p2': 'One of the empiricists\' leading voices was a Greek physician who became known as Sextus Empiricus, named after the school he practiced in. His position was simple: suspend judgment on any claim that cannot be tested by observation. Do not accept something as true because an authority said so. "We don\'t know why the drug works," the empiricists said. "We know that it does."',
+        's1.p3': 'The world does not owe us explanations. It does give us feedback.',
+        's1.mb.caption': 'MythBusters (2003–2016), build a hypothesis, design the test, accept whatever the data says.',
+        's2.title': 'Popper\'s Problem',
+        's2.p1': 'In the 1920s, Karl Popper read Freud, Adler, and Marx. He noticed that all three theories had something in common. They could explain everything.',
+        's2.p2': 'A patient acts aggressively? The theory explains it. A patient acts passively? The theory explains that too. The predicted revolution doesn\'t materialize? Historical conditions were not yet ripe. Everything confirmed the theory. Popper found this suspicious.',
+        's2.quote': '"A theory that is compatible with every possible observation is not a scientific theory. It is a dogma."',
+        's2.p3': 'Einstein\'s theory of relativity made a specific prediction. Light bends around massive objects like the sun, by a precise, calculable amount. If you measured it and the numbers were wrong, the theory was wrong. Einstein was betting on a prediction that could fail.',
+        's2.p4': 'In 1919, Arthur Eddington measured starlight deflection during a solar eclipse. The numbers matched. They could have not.',
+        's2.p5': 'Popper\'s criterion: a claim is scientific only if an observation could prove it wrong. A claim that is at risk.',
+        's2.deepdive.label': 'For the curious: the Duhem-Quine problem',
+        's2.deepdive.text': 'Popper\'s criterion is clean. Pierre Duhem pointed out a wrinkle: you never test a single hypothesis in isolation. You test it together with a web of auxiliary assumptions. When an experiment fails, you cannot know whether the main theory is wrong or one of the auxiliary assumptions is. W.V.O. Quine extended this: any theory can be saved from refutation by adjusting something else in the web of beliefs. It makes falsifiability messier than Popper\'s original formulation suggests.',
+        's3.title': 'Is It Science?',
+        's3.instruction': 'Below are eight statements. Sort each one: is it a claim that could, in principle, be disproved by an observation? Drag each card into the correct zone. Some are harder than they look.',
+        'game.falsifiable': 'Falsifiable, this is science',
+        'game.notscience': 'Not falsifiable, this is not science',
+        'game.reset': 'Reset cards',
+        'reveal.prompt': 'Done? Enter the password to see the answers.',
+        'reveal.btn': 'Reveal',
+        'rev.yes.h': 'Falsifiable',
+        'rev.no.h': 'Not Falsifiable',
+        's4.title': 'Why Your Model Needs a Test Set',
+        's4.p1': 'When you train a machine learning model, you fit it to observed data. The model finds patterns. Given enough capacity, it can fit any training dataset perfectly, including the noise, the outliers, the flukes. Evaluate it on the same data you trained it on and you learn nothing.',
+        's4.p2': 'The train/test split is Popper\'s falsification criterion, applied to predictive models. Hold back a portion of the data. Train on one part, evaluate on the other. The test set is the experiment. The test metric is the observation that can prove you wrong.',
+        's4.highlight': '<strong>Overfitting</strong> is the ML version of Freudian analysis. A model that fits everything explains nothing. It has memorized the training data. Put it in front of new observations and it fails.',
+        's4.p2b': 'It gets worse with less data. Give a powerful model only a handful of examples and it will find elaborate patterns in the noise. It has to. There is nothing else to work with. Smart people do the same thing. Feed them one ambiguous signal and they will construct an entire theory around it. The model is not wrong to look for structure. The problem is that it found structure where there was none.',
+        's4.p3': '"99% accuracy" should prompt a question: on what data? A model that achieves 99% on its training set has not been tested. A model that achieves 85% on held-out data has. The second number is the one that matters.',
+        'closing.title': 'Name a claim in your field.',
+        'closing.text': 'Something that gets repeated with confidence. Now design the experiment that could disprove it.',
+        'hw.label': 'Homework for critical thinkers',
+        'hw.text': 'Next week, keep a list. Every time you encounter a claim in the media, in advertising, in a conversation, ask one question: what observation would prove this wrong? Collect the ones that have no answer. Bring them to class.',
+        'f.1': 'Short email subject lines get more opens',
+        'f.2': 'Exercising three times a week improves sleep',
+        'f.3': 'More training data reduces prediction error',
+        'f.4': 'This fraud model outperforms the previous one',
+        'f.5': 'Everything happens for a reason',
+        'f.6': 'The universe was created with purpose',
+        'f.7': 'Some people are simply born lucky',
+        'f.8': 'This AI understands what it is saying',
+        'rev.f1.p': 'Run an A/B test. Two groups, two subject line lengths, one metric. You can be wrong.',
+        'rev.f2.p': 'Design a randomized trial. Assign participants to exercise and control groups, measure sleep quality before and after. The claim is at risk.',
+        'rev.f3.p': 'Train the same model on datasets of increasing size. Plot test error. The naive version of this claim, "always," turns out to be false for certain model-data combinations.',
+        'rev.f4.p': 'Evaluate both on the same held-out test set. One number will be larger. The result can go either way.',
+        'rev.f5.p': 'What observation would disprove it? If a tragedy happens, there was a reason, we just don\'t know it yet. If something good happens, there was a reason. Nothing can threaten the claim.',
+        'rev.f6.p': 'Any observation fits. Orderly universe, evidence of purpose. Chaotic universe, mysterious ways. The claim is not in range of any experiment.',
+        'rev.f7.p': 'If lucky people tend to have good outcomes, the claim explains nothing new. If unlucky people succeed sometimes, it was not their lucky day. The claim is infinitely flexible.',
+        'rev.f8.p': '"Understands" has no agreed definition, no agreed measurement, no agreed threshold. Behavioral tests have been designed. Every time a model passes one, the goalposts move. Sound familiar?',
+    },
+    de: {
+        'hero.title': 'Spinnen haben sechs Beine',
+        'hero.quote': '„Nicht widerlegbar zu sein ist keine Tugend einer Theorie: Es ist ein Fehler.“',
+        's0.p1': 'Aristoteles schrieb ein Buch mit dem Titel <em>Tierkunde</em>. Er beschrieb die körperlichen Merkmale von Hunderten Arten: ihre Teile, ihre Bewegungen, ihre Fortpflanzung. Das Buch war sorgfältig, detailliert und größtenteils richtig. Fast zweitausend Jahre lang blieb es das Fundament der Zoologie.',
+        's0.p2': 'Eine Geschichte dazu ist weit verbreitet. Man hört sie in Klassenräumen, in populärwissenschaftlichen Büchern und in Artikeln über kritisches Denken. Aristoteles soll in diesem Buch behauptet haben, Spinnen hätten sechs Beine. Mittelalterliche Mönche kopierten Manuskripte jahrhundertelang von Hand. Sie schrieben die Behauptung ungeprüft ab. Bibliotheken in ganz Europa bestätigten sie. Sechs Beine. Niemand zählte nach. Aristoteles hatte es ja gesagt.',
+        's0.p3': 'Dann kam die Aufklärung. Entomologen schauten sich echte Spinnen an. Sie zählten. Acht Beine. Wer es wissen will, kann noch heute selbst nachzählen.',
+        's0.question': 'Hier endet die Geschichte normalerweise. Die Lektion: Autorität hilft nicht, prüf lieber selbst nach. Also, was sagt dir diese Geschichte?',
+        's0.reveal.prompt': 'Denk darüber nach. Dann gib das Passwort ein und schau nach.',
+        'spider.p1': 'Die Geschichte ist falsch.',
+        'spider.p2': 'Es gibt keinen Beleg dafür. Aristoteles hat nie geschrieben, Spinnen hätten sechs Beine. Wissenschaftshistoriker haben danach gesucht. Die Behauptung steht weder in der <em>Tierkunde</em> noch in einem anderen Text von Aristoteles. Auch die Mönche haben sie nicht kopiert, denn es gab nichts zu kopieren. Die ganze Geschichte ist offenbar eine moderne Erfindung. Sie ist lebhaft und moralisch befriedigend. Genau deshalb verbreitet sie sich leicht: Sie passt zu dem, was wir ohnehin glauben.',
+        'spider.p3': 'Diese Geschichte warnt davor, Behauptungen ungeprüft zu übernehmen. Und genau so wurde sie selbst übernommen, wiederholt und weitergelehrt.',
+        'spider.p4': 'Du hast es gerade getan. Drei Absätze über Aristoteles und Spinnen, und du hast sie für wahr gehalten. Nicht weil du sie geprüft hast. Sondern weil sie aus einer plausiblen Quelle kamen. Weil sie gepasst haben. Weil dir Nachprüfen gar nicht in den Sinn kam.',
+        'spider.p5': 'Die Lektion gilt trotzdem. Sie gilt nur für sich selbst.',
+        's1.title': 'Vor der Methode',
+        's1.p1': 'Im antiken Alexandria stritten Ärzte darüber, wie man überhaupt etwas wissen kann. Die Rationalisten sagten: Beginne mit ersten Prinzipien. Verstehe die Theorie des Körpers, dann ergibt sich die Therapie von selbst. Die Empiriker hielten erste Prinzipien für eine Vermutung. Hat die Behandlung gewirkt? Probier es aus. Beobachte. Probier es nochmal.',
+        's1.p2': 'Eine der führenden Stimmen der Empiriker war ein griechischer Arzt. Er wurde als Sextus Empiricus bekannt, benannt nach seiner Schule. Seine Position war einfach. Halte dein Urteil zurück, wenn sich eine Behauptung nicht beobachten lässt. Und halte nichts für wahr, nur weil eine Autorität es sagt. „Wir wissen nicht, warum das Mittel wirkt“, sagten die Empiriker. „Wir wissen, dass es wirkt.“',
+        's1.p3': 'Die Welt schuldet uns keine Erklärungen. Feedback gibt sie uns schon.',
+        's1.mb.caption': 'MythBusters (2003–2016): Hypothese aufstellen, Test entwerfen, und akzeptieren, was die Daten sagen.',
+        's2.title': 'Poppers Problem',
+        's2.p1': 'In den 1920er Jahren las Karl Popper Freud, Adler und Marx. Er bemerkte, dass alle drei Theorien etwas gemeinsam hatten. Sie konnten alles erklären.',
+        's2.p2': 'Ein Patient verhält sich aggressiv? Die Theorie erklärt es. Ein Patient verhält sich passiv? Die Theorie erklärt das auch. Die vorhergesagte Revolution tritt nicht ein? Die historischen Bedingungen waren noch nicht reif. Alles bestätigte die Theorie. Popper fand das verdächtig.',
+        's2.quote': '„Eine Theorie, die mit jeder möglichen Beobachtung vereinbar ist, ist keine wissenschaftliche Theorie. Sie ist ein Dogma.“',
+        's2.p3': 'Einsteins Relativitätstheorie machte eine sehr konkrete Vorhersage. Licht biegt sich um massereiche Objekte wie die Sonne. Und zwar um einen präzisen, berechenbaren Betrag. Wich die Messung ab, war die Theorie falsch. Einstein setzte auf eine Vorhersage, die scheitern konnte.',
+        's2.p4': '1919 maß Arthur Eddington die Ablenkung von Sternlicht während einer Sonnenfinsternis. Die Zahlen stimmten. Sie hätten es nicht müssen.',
+        's2.p5': 'Poppers Kriterium: Eine Behauptung ist nur wissenschaftlich, wenn eine Beobachtung sie widerlegen könnte. Sie muss etwas riskieren.',
+        's2.deepdive.label': 'Für Neugierige: das Duhem-Quine-Problem',
+        's2.deepdive.text': 'Poppers Kriterium ist klar. Pierre Duhem wies auf eine Schwierigkeit hin. Du testest nie eine einzelne Hypothese für sich. Du testest sie immer zusammen mit einem Netz von Hilfsannahmen. Scheitert ein Experiment, weißt du nicht, wer schuld ist. Die Haupttheorie oder eine der Hilfsannahmen? W.V.O. Quine ging noch weiter. Jede Theorie lässt sich retten, wenn du an anderer Stelle im Netz etwas anpasst. Falsifizierbarkeit ist also unsauberer, als Popper es ursprünglich formuliert hat.',
+        's3.title': 'Ist es Wissenschaft?',
+        's3.instruction': 'Hier sind acht Aussagen. Sortier jede einzelne. Könnte eine Beobachtung sie im Prinzip widerlegen? Zieh jede Karte in die richtige Zone. Manche sind schwerer, als sie aussehen.',
+        'game.falsifiable': 'Falsifizierbar: Das ist Wissenschaft',
+        'game.notscience': 'Nicht falsifizierbar: Das ist keine Wissenschaft',
+        'game.reset': 'Karten zurücksetzen',
+        'reveal.prompt': 'Fertig? Gib das Passwort ein, um die Antworten zu sehen.',
+        'reveal.btn': 'Aufdecken',
+        'rev.yes.h': 'Falsifizierbar',
+        'rev.no.h': 'Nicht falsifizierbar',
+        's4.title': 'Warum dein Modell einen Testdatensatz braucht',
+        's4.p1': 'Du trainierst ein Modell, also passt du es an beobachtete Daten an. Das Modell findet Muster. Mit genug Kapazität passt es auf jeden Trainingsdatensatz perfekt. Auch auf das Rauschen, die Ausreißer und die Zufälle. Evaluierst du es dann auf denselben Daten, lernst du nichts.',
+        's4.p2': 'Der Train/Test-Split ist Poppers Falsifikationskriterium für Vorhersagemodelle. Halte einen Teil der Daten zurück. Trainiere auf dem einen Teil, evaluiere auf dem anderen. Der Testdatensatz ist dein Experiment. Die Testmetrik ist die Beobachtung, die dich widerlegen kann.',
+        's4.highlight': '<strong>Überanpassung</strong> ist die ML-Version der Freudschen Analyse. Ein Modell, das auf alles passt, erklärt nichts. Es hat die Trainingsdaten auswendig gelernt. Stell es vor neue Beobachtungen, und es versagt.',
+        's4.p2b': 'Mit weniger Daten wird es schlimmer. Gib einem starken Modell nur eine Handvoll Beispiele. Es wird ausgefeilte Muster im Rauschen finden. Es muss, denn etwas anderes hat es ja nicht. Kluge Menschen machen genau dasselbe. Gib ihnen ein einziges mehrdeutiges Signal, und sie bauen eine ganze Theorie darum. Nach Struktur zu suchen ist nicht das Problem. Das Problem ist: Es hat Struktur gefunden, wo keine war.',
+        's4.p3': '„99 % Trefferquote“ sollte eine Rückfrage auslösen: auf welchen Daten? Ein Modell mit 99 % auf den eigenen Trainingsdaten wurde nie getestet. Ein Modell mit 85 % auf zurückgehaltenen Daten schon. Die zweite Zahl ist die, die zählt.',
+        'closing.title': 'Nenne eine Behauptung in deinem Fach.',
+        'closing.text': 'Etwas, das mit Überzeugung wiederholt wird. Entwirf jetzt das Experiment, das diese Behauptung widerlegen könnte.',
+        'hw.label': 'Hausaufgabe für kritische Denker',
+        'hw.text': 'Führ nächste Woche eine Liste. Du begegnest einer Behauptung in den Medien, in der Werbung oder im Gespräch? Stell eine Frage: Welche Beobachtung würde sie widerlegen? Sammle die Behauptungen, auf die es keine Antwort gibt. Bring sie mit in den Unterricht.',
+        'f.1': 'Kurze E-Mail-Betreffzeilen erzielen mehr Öffnungen',
+        'f.2': 'Dreimal wöchentliches Training verbessert den Schlaf',
+        'f.3': 'Mehr Trainingsdaten reduzieren den Vorhersagefehler',
+        'f.4': 'Dieses Betrugsmodell übertrifft das vorherige',
+        'f.5': 'Alles geschieht aus einem Grund',
+        'f.6': 'Das Universum wurde mit einem Zweck erschaffen',
+        'f.7': 'Manche Menschen werden einfach mit Glück geboren',
+        'f.8': 'Diese KI versteht, was sie sagt',
+        'rev.f1.p': 'Mach einen A/B-Test. Zwei Gruppen, zwei Betreffzeilenlängen, eine Kennzahl. Du kannst falsch liegen.',
+        'rev.f2.p': 'Entwirf eine randomisierte Studie. Teil die Teilnehmer in Sport- und Kontrollgruppe. Miss die Schlafqualität vorher und nachher. Die Behauptung steht auf dem Spiel.',
+        'rev.f3.p': 'Trainier dasselbe Modell auf immer größeren Datensätzen. Zeichne den Testfehler auf. Die naive Version dieser Behauptung heißt „immer“. Für bestimmte Modell-Daten-Kombinationen ist sie falsch.',
+        'rev.f4.p': 'Evaluier beide auf demselben zurückgehaltenen Testdatensatz. Eine Zahl wird größer sein. Das Ergebnis kann in beide Richtungen gehen.',
+        'rev.f5.p': 'Welche Beobachtung würde sie widerlegen? Passiert eine Tragödie, gab es einen Grund. Wir kennen ihn nur noch nicht. Passiert etwas Gutes, gab es auch einen Grund. Nichts kann die Behauptung gefährden.',
+        'rev.f6.p': 'Jede Beobachtung passt. Geordnetes Universum: Beleg für einen Zweck. Chaotisches Universum: unergründliche Wege. Kein Experiment kommt an diese Behauptung heran.',
+        'rev.f7.p': 'Haben Glückliche gute Ergebnisse, erklärt die Behauptung nichts Neues. Hat ein Pechvogel mal Erfolg, war es eben sein Glückstag. Die Behauptung biegt sich, wie man sie braucht.',
+        'rev.f8.p': '„Versteht“ hat keine vereinbarte Definition, keine vereinbarte Messung, keine vereinbarte Schwelle. Verhaltenstests gibt es durchaus. Nur wird die Messlatte jedes Mal höher gelegt, wenn ein Modell einen besteht. Kommt dir das bekannt vor?',
+    }
+};
+
+let currentLang = 'en';
+
+function toggleLang() {
+    currentLang = currentLang === 'en' ? 'de' : 'en';
+    document.documentElement.lang = currentLang;
+    document.querySelector('.lang-toggle').textContent = currentLang === 'en' ? 'DE' : 'EN';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        el.innerHTML = (T[currentLang] && T[currentLang][key]) ? T[currentLang][key] : T.en[key];
+    });
+}
+
+// ─── Drag and drop ───────────────────────────────────────────────────────────
+let draggedId = null;
+
+function onDragStart(e) {
+    draggedId = e.target.id;
+    e.target.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+}
+
+function onDragEnd(e) { e.target.classList.remove('dragging'); }
+
+function onDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    e.currentTarget.classList.add('drag-over');
+}
+
+function onDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+
+function onDrop(e, targetId) {
+    e.preventDefault();
+    e.currentTarget.classList.remove('drag-over');
+    if (!draggedId) return;
+    const card   = document.getElementById(draggedId);
+    const target = document.getElementById(targetId);
+    if (card && target) target.appendChild(card);
+    draggedId = null;
+}
+
+function resetCards(poolId, cardIds) {
+    const pool = document.getElementById(poolId);
+    cardIds.forEach(id => { const c = document.getElementById(id); if (c) pool.appendChild(c); });
+}
+
+// ─── Password reveals ─────────────────────────────────────────────────────────
+function checkSpiderPassword() {
+    // Password: popper
+    const val = document.getElementById('spider-pw-input').value.toLowerCase().trim();
+    if (val === 'popper') {
+        document.getElementById('spider-pw-form').style.display        = 'none';
+        document.getElementById('spider-pw-error').textContent         = '';
+        document.getElementById('spider-reveal-content').style.display = 'block';
+    } else {
+        document.getElementById('spider-pw-error').textContent = 'Wrong password.';
+    }
+}
+
+function checkPassword() {
+    // Password: popper
+    const val = document.getElementById('pw-input').value.toLowerCase().trim();
+    if (val === 'popper') {
+        document.getElementById('pw-form').style.display        = 'none';
+        document.getElementById('pw-error').textContent         = '';
+        document.getElementById('reveal-content').style.display = 'block';
+    } else {
+        document.getElementById('pw-error').textContent = 'Wrong password.';
+    }
+}
+
+</script>
+</body>
+</html>

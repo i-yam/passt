@@ -1,0 +1,1550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Passt: An Introduction to AI</title>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #141420;
+            color: #e8e8f0;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            line-height: 1.8;
+            font-size: 18px;
+        }
+
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 0 28px;
+        }
+
+        /* === Language toggle === */
+        .lang-toggle {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            background: #2a2a44;
+            border: 1px solid #4a4a70;
+            border-radius: 20px;
+            padding: 6px 14px;
+            cursor: pointer;
+            font-size: 13px;
+            font-family: sans-serif;
+            color: #a0a0d0;
+            z-index: 100;
+            transition: background 0.2s;
+        }
+        .lang-toggle:hover { background: #363658; }
+
+        /* === Hero === */
+        .hero {
+            padding: 90px 0 44px;
+        }
+
+        .hero-label {
+            font-size: 12px;
+            font-family: sans-serif;
+            color: #444;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .hero h1 {
+            font-size: 52px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.15;
+            margin-bottom: 24px;
+        }
+
+        .hero h1 .hero-rest {
+            display: block;
+            font-size: 25px;
+            font-weight: 400;
+            color: #5a5aaa;
+            line-height: 1.4;
+            margin-top: 10px;
+        }
+
+        .hero-sub {
+            color: #8686b0;
+            font-size: 17px;
+            font-style: italic;
+            line-height: 1.75;
+            max-width: 620px;
+        }
+
+        /* === Course description === */
+        .course-desc {
+            padding-bottom: 40px;
+        }
+
+        .course-desc p {
+            color: #999;
+            font-size: 17px;
+            margin-bottom: 18px;
+            line-height: 1.85;
+        }
+
+        .course-desc p:last-child {
+            margin-bottom: 0;
+        }
+
+        .course-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 28px;
+        }
+
+        .meta-pill {
+            background: #1c1c2e;
+            border: 1px solid #2a2a40;
+            border-radius: 20px;
+            padding: 5px 14px;
+            font-size: 12px;
+            font-family: sans-serif;
+            color: #5a5a80;
+            letter-spacing: 0.3px;
+        }
+
+        /* === How this course works === */
+        .howto {
+            padding: 22px 24px 20px;
+            background: #12121e;
+            border: 1px solid #232338;
+            border-radius: 10px;
+            margin-bottom: 56px;
+        }
+
+        .howto-label {
+            font-size: 11px;
+            font-family: sans-serif;
+            color: #4a4a70;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+        }
+
+        .howto ul {
+            list-style: none;
+        }
+
+        .howto li {
+            font-size: 14px;
+            font-family: sans-serif;
+            color: #6a6a88;
+            line-height: 1.65;
+            margin-bottom: 9px;
+            padding-left: 16px;
+            position: relative;
+        }
+
+        .howto li:last-child { margin-bottom: 0; }
+
+        .howto li::before {
+            content: "–";
+            position: absolute;
+            left: 0;
+            color: #3a3a58;
+        }
+
+        /* === Class list === */
+        .classes {
+            padding: 0 0 80px;
+        }
+
+        .section-label {
+            font-size: 11px;
+            font-family: sans-serif;
+            color: #333;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+        }
+
+        /* === Accordion (details/summary) === */
+        details {
+            border: 1px solid #2a2a40;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            background: #1a1a2a;
+            overflow: hidden;
+        }
+
+        details[open] {
+            border-color: #3a3a58;
+        }
+
+        summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 22px 28px;
+            display: flex;
+            align-items: baseline;
+            gap: 16px;
+            user-select: none;
+            transition: background 0.15s;
+        }
+        summary::-webkit-details-marker { display: none; }
+        summary:hover { background: #1e1e30; }
+
+        .class-num {
+            font-size: 11px;
+            font-family: sans-serif;
+            color: #333;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            flex-shrink: 0;
+            padding-top: 3px;
+        }
+
+        .class-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #c8c8e0;
+            flex: 1;
+        }
+
+        details[open] .class-title { color: #fff; }
+
+        .class-arrow {
+            font-size: 12px;
+            color: #333;
+            flex-shrink: 0;
+            transition: transform 0.2s;
+            font-family: sans-serif;
+        }
+        details[open] .class-arrow { transform: rotate(90deg); color: #5a5a80; }
+
+        .class-theme {
+            font-size: 14px;
+            color: #444;
+            font-family: sans-serif;
+            font-style: italic;
+            flex-shrink: 0;
+            max-width: 260px;
+            text-align: right;
+            line-height: 1.4;
+        }
+
+        /* === Class body === */
+        .class-body {
+            padding: 0 28px 28px;
+            border-top: 1px solid #222234;
+        }
+
+        .class-theme-full {
+            font-size: 15px;
+            color: #555;
+            font-family: sans-serif;
+            font-style: italic;
+            padding: 20px 0 24px;
+            border-bottom: 1px solid #1e1e2e;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        /* === Module cards === */
+        .modules {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .module-card {
+            background: #141420;
+            border: 1px solid #222234;
+            border-radius: 10px;
+            padding: 22px 24px 20px;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            transition: border-color 0.15s, background 0.15s;
+        }
+        a.module-card:hover {
+            border-color: #3a3a58;
+            background: #181828;
+            text-decoration: none;
+        }
+
+        .module-card.inclass {
+            opacity: 0.55;
+            cursor: default;
+        }
+
+        .module-top {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .activity-badge {
+            font-size: 11px;
+            font-family: sans-serif;
+            font-weight: bold;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+        .badge-mini    { background: #131d2e; border: 1px solid #2a4070; color: #5080c0; }
+        .badge-inter   { background: #1e1a0c; border: 1px solid #604010; color: #a06020; }
+        .badge-discuss { background: #1a1a2e; border: 1px solid #3a3a70; color: #6060a0; }
+        .badge-tinker  { background: #23162b; border: 1px solid #5a3a70; color: #b070d0; }
+        .badge-video   { background: #1a1e14; border: 1px solid #3a5020; color: #70a040; }
+        .badge-test    { background: #2b1414; border: 1px solid #703030; color: #d06060; }
+
+        .module-name {
+            font-size: 17px;
+            font-weight: 700;
+            color: #ddd;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .module-desc {
+            font-size: 14px;
+            color: #555;
+            font-family: sans-serif;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .module-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .tag {
+            background: #1c1c2e;
+            color: #444464;
+            border: 1px solid #222236;
+            border-radius: 20px;
+            padding: 3px 10px;
+            font-size: 11px;
+            font-family: sans-serif;
+        }
+
+        .inclass-label {
+            font-size: 12px;
+            font-family: sans-serif;
+            color: #333;
+            margin-top: 10px;
+        }
+
+        /* === Homework === */
+        .homework {
+            margin-top: 28px;
+            padding: 18px 20px;
+            background: #12121e;
+            border: 1px solid #1e1e2e;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: sans-serif;
+            color: #444;
+            line-height: 1.6;
+        }
+
+        .homework strong {
+            color: #666;
+            font-weight: bold;
+        }
+
+        /* === Placeholder classes === */
+        .placeholder summary {
+            opacity: 0.35;
+            cursor: default;
+            pointer-events: none;
+        }
+
+        /* === Exam link (standalone, end of list) === */
+        .exam-link {
+            display: flex;
+            align-items: baseline;
+            gap: 16px;
+            padding: 22px 28px;
+            border: 1px solid #2a2a40;
+            border-radius: 12px;
+            margin-top: 24px;
+            background: #1a1a2a;
+            text-decoration: none;
+            user-select: none;
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .exam-link:hover {
+            background: #1e1e30;
+            border-color: #3a3a58;
+            text-decoration: none;
+        }
+        .exam-link .class-num   { color: #d06060; }
+        .exam-link .class-title { color: #c8c8e0; }
+        .exam-link:hover .class-title { color: #fff; }
+        .exam-link .class-arrow { color: #5a5a80; }
+
+        @media (max-width: 600px) {
+            .exam-link { padding: 18px 20px; gap: 12px; }
+        }
+
+        /* === Footer === */
+        footer {
+            text-align: center;
+            padding: 40px 24px;
+            color: #2a2a3a;
+            font-size: 13px;
+            font-family: sans-serif;
+        }
+        footer a { color: #333; }
+        footer a:hover { color: #666; }
+
+        a { color: #80b4f0; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        @media (max-width: 600px) {
+            .hero h1       { font-size: 38px; }
+            .hero h1 .hero-rest { font-size: 21px; }
+            .class-theme   { display: none; }
+            summary        { padding: 18px 20px; gap: 12px; }
+            .class-body    { padding: 0 20px 24px; }
+            .module-card   { padding: 18px 18px 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<button class="lang-toggle" onclick="toggleLang()">DE</button>
+
+<div class="container">
+
+    <div class="hero">
+        <div class="hero-label" data-i18n="hero.label">AI Foundations Course</div>
+        <h1>Passt<span class="hero-rest" data-i18n="hero.rest">An Introduction to AI</span></h1>
+        <p class="hero-sub" data-i18n="hero.sub">Passt is German for it fits. Passt schon means close enough, stop looking. A model will tell you both, and hearing the difference is the whole course.</p>
+    </div>
+
+    <div class="course-desc">
+        <p data-i18n="desc.p1">Twelve classes. No formulas on the first day. The math arrives when you need it.</p>
+        <p data-i18n="desc.p2">This course is for people who work with data, commission data products, or manage teams that build them. You will not leave knowing how to train the next language model. You will leave knowing what questions to ask when someone shows you one.</p>
+        <p data-i18n="desc.p3">Every topic has a direct track and an optional deep dive for the curious. The tags tell you how long something takes and how much code is involved.</p>
+        <div class="course-meta">
+            <span class="meta-pill" data-i18n="meta.classes">12 classes</span>
+            <span class="meta-pill" data-i18n="meta.hours">3 h each</span>
+            <span class="meta-pill" data-i18n="meta.hw">+ homework</span>
+            <span class="meta-pill" data-i18n="meta.lang">EN / DE</span>
+        </div>
+    </div>
+
+    <div class="howto">
+        <div class="howto-label" data-i18n="how.label">How this course works</div>
+        <ul>
+            <li data-i18n="how.l1">Mini-modules are self-contained. Each one runs twenty to thirty minutes, and inside a class you can take them in any order.</li>
+            <li data-i18n="how.l2">Tinker sessions are notebooks. You open Colab, run the code, break it, and fix it.</li>
+            <li data-i18n="how.l3">Everything is bilingual. The toggle in the corner switches this page and every module between English and German.</li>
+            <li data-i18n="how.l4">Sections marked "for the curious" are optional deep dives. They are not on the exam.</li>
+        </ul>
+    </div>
+
+    <div class="classes">
+        <div class="section-label" data-i18n="classes.label">Classes</div>
+
+        <details>
+            <summary>
+                <span class="class-num">01</span>
+                <span class="class-title" data-i18n="c1.title">What Is Intelligence? What Is Knowledge?</span>
+                <span class="class-theme" data-i18n="c1.theme">Before any algorithm, two questions.</span>
+                <span class="class-arrow">›</span>
+            </summary>
+            <div class="class-body">
+                <div class="class-theme-full" data-i18n="c1.theme.full">Before any algorithm, two questions. What are we trying to build? And how do we know if we know anything?</div>
+
+                <div class="modules">
+
+                    <a class="module-card" href="modules/can_machines_think/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-mini" data-i18n="badge.mini">mini-module</span>
+                            <span class="tag">~20 min</span>
+                            <span class="tag">no-code</span>
+                            <span class="tag">try-without-ai</span>
+                        </div>
+                        <div class="module-name" data-i18n="c1.m1.name">Can Machines Think?</div>
+                        <div class="module-desc" data-i18n="c1.m1.desc">Turing asked this in 1950. The question is still open. ML taxonomy, weak vs strong AI, and an analogy game that forces you to take a position before the theory arrives.</div>
+                    </a>
+
+                    <a class="module-card" href="modules/spiders_and_legs/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-mini" data-i18n="badge.mini">mini-module</span>
+                            <span class="tag">no-code</span>
+                            <span class="tag">try-without-ai</span>
+                            <span class="tag">statistics</span>
+                        </div>
+                        <div class="module-name" data-i18n="c1.m2.name">Empiricism and the Logic of Science</div>
+                        <div class="module-desc" data-i18n="c1.m2.desc">Sextus Empiricus, Karl Popper, and the question of what counts as knowledge. If it cannot be falsified, it is not science. This is the epistemological frame the rest of the course runs on.</div>
+                    </a>
+
+                    <div class="module-card inclass">
+                        <div class="module-top">
+                            <span class="activity-badge badge-discuss" data-i18n="badge.discuss">group discussion</span>
+                            <span class="tag">~30 min</span>
+                            <span class="tag">no-code</span>
+                            <span class="tag">try-without-ai</span>
+                        </div>
+                        <div class="module-name" data-i18n="c1.m3.name">What Is Intelligence?</div>
+                        <div class="module-desc" data-i18n="c1.m3.desc">Small groups produce definitions, merge, and critique each other. The class collects a capability list on the board, then sorts each item: weak AI, strong AI, or neither.</div>
+                        <div class="inclass-label" data-i18n="inclass.label">In-class activity, no link</div>
+                    </div>
+
+                    <a class="module-card" href="modules/is_ai/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-inter" data-i18n="badge.inter">intermediate</span>
+                            <span class="tag">~10 min</span>
+                            <span class="tag">no-code</span>
+                            <span class="tag">try-without-ai</span>
+                        </div>
+                        <div class="module-name" data-i18n="c1.m4.name">Is This AI?</div>
+                        <div class="module-desc" data-i18n="c1.m4.desc">Calculator, spam filter, GPS, Face ID. Vote on each one. The answer is not always obvious, and that is the point.</div>
+                    </a>
+
+                    <a class="module-card" href="modules/quiz1/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-inter" data-i18n="badge.inter">intermediate</span>
+                            <span class="tag">~10 min</span>
+                            <span class="tag">no-code</span>
+                            <span class="tag">try-without-ai</span>
+                        </div>
+                        <div class="module-name" data-i18n="c1.m5.name">Class 1 Quiz</div>
+                        <div class="module-desc" data-i18n="c1.m5.desc">A short knowledge check on the concepts from Class 1.</div>
+                    </a>
+
+                </div>
+
+                <div class="homework">
+                    <strong data-i18n="hw.label">Homework:</strong>
+                    <span data-i18n="c1.hw"> Find one dubious AI claim in the media, advertising, or a news headline. Bring it to Class 2 with your diagnosis.</span>
+                </div>
+            </div>
+        </details>
+
+        <details>
+            <summary>
+                <span class="class-num">02</span>
+                <span class="class-title" data-i18n="c2.title">Learning Has Many Faces</span>
+                <span class="class-theme" data-i18n="c2.theme">Let's see them all.</span>
+                <span class="class-arrow">›</span>
+            </summary>
+            <div class="class-body">
+                <div class="class-theme-full" data-i18n="c2.theme.full">Let's see them all. An introduction to the different shapes data and logic can take.</div>
+
+                <div class="modules">
+
+                    <a class="module-card" href="modules/duction/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-mini" data-i18n="badge.mini">mini-module</span>
+                            <span class="tag">all</span>
+                            <span class="tag">~40 min</span>
+                            <span class="tag">no-code</span>
+                            <span class="tag">try-without-ai</span>
+                            <span class="tag">ml-fundamentals</span>
+                        </div>
+                        <div class="module-name" data-i18n="c2.m1.name">Deduction vs. Induction</div>
+                        <div class="module-desc" data-i18n="c2.m1.desc">Exploring the difference between top-down reasoning and bottom-up learning from data.</div>
+                    </a>
+
+                    <a class="module-card" href="modules/anscombe/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-inter" data-i18n="badge.inter">intermediate</span>
+                            <span class="tag">all</span>
+                            <span class="tag">~40 min</span>
+                            <span class="tag">try-without-ai</span>
+                            <span class="tag">statistics</span>
+                            <span class="tag">ml-fundamentals</span>
+                        </div>
+                        <div class="module-name" data-i18n="c2.m2.name">Anscombe's Quartet</div>
+                        <div class="module-desc" data-i18n="c2.m2.desc">Why looking at your data matters. Four datasets with identical summary statistics and completely different distributions.</div>
+                    </a>
+
+                    <a class="module-card" href="modules/parametric/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-mini" data-i18n="badge.mini">mini-module</span>
+                            <span class="tag">optional</span>
+                            <span class="tag">all</span>
+                            <span class="tag">~20 min</span>
+                            <span class="tag">no-code</span>
+                            <span class="tag">try-without-ai</span>
+                            <span class="tag">ml-fundamentals</span>
+                        </div>
+                        <div class="module-name" data-i18n="c2.m3.name">Parametric vs Non-parametric Models</div>
+                        <div class="module-desc" data-i18n="c2.m3.desc">A quick optional dive into models that assume a specific form versus those that adapt freely to the data.</div>
+                    </a>
+
+                    <a class="module-card" href="modules/code_comprehension/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-tinker" data-i18n="badge.tinker">tinker-session</span>
+                            <span class="tag">all</span>
+                            <span class="tag">~60 min</span>
+                            <span class="tag">some-code</span>
+                            <span class="tag">ml-fundamentals</span>
+                        </div>
+                        <div class="module-name" data-i18n="c2.m4.name">Code Comprehension</div>
+                        <div class="module-desc" data-i18n="c2.m4.desc">How to read and map out the structural logic of a program before writing a single line of your own code.</div>
+                    </a>
+
+                </div>
+            </div>
+        </details>
+
+        <details>
+            <summary>
+                <span class="class-num">03</span>
+                <span class="class-title" data-i18n="c3.title">Linear Regression</span>
+                <span class="class-theme" data-i18n="c3.theme">The simplest useful model.</span>
+                <span class="class-arrow">›</span>
+            </summary>
+            <div class="class-body">
+                <div class="class-theme-full" data-i18n="c3.theme.full">The line that started it all. Find the best straight line through a cloud of points, understand why the imprecise training version works better, then try it on real data.</div>
+
+                <div class="modules">
+
+                    <a class="module-card" href="modules/hot_or_cold/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-mini" data-i18n="badge.mini">mini-module</span>
+                            <span class="tag">all</span>
+                            <span class="tag">~20 min</span>
+                            <span class="tag">no-code</span>
+                            <span class="tag">try-without-ai</span>
+                            <span class="tag">regression</span>
+                        </div>
+                        <div class="module-name" data-i18n="c3.m1.name">The Straightest Tool in the Shed</div>
+                        <div class="module-desc" data-i18n="c3.m1.desc">From Galton's Victorian curiosity to gradient descent. OLS gives you the exact answer in one step. The game makes you feel the loss landscape before you understand it.</div>
+                    </a>
+
+                    <a class="module-card" href="modules/sgd/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-mini" data-i18n="badge.mini">mini-module</span>
+                            <span class="tag">all</span>
+                            <span class="tag">~20 min</span>
+                            <span class="tag">no-code</span>
+                            <span class="tag">try-without-ai</span>
+                            <span class="tag">ml-fundamentals</span>
+                            <span class="tag">regression</span>
+                        </div>
+                        <div class="module-name" data-i18n="c3.m2.name">Downhill in the Dark</div>
+                        <div class="module-desc" data-i18n="c3.m2.desc">Batch gradient descent is precise and gets stuck. Stochastic gradient descent is sloppy and works better. Randomness as a design choice, not a flaw.</div>
+                    </a>
+
+                    <a class="module-card" href="modules/linregtutorial/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-tinker" data-i18n="badge.tinker">tinker-session</span>
+                            <span class="tag">all</span>
+                            <span class="tag">~60 min</span>
+                            <span class="tag">some-code</span>
+                            <span class="tag">use-ai-here</span>
+                            <span class="tag">regression</span>
+                        </div>
+                        <div class="module-name" data-i18n="c3.m3.name">Try It on Real Data</div>
+                        <div class="module-desc" data-i18n="c3.m3.desc">Download the insurance dataset, open the Colab notebook, and fit your first regression model on real numbers.</div>
+                    </a>
+
+                </div>
+            </div>
+        </details>
+
+        <details>
+            <summary>
+                <span class="class-num">04</span>
+                <span class="class-title" data-i18n="c4.title">Local Models &amp; Geometry</span>
+                <span class="class-theme" data-i18n="c4.theme">Not every question has one global answer.</span>
+                <span class="class-arrow">›</span>
+            </summary>
+            <div class="class-body">
+                <div class="class-theme-full" data-i18n="c4.theme.full">Not every question has one global answer. Sometimes the right rule depends entirely on where you are, and on who your neighbours are.</div>
+
+                <div class="modules">
+
+                    <a class="module-card" href="modules/glocal/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-mini" data-i18n="badge.mini">mini-module</span>
+                            <span class="tag">~20 min</span>
+                            <span class="tag">no-code</span>
+                            <span class="tag">try-without-ai</span>
+                            <span class="tag">ml-fundamentals</span>
+                        </div>
+                        <div class="module-name" data-i18n="c4.m1.name">Global vs Local Models</div>
+                        <div class="module-desc" data-i18n="c4.m1.desc">One equation for everything, or a different rule for every neighbourhood. Kurchatov's paths against Sanssouci's geometry, plus an interactive demo where you draw points and watch both models react.</div>
+                    </a>
+
+                    <a class="module-card" href="modules/neighbours/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-mini" data-i18n="badge.mini">mini-module</span>
+                            <span class="tag">~30 min</span>
+                            <span class="tag">no-code</span>
+                            <span class="tag">try-without-ai</span>
+                            <span class="tag">ml-fundamentals</span>
+                        </div>
+                        <div class="module-name" data-i18n="c4.m2.name">Birds of a Feather: K-NN Classification</div>
+                        <div class="module-desc" data-i18n="c4.m2.desc">K-Nearest Neighbours turns a proverb into an algorithm. A territorial game between Blobovia and Splotchia. Place dots, watch the decision boundary emerge, change K and the distance metric, watch the border shift.</div>
+                    </a>
+
+                    <a class="module-card" href="modules/bv/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-mini" data-i18n="badge.mini">mini-module</span>
+                            <span class="tag">~20 min</span>
+                            <span class="tag">no-code</span>
+                            <span class="tag">try-without-ai</span>
+                            <span class="tag">regression</span>
+                        </div>
+                        <div class="module-name" data-i18n="c4.m3.name">K-NN Regression and the Bias-Variance Trade-off</div>
+                        <div class="module-desc" data-i18n="c4.m3.desc">From voting to averaging. One number, K, slides you along a curve between two kinds of wrong: a model too rigid to follow the data, and one too twitchy to ignore noise.</div>
+                    </a>
+
+                    <a class="module-card" href="modules/dimcurse/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-mini" data-i18n="badge.mini">mini-module</span>
+                            <span class="tag">~20 min</span>
+                            <span class="tag">no-code</span>
+                            <span class="tag">try-without-ai</span>
+                            <span class="tag">ml-fundamentals</span>
+                        </div>
+                        <div class="module-name" data-i18n="c4.m4.name">The Curse of Dimensionality</div>
+                        <div class="module-desc" data-i18n="c4.m4.desc">High-dimensional space does not behave like the space you can draw on paper. Three puzzles: spheres vanishing inside cubes, all volume moving to the surface, random vectors going perpendicular. Enough to convince you the intuition breaks.</div>
+                    </a>
+
+                </div>
+            </div>
+        </details>
+
+        <details>
+            <summary>
+                <span class="class-num">05</span>
+                <span class="class-title" data-i18n="c5.title">Regularisation</span>
+                <span class="class-theme" data-i18n="c5.theme">When the model fits too well.</span>
+                <span class="class-arrow">›</span>
+            </summary>
+            <div class="class-body">
+                <div class="class-theme-full" data-i18n="c5.theme.full">A model that memorises the training data has learned nothing. It has copied. Regularisation is a small penalty on the weights that makes the model forget just enough to be right about data it has never seen.</div>
+
+                <div class="modules">
+
+                    <a class="module-card" href="modules/regularisation/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-mini" data-i18n="badge.mini">mini-module</span>
+                            <span class="tag">~25 min</span>
+                            <span class="tag">no-code</span>
+                            <span class="tag">try-without-ai</span>
+                            <span class="tag">regularisation</span>
+                        </div>
+                        <div class="module-name" data-i18n="c5.m1.name">Regularisation: Shift and Spread</div>
+                        <div class="module-desc" data-i18n="c5.m1.desc">What a penalty buys you. A little shift in exchange for a lot less spread. One dial, two errors moving in opposite directions, and the setting where their sum bottoms out.</div>
+                    </a>
+
+                    <a class="module-card" href="modules/ridge/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-mini" data-i18n="badge.mini">mini-module</span>
+                            <span class="tag">~25 min</span>
+                            <span class="tag">no-code</span>
+                            <span class="tag">try-without-ai</span>
+                            <span class="tag">regularisation</span>
+                        </div>
+                        <div class="module-name" data-i18n="c5.m2.name">Ridge: Make Everything Smaller</div>
+                        <div class="module-desc" data-i18n="c5.m2.desc">The L2 penalty. Every weight shrinks towards zero and none of them ever arrives. Turn the dial, watch five bars get shorter together, and see why the biggest weight has the most to lose.</div>
+                    </a>
+
+                    <a class="module-card" href="modules/lasso/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-mini" data-i18n="badge.mini">mini-module</span>
+                            <span class="tag">~25 min</span>
+                            <span class="tag">no-code</span>
+                            <span class="tag">try-without-ai</span>
+                            <span class="tag">regularisation</span>
+                        </div>
+                        <div class="module-name" data-i18n="c5.m3.name">Lasso: Some Coefficients Die</div>
+                        <div class="module-desc" data-i18n="c5.m3.desc">The L1 penalty. Weights do not shrink politely here. They hit exactly zero and stay there, which means the model has quietly thrown a feature away. Feature selection, arriving as a side effect.</div>
+                    </a>
+
+                    <a class="module-card" href="https://colab.research.google.com/drive/1Dp7lR5VdDTN-mtOi-VXubpEEB_JcbzPF" target="_blank">
+                        <div class="module-top">
+                            <span class="activity-badge badge-tinker" data-i18n="badge.tinker">tinker-session</span>
+                            <span class="tag">~60 min</span>
+                            <span class="tag">some-code</span>
+                            <span class="tag">use-ai-here</span>
+                            <span class="tag">regularisation</span>
+                        </div>
+                        <div class="module-name" data-i18n="c5.m4.name">Ridge and Lasso on Real Data</div>
+                        <div class="module-desc" data-i18n="c5.m4.desc">The Colab notebook. Start with a model that fits the training set far too well, add both penalties, and watch the coefficients move. Tune the strength until the test error is as low as it goes.</div>
+                    </a>
+
+                </div>
+            </div>
+        </details>
+
+        <details>
+            <summary>
+                <span class="class-num">06</span>
+                <span class="class-title" data-i18n="c6.title">Classification Fundamentals</span>
+                <span class="class-theme" data-i18n="c6.theme">When the answer is a category, not a number.</span>
+                <span class="class-arrow">›</span>
+            </summary>
+            <div class="class-body">
+                <div class="class-theme-full" data-i18n="c6.theme.full">When the answer is a category, not a number. The shape of a classifier, the metrics that judge it, and the Bayesian arithmetic underneath.</div>
+
+                <div class="modules">
+
+                    <a class="module-card" href="modules/decisions/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-mini" data-i18n="badge.mini">mini-module</span>
+                            <span class="tag">~40 min</span>
+                            <span class="tag">no-code</span>
+                            <span class="tag">try-without-ai</span>
+                            <span class="tag">classification</span>
+                        </div>
+                        <div class="module-name" data-i18n="c6.m1.name">Modelling Decisions</div>
+                        <div class="module-desc" data-i18n="c6.m1.desc">From Verhulst's rabbits to a vote in Bundestag. The sigmoid turns a sum of scores into a probability between zero and one. Three games: tilt the decision boundary, watch each feature deposit its log-odds, and drag the threshold to see precision trade places with recall.</div>
+                    </a>
+
+                    <a class="module-card" href="modules/shrooms/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-mini" data-i18n="badge.mini">mini-module</span>
+                            <span class="tag">~25 min</span>
+                            <span class="tag">no-code</span>
+                            <span class="tag">try-without-ai</span>
+                            <span class="tag">classification</span>
+                            <span class="tag">evaluation</span>
+                        </div>
+                        <div class="module-name" data-i18n="c6.m2.name">Pilzwanderung: The Four Mistakes</div>
+                        <div class="module-desc" data-i18n="c6.m2.desc">Precision, recall, accuracy, F1. Four numbers arguing about the same basket of mushrooms. Pick a threshold, watch dinner turn into a funeral. One demonstration of why ninety-nine percent accuracy can still kill you.</div>
+                    </a>
+
+                    <a class="module-card" href="modules/bayes/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-mini" data-i18n="badge.mini">mini-module</span>
+                            <span class="tag">~40 min</span>
+                            <span class="tag">no-code</span>
+                            <span class="tag">try-without-ai</span>
+                            <span class="tag">bayes</span>
+                            <span class="tag">inference</span>
+                        </div>
+                        <div class="module-name" data-i18n="c6.m3.name">Thinking in Chances</div>
+                        <div class="module-desc" data-i18n="c6.m3.desc">A patient tests positive on a ninety-nine percent accurate test. Most people say ninety-nine. The answer is closer to fifty. Three games: a mammogram, an urn, and Turing's Banburismus at Bletchley Park. All built on the same arithmetic of changing your mind.</div>
+                    </a>
+
+                    <a class="module-card" href="modules/test6/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-test" data-i18n="badge.test">self-test</span>
+                            <span class="tag">~30 min</span>
+                            <span class="tag">no-code</span>
+                            <span class="tag">try-without-ai</span>
+                            <span class="tag">evaluation</span>
+                        </div>
+                        <div class="module-name" data-i18n="c6.m4.name">Self-Test: Modules 1 to 6</div>
+                        <div class="module-desc" data-i18n="c6.m4.desc">Fourteen multiple-choice questions and two open ones, covering everything from Class 1 through Class 6. One at a time. A checkpoint before the second half of the course.</div>
+                    </a>
+
+                </div>
+            </div>
+        </details>
+
+        <details>
+            <summary>
+                <span class="class-num">07</span>
+                <span class="class-title" data-i18n="c7.title">Decision Trees</span>
+                <span class="class-theme" data-i18n="c7.theme">A model you can draw on a whiteboard.</span>
+                <span class="class-arrow">›</span>
+            </summary>
+            <div class="class-body">
+                <div class="class-theme-full" data-i18n="c7.theme.full">A model you can draw on a whiteboard. How to split, when to stop, and what the tree is actually learning. The whole thing is a game of twenty questions, played greedily.</div>
+
+                <div class="modules">
+
+                    <a class="module-card" href="modules/akinator/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-mini" data-i18n="badge.mini">mini-module</span>
+                            <span class="tag">~20 min</span>
+                            <span class="tag">no-code</span>
+                            <span class="tag">try-without-ai</span>
+                            <span class="tag">trees-and-forests</span>
+                            <span class="tag">classification</span>
+                        </div>
+                        <div class="module-name" data-i18n="c7.m1.name">The Animal Guesser</div>
+                        <div class="module-desc" data-i18n="c7.m1.desc">Think of an animal. The machine asks yes-or-no questions and narrows the field until it names your pick. That is a decision tree, built one question at a time. The question you ask first is the one that matters most.</div>
+                    </a>
+
+                    <a class="module-card" href="modules/entropy/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-mini" data-i18n="badge.mini">mini-module</span>
+                            <span class="tag">~20 min</span>
+                            <span class="tag">no-code</span>
+                            <span class="tag">try-without-ai</span>
+                            <span class="tag">trees-and-forests</span>
+                            <span class="tag">math-foundations</span>
+                        </div>
+                        <div class="module-name" data-i18n="c7.m2.name">Entropy, Gini, Information Gain</div>
+                        <div class="module-desc" data-i18n="c7.m2.desc">How does a tree know which question to ask first? Two rulers for measuring a mixed deck, and one number that scores a split. Built on 712 Titanic passengers. Why "sex" beats "age" as a first question, and why a clever-sounding question can tell you nothing.</div>
+                    </a>
+
+                    <a class="module-card" href="modules/titanic/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-tinker" data-i18n="badge.tinker">tinker-session</span>
+                            <span class="tag">~60 min</span>
+                            <span class="tag">some-code</span>
+                            <span class="tag">both</span>
+                            <span class="tag">trees-and-forests</span>
+                            <span class="tag">classification</span>
+                            <span class="tag">ai-in-practice</span>
+                        </div>
+                        <div class="module-name" data-i18n="c7.m3.name">Titanic Decision Tree</div>
+                        <div class="module-desc" data-i18n="c7.m3.desc">Put yourself in the passenger table and let the tree decide. A Colab notebook that builds a tree on who lived and who died, reads its splits out loud, and confronts what the features actually encode. The uncomfortable conversation is the point.</div>
+                    </a>
+
+                </div>
+            </div>
+        </details>
+
+        <details>
+            <summary>
+                <span class="class-num">08</span>
+                <span class="class-title" data-i18n="c8.title">Ensembles</span>
+                <span class="class-theme" data-i18n="c8.theme">One tree memorises. A thousand trees generalise.</span>
+                <span class="class-arrow">›</span>
+            </summary>
+            <div class="class-body">
+                <div class="class-theme-full" data-i18n="c8.theme.full">One tree memorises. A thousand trees generalise. Why aggregating many weak models beats any single strong one.</div>
+
+                <div class="modules">
+
+                    <a class="module-card" href="modules/ensambles/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-mini" data-i18n="badge.mini">mini-module</span>
+                            <span class="tag">~20 min</span>
+                            <span class="tag">no-code</span>
+                            <span class="tag">try-without-ai</span>
+                            <span class="tag">trees-and-forests</span>
+                            <span class="tag">ml-fundamentals</span>
+                        </div>
+                        <div class="module-name" data-i18n="c8.m1.name">One Tree Is a Liar</div>
+                        <div class="module-desc" data-i18n="c8.m1.desc">Bagging, stacking, and boosting, the three ways to turn a crowd of unreliable models into one you can trust. Built on the Titanic tree, with real accuracy climbing from a single overfit tree to a blended ensemble, and a sandbox to watch each strategy fit a noisy curve.</div>
+                    </a>
+
+                    <a class="module-card" href="modules/boosting/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-mini" data-i18n="badge.mini">mini-module</span>
+                            <span class="tag">~20 min</span>
+                            <span class="tag">no-code</span>
+                            <span class="tag">try-without-ai</span>
+                            <span class="tag">trees-and-forests</span>
+                            <span class="tag">math-foundations</span>
+                        </div>
+                        <div class="module-name" data-i18n="c8.m2.name">Chasing the Leftovers</div>
+                        <div class="module-desc" data-i18n="c8.m2.desc">Gradient boosting, one residual at a time. The prediction sits up top, the leftover error below with the next tree already fit to it. Add trees by hand, turn the learning rate, and watch the test error bottom out and climb back into overfitting.</div>
+                    </a>
+
+                </div>
+            </div>
+        </details>
+
+        <details>
+            <summary>
+                <span class="class-num">09</span>
+                <span class="class-title" data-i18n="c9.title">Validation &amp; Model Selection</span>
+                <span class="class-theme" data-i18n="c9.theme">You built a model. Now prove it works.</span>
+                <span class="class-arrow">›</span>
+            </summary>
+            <div class="class-body">
+                <div class="class-theme-full" data-i18n="c9.theme.full">You built a model. Now prove it works, on data it has not seen, with methods that do not cheat.</div>
+
+                <div class="modules">
+
+                    <a class="module-card" href="modules/testtrain/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-mini" data-i18n="badge.mini">mini-module</span>
+                            <span class="tag">~20 min</span>
+                            <span class="tag">no-code</span>
+                            <span class="tag">try-without-ai</span>
+                            <span class="tag">evaluation</span>
+                        </div>
+                        <div class="module-name" data-i18n="c9.m1.name">Memorise the Answers</div>
+                        <div class="module-desc" data-i18n="c9.m1.desc">Every exam question in this course is already published, and learning them cold is the goal. For a model it is the trap. Train on some rows, seal the rest, score on what it never saw. Two sliders show why 80/20 is a habit and not a result, and how many sealed questions a number actually needs before you can trust it.</div>
+                    </a>
+
+                    <a class="module-card" href="modules/folds/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-mini" data-i18n="badge.mini">mini-module</span>
+                            <span class="tag">~20 min</span>
+                            <span class="tag">some-code</span>
+                            <span class="tag">try-without-ai</span>
+                            <span class="tag">evaluation</span>
+                        </div>
+                        <div class="module-name" data-i18n="c9.m2.name">The Knobs and the Folds</div>
+                        <div class="module-desc" data-i18n="c9.m2.desc">Parameters are learned. Hyperparameters you pick yourself, like the churn cutoff you set back in logistic regression. Grid search tries every combination and multiplies fast. Score them all on one validation split and you overfit to it, so you rotate the split instead. K-fold, leave-one-out, stratified, and why GridSearchCV folds the two moves into one.</div>
+                    </a>
+
+                    <a class="module-card" href="modules/simpson/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-mini" data-i18n="badge.mini">mini-module</span>
+                            <span class="tag">~25 min</span>
+                            <span class="tag">no-code</span>
+                            <span class="tag">try-without-ai</span>
+                            <span class="tag">statistics</span>
+                            <span class="tag">evaluation</span>
+                        </div>
+                        <div class="module-name" data-i18n="c9.m3.name">The Average Agrees With No One</div>
+                        <div class="module-desc" data-i18n="c9.m3.desc">The median American wage rose since 2000 while it fell for every education group. Berkeley looked biased against women in aggregate and was not, department by department. A slider flips a discount-versus-value line the moment you colour the two hidden groups. Then the same trap on a churn model that posts 92% overall and 54% where it counts.</div>
+                    </a>
+
+                </div>
+            </div>
+        </details>
+
+        <details>
+            <summary>
+                <span class="class-num">10</span>
+                <span class="class-title" data-i18n="c10.title">Recommendations &amp; Neural Networks</span>
+                <span class="class-theme" data-i18n="c10.theme">How machines learn what you want.</span>
+                <span class="class-arrow">›</span>
+            </summary>
+            <div class="class-body">
+                <div class="class-theme-full" data-i18n="c10.theme.full">How machines learn what you want, and how a network of plain neurons learns things nobody wrote down. Two recommender methods, the rich-get-richer dynamics behind every feed, a game with no players, and a single neuron grown into a network.</div>
+
+                <div class="modules">
+
+                    <a class="module-card" href="modules/people_like_you/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-mini" data-i18n="badge.mini">mini-module</span>
+                            <span class="tag">~25 min</span>
+                            <span class="tag">no-code</span>
+                            <span class="tag">try-without-ai</span>
+                            <span class="tag">recommendations</span>
+                        </div>
+                        <div class="module-name" data-i18n="c10.m1.name">People Like You</div>
+                        <div class="module-desc" data-i18n="c10.m1.desc">Spotify built you a playlist you never asked for. Two machines can produce that guess and they fail in opposite ways. Collaborative filtering finds the viewer most like you and hands you what they loved. Content-based reads what a film is made of and serves more of the same. The Neighbor Finder and the Feature Matcher run both, then watch the same seed send you down two paths.</div>
+                    </a>
+
+                    <a class="module-card" href="modules/boards_of_destiny/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-mini" data-i18n="badge.mini">mini-module</span>
+                            <span class="tag">~25 min</span>
+                            <span class="tag">no-code</span>
+                            <span class="tag">try-without-ai</span>
+                            <span class="tag">recommendations</span>
+                            <span class="tag">statistics</span>
+                        </div>
+                        <div class="module-name" data-i18n="c10.m2.name">Boards of Destiny</div>
+                        <div class="module-desc" data-i18n="c10.m2.desc">Galton's 1889 board drops a ball through fair pegs and a bell curve appears every time. Rig the pegs so past losses lower future odds, add competing balls, and the bell collapses into a power law where a few bins take almost everything. The same dynamics run inside every recommendation feed. A video, three rigged boards to play with, and the discovery problem that keeps new creators invisible.</div>
+                    </a>
+
+                    <a class="module-card" href="modules/game_of_life/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-mini" data-i18n="badge.mini">mini-module</span>
+                            <span class="tag">optional</span>
+                            <span class="tag">~20 min</span>
+                            <span class="tag">no-code</span>
+                            <span class="tag">try-without-ai</span>
+                            <span class="tag">neural-networks</span>
+                            <span class="tag">math-foundations</span>
+                        </div>
+                        <div class="module-name" data-i18n="c10.m3.name">No One Drew the Glider</div>
+                        <div class="module-desc" data-i18n="c10.m3.desc">A cell is alive or dead. Count its eight neighbors, and four rules decide the next step. Nothing in those four lines mentions a glider or a gun, yet both walk out when you press play. Conway's 1970 game with no players, a grid to draw on, three starter patterns, and the bridge from rule-following to behaviour nobody programmed.</div>
+                    </a>
+
+                    <a class="module-card" href="modules/nets/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-mini" data-i18n="badge.mini">mini-module</span>
+                            <span class="tag">~30 min</span>
+                            <span class="tag">no-code</span>
+                            <span class="tag">try-without-ai</span>
+                            <span class="tag">neural-networks</span>
+                        </div>
+                        <div class="module-name" data-i18n="c10.m4.name">Neural Networks</div>
+                        <div class="module-desc" data-i18n="c10.m4.desc">A single neuron takes a few numbers, weights them, adds a bias, and squashes the total into a confidence between zero and one. Decide whether to send a churning customer a coupon, one neuron at a time. Stack a row of them into a layer, stack layers into depth, and watch why depth buys you things one neuron cannot. Ends with the perceptron and how it learns its own weights.</div>
+                    </a>
+
+                </div>
+            </div>
+        </details>
+
+        <details>
+            <summary>
+                <span class="class-num">11</span>
+                <span class="class-title" data-i18n="c11.title">LLMs &amp; Generative AI</span>
+                <span class="class-theme" data-i18n="c11.theme">What changed.</span>
+                <span class="class-arrow">›</span>
+            </summary>
+            <div class="class-body">
+                <div class="class-theme-full" data-i18n="c11.theme.full">What changed. A model that guesses your next word, a model that scrubs a picture out of static, and the words you type to steer them both. Also what those words will not fix.</div>
+
+                <div class="modules">
+
+                    <a class="module-card" href="modules/gaps/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-mini" data-i18n="badge.mini">mini-module</span>
+                            <span class="tag">~25 min</span>
+                            <span class="tag">no-code</span>
+                            <span class="tag">try-without-ai</span>
+                            <span class="tag">llm-and-genai</span>
+                        </div>
+                        <div class="module-name" data-i18n="c11.m1.name">Fill in the Gaps</div>
+                        <div class="module-desc" data-i18n="c11.m1.desc">A language model has read everything and understood nothing. Its whole job: look at some words, guess the next one. You do this too, three words into a text message. A real trigram model trained on 1980s Reuters wire finishes your sentence live, one bet at a time, and shows the odds behind every word. Then why a chain with no memory writes fluent nonsense.</div>
+                    </a>
+
+                    <a class="module-card" href="modules/apophenic/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-mini" data-i18n="badge.mini">mini-module</span>
+                            <span class="tag">~20 min</span>
+                            <span class="tag">no-code</span>
+                            <span class="tag">try-without-ai</span>
+                            <span class="tag">llm-and-genai</span>
+                        </div>
+                        <div class="module-name" data-i18n="c11.m2.name">Apophenic Models</div>
+                        <div class="module-desc" data-i18n="c11.m2.desc">The last model wrote one word at a time. This one starts with a screen of television snow and scrapes the noise away until a picture is left. Apophenia is your brain finding faces in clouds; a diffusion model does the same thing on purpose and does not stop until the picture is sharp. Sliders to run the denoising yourself, pass by pass, and how the writer and the painter turn out to be doing the same job in opposite directions.</div>
+                    </a>
+
+                    <a class="module-card" href="modules/prompts/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-mini" data-i18n="badge.mini">mini-module</span>
+                            <span class="tag">~25 min</span>
+                            <span class="tag">no-code</span>
+                            <span class="tag">both</span>
+                            <span class="tag">llm-and-genai</span>
+                        </div>
+                        <div class="module-name" data-i18n="c11.m3.name">There Are No Magic Words</div>
+                        <div class="module-desc" data-i18n="c11.m3.desc">A student types: make this better. The essay comes back longer, smoother, rounder, and worse. The model is a very fast intern who has read the entire internet and knows nothing about you. It will do exactly what you say, which is a problem, because you rarely say what you mean. The anatomy of a prompt that works, the failures no prompt will fix, and an exercise in keeping your own head.</div>
+                    </a>
+
+                </div>
+            </div>
+        </details>
+
+        <details>
+            <summary>
+                <span class="class-num">12</span>
+                <span class="class-title" data-i18n="c12.title">AI in Practice: Bias, Society, Synthesis</span>
+                <span class="class-theme" data-i18n="c12.theme">What happens when the model meets the real world.</span>
+                <span class="class-arrow">›</span>
+            </summary>
+            <div class="class-body">
+                <div class="class-theme-full" data-i18n="c12.theme.full">What happens when the model meets the real world. A personality you can measure but cannot locate, a salary figure that shifts when you change one word about yourself, and what a lifetime of trusting the autopilot does to the person still in the seat.</div>
+
+                <div class="modules">
+
+                    <a class="module-card" href="modules/persona/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-mini" data-i18n="badge.mini">mini-module</span>
+                            <span class="tag">~20 min</span>
+                            <span class="tag">no-code</span>
+                            <span class="tag">try-without-ai</span>
+                            <span class="tag">llm-and-genai</span>
+                            <span class="tag">ai-in-practice</span>
+                        </div>
+                        <div class="module-name" data-i18n="c12.m1.name">The Model Has a Personality</div>
+                        <div class="module-desc" data-i18n="c12.m1.desc">Hand a standard personality test to GPT-4, then to Llama 2, then to Mixtral. No role play, no instruction about who to be. Three models, three different profiles. Personality means one thing here: measured behaviour, a property of the text with nothing behind it. And it drifts, which is why the teams that ship these systems log the score and keep re-testing it.</div>
+                    </a>
+
+                    <a class="module-card" href="modules/same_cv/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-mini" data-i18n="badge.mini">mini-module</span>
+                            <span class="tag">~25 min</span>
+                            <span class="tag">no-code</span>
+                            <span class="tag">try-without-ai</span>
+                            <span class="tag">llm-and-genai</span>
+                            <span class="tag">ai-in-practice</span>
+                        </div>
+                        <div class="module-name" data-i18n="c12.m2.name">Same CV, Different Advice</div>
+                        <div class="module-desc" data-i18n="c12.m2.desc">You ask an assistant what salary to request. Same field, same level, same city. Mention that you are a woman and the number drops. Four researchers from the NLP group at CAIRO, THWS ran exactly this at scale in 2025, across four models and five fields. The bias does not surface when you ask the model whether it is fair. It surfaces in the number.</div>
+                    </a>
+
+                    <a class="module-card" href="modules/magenta_line/">
+                        <div class="module-top">
+                            <span class="activity-badge badge-mini" data-i18n="badge.mini">mini-module</span>
+                            <span class="tag">~25 min</span>
+                            <span class="tag">no-code</span>
+                            <span class="tag">try-without-ai</span>
+                            <span class="tag">ai-in-practice</span>
+                        </div>
+                        <div class="module-name" data-i18n="c12.m3.name">Children of the Magenta Line</div>
+                        <div class="module-desc" data-i18n="c12.m3.desc">June 2009, an Airbus over the Atlantic. A frozen sensor drops the autopilot and hands three pilots a working airplane. They stall it into the ocean. Twelve years earlier a training captain had named the pattern: the more the automation flies, the less the pilot can. The autopilot never forgets how to fly. The pilot does. What that has to do with the tool that finishes your sentences.</div>
+                    </a>
+
+                </div>
+            </div>
+        </details>
+
+        <a class="exam-link" href="modules/exam/">
+            <span class="class-num" data-i18n="exam.label">Exam</span>
+            <span class="class-title" data-i18n="exam.title">Practice Exam: The Full Question Pool</span>
+            <span class="class-theme" data-i18n="exam.theme">Every question that can appear, published in advance.</span>
+            <span class="class-arrow">›</span>
+        </a>
+
+        <a class="exam-link" href="modules/open/">
+            <span class="class-num" data-i18n="open.label">Exam</span>
+            <span class="class-title" data-i18n="open.title">Open Questions: The Full Pool</span>
+            <span class="class-theme" data-i18n="open.theme">Fifteen of these appear on the exam. Model answers included.</span>
+            <span class="class-arrow">›</span>
+        </a>
+
+    </div>
+
+</div>
+
+<footer>
+    <a href="https://github.com/i-yam/passt" target="_blank">github.com/i-yam/passt</a>
+</footer>
+
+<script>
+
+const T = {
+    en: {
+        'hero.label':     'AI Foundations Course',
+        'hero.rest':      'An Introduction to AI',
+        'hero.sub':       'Passt is German for it fits. Passt schon means close enough, stop looking. A model will tell you both, and hearing the difference is the whole course.',
+        'desc.p1':        'Twelve classes. No formulas on the first day. The math arrives when you need it.',
+        'desc.p2':        'This course is for people who work with data, commission data products, or manage teams that build them. You will not leave knowing how to train the next language model. You will leave knowing what questions to ask when someone shows you one.',
+        'desc.p3':        'Every topic has a direct track and an optional deep dive for the curious. The tags tell you how long something takes and how much code is involved.',
+        'meta.classes':   '12 classes',
+        'meta.hours':     '3 h each',
+        'meta.hw':        '+ homework',
+        'meta.lang':      'EN / DE',
+        'how.label':      'How this course works',
+        'how.l1':         'Mini-modules are self-contained. Each one runs twenty to thirty minutes, and inside a class you can take them in any order.',
+        'how.l2':         'Tinker sessions are notebooks. You open Colab, run the code, break it, and fix it.',
+        'how.l3':         'Everything is bilingual. The toggle in the corner switches this page and every module between English and German.',
+        'how.l4':         'Sections marked "for the curious" are optional deep dives. They are not on the exam.',
+        'classes.label':  'Classes',
+        'badge.mini':     'mini-module',
+        'badge.inter':    'intermediate',
+        'badge.discuss':  'group discussion',
+        'badge.tinker':   'tinker-session',
+        'badge.video':    'video',
+        'badge.test':     'self-test',
+        'inclass.label':  'In-class activity, no link',
+        'hw.label':       'Homework:',
+
+        'c1.title':       'What Is Intelligence? What Is Knowledge?',
+        'c1.theme':       'Before any algorithm, two questions.',
+        'c1.theme.full':  'Before any algorithm, two questions. What are we trying to build? And how do we know if we know anything?',
+        'c1.m1.name':     'Can Machines Think?',
+        'c1.m1.desc':     'Turing asked this in 1950. The question is still open. ML taxonomy, weak vs strong AI, and an analogy game that forces you to take a position before the theory arrives.',
+        'c1.m2.name':     'Empiricism and the Logic of Science',
+        'c1.m2.desc':     'Sextus Empiricus, Karl Popper, and the question of what counts as knowledge. If it cannot be falsified, it is not science. This is the epistemological frame the rest of the course runs on.',
+        'c1.m3.name':     'What Is Intelligence?',
+        'c1.m3.desc':     'Small groups produce definitions, merge, and critique each other. The class collects a capability list on the board, then sorts each item: weak AI, strong AI, or neither.',
+        'c1.m4.name':     'Is This AI?',
+        'c1.m4.desc':     'Calculator, spam filter, GPS, Face ID. Vote on each one. The answer is not always obvious, and that is the point.',
+        'c1.m5.name':     'Class 1 Quiz',
+        'c1.m5.desc':     'A short knowledge check on the concepts from Class 1.',
+        'c1.hw':          ' Find one dubious AI claim in the media, advertising, or a news headline. Bring it to Class 2 with your diagnosis.',
+
+        'c2.title':       'Learning Has Many Faces',
+        'c2.theme':       'Let\'s see them all.',
+        'c2.theme.full':  'Let\'s see them all. An introduction to the different shapes data and logic can take.',
+        'c2.m1.name':     'Deduction vs. Induction',
+        'c2.m1.desc':     'Exploring the difference between top-down reasoning and bottom-up learning from data.',
+        'c2.m2.name':     'Anscombe\'s Quartet',
+        'c2.m2.desc':     'Why looking at your data matters. Four datasets with identical summary statistics and completely different distributions.',
+        'c2.m3.name':     'Parametric vs Non-parametric Models',
+        'c2.m3.desc':     'A quick optional dive into models that assume a specific form versus those that adapt freely to the data.',
+        'c2.m4.name':     'Code Comprehension',
+        'c2.m4.desc':     'How to read and map out the structural logic of a program before writing a single line of your own code.',
+
+        'c3.title':       'Linear Regression',
+        'c3.theme':       'The simplest useful model.',
+        'c3.theme.full':  'The line that started it all. Find the best straight line through a cloud of points, understand why the imprecise training version works better, then try it on real data.',
+        'c3.m1.name':     'The Straightest Tool in the Shed',
+        'c3.m1.desc':     'From Galton\'s Victorian curiosity to gradient descent. OLS gives you the exact answer in one step. The game makes you feel the loss landscape before you understand it.',
+        'c3.m2.name':     'Downhill in the Dark',
+        'c3.m2.desc':     'Batch gradient descent is precise and gets stuck. Stochastic gradient descent is sloppy and works better. Randomness as a design choice, not a flaw.',
+        'c3.m3.name':     'Try It on Real Data',
+        'c3.m3.desc':     'Download the insurance dataset, open the Colab notebook, and fit your first regression model on real numbers.',
+
+        'c4.title':       'Local Models & Geometry',
+        'c4.theme':       'Not every question has one global answer.',
+        'c4.theme.full':  'Not every question has one global answer. Sometimes the right rule depends entirely on where you are, and on who your neighbours are.',
+        'c4.m1.name':     'Global vs Local Models',
+        'c4.m1.desc':     'One equation for everything, or a different rule for every neighbourhood. Kurchatov\'s paths against Sanssouci\'s geometry, plus an interactive demo where you draw points and watch both models react.',
+        'c4.m2.name':     'Birds of a Feather: K-NN Classification',
+        'c4.m2.desc':     'K-Nearest Neighbours turns a proverb into an algorithm. A territorial game between Blobovia and Splotchia. Place dots, watch the decision boundary emerge, change K and the distance metric, watch the border shift.',
+        'c4.m3.name':     'K-NN Regression and the Bias-Variance Trade-off',
+        'c4.m3.desc':     'From voting to averaging. One number, K, slides you along a curve between two kinds of wrong: a model too rigid to follow the data, and one too twitchy to ignore noise.',
+        'c4.m4.name':     'The Curse of Dimensionality',
+        'c4.m4.desc':     'High-dimensional space does not behave like the space you can draw on paper. Three puzzles: spheres vanishing inside cubes, all volume moving to the surface, random vectors going perpendicular. Enough to convince you the intuition breaks.',
+
+        'c5.title':       'Regularisation',
+        'c5.theme':       'When the model fits too well.',
+        'c5.theme.full':  'A model that memorises the training data has learned nothing. It has copied. Regularisation is a small penalty on the weights that makes the model forget just enough to be right about data it has never seen.',
+        'c5.m1.name':     'Regularisation: Shift and Spread',
+        'c5.m1.desc':     'What a penalty buys you. A little shift in exchange for a lot less spread. One dial, two errors moving in opposite directions, and the setting where their sum bottoms out.',
+        'c5.m2.name':     'Ridge: Make Everything Smaller',
+        'c5.m2.desc':     'The L2 penalty. Every weight shrinks towards zero and none of them ever arrives. Turn the dial, watch five bars get shorter together, and see why the biggest weight has the most to lose.',
+        'c5.m3.name':     'Lasso: Some Coefficients Die',
+        'c5.m3.desc':     'The L1 penalty. Weights do not shrink politely here. They hit exactly zero and stay there, which means the model has quietly thrown a feature away. Feature selection, arriving as a side effect.',
+        'c5.m4.name':     'Ridge and Lasso on Real Data',
+        'c5.m4.desc':     'The Colab notebook. Start with a model that fits the training set far too well, add both penalties, and watch the coefficients move. Tune the strength until the test error is as low as it goes.',
+
+        'c6.title':       'Classification Fundamentals',
+        'c6.theme':       'When the answer is a category, not a number.',
+        'c6.theme.full':  'When the answer is a category, not a number. The shape of a classifier, the metrics that judge it, and the Bayesian arithmetic underneath.',
+        'c6.m1.name':     'Modelling Decisions',
+        'c6.m1.desc':     'From Verhulst\'s rabbits to a vote in Bundestag. The sigmoid turns a sum of scores into a probability between zero and one. Three games: tilt the decision boundary, watch each feature deposit its log-odds, and drag the threshold to see precision trade places with recall.',
+        'c6.m2.name':     'Pilzwanderung: The Four Mistakes',
+        'c6.m2.desc':     'Precision, recall, accuracy, F1. Four numbers arguing about the same basket of mushrooms. Pick a threshold, watch dinner turn into a funeral. One demonstration of why ninety-nine percent accuracy can still kill you.',
+        'c6.m3.name':     'Thinking in Chances',
+        'c6.m3.desc':     'A patient tests positive on a ninety-nine percent accurate test. Most people say ninety-nine. The answer is closer to fifty. Three games: a mammogram, an urn, and Turing\'s Banburismus at Bletchley Park. All built on the same arithmetic of changing your mind.',
+        'c6.m4.name':     'Self-Test: Modules 1 to 6',
+        'c6.m4.desc':     'Fourteen multiple-choice questions and two open ones, covering everything from Class 1 through Class 6. One at a time. A checkpoint before the second half of the course.',
+
+        'c7.title':       'Decision Trees',
+        'c7.theme':       'A model you can draw on a whiteboard.',
+        'c7.theme.full':  'A model you can draw on a whiteboard. How to split, when to stop, and what the tree is actually learning. The whole thing is a game of twenty questions, played greedily.',
+        'c7.m1.name':     'The Animal Guesser',
+        'c7.m1.desc':     'Think of an animal. The machine asks yes-or-no questions and narrows the field until it names your pick. That is a decision tree, built one question at a time. The question you ask first is the one that matters most.',
+        'c7.m2.name':     'Entropy, Gini, Information Gain',
+        'c7.m2.desc':     'How does a tree know which question to ask first? Two rulers for measuring a mixed deck, and one number that scores a split. Built on 712 Titanic passengers. Why "sex" beats "age" as a first question, and why a clever-sounding question can tell you nothing.',
+        'c7.m3.name':     'Titanic Decision Tree',
+        'c7.m3.desc':     'Put yourself in the passenger table and let the tree decide. A Colab notebook that builds a tree on who lived and who died, reads its splits out loud, and confronts what the features actually encode. The uncomfortable conversation is the point.',
+
+        'c8.title':       'Ensembles',
+        'c8.theme':       'One tree memorises. A thousand trees generalise.',
+        'c8.theme.full':  'One tree memorises. A thousand trees generalise. Why aggregating many weak models beats any single strong one.',
+        'c8.m1.name':     'One Tree Is a Liar',
+        'c8.m1.desc':     'Bagging, stacking, and boosting, the three ways to turn a crowd of unreliable models into one you can trust. Built on the Titanic tree, with real accuracy climbing from a single overfit tree to a blended ensemble, and a sandbox to watch each strategy fit a noisy curve.',
+        'c8.m2.name':     'Chasing the Leftovers',
+        'c8.m2.desc':     'Gradient boosting, one residual at a time. The prediction sits up top, the leftover error below with the next tree already fit to it. Add trees by hand, turn the learning rate, and watch the test error bottom out and climb back into overfitting.',
+
+        'c9.title':       'Validation & Model Selection',
+        'c9.theme':       'You built a model. Now prove it works.',
+        'c9.theme.full':  'You built a model. Now prove it works, on data it has not seen, with methods that do not cheat.',
+        'c9.m1.name':     'Memorise the Answers',
+        'c9.m1.desc':     'Every exam question in this course is already published, and learning them cold is the goal. For a model it is the trap. Train on some rows, seal the rest, score on what it never saw. Two sliders show why 80/20 is a habit and not a result, and how many sealed questions a number actually needs before you can trust it.',
+        'c9.m2.name':     'The Knobs and the Folds',
+        'c9.m2.desc':     'Parameters are learned. Hyperparameters you pick yourself, like the churn cutoff you set back in logistic regression. Grid search tries every combination and multiplies fast. Score them all on one validation split and you overfit to it, so you rotate the split instead. K-fold, leave-one-out, stratified, and why GridSearchCV folds the two moves into one.',
+        'c9.m3.name':     'The Average Agrees With No One',
+        'c9.m3.desc':     'The median American wage rose since 2000 while it fell for every education group. Berkeley looked biased against women in aggregate and was not, department by department. A slider flips a discount-versus-value line the moment you colour the two hidden groups. Then the same trap on a churn model that posts 92% overall and 54% where it counts.',
+
+        'c10.title':      'Recommendations & Neural Networks',
+        'c10.theme':      'How machines learn what you want.',
+        'c10.theme.full': 'How machines learn what you want, and how a network of plain neurons learns things nobody wrote down. Two recommender methods, the rich-get-richer dynamics behind every feed, a game with no players, and a single neuron grown into a network.',
+        'c10.m1.name':    'People Like You',
+        'c10.m1.desc':    'Spotify built you a playlist you never asked for. Two machines can produce that guess and they fail in opposite ways. Collaborative filtering finds the viewer most like you and hands you what they loved. Content-based reads what a film is made of and serves more of the same. The Neighbor Finder and the Feature Matcher run both, then watch the same seed send you down two paths.',
+        'c10.m2.name':    'Boards of Destiny',
+        'c10.m2.desc':    'Galton\'s 1889 board drops a ball through fair pegs and a bell curve appears every time. Rig the pegs so past losses lower future odds, add competing balls, and the bell collapses into a power law where a few bins take almost everything. The same dynamics run inside every recommendation feed. A video, three rigged boards to play with, and the discovery problem that keeps new creators invisible.',
+        'c10.m3.name':    'No One Drew the Glider',
+        'c10.m3.desc':    'A cell is alive or dead. Count its eight neighbors, and four rules decide the next step. Nothing in those four lines mentions a glider or a gun, yet both walk out when you press play. Conway\'s 1970 game with no players, a grid to draw on, three starter patterns, and the bridge from rule-following to behaviour nobody programmed.',
+        'c10.m4.name':    'Neural Networks',
+        'c10.m4.desc':    'A single neuron takes a few numbers, weights them, adds a bias, and squashes the total into a confidence between zero and one. Decide whether to send a churning customer a coupon, one neuron at a time. Stack a row of them into a layer, stack layers into depth, and watch why depth buys you things one neuron cannot. Ends with the perceptron and how it learns its own weights.',
+
+        'c11.title':      'LLMs & Generative AI',
+        'c11.theme':      'What changed.',
+        'c11.theme.full': 'What changed. A model that guesses your next word, a model that scrubs a picture out of static, and the words you type to steer them both. Also what those words will not fix.',
+        'c11.m1.name':    'Fill in the Gaps',
+        'c11.m1.desc':    'A language model has read everything and understood nothing. Its whole job: look at some words, guess the next one. You do this too, three words into a text message. A real trigram model trained on 1980s Reuters wire finishes your sentence live, one bet at a time, and shows the odds behind every word. Then why a chain with no memory writes fluent nonsense.',
+        'c11.m2.name':    'Apophenic Models',
+        'c11.m2.desc':    'The last model wrote one word at a time. This one starts with a screen of television snow and scrapes the noise away until a picture is left. Apophenia is your brain finding faces in clouds; a diffusion model does the same thing on purpose and does not stop until the picture is sharp. Sliders to run the denoising yourself, pass by pass, and how the writer and the painter turn out to be doing the same job in opposite directions.',
+        'c11.m3.name':    'There Are No Magic Words',
+        'c11.m3.desc':    'A student types: make this better. The essay comes back longer, smoother, rounder, and worse. The model is a very fast intern who has read the entire internet and knows nothing about you. It will do exactly what you say, which is a problem, because you rarely say what you mean. The anatomy of a prompt that works, the failures no prompt will fix, and an exercise in keeping your own head.',
+
+        'c12.title':      'AI in Practice: Bias, Society, Synthesis',
+        'c12.theme':      'What happens when the model meets the real world.',
+        'c12.theme.full': 'What happens when the model meets the real world. A personality you can measure but cannot locate, a salary figure that shifts when you change one word about yourself, and what a lifetime of trusting the autopilot does to the person still in the seat.',
+        'c12.m1.name':    'The Model Has a Personality',
+        'c12.m1.desc':    'Hand a standard personality test to GPT-4, then to Llama 2, then to Mixtral. No role play, no instruction about who to be. Three models, three different profiles. Personality means one thing here: measured behaviour, a property of the text with nothing behind it. And it drifts, which is why the teams that ship these systems log the score and keep re-testing it.',
+        'c12.m2.name':    'Same CV, Different Advice',
+        'c12.m2.desc':    'You ask an assistant what salary to request. Same field, same level, same city. Mention that you are a woman and the number drops. Four researchers from the NLP group at CAIRO, THWS ran exactly this at scale in 2025, across four models and five fields. The bias does not surface when you ask the model whether it is fair. It surfaces in the number.',
+        'c12.m3.name':    'Children of the Magenta Line',
+        'c12.m3.desc':    'June 2009, an Airbus over the Atlantic. A frozen sensor drops the autopilot and hands three pilots a working airplane. They stall it into the ocean. Twelve years earlier a training captain had named the pattern: the more the automation flies, the less the pilot can. The autopilot never forgets how to fly. The pilot does. What that has to do with the tool that finishes your sentences.',
+
+        'exam.label':     'Exam',
+        'exam.title':     'Practice Exam: The Full Question Pool',
+        'exam.theme':     'Every question that can appear, published in advance.',
+        'open.label':     'Exam',
+        'open.title':     'Open Questions: The Full Pool',
+        'open.theme':     'Fifteen of these appear on the exam. Model answers included.',
+    },
+    de: {
+        'hero.label':     'KI-Grundlagenkurs',
+        'hero.rest':      'KI-Grundlagen',
+        'hero.sub':       '„Passt“ ist ein Lob. „Passt schon“ ist eine Ausrede. Ein Modell sagt dir beides, und den Unterschied zu hören ist der ganze Kurs.',
+        'desc.p1':        'Zwölf Einheiten. Am ersten Tag keine Formeln. Die Mathematik kommt, wenn du sie brauchst.',
+        'desc.p2':        'Dieser Kurs ist für Menschen, die mit Daten arbeiten, Datenprodukte in Auftrag geben oder Teams leiten, die sie bauen. Du lernst hier nicht, das nächste Sprachmodell zu trainieren. Du lernst, die richtigen Fragen zu stellen, wenn dir jemand eines zeigt.',
+        'desc.p3':        'Jedes Thema hat einen direkten Pfad und einen optionalen Vertiefungsteil. Die Tags sagen dir, wie lange etwas dauert und wie viel Code nötig ist.',
+        'meta.classes':   '12 Einheiten',
+        'meta.hours':     'je 3 Std.',
+        'meta.hw':        '+ Hausaufgaben',
+        'meta.lang':      'EN / DE',
+        'how.label':      'Wie der Kurs funktioniert',
+        'how.l1':         'Mini-Module stehen für sich. Eines dauert zwanzig bis dreißig Minuten. Innerhalb einer Einheit ist die Reihenfolge dir überlassen.',
+        'how.l2':         'Tüftel-Sessions sind Notebooks. Colab öffnen, Code laufen lassen, kaputt machen, reparieren.',
+        'how.l3':         'Alles gibt es auf Deutsch und auf Englisch. Der Schalter in der Ecke stellt diese Seite und jedes Modul um.',
+        'how.l4':         'Abschnitte mit „Für Neugierige“ sind optionale Vertiefungen. Sie kommen nicht in die Klausur.',
+        'classes.label':  'Einheiten',
+        'badge.mini':     'Mini-Modul',
+        'badge.inter':    'Zwischenaktivität',
+        'badge.discuss':  'Gruppendiskussion',
+        'badge.tinker':   'Tüftel-Session',
+        'badge.video':    'Video',
+        'badge.test':     'Selbsttest',
+        'inclass.label':  'Präsenzaktivität, kein Link',
+        'hw.label':       'Hausaufgabe:',
+
+        'c1.title':       'Was ist Intelligenz? Was ist Wissen?',
+        'c1.theme':       'Vor jedem Algorithmus: zwei Fragen.',
+        'c1.theme.full':  'Vor jedem Algorithmus: zwei Fragen. Was wollen wir bauen? Und woher wissen wir, ob wir überhaupt etwas wissen?',
+        'c1.m1.name':     'Können Maschinen denken?',
+        'c1.m1.desc':     'Turing stellte diese Frage 1950. Sie ist noch offen. ML-Taxonomie, schwache und starke KI, dazu ein Analogiespiel. Es zwingt dich zu einer Position, bevor die Theorie kommt.',
+        'c1.m2.name':     'Empirismus und die Logik der Wissenschaft',
+        'c1.m2.desc':     'Sextus Empiricus, Karl Popper und die Frage, was als Wissen gilt. Was nicht falsifizierbar ist, ist keine Wissenschaft. Auf diesem Rahmen läuft der ganze Kurs.',
+        'c1.m3.name':     'Was ist Intelligenz?',
+        'c1.m3.desc':     'Kleingruppen erarbeiten Definitionen, führen sie zusammen und kritisieren sich gegenseitig. Die Klasse sammelt eine Fähigkeitenliste an der Tafel. Dann wird jeder Punkt einsortiert: schwache KI, starke KI oder keines von beidem.',
+        'c1.m4.name':     'Ist das KI?',
+        'c1.m4.desc':     'Taschenrechner, Spam-Filter, GPS, Face ID. Stimm über jeden Punkt ab. Die Antwort ist nicht immer eindeutig, und genau darum geht es.',
+        'c1.m5.name':     'Quiz zu Einheit 1',
+        'c1.m5.desc':     'Ein kurzes Quiz zu den Konzepten aus Einheit 1.',
+        'c1.hw':          ' Finde eine zweifelhafte KI-Behauptung in Medien, Werbung oder einer Schlagzeile. Bring sie zur Einheit 2 mit, samt eigener Diagnose.',
+
+        'c2.title':       'Lernen hat viele Gesichter',
+        'c2.theme':       'Schauen wir sie uns alle an.',
+        'c2.theme.full':  'Schauen wir sie uns alle an. Eine Einführung in die Formen, die Daten und Logik annehmen können.',
+        'c2.m1.name':     'Deduktion vs. Induktion',
+        'c2.m1.desc':     'Der Unterschied zwischen Regeln von oben und Lernen aus Daten von unten.',
+        'c2.m2.name':     'Anscombe-Quartett',
+        'c2.m2.desc':     'Warum du dir deine Daten ansehen musst. Vier Datensätze mit identischen Kennzahlen und völlig verschiedenen Verteilungen.',
+        'c2.m3.name':     'Parametrische vs. nicht-parametrische Modelle',
+        'c2.m3.desc':     'Eine optionale Vertiefung zu Modellen mit fester Form und solchen, die sich frei an die Daten anpassen.',
+        'c2.m4.name':     'Code-Verständnis',
+        'c2.m4.desc':     'Die Logik eines Programms lesen und aufzeichnen, bevor du selbst eine Zeile Code schreibst.',
+
+        'c3.title':       'Lineare Regression',
+        'c3.theme':       'Das einfachste nützliche Modell.',
+        'c3.theme.full':  'Die Gerade, mit der alles begann. Finde die beste Gerade durch eine Punktwolke. Verstehe, warum die ungenaue Trainingsvariante besser läuft. Dann probier es mit echten Daten.',
+        'c3.m1.name':     'Das geradlinigste Werkzeug im Schuppen',
+        'c3.m1.desc':     'Von Galtons viktorianischer Neugier bis zum Gradientenabstieg. OLS liefert die exakte Antwort in einem Schritt. Das Spiel lässt dich die Verlustlandschaft spüren, bevor du sie verstehst.',
+        'c3.m2.name':     'Im Dunkeln bergab',
+        'c3.m2.desc':     'Der Batch-Gradientenabstieg ist präzise und bleibt stecken. Der stochastische ist schlampig und funktioniert besser. Zufall als Designentscheidung, nicht als Fehler.',
+        'c3.m3.name':     'Mit echten Daten ausprobieren',
+        'c3.m3.desc':     'Lade den Versicherungsdatensatz herunter, öffne das Colab-Notebook und trainiere dein erstes Regressionsmodell auf echten Zahlen.',
+
+        'c4.title':       'Lokale Modelle & Geometrie',
+        'c4.theme':       'Nicht jede Frage hat eine globale Antwort.',
+        'c4.theme.full':  'Nicht jede Frage hat eine globale Antwort. Manchmal hängt die richtige Regel davon ab, wo du gerade bist. Und wer deine Nachbarn sind.',
+        'c4.m1.name':     'Globale vs. lokale Modelle',
+        'c4.m1.desc':     'Eine Gleichung für alles, oder eine eigene Regel für jede Nachbarschaft. Kurtschatows Pfade gegen Sanssoucis Geometrie. Dazu eine Demo: du setzt Punkte, beide Modelle reagieren.',
+        'c4.m2.name':     'Gleich und Gleich gesellt sich gern: K-NN-Klassifikation',
+        'c4.m2.desc':     'K-Nächste-Nachbarn macht aus einem Sprichwort einen Algorithmus. Ein Gebietsstreit zwischen Blobovien und Splotschien. Setz Punkte und sieh die Entscheidungsgrenze entstehen. Ändere K und das Abstandsmaß, und die Grenze verschiebt sich.',
+        'c4.m3.name':     'K-NN-Regression und der Kompromiss aus Verzerrung und Varianz',
+        'c4.m3.desc':     'Vom Abstimmen zum Mitteln. Eine einzige Zahl, K, schiebt dich auf einer Kurve zwischen zwei Arten von falsch. Ein Modell ist zu starr für die Daten. Das andere ist zu zittrig, um Rauschen zu ignorieren.',
+        'c4.m4.name':     'Der Fluch der Dimensionalität',
+        'c4.m4.desc':     'Hochdimensionaler Raum verhält sich nicht wie der Raum auf dem Papier. Drei Rätsel: Kugeln verschwinden in Würfeln, das Volumen wandert an die Oberfläche, zufällige Vektoren stehen senkrecht. Danach traust du deiner Intuition nicht mehr.',
+
+        'c5.title':       'Regularisierung',
+        'c5.theme':       'Wenn das Modell zu gut passt.',
+        'c5.theme.full':  'Ein Modell, das die Trainingsdaten auswendig lernt, hat nichts gelernt. Es hat abgeschrieben. Die Regularisierung ist ein kleiner Strafterm auf den Gewichten. Er lässt das Modell gerade genug vergessen, damit es bei neuen Daten stimmt.',
+        'c5.m1.name':     'Regularisierung: Verschiebung und Streuung',
+        'c5.m1.desc':     'Was ein Strafterm dir bringt. Eine kleine Verschiebung im Tausch gegen viel weniger Streuung. Ein Regler, zwei Fehler in Gegenrichtung, und die Stelle, an der ihre Summe am kleinsten ist.',
+        'c5.m2.name':     'Ridge: Alles ein bisschen kleiner',
+        'c5.m2.desc':     'Der L2-Strafterm. Jedes Gewicht schrumpft Richtung null, und keines kommt an. Dreh am Regler. Fünf Balken werden gemeinsam kürzer, und das größte Gewicht verliert am meisten.',
+        'c5.m3.name':     'Lasso: Manche Gewichte sterben',
+        'c5.m3.desc':     'Der L1-Strafterm. Hier schrumpfen die Gewichte nicht höflich. Sie treffen exakt die Null und bleiben dort. Damit wirft das Modell ein Merkmal weg. Merkmalsauswahl als Nebenwirkung.',
+        'c5.m4.name':     'Ridge und Lasso mit echten Daten',
+        'c5.m4.desc':     'Das Colab-Notebook. Beginne mit einem Modell, das viel zu gut auf die Trainingsdaten passt. Füge beide Strafterme hinzu und sieh den Gewichten beim Schrumpfen zu. Stell die Stärke ein, bis der Testfehler am kleinsten ist.',
+
+        'c6.title':       'Klassifikation: Grundlagen',
+        'c6.theme':       'Wenn die Antwort eine Kategorie ist, keine Zahl.',
+        'c6.theme.full':  'Wenn die Antwort eine Kategorie ist, keine Zahl. Die Grundform eines Klassifikators, die Maße, die ihn bewerten, und die bayesianische Arithmetik dahinter.',
+        'c6.m1.name':     'Entscheidungen modellieren',
+        'c6.m1.desc':     'Von Verhulsts Kaninchen zu einer Abstimmung im Bundestag. Die Sigmoid-Funktion macht aus einer Summe von Punktwerten eine Wahrscheinlichkeit zwischen null und eins. Drei Spiele: kipp die Entscheidungsgrenze, sieh zu, wie jedes Merkmal seine Log-Odds beisteuert, und zieh die Schwelle, bis Präzision und Recall die Plätze tauschen.',
+        'c6.m2.name':     'Pilzwanderung: Die vier Fehler',
+        'c6.m2.desc':     'Präzision, Recall, Trefferquote, F1. Vier Zahlen streiten über denselben Korb Pilze. Wähl eine Schwelle und sieh zu, wie aus dem Abendessen eine Beerdigung wird. Neunundneunzig Prozent Trefferquote können dich trotzdem umbringen.',
+        'c6.m3.name':     'Denken in Chancen',
+        'c6.m3.desc':     'Ein Patient wird positiv getestet, mit einem Test, der zu neunundneunzig Prozent stimmt. Die meisten sagen neunundneunzig. Die Antwort liegt näher bei fünfzig. Drei Spiele: eine Mammographie, eine Urne und Turings Banburismus in Bletchley Park. Alle bauen auf derselben Arithmetik des Umdenkens.',
+        'c6.m4.name':     'Selbsttest: Module 1 bis 6',
+        'c6.m4.desc':     'Vierzehn Multiple-Choice-Fragen und zwei offene Fragen. Sie decken alles von Einheit 1 bis Einheit 6 ab, eine nach der anderen. Ein Kontrollpunkt vor der zweiten Hälfte des Kurses.',
+
+        'c7.title':       'Entscheidungsbäume',
+        'c7.theme':       'Ein Modell, das du an die Tafel zeichnen kannst.',
+        'c7.theme.full':  'Ein Modell, das du an die Tafel zeichnen kannst. Wie man aufteilt, wann man aufhört und was der Baum tatsächlich lernt. Das Ganze ist ein Spiel mit zwanzig Fragen, gierig gespielt.',
+        'c7.m1.name':     'Der Tierrater',
+        'c7.m1.desc':     'Denk dir ein Tier. Die Maschine stellt Ja-oder-Nein-Fragen und engt das Feld ein, bis sie deine Wahl benennt. Das ist ein Entscheidungsbaum, Frage für Frage gebaut. Die erste Frage ist die wichtigste.',
+        'c7.m2.name':     'Entropie, Gini, Informationsgewinn',
+        'c7.m2.desc':     'Woher weiß ein Baum, welche Frage zuerst kommt? Zwei Maßstäbe für ein gemischtes Deck und eine Zahl, die eine Aufteilung bewertet. Gebaut auf 712 Titanic-Passagieren. Warum „Geschlecht“ als erste Frage „Alter“ schlägt, und warum eine clever klingende Frage gar nichts verrät.',
+        'c7.m3.name':     'Titanic-Entscheidungsbaum',
+        'c7.m3.desc':     'Setz dich selbst in die Passagiertabelle und lass den Baum entscheiden. Ein Colab-Notebook baut einen Baum darauf, wer lebte und wer starb. Es liest seine Aufteilungen laut vor und zeigt, was die Merkmale wirklich kodieren. Das unbequeme Gespräch ist der Punkt.',
+
+        'c8.title':       'Ensembles',
+        'c8.theme':       'Ein Baum lernt auswendig. Tausend Bäume generalisieren.',
+        'c8.theme.full':  'Ein Baum lernt auswendig. Tausend Bäume generalisieren. Warum ein Bündel schwacher Modelle jedes einzelne starke schlägt.',
+        'c8.m1.name':     'Ein Baum lügt',
+        'c8.m1.desc':     'Bagging, Stacking und Boosting. Drei Wege, aus einer Schar unzuverlässiger Modelle eines zu machen, dem du traust. Gebaut auf dem Titanic-Baum, mit einer Trefferquote, die vom einzelnen überangepassten Baum bis zum gemischten Ensemble klettert. Dazu ein Spielfeld, auf dem jede Strategie eine verrauschte Kurve anpasst.',
+        'c8.m2.name':     'Den Resten hinterher',
+        'c8.m2.desc':     'Gradient Boosting, ein Residuum nach dem anderen. Oben sitzt die Vorhersage, unten der übrig gebliebene Fehler mit dem nächsten Baum daran. Füge Bäume von Hand hinzu, dreh an der Lernrate und sieh zu, wie der Testfehler ein Minimum erreicht und wieder in die Überanpassung steigt.',
+
+        'c9.title':       'Validierung & Modellauswahl',
+        'c9.theme':       'Du hast ein Modell gebaut. Jetzt beweise, dass es funktioniert.',
+        'c9.theme.full':  'Du hast ein Modell gebaut. Jetzt beweise, dass es funktioniert. Auf Daten, die es nie gesehen hat, mit Methoden, die nicht schummeln.',
+        'c9.m1.name':     'Die Antworten auswendig lernen',
+        'c9.m1.desc':     'Jede Klausurfrage in diesem Kurs ist schon veröffentlicht. Sie sicher zu beherrschen ist hier das Ziel. Für ein Modell ist es die Falle. Trainiere auf einem Teil der Zeilen, halte den Rest zurück und bewerte auf dem, was es nie gesehen hat. Zwei Schieberegler zeigen, warum 80/20 eine Gewohnheit ist und kein Ergebnis. Und wie viele zurückgehaltene Fragen eine Zahl braucht, bevor du ihr traust.',
+        'c9.m2.name':     'Die Regler und die Folds',
+        'c9.m2.desc':     'Parameter werden gelernt. Hyperparameter wählst du selbst, wie die Churn-Schwelle aus der logistischen Regression. Grid Search probiert jede Kombination durch und vervielfacht sich schnell. Bewertest du alle auf einem einzigen Validierungssplit, passt du dich genau an diesen Split an. Also rotierst du ihn. K-Fold, Leave-One-Out, stratifiziert, und warum GridSearchCV beide Schritte zusammenlegt.',
+        'c9.m3.name':     'Der Durchschnitt stimmt mit niemandem überein',
+        'c9.m3.desc':     'Der mittlere US-Lohn stieg seit 2000, während er in jeder Bildungsgruppe fiel. Berkeley wirkte insgesamt voreingenommen gegen Frauen. Fachbereich für Fachbereich war es das nicht. Ein Schieberegler kippt eine Linie aus Rabatt und Wert, sobald du die zwei verborgenen Gruppen einfärbst. Dann dieselbe Falle bei einem Churn-Modell: 92 % insgesamt, 54 % dort, wo es zählt.',
+
+        'c10.title':      'Empfehlungssysteme & Neuronale Netze',
+        'c10.theme':      'Wie Maschinen lernen, was du willst.',
+        'c10.theme.full': 'Wie Maschinen lernen, was du willst. Und wie ein Netz aus schlichten Neuronen Dinge lernt, die niemand aufgeschrieben hat. Zwei Empfehlungsmethoden, die Rich-get-richer-Dynamik hinter jedem Feed, ein Spiel ohne Spieler und ein einzelnes Neuron, das zu einem Netz heranwächst.',
+        'c10.m1.name':    'People Like You',
+        'c10.m1.desc':    'Spotify hat dir eine Playlist gebaut, um die du nie gebeten hast. Zwei Maschinen können diese Vermutung erzeugen, und sie versagen auf entgegengesetzte Weise. Collaborative Filtering sucht den Zuschauer, der dir am ähnlichsten ist, und reicht dir, was er liebte. Content-based liest, woraus ein Film gemacht ist, und liefert mehr davon. Der Neighbor Finder und der Feature Matcher führen beides vor. Dann siehst du, wie derselbe Startpunkt zu zwei Pfaden führt.',
+        'c10.m2.name':    'Boards of Destiny',
+        'c10.m2.desc':    'Galtons Brett von 1889 lässt eine Kugel durch faire Stifte fallen, und jedes Mal entsteht eine Glockenkurve. Manipulier die Stifte so, dass vergangene Verluste die künftigen Chancen senken, und füge konkurrierende Kugeln hinzu. Die Glocke kippt in ein Potenzgesetz, bei dem wenige Fächer fast alles abbekommen. Dieselbe Dynamik läuft in jedem Empfehlungs-Feed. Ein Video, drei manipulierte Bretter zum Spielen und das Discovery-Problem, das neue Creator unsichtbar hält.',
+        'c10.m3.name':    'Niemand hat den Gleiter gezeichnet',
+        'c10.m3.desc':    'Eine Zelle ist lebendig oder tot. Zähl ihre acht Nachbarn, und vier Regeln entscheiden den nächsten Schritt. Nichts in diesen vier Zeilen erwähnt einen Gleiter oder eine Kanone. Trotzdem laufen beide heraus, sobald du auf Play drückst. Conways Spiel von 1970 ohne Spieler, ein Gitter zum Zeichnen, drei Startmuster und die Brücke vom Regelbefolgen zu Verhalten, das niemand programmiert hat.',
+        'c10.m4.name':    'Neuronale Netze',
+        'c10.m4.desc':    'Ein einzelnes Neuron nimmt ein paar Zahlen, gewichtet sie, addiert einen Bias und quetscht die Summe in eine Konfidenz zwischen null und eins. Entscheide, ob ein abwandernder Kunde einen Gutschein bekommt, ein Neuron nach dem anderen. Reih sie zu einer Schicht, stapel die Schichten zu Tiefe und sieh, warum Tiefe Dinge erkauft, die ein einzelnes Neuron nicht kann. Endet mit dem Perzeptron und wie es seine eigenen Gewichte lernt.',
+
+        'c11.title':      'LLMs & Generative KI',
+        'c11.theme':      'Was sich verändert hat.',
+        'c11.theme.full': 'Was sich verändert hat. Ein Modell, das dein nächstes Wort errät. Ein Modell, das ein Bild aus dem Rauschen kratzt. Und die Wörter, mit denen du beide steuerst. Dazu das, was diese Wörter nicht reparieren.',
+        'c11.m1.name':    'Fülle die Lücken',
+        'c11.m1.desc':    'Ein Sprachmodell hat alles gelesen und nichts verstanden. Sein ganzer Job: ein paar Wörter ansehen, das nächste erraten. Das machst du auch, drei Wörter tief in einer Textnachricht. Ein echtes Trigramm-Modell, trainiert auf Reuters-Meldungen der Achtziger, vervollständigt deinen Satz live und zeigt die Quoten hinter jedem Wort. Dann siehst du, warum eine Kette ohne Gedächtnis flüssigen Unsinn schreibt.',
+        'c11.m2.name':    'Apophene Modelle',
+        'c11.m2.desc':    'Das letzte Modell schrieb ein Wort nach dem anderen. Dieses beginnt mit einem Bildschirm voll Fernsehschnee und kratzt das Rauschen weg, bis ein Bild übrig bleibt. Apophänie ist, wenn dein Gehirn Gesichter in Wolken findet. Ein Diffusionsmodell macht dasselbe mit Absicht und hört nicht auf, bis das Bild scharf ist. Schieberegler zum Entrauschen, Durchgang für Durchgang. Am Ende zeigt sich: Schreiber und Maler machen denselben Job in entgegengesetzter Richtung.',
+        'c11.m3.name':    'Es gibt keine Zauberworte',
+        'c11.m3.desc':    'Ein Student tippt: mach das besser. Der Aufsatz kommt zurück, länger, glatter, runder und schlechter. Das Modell ist ein sehr schneller Praktikant. Er hat das ganze Internet gelesen und weiß nichts über dich. Er tut genau, was du sagst, und das ist ein Problem. Du sagst nämlich selten, was du meinst. Die Anatomie eines Prompts, der funktioniert, die Fehler, die kein Prompt behebt, und eine Übung darin, den eigenen Kopf zu behalten.',
+
+        'c12.title':      'KI in der Praxis: Verzerrung, Gesellschaft, Synthese',
+        'c12.theme':      'Was passiert, wenn das Modell auf die echte Welt trifft.',
+        'c12.theme.full': 'Was passiert, wenn das Modell auf die echte Welt trifft. Eine Persönlichkeit, die man messen, aber nicht verorten kann. Eine Gehaltszahl, die sich verschiebt, sobald du ein Wort über dich änderst. Und was ein Leben lang Vertrauen in den Autopiloten mit dem Menschen macht, der noch im Sitz sitzt.',
+        'c12.m1.name':    'Das Modell hat eine Persönlichkeit',
+        'c12.m1.desc':    'Gib GPT-4 einen Standard-Persönlichkeitstest, dann Llama 2, dann Mixtral. Kein Rollenspiel, keine Anweisung, wer zu sein ist. Drei Modelle, drei verschiedene Profile. Persönlichkeit heißt hier nur eines: gemessenes Verhalten, eine Eigenschaft des Textes und nichts dahinter. Und sie driftet. Deshalb protokollieren die Teams hinter solchen Systemen den Wert und testen immer wieder nach.',
+        'c12.m2.name':    'Gleicher Lebenslauf, anderer Rat',
+        'c12.m2.desc':    'Du fragst einen Assistenten, welches Gehalt du fordern sollst. Gleiches Fach, gleiche Ebene, gleiche Stadt. Erwähne, dass du eine Frau bist, und die Zahl sinkt. Vier Forschende der NLP-Gruppe an der CAIRO, THWS haben das 2025 im großen Maßstab durchgespielt, über vier Modelle und fünf Fachbereiche. Die Verzerrung zeigt sich nicht, wenn du das Modell nach Fairness fragst. Sie zeigt sich in der Zahl.',
+        'c12.m3.name':    'Kinder der Magenta-Linie',
+        'c12.m3.desc':    'Juni 2009, ein Airbus über dem Atlantik. Ein vereister Sensor schaltet den Autopiloten ab und übergibt drei Piloten ein funktionierendes Flugzeug. Sie fliegen es im Strömungsabriss in den Ozean. Zwölf Jahre zuvor hatte ein Ausbilder das Muster benannt: je mehr die Automatik fliegt, desto weniger kann es der Pilot. Der Autopilot verlernt das Fliegen nie. Der Pilot schon. Und was das mit dem Werkzeug zu tun hat, das dir die Sätze zu Ende schreibt.',
+
+        'exam.label':     'Klausur',
+        'exam.title':     'Probeklausur: Der vollständige Fragenpool',
+        'exam.theme':     'Jede Frage, die drankommen kann, vorab veröffentlicht.',
+        'open.label':     'Klausur',
+        'open.title':     'Offene Fragen: Der vollständige Pool',
+        'open.theme':     'Fünfzehn davon kommen in die Klausur. Mit Modellantworten.',
+    }
+};
+
+let currentLang = 'en';
+
+function toggleLang() {
+    currentLang = currentLang === 'en' ? 'de' : 'en';
+    document.documentElement.lang = currentLang;
+    document.querySelector('.lang-toggle').textContent = currentLang === 'en' ? 'DE' : 'EN';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (T[currentLang][key] !== undefined) el.textContent = T[currentLang][key];
+    });
+}
+
+</script>
+</body>
+</html>

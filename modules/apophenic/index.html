@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apophenic Models</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: #141420; color: #e8e8f0; font-family: 'Georgia','Times New Roman',serif; line-height: 1.8; font-size: 18px; }
+        .container { max-width: 820px; margin: 0 auto; padding: 0 24px; }
+
+        .lang-toggle { position: fixed; top: 16px; right: 16px; background: #2a2a44; border: 1px solid #4a4a70; border-radius: 20px; padding: 6px 14px; cursor: pointer; font-size: 13px; font-family: sans-serif; color: #a0a0d0; z-index: 100; transition: background 0.2s; }
+        .lang-toggle:hover { background: #363658; }
+
+        .hero { text-align: center; padding: 80px 24px 40px; }
+        .hero h1 { font-size: 42px; font-weight: 700; color: #fff; line-height: 1.3; max-width: 700px; margin: 0 auto; }
+        .hero .subtitle { margin-top: 16px; color: #888; font-size: 16px; font-style: italic; }
+
+        section { padding: 50px 0; }
+        h2 { font-size: 30px; color: #fff; margin-bottom: 24px; line-height: 1.3; }
+        h3 { font-size: 20px; color: #ccc; margin: 32px 0 12px; }
+        p { margin-bottom: 20px; color: #ccc; }
+        em { color: #d8d8e8; }
+
+        .formula-block { margin: 24px auto; text-align: center; overflow-x: auto; padding: 10px 0; }
+        a { color: #80b4f0; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .section-rule { border: none; border-top: 1px solid #2a2a40; margin: 0; }
+
+        .figure { margin: 34px 0; text-align: center; }
+        .figure svg { max-width: 100%; height: auto; }
+        .caption { margin-top: 12px; font-size: 14px; color: #777; font-style: italic; }
+
+        .demo { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px; padding: 28px; margin: 36px 0; }
+        .canvas-wrap { text-align: center; }
+        #diffCanvas { display: block; width: 100%; max-width: 528px; margin: 0 auto; background: #000; border: 1px solid #2a2a40; border-radius: 8px; image-rendering: pixelated; }
+        .demo-status { font-family: sans-serif; font-size: 13px; color: #888; min-height: 20px; margin: 16px 0 4px; text-align: center; }
+        .demo-status b { color: #a0a0d0; font-weight: 600; }
+
+        .demo-controls { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin: 18px 0 6px; }
+        .slider-wrap { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 240px; }
+        .slider-wrap label { font-family: sans-serif; font-size: 13px; color: #a0a0d0; white-space: nowrap; }
+        .slider-wrap input[type=range] { flex: 1; accent-color: #80b4f0; }
+        .noise-val { font-family: sans-serif; font-size: 13px; color: #70e898; width: 70px; text-align: left; }
+
+        .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+        .demo-btn { background: #2a2a44; color: #e0e0f0; border: 1px solid #3a3a55; border-radius: 8px; padding: 10px 18px; font-size: 14px; font-family: sans-serif; cursor: pointer; transition: background 0.2s, border-color 0.2s; }
+        .demo-btn:hover { background: #363658; border-color: #5a5a80; }
+        .demo-btn:disabled { opacity: 0.5; cursor: default; }
+
+        details.deepdive { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px; padding: 8px 28px; margin: 36px 0; }
+        details.deepdive summary { cursor: pointer; font-family: sans-serif; font-size: 15px; color: #a0a0d0; padding: 16px 0; list-style: none; }
+        details.deepdive summary::-webkit-details-marker { display: none; }
+        details.deepdive summary::before { content: "\25B6  "; color: #80b4f0; font-size: 12px; }
+        details.deepdive[open] summary::before { content: "\25BC  "; }
+        details.deepdive .dd-body { padding-bottom: 20px; }
+
+        footer { text-align: center; padding: 40px 24px; color: #444; font-size: 14px; }
+        footer a { color: #666; }
+
+        @media (max-width: 680px) { .hero h1 { font-size: 28px; } h2 { font-size: 24px; } body { font-size: 16px; } }
+    </style>
+</head>
+<body>
+
+<button class="lang-toggle" onclick="toggleLang()">DE</button>
+
+<div class="hero">
+    <h1 data-i18n="hero.title">Apophenic Models</h1>
+    <p class="subtitle" data-i18n="hero.subtitle">The last model wrote one word at a time. This one starts from pure noise and scrapes it away until a picture is left.</p>
+</div>
+
+<div class="container">
+
+<!-- Section 1 -->
+<section>
+    <h2 data-i18n="s1.h2">Two Ways to Make Something</h2>
+    <p data-i18n="s1.p1">Last module, the machine wrote by guessing the next word, then the next, laying a sentence down from the left edge like someone typing with no backspace. Most image models do not work that way at all.</p>
+    <p data-i18n="s1.p2">Picture an old television tuned to a dead channel. Grey snow, no signal, every dot flickering at random. A diffusion model starts there, with a whole screen of noise, and cleans it up. Not corner to corner. All at once, a little per pass, over and over, until the snow settles into a photograph that was never transmitted.</p>
+
+    <div class="figure">
+        <svg viewBox="0 0 420 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="An old television showing static">
+            <defs>
+                <filter id="tvstatic" x="0" y="0" width="100%" height="100%">
+                    <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" stitchTiles="stitch" result="n"/>
+                    <feColorMatrix in="n" type="saturate" values="0"/>
+                    <feComponentTransfer>
+                        <feFuncR type="linear" slope="1.6" intercept="-0.15"/>
+                        <feFuncG type="linear" slope="1.6" intercept="-0.15"/>
+                        <feFuncB type="linear" slope="1.6" intercept="-0.15"/>
+                        <feFuncA type="linear" slope="0" intercept="1"/>
+                    </feComponentTransfer>
+                </filter>
+            </defs>
+            <!-- antenna -->
+            <line x1="210" y1="78" x2="150" y2="22" stroke="#55556e" stroke-width="4" stroke-linecap="round"/>
+            <line x1="210" y1="78" x2="276" y2="22" stroke="#55556e" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="150" cy="22" r="6" fill="#6c6c8a"/>
+            <circle cx="276" cy="22" r="6" fill="#6c6c8a"/>
+            <!-- body -->
+            <rect x="58" y="72" width="304" height="234" rx="20" fill="#26262f" stroke="#3a3a4e" stroke-width="2"/>
+            <!-- screen bezel -->
+            <rect x="82" y="94" width="212" height="190" rx="12" fill="#0a0a10" stroke="#101018" stroke-width="6"/>
+            <!-- static -->
+            <clipPath id="scr"><rect x="88" y="100" width="200" height="178" rx="8"/></clipPath>
+            <g clip-path="url(#scr)">
+                <rect x="88" y="100" width="200" height="178" filter="url(#tvstatic)"/>
+                <rect x="88" y="100" width="200" height="178" fill="url(#glare)"/>
+            </g>
+            <radialGradient id="glare" cx="32%" cy="26%" r="75%">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.10"/>
+                <stop offset="45%" stop-color="#ffffff" stop-opacity="0"/>
+            </radialGradient>
+            <!-- control panel -->
+            <rect x="306" y="94" width="48" height="190" rx="8" fill="#20202a" stroke="#33334a" stroke-width="1.5"/>
+            <circle cx="330" cy="126" r="13" fill="#2f2f40" stroke="#4a4a66" stroke-width="2"/>
+            <circle cx="330" cy="126" r="3" fill="#8890b8"/>
+            <circle cx="330" cy="170" r="13" fill="#2f2f40" stroke="#4a4a66" stroke-width="2"/>
+            <circle cx="330" cy="170" r="3" fill="#8890b8"/>
+            <line x1="318" y1="210" x2="342" y2="210" stroke="#3a3a4e" stroke-width="2"/>
+            <line x1="318" y1="222" x2="342" y2="222" stroke="#3a3a4e" stroke-width="2"/>
+            <line x1="318" y1="234" x2="342" y2="234" stroke="#3a3a4e" stroke-width="2"/>
+            <!-- feet -->
+            <rect x="96" y="306" width="26" height="16" rx="4" fill="#20202a"/>
+            <rect x="298" y="306" width="26" height="16" rx="4" fill="#20202a"/>
+        </svg>
+        <div class="caption" data-i18n="s1.tvcap">A dead channel. Every dot random, no signal. This is where a diffusion model begins.</div>
+    </div>
+
+    <p data-i18n="s1.apo">There is a word for seeing a picture in random noise. Apophenia. Your brain does it without asking, faces in clouds, a figure in the static, the man in the moon. A diffusion model does the same thing on purpose, and it does not stop until the picture is sharp.</p>
+    <p data-i18n="s1.p3">The obvious question is how anyone trains a machine to do that. You cannot hand it noise and the matching picture, because there is no matching picture. So you build the training data backwards.</p>
+</section>
+
+<hr class="section-rule">
+
+<!-- Section 2 -->
+<section>
+    <h2 data-i18n="s2.h2">Learning to Undo a Mess</h2>
+    <p data-i18n="s2.p1">Take a real photograph. Add a small amount of noise. Add a little more. Keep going, step after step, until nothing is left but snow. This part is mechanical. Nothing is learned. You are degrading an image on a schedule, and at every step you know exactly how much noise you poured in.</p>
+    <p data-i18n="s2.p2">Now you have a ladder. Clean photo at the bottom, pure noise at the top, and a known rung between every pair. You train the model on one thing only. Given an image at some rung, take a single small step back down, toward the slightly cleaner version below it. One rung of noise removed. That is the whole skill.</p>
+    <p data-i18n="s2.p3">To make a new picture, start at the top with noise you invented, static that never came from any photo, and climb down. Apply the one-step denoiser, then again, then again. Each pass peels off a little noise and commits to a little more structure. The picture was not hiding in the static. The model paints it on the way down, guided by everything it learned about what real pictures look like.</p>
+</section>
+
+<hr class="section-rule">
+
+<!-- Section 3: demo -->
+<section>
+    <h2 data-i18n="demo.h2">Watch the Snow Settle</h2>
+    <p data-i18n="demo.p">Here the picture is a small grid of pixels spelling four letters, coarse enough that you can watch every pixel. Drag the slider to eat the letters with static, pixel by pixel. Then start the descent and watch them climb back out of the snow. A real model runs this same loop on a far bigger grid, a million pixels, and it learned the way back from a million pictures rather than the one it has here.</p>
+
+    <div class="demo">
+        <div class="canvas-wrap">
+            <canvas id="diffCanvas" width="528" height="144"></canvas>
+        </div>
+        <div class="demo-status" id="demoStatus"></div>
+
+        <div class="demo-controls">
+            <div class="slider-wrap">
+                <label data-i18n="demo.noise">Noise</label>
+                <input type="range" id="noiseSlider" min="0" max="40" step="1" value="0" oninput="onSlide()">
+                <span class="noise-val" id="noiseVal">0%</span>
+            </div>
+        </div>
+        <div class="btn-row">
+            <button class="demo-btn" id="genBtn" onclick="generate()" data-i18n="demo.generate">Generate from noise</button>
+            <button class="demo-btn" onclick="resetDemo()" data-i18n="demo.reset">Reset to letters</button>
+        </div>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- Section 4: contrast payoff -->
+<section>
+    <h2 data-i18n="s3.h2">Same Job, Opposite Motion</h2>
+    <p data-i18n="s3.p1">Both models chase the one thing the last module ended on. Learn what real data looks like, then hand back a fresh sample of it. The text model learned the spread of sentences and drew from it one word at a time. The image model learns the spread of pictures and draws the whole frame at once, sharpening it across many passes.</p>
+    <p data-i18n="s3.p2">The split is order and direction. A left-to-right writer commits to the start before it has seen the end, one word locked in behind the next, with no way back. Diffusion keeps the entire canvas in a blurry draft and refines it globally. Early passes rough in the big shapes, late passes fix the details. That is why an image model can correct a hand on pass forty that came out wrong on pass ten. The writer cannot unsay a word.</p>
+    <p data-i18n="s3.p3">The method fits the shape of the data. Text is a line. One thing follows another, and the order carries the meaning. An image is a field. Everything sits at once and there is no first pixel to read. So text gets built in sequence, and a picture gets sharpened all together.</p>
+
+    <details class="deepdive">
+        <summary data-i18n="dd.summary">For the curious: the noise schedule and the denoiser</summary>
+        <div class="dd-body">
+            <p data-i18n="dd.p1">Adding noise has a closed form. Let \(x_0\) be the clean image and \(\bar\alpha_t\) a number that slides from near 1 down toward 0 as the step \(t\) climbs. The noised image at step \(t\) is:</p>
+            <div class="formula-block">$$ x_t = \sqrt{\bar\alpha_t}\; x_0 + \sqrt{1 - \bar\alpha_t}\;\varepsilon, \qquad \varepsilon \sim \mathcal{N}(0, I) $$</div>
+            <p data-i18n="dd.p2">That runs on every pixel at once. At small \(t\) the image is almost clean, at large \(t\) it is almost pure static. The model's one job at each rung is to look at a noisy image and estimate the clean one behind it. In this demo there is exactly one clean image it could mean, the four letters, so its best estimate is always that image. It memorized the answer.</p>
+            <p data-i18n="dd.p3">That is the cheap version. Real diffusion models cannot memorize a single picture, they are trained on billions, so they replace the exact answer with a neural network that predicts the clean image from the noisy one, for any image at all. It is the same move as the last module. A lookup over everything you have seen becomes a learned function that stores none of it. The counting model turned into a neural language model. The one memorized image here turns into a denoising network that can dream up pictures it never saw.</p>
+        </div>
+    </details>
+</section>
+
+<hr class="section-rule">
+
+<!-- Exercise -->
+<section>
+    <h2 data-i18n="ex.h2">Before You Go</h2>
+    <p data-i18n="ex.p">Drag the slider to the middle and stop. That half-ruined grid is what the model faces at one rung, and its only task is to guess the noise to peel off before it repeats. Run the descent a few times. The static churns differently every run, but the letters always land the same, because this model has seen exactly one picture in its life. A model that had seen millions would fill the uncertain spots with something new each time. That difference, memorizing against inventing, is the whole game.</p>
+</section>
+
+</div>
+
+<footer>
+    <span data-i18n="footer.title">Apophenic Models</span><br>
+    <a href="https://github.com/i-yam/passt/tree/main/modules/apophenic" data-i18n="footer.repo">Source code</a> &middot;
+    <a href="../../" data-i18n="footer.home">Course home</a>
+</footer>
+
+<script>
+const GRID = {"W":88,"H":24,"bits":"000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001111111111111110011110000001111000111100000111100000111110000011111111100000000000000000111111111111111001111000000111100011110000011111000011110000011111111110000000000000000000000111110000000111100000011110001111000011111100001111000011110000111000000000000000000000011111000000011110000001111000111110001111110000111100001111000000100000000000000000000001111100000001111000000111100001111000111111000011110000111000000000000000000000000000000111110000000111100000011110000111100011111100011110000011110000000000000000000000000000011111000000011110000001111000011110001110111001111000001111111100000000000000000000000001111100000001111111111111100001111001110011100111100000111111111100000000000000000000000111110000000111111111111110000011110111001110011110000001111111111100000000000000000000011111000000011110000001111000001111011100111011110000000000111111110000000000000000000001111100000001111000000111100000111111110001111111000000000000011111000000000000000000000111110000000111100000011110000011111110000111111100000000000000111100000000000000000000011111000000011110000001111000000111111000011111110000001000000011110000000000000000000001111100000001111000000111100000011111100001111110000000111000011111000000000000000000000111110000000111100000011110000001111110000011111000000011111111111000000000000000000000011111000000011110000001111000000111110000001111100000000111111110000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"};
+
+const T = {
+    en: {
+        'hero.title': 'Apophenic Models',
+        'hero.subtitle': 'The last model wrote one word at a time. This one starts from pure noise and scrapes it away until a picture is left.',
+
+        's1.h2': 'Two Ways to Make Something',
+        's1.p1': 'Last module, the machine wrote by guessing the next word, then the next, laying a sentence down from the left edge like someone typing with no backspace. Most image models do not work that way at all.',
+        's1.p2': 'Picture an old television tuned to a dead channel. Grey snow, no signal, every dot flickering at random. A diffusion model starts there, with a whole screen of noise, and cleans it up. Not corner to corner. All at once, a little per pass, over and over, until the snow settles into a photograph that was never transmitted.',
+        's1.tvcap': 'A dead channel. Every dot random, no signal. This is where a diffusion model begins.',
+        's1.apo': 'There is a word for seeing a picture in random noise. Apophenia. Your brain does it without asking, faces in clouds, a figure in the static, the man in the moon. A diffusion model does the same thing on purpose, and it does not stop until the picture is sharp.',
+        's1.p3': 'The obvious question is how anyone trains a machine to do that. You cannot hand it noise and the matching picture, because there is no matching picture. So you build the training data backwards.',
+
+        's2.h2': 'Learning to Undo a Mess',
+        's2.p1': 'Take a real photograph. Add a small amount of noise. Add a little more. Keep going, step after step, until nothing is left but snow. This part is mechanical. Nothing is learned. You are degrading an image on a schedule, and at every step you know exactly how much noise you poured in.',
+        's2.p2': 'Now you have a ladder. Clean photo at the bottom, pure noise at the top, and a known rung between every pair. You train the model on one thing only. Given an image at some rung, take a single small step back down, toward the slightly cleaner version below it. One rung of noise removed. That is the whole skill.',
+        's2.p3': 'To make a new picture, start at the top with noise you invented, static that never came from any photo, and climb down. Apply the one-step denoiser, then again, then again. Each pass peels off a little noise and commits to a little more structure. The picture was not hiding in the static. The model paints it on the way down, guided by everything it learned about what real pictures look like.',
+
+        'demo.h2': 'Watch the Snow Settle',
+        'demo.p': 'Here the picture is a small grid of pixels spelling four letters, coarse enough that you can watch every pixel. Drag the slider to eat the letters with static, pixel by pixel. Then start the descent and watch them climb back out of the snow. A real model runs this same loop on a far bigger grid, a million pixels, and it learned the way back from a million pictures rather than the one it has here.',
+        'demo.noise': 'Noise',
+        'demo.generate': 'Generate from noise',
+        'demo.reset': 'Reset to letters',
+        'demo.stat_clean': 'Step 0. The letters, before any noise.',
+        'demo.stat_forward': 'Rung <b>{t}</b> of 40. Static eating the letters, {pct}% of the way to snow.',
+        'demo.stat_pure': 'Step 40. Pure static. No signal left.',
+        'demo.stat_gen': 'Descending from static. Rung <b>{t}</b> of 40.',
+        'demo.stat_done': 'Out of the static, the letters.',
+
+        's3.h2': 'Same Job, Opposite Motion',
+        's3.p1': 'Both models chase the one thing the last module ended on. Learn what real data looks like, then hand back a fresh sample of it. The text model learned the spread of sentences and drew from it one word at a time. The image model learns the spread of pictures and draws the whole frame at once, sharpening it across many passes.',
+        's3.p2': 'The split is order and direction. A left-to-right writer commits to the start before it has seen the end, one word locked in behind the next, with no way back. Diffusion keeps the entire canvas in a blurry draft and refines it globally. Early passes rough in the big shapes, late passes fix the details. That is why an image model can correct a hand on pass forty that came out wrong on pass ten. The writer cannot unsay a word.',
+        's3.p3': 'The method fits the shape of the data. Text is a line. One thing follows another, and the order carries the meaning. An image is a field. Everything sits at once and there is no first pixel to read. So text gets built in sequence, and a picture gets sharpened all together.',
+
+        'dd.summary': 'For the curious: the noise schedule and the denoiser',
+        'dd.p1': 'Adding noise has a closed form. Let \\(x_0\\) be the clean image and \\(\\bar\\alpha_t\\) a number that slides from near 1 down toward 0 as the step \\(t\\) climbs. The noised image at step \\(t\\) is:',
+        'dd.p2': 'That runs on every pixel at once. At small \\(t\\) the image is almost clean, at large \\(t\\) it is almost pure static. The model\'s one job at each rung is to look at a noisy image and estimate the clean one behind it. In this demo there is exactly one clean image it could mean, the four letters, so its best estimate is always that image. It memorized the answer.',
+        'dd.p3': 'That is the cheap version. Real diffusion models cannot memorize a single picture, they are trained on billions, so they replace the exact answer with a neural network that predicts the clean image from the noisy one, for any image at all. It is the same move as the last module. A lookup over everything you have seen becomes a learned function that stores none of it. The counting model turned into a neural language model. The one memorized image here turns into a denoising network that can dream up pictures it never saw.',
+
+        'ex.h2': 'Before You Go',
+        'ex.p': 'Drag the slider to the middle and stop. That half-ruined grid is what the model faces at one rung, and its only task is to guess the noise to peel off before it repeats. Run the descent a few times. The static churns differently every run, but the letters always land the same, because this model has seen exactly one picture in its life. A model that had seen millions would fill the uncertain spots with something new each time. That difference, memorizing against inventing, is the whole game.',
+
+        'footer.title': 'Apophenic Models',
+        'footer.repo': 'Source code',
+        'footer.home': 'Course home',
+    },
+    de: {
+        'hero.title': 'Apophene Modelle',
+        'hero.subtitle': 'Das letzte Modell schrieb Wort für Wort. Dieses startet aus reinem Rauschen und kratzt es weg, bis ein Bild übrig bleibt.',
+
+        's1.h2': 'Zwei Arten, etwas zu machen',
+        's1.p1': 'Im letzten Modul schrieb die Maschine, indem sie das nächste Wort riet, dann das nächste. So legte sie einen Satz vom linken Rand her ab, wie jemand ohne Rücktaste. Die meisten Bildmodelle arbeiten ganz anders.',
+        's1.p2': 'Stell dir einen alten Fernseher vor, eingestellt auf einen toten Kanal. Graues Rauschen, kein Signal, jeder Punkt flackert zufällig. Genau dort beginnt ein Diffusionsmodell, mit einem ganzen Bildschirm voll Rauschen. Und dann räumt es auf. Nicht Ecke für Ecke. Alles auf einmal, ein wenig pro Durchgang, immer wieder. Am Ende legt sich das Rauschen zu einer Fotografie, die nie gesendet wurde.',
+        's1.tvcap': 'Ein toter Kanal. Jeder Punkt zufällig, kein Signal. Hier beginnt ein Diffusionsmodell.',
+        's1.apo': 'Es gibt ein Wort dafür, in zufälligem Rauschen ein Bild zu sehen. Apophänie. Dein Gehirn tut es ungefragt: Gesichter in Wolken, eine Gestalt im Rauschen, der Mann im Mond. Ein Diffusionsmodell tut dasselbe mit Absicht. Und es hört nicht auf, bis das Bild scharf ist.',
+        's1.p3': 'Die naheliegende Frage: Wie bringt man einer Maschine das bei? Du kannst ihr nicht Rauschen und das passende Bild geben, denn es gibt kein passendes Bild. Also baust du die Trainingsdaten rückwärts.',
+
+        's2.h2': 'Lernen, eine Sauerei rückgängig zu machen',
+        's2.p1': 'Nimm eine echte Fotografie. Füg ein wenig Rauschen hinzu. Füg noch etwas hinzu. Mach weiter, Schritt für Schritt, bis nichts als Rauschen übrig ist. Dieser Teil ist reine Mechanik. Gelernt wird dabei nichts. Du verschlechterst ein Bild nach einem Fahrplan. Bei jedem Schritt weißt du genau, wie viel Rauschen du eingefüllt hast.',
+        's2.p2': 'Jetzt hast du eine Leiter. Unten das saubere Foto, oben das reine Rauschen. Zwischen jedem Paar liegt eine bekannte Sprosse. Du trainierst das Modell auf nur eine Sache. Es bekommt ein Bild auf irgendeiner Sprosse. Dann macht es einen einzigen kleinen Schritt nach unten, hin zur etwas saubereren Version. Eine Sprosse Rauschen entfernt. Das ist die ganze Fähigkeit.',
+        's2.p3': 'Für ein neues Bild beginnst du oben, mit Rauschen, das du selbst erfunden hast. Dieses Rauschen kam nie von einem Foto. Und jetzt kletterst du hinunter. Wende den Ein-Schritt-Entrauscher an, dann wieder, dann wieder. Jeder Durchgang schält ein wenig Rauschen ab und legt sich auf ein wenig mehr Struktur fest. Das Bild steckte nicht im Rauschen. Das Modell malt es auf dem Weg nach unten. Dabei leitet es alles, was es über echte Bilder gelernt hat.',
+
+        'demo.h2': 'Sieh zu, wie sich das Rauschen legt',
+        'demo.p': 'Hier ist das Bild ein kleines Raster aus Pixeln und zeigt vier Buchstaben. Es ist grob genug, dass du jedes Pixel einzeln beobachten kannst. Zieh am Regler, um die Buchstaben mit Rauschen aufzufressen, Pixel für Pixel. Dann starte den Abstieg und sieh zu, wie sie wieder aus dem Schnee klettern. Ein echtes Modell fährt dieselbe Schleife auf einem viel größeren Raster, einer Million Pixel. Und es hat den Weg zurück aus einer Million Bilder gelernt, nicht aus dem einen, das es hier hat.',
+        'demo.noise': 'Rauschen',
+        'demo.generate': 'Aus Rauschen erzeugen',
+        'demo.reset': 'Auf die Buchstaben zurücksetzen',
+        'demo.stat_clean': 'Schritt 0. Die Buchstaben, vor jedem Rauschen.',
+        'demo.stat_forward': 'Sprosse <b>{t}</b> von 40. Das Rauschen frisst die Buchstaben, {pct}% des Weges zum Schnee.',
+        'demo.stat_pure': 'Schritt 40. Reines Rauschen. Kein Signal übrig.',
+        'demo.stat_gen': 'Abstieg aus dem Rauschen. Sprosse <b>{t}</b> von 40.',
+        'demo.stat_done': 'Aus dem Rauschen, die Buchstaben.',
+
+        's3.h2': 'Dieselbe Aufgabe, entgegengesetzte Bewegung',
+        's3.p1': 'Beide Modelle jagen dem einen nach, mit dem das letzte Modul endete. Lernen, wie echte Daten aussehen. Dann eine frische Probe davon zurückgeben. Das Textmodell lernte die Verteilung von Sätzen und zog daraus Wort für Wort. Das Bildmodell lernt die Verteilung von Bildern. Es zeichnet das ganze Bild auf einmal und schärft es über viele Durchgänge.',
+        's3.p2': 'Der Unterschied liegt in Reihenfolge und Richtung. Ein Schreiber von links nach rechts legt sich auf den Anfang fest, bevor er das Ende gesehen hat. Ein Wort rastet hinter dem nächsten ein, ohne Weg zurück. Diffusion hält die ganze Leinwand in einem verschwommenen Entwurf und verfeinert sie überall zugleich. Frühe Durchgänge skizzieren die großen Formen, späte korrigieren die Details. Deshalb kann ein Bildmodell im vierzigsten Durchgang eine Hand richten, die im zehnten falsch aussah. Der Schreiber kann kein Wort zurücknehmen.',
+        's3.p3': 'Die Methode passt zur Form der Daten. Text ist eine Linie. Eines folgt dem anderen, und die Reihenfolge trägt die Bedeutung. Ein Bild ist eine Fläche. Alles sitzt auf einmal da, und es gibt kein erstes Pixel zum Lesen. Also wird Text der Reihe nach gebaut. Ein Bild wird als Ganzes geschärft.',
+
+        'dd.summary': 'Für Neugierige: der Rausch-Fahrplan und der Entrauscher',
+        'dd.p1': 'Rauschen hinzuzufügen hat eine geschlossene Form. Sei \\(x_0\\) das saubere Bild. Sei \\(\\bar\\alpha_t\\) eine Zahl, die von nahe 1 Richtung 0 gleitet, während der Schritt \\(t\\) steigt. Das verrauschte Bild bei Schritt \\(t\\) ist:',
+        'dd.p2': 'Das läuft auf jedem Pixel gleichzeitig. Bei kleinem \\(t\\) ist das Bild fast sauber, bei großem \\(t\\) fast reines Rauschen. Auf jeder Sprosse hat das Modell nur eine Aufgabe. Es sieht ein verrauschtes Bild an und schätzt das saubere dahinter. In diesem Demo gibt es genau ein sauberes Bild, das gemeint sein kann, die vier Buchstaben. Also ist die beste Schätzung immer dieses Bild. Das Modell hat die Antwort auswendig gelernt.',
+        'dd.p3': 'Das ist die billige Variante. Echte Diffusionsmodelle können sich kein einzelnes Bild merken, denn sie werden auf Milliarden trainiert. Also ersetzen sie die exakte Antwort durch ein neuronales Netz. Dieses Netz sagt aus dem verrauschten Bild das saubere vorher, für jedes beliebige Bild. Es ist derselbe Schritt wie im letzten Modul. Aus einer Nachschlagetabelle über alles Gesehene wird eine gelernte Funktion, die nichts davon speichert. Das Zählmodell wurde zu einem neuronalen Sprachmodell. Das eine auswendig gelernte Bild hier wird zu einem Entrausch-Netz. Und das kann Bilder erträumen, die es nie gesehen hat.',
+
+        'ex.h2': 'Bevor du gehst',
+        'ex.p': 'Zieh den Regler in die Mitte und halt an. Dieses halb ruinierte Raster sieht das Modell auf einer Sprosse. Seine einzige Aufgabe ist, das Rauschen zu raten, das es abschälen soll. Dann wiederholt es sich. Lass den Abstieg ein paar Mal laufen. Das Rauschen wirbelt bei jedem Lauf anders, aber die Buchstaben landen immer gleich. Dieses Modell hat in seinem Leben nämlich genau ein Bild gesehen. Ein Modell mit Millionen Bildern würde die unsicheren Stellen jedes Mal anders füllen. Auswendiglernen gegen Erfinden: Genau darum geht das ganze Spiel.',
+
+        'footer.title': 'Apophene Modelle',
+        'footer.repo': 'Quellcode',
+        'footer.home': 'Kurs-Startseite',
+    }
+};
+
+let currentLang = 'en';
+function applyLang() {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (T[currentLang] && T[currentLang][key] != null) el.innerHTML = T[currentLang][key];
+    });
+}
+function toggleLang() {
+    currentLang = currentLang === 'en' ? 'de' : 'en';
+    document.documentElement.lang = currentLang;
+    document.querySelector('.lang-toggle').textContent = currentLang === 'en' ? 'DE' : 'EN';
+    applyLang();
+    refreshStatus();
+    if (typeof renderMathInElement !== 'undefined') {
+        renderMathInElement(document.body, { delimiters: [ { left: '$$', right: '$$', display: true }, { left: '\\(', right: '\\)', display: false } ], throwOnError: false });
+    }
+}
+
+// ─── Pixel diffusion engine (offline-validated) ───────────────────────────────
+const W = GRID.W, H = GRID.H, P = W * H;
+const x0 = new Float32Array(P);
+for (let i = 0; i < P; i++) x0[i] = GRID.bits.charCodeAt(i) === 49 ? 1 : -1;  // '1' -> 49
+const Tn = 40;
+const betas = []; for (let i = 0; i < Tn; i++) betas.push(0.004 + (0.14 - 0.004) * i / (Tn - 1));
+const alphas = betas.map(b => 1 - b);
+const abar = []; (function () { let a = 1; for (let i = 0; i < Tn; i++) { a *= alphas[i]; abar.push(a); } })();
+
+function randn() {
+    let u = 0, v = 0;
+    while (u === 0) u = Math.random();
+    while (v === 0) v = Math.random();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+
+let fixedEps = new Float32Array(P);
+function drawEps() { for (let i = 0; i < P; i++) fixedEps[i] = randn(); }
+drawEps();
+
+function forwardAt(t) {
+    const out = new Float32Array(P);
+    if (t <= 0) { out.set(x0); return out; }
+    if (t >= Tn) { out.set(fixedEps); return out; }
+    const a = Math.sqrt(abar[t]), s = Math.sqrt(1 - abar[t]);
+    for (let i = 0; i < P; i++) out[i] = a * x0[i] + s * fixedEps[i];
+    return out;
+}
+
+function reverseStep(x, t) {
+    const out = new Float32Array(P);
+    if (t === 0) { out.set(x0); return out; }       // single-image denoiser: memorized target
+    const bt = betas[t], at = alphas[t], abt = abar[t], abp = abar[t - 1];
+    const c1 = Math.sqrt(abp) * bt / (1 - abt);
+    const c2 = Math.sqrt(at) * (1 - abp) / (1 - abt);
+    const sd = Math.sqrt(bt * (1 - abp) / (1 - abt));
+    for (let i = 0; i < P; i++) out[i] = c1 * x0[i] + c2 * x[i] + sd * randn();
+    return out;
+}
+
+function sampleSync() {
+    let x = new Float32Array(P);
+    for (let i = 0; i < P; i++) x[i] = randn();
+    for (let t = Tn - 1; t >= 0; t--) x = reverseStep(x, t);
+    return x;
+}
+
+// ─── Rendering ────────────────────────────────────────────────────────────────
+let off = null, octx = null;
+function draw(vals) {
+    const c = document.getElementById('diffCanvas');
+    if (!c || !c.getContext) return;
+    let ctx = null; try { ctx = c.getContext('2d'); } catch (e) { ctx = null; }
+    if (!ctx) return;
+    try {
+        if (!off) { off = document.createElement('canvas'); off.width = W; off.height = H; }
+        if (!octx) octx = off.getContext('2d');
+        if (!octx) return;
+        const img = octx.createImageData(W, H);
+        for (let i = 0; i < P; i++) {
+            let v = (vals[i] + 1) / 2; if (v < 0) v = 0; if (v > 1) v = 1;
+            const g = (v * 255) | 0;
+            img.data[i * 4] = g; img.data[i * 4 + 1] = g; img.data[i * 4 + 2] = g; img.data[i * 4 + 3] = 255;
+        }
+        octx.putImageData(img, 0, 0);
+        ctx.imageSmoothingEnabled = false;
+        ctx.clearRect(0, 0, c.width, c.height);
+        ctx.drawImage(off, 0, 0, W, H, 0, 0, c.width, c.height);
+    } catch (e) { /* no canvas raster support */ }
+}
+
+let sliderT = 0, mode = 'clean', animTimer = null;
+
+function refreshStatus() {
+    const st = document.getElementById('demoStatus');
+    const nv = document.getElementById('noiseVal');
+    if (!st) return;
+    const tr = T[currentLang];
+    const pct = sliderT <= 0 ? 0 : (sliderT >= Tn ? 100 : Math.round((1 - abar[sliderT]) * 100));
+    if (nv) nv.textContent = pct + '%';
+    let msg;
+    if (mode === 'gen') msg = tr['demo.stat_gen'].replace('{t}', sliderT);
+    else if (mode === 'done') msg = tr['demo.stat_done'];
+    else if (sliderT === 0) msg = tr['demo.stat_clean'];
+    else if (sliderT >= Tn) msg = tr['demo.stat_pure'];
+    else msg = tr['demo.stat_forward'].replace('{t}', sliderT).replace('{pct}', pct);
+    st.innerHTML = msg;
+}
+
+function onSlide() {
+    if (animTimer) return;
+    sliderT = parseInt(document.getElementById('noiseSlider').value, 10);
+    mode = sliderT === 0 ? 'clean' : 'forward';
+    draw(forwardAt(sliderT));
+    refreshStatus();
+}
+
+function generate() {
+    if (animTimer) return;
+    const btn = document.getElementById('genBtn');
+    btn.disabled = true;
+    mode = 'gen';
+    let x = new Float32Array(P);
+    for (let i = 0; i < P; i++) x[i] = randn();
+    let t = Tn - 1;
+    sliderT = Tn;
+    document.getElementById('noiseSlider').value = Tn;
+    draw(x); refreshStatus();
+    animTimer = setInterval(() => {
+        x = reverseStep(x, t);
+        sliderT = t;
+        document.getElementById('noiseSlider').value = t;
+        draw(x);
+        refreshStatus();
+        if (t === 0) { clearInterval(animTimer); animTimer = null; mode = 'done'; btn.disabled = false; refreshStatus(); }
+        t--;
+    }, 75);
+}
+
+function resetDemo() {
+    if (animTimer) { clearInterval(animTimer); animTimer = null; }
+    document.getElementById('genBtn').disabled = false;
+    drawEps();
+    sliderT = 0; mode = 'clean';
+    document.getElementById('noiseSlider').value = 0;
+    draw(forwardAt(0));
+    refreshStatus();
+}
+
+window.addEventListener('load', function () {
+    applyLang();
+    draw(forwardAt(0));
+    refreshStatus();
+    if (typeof renderMathInElement !== 'undefined') {
+        renderMathInElement(document.body, { delimiters: [ { left: '$$', right: '$$', display: true }, { left: '\\(', right: '\\)', display: false } ], throwOnError: false });
+    }
+});
+</script>
+</body>
+</html>

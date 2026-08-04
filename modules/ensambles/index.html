@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One Tree Is a Liar</title>
+
+    <!-- KaTeX -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #141420;
+            color: #e8e8f0;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            line-height: 1.8;
+            font-size: 18px;
+        }
+
+        .container {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* === Language toggle === */
+        .lang-toggle {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            background: #2a2a44;
+            border: 1px solid #4a4a70;
+            border-radius: 20px;
+            padding: 6px 14px;
+            cursor: pointer;
+            font-size: 13px;
+            font-family: sans-serif;
+            color: #a0a0d0;
+            z-index: 100;
+            transition: background 0.2s;
+        }
+        .lang-toggle:hover { background: #363658; }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: 80px 24px 40px;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.3;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .hero .subtitle {
+            margin-top: 16px;
+            color: #888;
+            font-size: 16px;
+            font-style: italic;
+        }
+
+        /* Sections */
+        section { padding: 50px 0; }
+
+        h2 {
+            font-size: 30px;
+            color: #fff;
+            margin-bottom: 24px;
+            line-height: 1.3;
+        }
+
+        h3 {
+            font-size: 20px;
+            color: #ccc;
+            margin: 28px 0 12px;
+        }
+
+        p { margin-bottom: 20px; color: #ccc; }
+
+        em { color: #e0e0f0; font-style: italic; }
+
+        /* Formula blocks */
+        .formula-block {
+            margin: 24px auto;
+            text-align: center;
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+
+        /* Quiz */
+        .quiz {
+            background: #1c1c2e;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            padding: 28px;
+            margin: 36px 0;
+        }
+
+        .quiz-question {
+            font-size: 18px;
+            color: #e0e0f0;
+            margin-bottom: 18px;
+            font-style: italic;
+        }
+
+        .quiz-options {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .quiz-btn {
+            background: #2a2a44;
+            color: #e0e0f0;
+            border: 1px solid #3a3a55;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+            flex: 1;
+            min-width: 200px;
+            text-align: center;
+        }
+
+        .quiz-btn:hover { background: #363658; border-color: #5a5a80; }
+
+        .quiz-btn.correct {
+            background: #1a4a2a;
+            border-color: #50b878;
+            color: #70e898;
+        }
+
+        .quiz-btn.wrong {
+            background: #2a2248;
+            border-color: #8264dc;
+            color: #a88ef0;
+        }
+
+        .quiz-btn.disabled { pointer-events: none; opacity: 0.6; }
+
+        .quiz-feedback {
+            margin-top: 14px;
+            font-size: 16px;
+            min-height: 24px;
+            line-height: 1.5;
+        }
+
+        .quiz-feedback.success { color: #70e898; }
+        .quiz-feedback.fail    { color: #a88ef0; }
+
+        /* Reflection card (reuses surface/border tokens) */
+        .reflection {
+            background: #1c1c2e;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            padding: 28px;
+            margin: 36px 0;
+            color: #ccc;
+        }
+        .reflection p:last-child { margin-bottom: 0; }
+
+        /* Deep-dive */
+        details {
+            background: #1c1c2e;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            padding: 0 28px;
+            margin: 36px 0;
+        }
+        details[open] { padding-bottom: 8px; }
+        summary {
+            cursor: pointer;
+            padding: 22px 0;
+            color: #80b4f0;
+            font-family: sans-serif;
+            font-size: 15px;
+            list-style: none;
+        }
+        summary::-webkit-details-marker { display: none; }
+        summary::before { content: "\203A  "; }
+        details[open] summary::before { content: "\2304  "; }
+
+        /* Divider */
+        .section-rule {
+            border: none;
+            border-top: 1px solid #2a2a40;
+            margin: 0;
+        }
+
+        /* Links */
+        a { color: #80b4f0; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 24px;
+            color: #444;
+            font-size: 14px;
+        }
+        footer a { color: #666; }
+
+        /* Figures */
+        .figure { margin: 28px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            border-radius: 10px;
+            background: #fff;
+            border: 1px solid #2a2a40;
+        }
+        .caption { margin-top: 10px; font-size: 13px; color: #777; font-style: italic; }
+        .caption a { color: #777; }
+
+        /* Code blocks */
+        pre.code {
+            background: #1c1c2e;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            padding: 20px 22px;
+            margin: 26px 0;
+            overflow-x: auto;
+            font-family: 'SF Mono', 'Menlo', 'Consolas', 'Liberation Mono', monospace;
+            font-size: 14px;
+            line-height: 1.65;
+            color: #d8d8e8;
+            white-space: pre;
+        }
+        pre.code .cmt { color: #6f7390; }
+        pre.code .hl  { color: #80b4f0; }
+        pre.code .kw  { color: #a88ef0; }
+
+        /* Interactive widget */
+        .chart-wrap {
+            width: 100%;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            background: #1c1c2e;
+            padding: 12px;
+        }
+        #ens-canvas { display: block; width: 100%; height: auto; }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            margin: 22px 0 6px;
+            font-family: sans-serif;
+        }
+        .control { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 180px; }
+        .control label { font-size: 13px; color: #888; }
+        .control select {
+            background: #2a2a44;
+            color: #e0e0f0;
+            border: 1px solid #3a3a55;
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-family: sans-serif;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .control select:hover { border-color: #5a5a80; }
+        .control input[type=range] { accent-color: #80b4f0; cursor: pointer; width: 100%; }
+        .control .val { font-size: 14px; color: #e8e8f0; font-variant-numeric: tabular-nums; }
+
+        .legend {
+            display: flex;
+            gap: 22px;
+            flex-wrap: wrap;
+            font-family: sans-serif;
+            font-size: 13px;
+            color: #888;
+            margin-top: 6px;
+        }
+        .legend span { display: inline-flex; align-items: center; }
+        .legend span::before {
+            content: "";
+            display: inline-block;
+            width: 16px;
+            margin-right: 7px;
+            border-top: 2px solid transparent;
+        }
+        .legend .l-data::before { width: 9px; height: 9px; border: none; border-radius: 50%; background: #888; }
+        .legend .l-ind::before  { border-top-color: #788cbe; }
+        .legend .l-ens::before  { border-top-color: #80b4f0; }
+
+        .readout {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            font-family: sans-serif;
+            font-size: 14px;
+            color: #a0a0d0;
+            margin-top: 14px;
+        }
+        .readout .num { color: #e8e8f0; font-variant-numeric: tabular-nums; }
+
+        .widget-cap { margin-top: 18px; }
+        .widget-note { font-size: 14px; color: #777; font-style: italic; margin-top: 16px; }
+
+        /* Responsive */
+        @media (max-width: 680px) {
+            .controls { flex-direction: column; gap: 18px; }
+            .hero h1 { font-size: 28px; }
+            h2 { font-size: 24px; }
+            body { font-size: 16px; }
+            .quiz-options { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<button class="lang-toggle" onclick="toggleLang()">DE</button>
+
+<div class="hero">
+    <h1 data-i18n="hero.title">One Tree Is a Liar</h1>
+    <p class="subtitle" data-i18n="hero.subtitle">A minimodule on bagging, stacking, and boosting: how a crowd of unreliable models becomes one you can trust.</p>
+</div>
+
+<div class="container">
+
+    <section>
+        <h2 data-i18n="s1.h2">The Problem With One Good Model</h2>
+        <p data-i18n="s1.p1">Take the decision tree from the last class and grow it on the Titanic passengers with no depth limit. It splits until almost every passenger sits in their own leaf.</p>
+        <pre class="code"><span class="cmt"># a Titanic tree with no depth limit</span>
+from sklearn.tree import DecisionTreeClassifier
+
+tree = DecisionTreeClassifier(random_state=0).fit(X_train, y_train)
+
+tree.score(X_train, y_train)   <span class="cmt"># 0.989</span>
+tree.score(X_test,  y_test)    <span class="hl"># 0.734   the gap is the lie</span>
+tree.get_depth()               <span class="cmt"># 17</span></pre>
+        <p class="caption" data-i18n="s1.code.cap">714 passengers, an 80/20 split. Almost perfect on the ones it trained on, barely past a guess on the rest.</p>
+        <p data-i18n="s1.p2">One unstable model is a bad bet. A crowd of them, each wrong somewhere different, can be a good one. You let them disagree, then combine. The instability is the raw material: stable models like k-nearest-neighbours barely move when the data shifts, so copies of them agree on everything and the crowd adds nothing.</p>
+
+        <div class="quiz" id="quiz1">
+            <p class="quiz-question" data-i18n="quiz1.q">Why do ensembles prefer unstable base models like deep trees?</p>
+            <div class="quiz-options">
+                <button class="quiz-btn" data-i18n="quiz1.a1" onclick="answerQuiz('quiz1', this, true)">Their errors differ from model to model, so combining them cancels mistakes</button>
+                <button class="quiz-btn" data-i18n="quiz1.a2" onclick="answerQuiz('quiz1', this, false)">Unstable models are more accurate on their own</button>
+            </div>
+            <div class="quiz-feedback" id="quiz1-feedback"></div>
+        </div>
+    </section>
+
+    <hr class="section-rule">
+
+    <section>
+        <h2 data-i18n="s2.h2">Bagging: The Crowd Votes</h2>
+        <p data-i18n="s2.p1">Resample the data with replacement, train a tree on each copy, then average the votes. Every tree saw a different slice and made different mistakes, so the disagreements cancel. Variance drops, bias stays put, and the trees train in parallel. Bagging on trees, plus one trick from the next module, is the random forest.</p>
+
+        <div class="figure">
+            <img src="images/bagging.png" alt="Bagging: different data subsets, same algorithm, results averaged">
+            <p class="caption" data-i18n="s2.fig.cap">Different subsets of the data, the same algorithm on each, the answers averaged. Illustration after <a href="https://vas3k.com/blog/machine_learning">vas3k, Machine Learning for Everyone</a>.</p>
+        </div>
+
+        <pre class="code"><span class="cmt"># the same depth-hungry trees, but 300 of them on bootstrap samples</span>
+from sklearn.ensemble import RandomForestClassifier
+
+forest = RandomForestClassifier(n_estimators=300, random_state=0).fit(X_train, y_train)
+
+forest.score(X_train, y_train)   <span class="cmt"># 0.989</span>
+forest.score(X_test,  y_test)    <span class="hl"># 0.776   steadier on new passengers</span></pre>
+
+        <div class="quiz" id="quiz2">
+            <p class="quiz-question" data-i18n="quiz2.q">Bagging mainly reduces which of these?</p>
+            <div class="quiz-options">
+                <button class="quiz-btn" data-i18n="quiz2.a1" onclick="answerQuiz('quiz2', this, true)">Variance</button>
+                <button class="quiz-btn" data-i18n="quiz2.a2" onclick="answerQuiz('quiz2', this, false)">Bias</button>
+            </div>
+            <div class="quiz-feedback" id="quiz2-feedback"></div>
+        </div>
+    </section>
+
+    <hr class="section-rule">
+
+    <section>
+        <h2 data-i18n="s3.h2">Boosting: The Line Forms</h2>
+        <p data-i18n="s3.p1">Train the trees in sequence, not side by side. Each new shallow tree pays attention to what the ones before it got wrong. The errors no single weak tree could reach get chipped away, so bias falls. Run it too long and it starts memorising. No parallel here, and the names you will meet are XGBoost and LightGBM.</p>
+
+        <div class="figure">
+            <img src="images/boosting.png" alt="Boosting: each new tree focuses on the cases the previous one got wrong">
+            <p class="caption" data-i18n="s3.fig.cap">Each new tree gets the cases the previous one fumbled, and the chain repeats. Illustration after <a href="https://vas3k.com/blog/machine_learning">vas3k, Machine Learning for Everyone</a>.</p>
+        </div>
+
+        <pre class="code"><span class="cmt"># shallow trees, each fixing the leftovers of the last</span>
+from sklearn.ensemble import GradientBoostingClassifier
+
+boost = GradientBoostingClassifier(random_state=0).fit(X_train, y_train)
+
+boost.score(X_train, y_train)   <span class="cmt"># 0.926</span>
+boost.score(X_test,  y_test)    <span class="hl"># 0.790   smaller gap, less memorizing</span></pre>
+
+        <div class="quiz" id="quiz3">
+            <p class="quiz-question" data-i18n="quiz3.q">What is the core difference between bagging and boosting?</p>
+            <div class="quiz-options">
+                <button class="quiz-btn" data-i18n="quiz3.a1" onclick="answerQuiz('quiz3', this, true)">Bagging trains models independently in parallel; boosting trains them in sequence, each fixing the last</button>
+                <button class="quiz-btn" data-i18n="quiz3.a2" onclick="answerQuiz('quiz3', this, false)">Bagging uses trees; boosting uses linear models</button>
+            </div>
+            <div class="quiz-feedback" id="quiz3-feedback"></div>
+        </div>
+    </section>
+
+    <hr class="section-rule">
+
+    <section>
+        <h2 data-i18n="s4.h2">Stacking: Ask Around First</h2>
+        <p data-i18n="s4.p1">Train several different models in parallel, a nearest-neighbours, a tree, a support vector machine, then let one more model learn how to weigh their answers. The base models have to disagree to be worth blending. It shows up less than the other two, because they usually win for less effort.</p>
+
+        <div class="figure">
+            <img src="images/stacking.png" alt="Stacking: different algorithms on the same data, a final model decides">
+            <p class="caption" data-i18n="s4.fig.cap">Different algorithms on the same data, a final model deciding from their answers. Illustration after <a href="https://vas3k.com/blog/machine_learning">vas3k, Machine Learning for Everyone</a>.</p>
+        </div>
+
+        <pre class="code"><span class="cmt"># three different models, a fourth learns to weigh them</span>
+from sklearn.ensemble import StackingClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.svm import SVC
+
+stack = StackingClassifier(
+    estimators=[("knn", KNeighborsClassifier()),
+                ("tree", DecisionTreeClassifier(max_depth=4)),
+                ("svm", SVC())],
+    final_estimator=LogisticRegression(max_iter=1000),
+).fit(X_train, y_train)
+
+stack.score(X_train, y_train)   <span class="cmt"># 0.872</span>
+stack.score(X_test,  y_test)    <span class="hl"># 0.797   different models, best test yet</span></pre>
+        <p class="caption" data-i18n="s4.code.cap">Four models, one Titanic. Test accuracy walked 0.73, 0.78, 0.79, 0.80, and the gap between training and test closed at every step.</p>
+
+        <details>
+            <summary data-i18n="dd.summary">For the curious: where does the bootstrap leave 63.2% behind?</summary>
+            <p data-i18n="dd.p1">A bootstrap sample draws \(n\) rows from a dataset of \(n\) rows, with replacement. The chance that one particular row is missed on a single draw is \(1 - \tfrac{1}{n}\). Across all \(n\) draws, the chance it is missed every time is:</p>
+            <div class="formula-block" data-i18n="dd.formula">$$\left(1 - \frac{1}{n}\right)^{n} \;\xrightarrow{\; n \to \infty \;}\; \frac{1}{e} \approx 0.368$$</div>
+            <p data-i18n="dd.p2">So about 36.8% of the rows never make it into a given sample, and about 63.2% do. The rows left out are called the out-of-bag set. Each model can be tested on exactly the rows it never trained on, which hands you a validation estimate for free, without setting any data aside.</p>
+        </details>
+    </section>
+
+    <hr class="section-rule">
+
+    <section>
+        <h2 data-i18n="widget.h2">Now Try It Yourself</h2>
+        <p data-i18n="widget.p">Here is something wavy and noisy, the kind of shape a straight line gives up on. Pick a strategy, set how many trees and how deep, and watch what the crowd draws. The faint curves are the individual models. The bold one is what they agree on.</p>
+
+        <div class="chart-wrap"><canvas id="ens-canvas" width="800" height="480"></canvas></div>
+
+        <div class="legend">
+            <span class="l-data" data-i18n="lg.data">Data</span>
+            <span class="l-ind" id="legend-ind" data-i18n="lg.ind.bagging">Individual trees</span>
+            <span class="l-ens" data-i18n="lg.ensemble">Ensemble</span>
+        </div>
+
+        <div class="controls">
+            <div class="control">
+                <label data-i18n="ctl.model">Strategy</label>
+                <select id="sl-mode" onchange="render()">
+                    <option value="bagging"  data-i18n="opt.bagging">Bagging</option>
+                    <option value="boosting" data-i18n="opt.boosting">Boosting</option>
+                    <option value="stacking" data-i18n="opt.stacking">Stacking</option>
+                </select>
+            </div>
+            <div class="control">
+                <label id="lbl-count" data-i18n="lbl.count.bagging">Number of trees</label>
+                <input type="range" id="sl-count" min="2" max="24" value="8" oninput="render()">
+                <div class="val"><span id="val-count">8</span></div>
+            </div>
+            <div class="control">
+                <label data-i18n="lbl.depth">Tree depth</label>
+                <input type="range" id="sl-depth" min="1" max="9" value="4" oninput="render()">
+                <div class="val"><span id="val-depth">4</span></div>
+            </div>
+        </div>
+
+        <div class="readout">
+            <div><span data-i18n="ro.train">Training error (MSE)</span>: <span class="num" id="val-train">0.000</span></div>
+            <div><span data-i18n="ro.test">Test error (MSE)</span>: <span class="num" id="val-test">0.000</span></div>
+        </div>
+
+        <p class="widget-cap" id="widget-cap" data-i18n="cap.bagging">Each tree trains on its own bootstrap sample, so they disagree, most of all out at the edges. Average them and the disagreement cancels. More trees, steadier result. Deeper trees give the average more wobble to absorb.</p>
+        <p class="widget-note" data-i18n="widget.note">The other half of a random forest, picking a random subset of features at each split, needs more than one feature to mean anything. This curve has only one, so only the bootstrap sampling shows here. The feature trick gets its own treatment in the next module.</p>
+    </section>
+
+    <hr class="section-rule">
+
+    <section>
+        <h2 data-i18n="reflect.h2">Before You Move On</h2>
+        <div class="reflection">
+            <p data-i18n="reflect.p1">You have a deep tree that scores perfectly on the training data and falls apart on new customers. Which of the three methods would you reach for first, and which kind of error does it fix?</p>
+            <p data-i18n="reflect.p2">A fraud system has to score each transaction in a few milliseconds, spread across many machines at once. Bagging or boosting? Say why in one sentence.</p>
+            <p data-i18n="reflect.p3">Overfitting has shown up in regression, in single trees, and now here. Which of these three methods has its own way of overfitting if you let it run too long?</p>
+        </div>
+    </section>
+
+</div>
+
+<footer>
+    <p data-i18n="footer.title">One Tree Is a Liar</p>
+    <p><a href="https://github.com/i-yam/passt/tree/main/modules/ensambles" data-i18n="footer.repo">Source on GitHub</a> &nbsp;·&nbsp; <a href="../../" data-i18n="footer.course">Passt, Class 8</a></p>
+</footer>
+
+<script>
+
+// ─── Language data ────────────────────────────────────────────────────────────
+const T = {
+    en: {
+        'hero.title':    'One Tree Is a Liar',
+        'hero.subtitle': 'A minimodule on bagging, stacking, and boosting: how a crowd of unreliable models becomes one you can trust.',
+
+        's1.h2': 'The Problem With One Good Model',
+        's1.p1': 'Take the decision tree from the last class and grow it on the Titanic passengers with no depth limit. It splits until almost every passenger sits in their own leaf.',
+        's1.code.cap': '714 passengers, an 80/20 split. Almost perfect on the ones it trained on, barely past a guess on the rest.',
+        's1.p2': 'One unstable model is a bad bet. A crowd of them, each wrong somewhere different, can be a good one. You let them disagree, then combine. The instability is the raw material: stable models like k-nearest-neighbours barely move when the data shifts, so copies of them agree on everything and the crowd adds nothing.',
+
+        'quiz1.q':  'Why do ensembles prefer unstable base models like deep trees?',
+        'quiz1.a1': 'Their errors differ from model to model, so combining them cancels mistakes',
+        'quiz1.a2': 'Unstable models are more accurate on their own',
+        'quiz1.ok': 'Right. If every model made the same mistake, combining them would keep it. Disagreement is the thing that cancels.',
+        'quiz1.no': 'The other way around. A single unstable model is often worse on its own. The crowd is what repairs it, as long as the members disagree.',
+
+        's2.h2': 'Bagging: The Crowd Votes',
+        's2.p1': 'Resample the data with replacement, train a tree on each copy, then average the votes. Every tree saw a different slice and made different mistakes, so the disagreements cancel. Variance drops, bias stays put, and the trees train in parallel. Bagging on trees, plus one trick from the next module, is the random forest.',
+        's2.fig.cap': 'Different subsets of the data, the same algorithm on each, the answers averaged. Illustration after <a href="https://vas3k.com/blog/machine_learning">vas3k, Machine Learning for Everyone</a>.',
+
+        'quiz2.q':  'Bagging mainly reduces which of these?',
+        'quiz2.a1': 'Variance',
+        'quiz2.a2': 'Bias',
+        'quiz2.ok': 'Right. Averaging many noisy but roughly unbiased models steadies the prediction without making any one of them less wrong on average.',
+        'quiz2.no': 'Not quite. Each bagged model carries about the same bias as a single one. What the averaging kills is the variance, the wobble between them.',
+
+        's3.h2': 'Boosting: The Line Forms',
+        's3.p1': 'Train the trees in sequence, not side by side. Each new shallow tree pays attention to what the ones before it got wrong. The errors no single weak tree could reach get chipped away, so bias falls. Run it too long and it starts memorising. No parallel here, and the names you will meet are XGBoost and LightGBM.',
+        's3.fig.cap': 'Each new tree gets the cases the previous one fumbled, and the chain repeats. Illustration after <a href="https://vas3k.com/blog/machine_learning">vas3k, Machine Learning for Everyone</a>.',
+
+        'quiz3.q':  'What is the core difference between bagging and boosting?',
+        'quiz3.a1': 'Bagging trains models independently in parallel; boosting trains them in sequence, each fixing the last',
+        'quiz3.a2': 'Bagging uses trees; boosting uses linear models',
+        'quiz3.ok': 'Right. Parallel and independent against sequential and corrective. That single difference is why bagging fights variance and boosting fights bias.',
+        'quiz3.no': 'Both usually use trees. The real split is parallel and independent (bagging) against sequential and corrective (boosting).',
+
+        's4.h2': 'Stacking: Ask Around First',
+        's4.p1': 'Train several different models in parallel, a nearest-neighbours, a tree, a support vector machine, then let one more model learn how to weigh their answers. The base models have to disagree to be worth blending. It shows up less than the other two, because they usually win for less effort.',
+        's4.fig.cap': 'Different algorithms on the same data, a final model deciding from their answers. Illustration after <a href="https://vas3k.com/blog/machine_learning">vas3k, Machine Learning for Everyone</a>.',
+        's4.code.cap': 'Four models, one Titanic. Test accuracy walked 0.73, 0.78, 0.79, 0.80, and the gap between training and test closed at every step.',
+
+        'dd.summary': 'For the curious: where does the bootstrap leave 63.2% behind?',
+        'dd.p1':      'A bootstrap sample draws \\(n\\) rows from a dataset of \\(n\\) rows, with replacement. The chance that one particular row is missed on a single draw is \\(1 - \\tfrac{1}{n}\\). Across all \\(n\\) draws, the chance it is missed every time is:',
+        'dd.formula': '$$\\left(1 - \\frac{1}{n}\\right)^{n} \\;\\xrightarrow{\\; n \\to \\infty \\;}\\; \\frac{1}{e} \\approx 0.368$$',
+        'dd.p2':      'So about 36.8% of the rows never make it into a given sample, and about 63.2% do. The rows left out are called the out-of-bag set. Each model can be tested on exactly the rows it never trained on, which hands you a validation estimate for free, without setting any data aside.',
+
+        'reflect.h2': 'Before You Move On',
+        'reflect.p1': 'You have a deep tree that scores perfectly on the training data and falls apart on new customers. Which of the three methods would you reach for first, and which kind of error does it fix?',
+        'reflect.p2': 'A fraud system has to score each transaction in a few milliseconds, spread across many machines at once. Bagging or boosting? Say why in one sentence.',
+        'reflect.p3': 'Overfitting has shown up in regression, in single trees, and now here. Which of these three methods has its own way of overfitting if you let it run too long?',
+
+        'widget.h2': 'Now Try It Yourself',
+        'widget.p':  'Here is something wavy and noisy, the kind of shape a straight line gives up on. Pick a strategy, set how many trees and how deep, and watch what the crowd draws. The faint curves are the individual models. The bold one is what they agree on.',
+        'ctl.model': 'Strategy',
+        'opt.bagging':  'Bagging',
+        'opt.boosting': 'Boosting',
+        'opt.stacking': 'Stacking',
+        'lbl.count.bagging':  'Number of trees',
+        'lbl.count.boosting': 'Number of trees',
+        'lbl.count.stacking': 'Number of base models',
+        'lbl.depth': 'Tree depth',
+        'lg.data':         'Data',
+        'lg.ind.bagging':  'Individual trees',
+        'lg.ind.boosting': 'Cumulative stages',
+        'lg.ind.stacking': 'Base models',
+        'lg.ensemble':     'Ensemble',
+        'ro.train': 'Training error (MSE)',
+        'ro.test':  'Test error (MSE)',
+        'cap.bagging':  'Each tree trains on its own bootstrap sample, so they disagree, most of all out at the edges. Average them and the disagreement cancels. More trees, steadier result. Deeper trees give the average more wobble to absorb.',
+        'cap.boosting': 'Start flat at the mean. Each new shallow tree fixes the leftover error of the ones before it, so the curve crawls toward the data stage by stage. Push the depth and the count too far and it starts tracing the noise.',
+        'cap.stacking': 'The base models are kept different on purpose, a straight line and trees of varying depth. A second model learns how much to trust each one. On a one-dimensional curve the gain is quiet. Stacking earns its keep when the base models are genuinely unalike and the data is messier than this.',
+        'widget.note': 'The other half of a random forest, picking a random subset of features at each split, needs more than one feature to mean anything. This curve has only one, so only the bootstrap sampling shows here. The feature trick gets its own treatment in the next module.',
+
+        'footer.title':  'One Tree Is a Liar',
+        'footer.repo':   'Source on GitHub',
+        'footer.course': 'Passt, Class 8',
+    },
+
+    de: {
+        'hero.title': 'Ein Baum l\u00fcgt',
+        'hero.subtitle': 'Ein Mini-Modul zu Bagging, Stacking und Boosting. So wird aus einer Schar unzuverl\u00e4ssiger Modelle eines, dem du trauen kannst.',
+        's1.h2': 'Das Problem mit einem einzigen guten Modell',
+        's1.p1': 'Nimm den Entscheidungsbaum aus der letzten Stunde. Lass ihn auf den Titanic-Passagieren wachsen, ohne Tiefenbegrenzung. Er teilt so lange auf, bis fast jeder Passagier in seinem eigenen Blatt sitzt.',
+        's1.code.cap': '714 Passagiere, ein 80/20-Split. Fast perfekt auf den Passagieren aus dem Training, kaum besser als Raten auf dem Rest.',
+        's1.p2': 'Ein instabiles Modell ist eine schlechte Wette. Eine ganze Schar davon kann eine gute sein. Denn jedes Modell liegt an einer anderen Stelle falsch. Du l\u00e4sst sie sich widersprechen und kombinierst danach. Die Instabilit\u00e4t ist dabei der Rohstoff. Stabile Modelle wie die k-n\u00e4chsten Nachbarn bewegen sich kaum, wenn sich die Daten verschieben. Kopien davon stimmen in allem \u00fcberein, und die Schar bringt nichts hinzu.',
+        'quiz1.q': 'Warum bevorzugen Ensembles instabile Basismodelle wie tiefe B\u00e4ume?',
+        'quiz1.a1': 'Ihre Fehler unterscheiden sich von Modell zu Modell, also heben sie sich beim Kombinieren auf',
+        'quiz1.a2': 'Instabile Modelle haben allein schon eine h\u00f6here Trefferquote',
+        'quiz1.ok': 'Richtig. W\u00fcrde jedes Modell denselben Fehler machen, bliebe er beim Kombinieren erhalten. Erst der Widerspruch hebt sich auf.',
+        'quiz1.no': 'Genau andersherum. Ein einzelnes instabiles Modell ist f\u00fcr sich oft schlechter. Die Schar repariert es, solange sich ihre Mitglieder widersprechen.',
+        's2.h2': 'Bagging: Die Menge stimmt ab',
+        's2.p1': 'Ziehe die Daten mit Zur\u00fccklegen neu. Trainiere auf jeder Kopie einen Baum. Mittle dann die Stimmen. Jeder Baum sah einen anderen Ausschnitt und machte andere Fehler. Also heben sich die Widerspr\u00fcche auf. Die Varianz sinkt, die Verzerrung bleibt, und die B\u00e4ume trainieren parallel. Bagging auf B\u00e4umen plus ein Kniff aus dem n\u00e4chsten Modul ergibt den Random Forest.',
+        's2.fig.cap': 'Verschiedene Teilmengen der Daten, derselbe Algorithmus auf jeder, die Antworten gemittelt. Illustration nach <a href="https://vas3k.com/blog/machine_learning">vas3k, Machine Learning for Everyone</a>.',
+        'quiz2.q': 'Was senkt Bagging vor allem?',
+        'quiz2.a1': 'Varianz',
+        'quiz2.a2': 'Verzerrung',
+        'quiz2.ok': 'Richtig. Das Mitteln vieler verrauschter, aber ungef\u00e4hr unverzerrter Modelle beruhigt die Vorhersage. Im Schnitt wird dabei kein einzelnes Modell weniger falsch.',
+        'quiz2.no': 'Nicht ganz. Jedes gebaggte Modell tr\u00e4gt ungef\u00e4hr dieselbe Verzerrung wie ein einzelnes. Das Mitteln t\u00f6tet die Varianz, also das Schwanken zwischen den Modellen.',
+        's3.h2': 'Boosting: Die Reihe bildet sich',
+        's3.p1': 'Trainiere die B\u00e4ume nacheinander, nicht nebeneinander. Jeder neue flache Baum achtet darauf, was die vorigen falsch gemacht haben. So werden Fehler abgetragen, an die kein einzelner schwacher Baum herankam. Die Verzerrung sinkt. L\u00e4uft es zu lange, beginnt das Ensemble auswendig zu lernen. Hier l\u00e4uft nichts parallel. Die Namen, die dir begegnen werden, sind XGBoost und LightGBM.',
+        's3.fig.cap': 'Jeder neue Baum bekommt die F\u00e4lle, die der vorige vermasselt hat, und die Kette wiederholt sich. Illustration nach <a href="https://vas3k.com/blog/machine_learning">vas3k, Machine Learning for Everyone</a>.',
+        'quiz3.q': 'Was ist der Kernunterschied zwischen Bagging und Boosting?',
+        'quiz3.a1': 'Bagging trainiert Modelle unabh\u00e4ngig und parallel; Boosting trainiert sie nacheinander, jedes korrigiert das vorige',
+        'quiz3.a2': 'Bagging nutzt B\u00e4ume; Boosting nutzt lineare Modelle',
+        'quiz3.ok': 'Richtig. Parallel und unabh\u00e4ngig gegen sequenziell und korrigierend. Dieser eine Unterschied erkl\u00e4rt den Rest: Bagging bek\u00e4mpft die Varianz, Boosting die Verzerrung.',
+        'quiz3.no': 'Beide nutzen meist B\u00e4ume. Die eigentliche Trennung ist parallel und unabh\u00e4ngig beim Bagging gegen sequenziell und korrigierend beim Boosting.',
+        's4.h2': 'Stacking: Erst herumfragen',
+        's4.p1': 'Trainiere mehrere unterschiedliche Modelle parallel: ein N\u00e4chste-Nachbarn-Modell, einen Baum, eine Support Vector Machine. Danach lernt ein weiteres Modell, wie es ihre Antworten gewichtet. Die Basismodelle m\u00fcssen sich widersprechen, sonst lohnt das Mischen nicht. Stacking taucht seltener auf als die anderen beiden. Die gewinnen meist schon mit weniger M\u00fche.',
+        's4.fig.cap': 'Verschiedene Algorithmen auf denselben Daten, ein letztes Modell entscheidet aus ihren Antworten. Illustration nach <a href="https://vas3k.com/blog/machine_learning">vas3k, Machine Learning for Everyone</a>.',
+        's4.code.cap': 'Vier Modelle, eine Titanic. Die Trefferquote auf den Testdaten wanderte \u00fcber 0,73, 0,78, 0,79 und 0,80. Der Abstand zwischen Training und Test wurde bei jedem Schritt kleiner.',
+        'dd.summary': 'F\u00fcr Neugierige: woher kommen die 63,2\u00a0% beim Bootstrap?',
+        'dd.p1': 'Eine Bootstrap-Stichprobe zieht \\(n\\) Zeilen aus einem Datensatz mit \\(n\\) Zeilen, und zwar mit Zur\u00fccklegen. Die Chance, eine bestimmte Zeile bei einem einzelnen Zug zu verpassen, ist \\(1 - \\tfrac{1}{n}\\). \u00dcber alle \\(n\\) Z\u00fcge hinweg ergibt sich die Chance, sie jedes Mal zu verpassen:',
+        'dd.formula': '$$\\left(1 - \\frac{1}{n}\\right)^{n} \\;\\xrightarrow{\\; n \\to \\infty \\;}\\; \\frac{1}{e} \\approx 0{,}368$$',
+        'dd.p2': 'Etwa 36,8\u00a0% der Zeilen schaffen es also nie in eine bestimmte Stichprobe. Etwa 63,2\u00a0% schaffen es. Die ausgelassenen Zeilen hei\u00dfen Out-of-Bag-Menge. Jedes Modell l\u00e4sst sich an genau den Zeilen testen, mit denen es nie trainiert hat. Das liefert dir eine Validierungssch\u00e4tzung gratis, ganz ohne Daten beiseitezulegen.',
+        'reflect.h2': 'Bevor du weitergehst',
+        'reflect.p1': 'Du hast einen tiefen Baum. Auf den Trainingsdaten schneidet er perfekt ab, bei neuen Kunden bricht er zusammen. Zu welcher der drei Methoden w\u00fcrdest du zuerst greifen? Und welche Art von Fehler behebt sie?',
+        'reflect.p2': 'Ein Betrugssystem muss jede Transaktion in wenigen Millisekunden bewerten, verteilt \u00fcber viele Maschinen gleichzeitig. Bagging oder Boosting? Sag in einem Satz, warum.',
+        'reflect.p3': '\u00dcberanpassung ist in der Regression aufgetaucht, dann in einzelnen B\u00e4umen und jetzt hier. Welche dieser drei Methoden \u00fcberanpasst auf ihre eigene Art, wenn man sie zu lange laufen l\u00e4sst?',
+        'widget.h2': 'Jetzt selbst ausprobieren',
+        'widget.p': 'Hier ist etwas Welliges und Verrauschtes. An so einer Form scheitert eine Gerade. W\u00e4hle eine Strategie. Stell ein, wie viele B\u00e4ume es sein sollen und wie tief. Dann sieh zu, was die Menge zeichnet. Die blassen Kurven sind die einzelnen Modelle. Die kr\u00e4ftige Kurve ist das, worauf sie sich einigen.',
+        'ctl.model': 'Strategie',
+        'opt.bagging': 'Bagging',
+        'opt.boosting': 'Boosting',
+        'opt.stacking': 'Stacking',
+        'lbl.count.bagging': 'Anzahl der B\u00e4ume',
+        'lbl.count.boosting': 'Anzahl der B\u00e4ume',
+        'lbl.count.stacking': 'Anzahl der Basismodelle',
+        'lbl.depth': 'Baumtiefe',
+        'lg.data': 'Daten',
+        'lg.ind.bagging': 'Einzelne B\u00e4ume',
+        'lg.ind.boosting': 'Kumulative Stufen',
+        'lg.ind.stacking': 'Basismodelle',
+        'lg.ensemble': 'Ensemble',
+        'ro.train': 'Trainingsfehler (MSE)',
+        'ro.test': 'Testfehler (MSE)',
+        'cap.bagging': 'Jeder Baum trainiert auf seiner eigenen Bootstrap-Stichprobe. Also widersprechen sie sich, am st\u00e4rksten an den R\u00e4ndern. Mittelt man sie, hebt sich der Widerspruch auf. Mehr B\u00e4ume, ruhigeres Ergebnis. Tiefere B\u00e4ume geben dem Durchschnitt mehr Schwanken zum Ausgleichen.',
+        'cap.boosting': 'Beginne flach beim Mittelwert. Jeder neue flache Baum behebt den \u00fcbrig gebliebenen Fehler der vorigen. So tastet sich die Kurve Stufe um Stufe an die Daten heran. Treibst du Tiefe und Anzahl zu weit, zeichnet sie das Rauschen nach.',
+        'cap.stacking': 'Die Basismodelle werden absichtlich unterschiedlich gehalten, eine Gerade und B\u00e4ume verschiedener Tiefe. Ein zweites Modell lernt, wie sehr es jedem trauen soll. Auf einer eindimensionalen Kurve f\u00e4llt der Gewinn leise aus. Stacking lohnt sich erst, wenn die Basismodelle wirklich verschieden sind. Und wenn die Daten unordentlicher sind als hier.',
+        'widget.note': 'Ein Random Forest hat noch eine zweite H\u00e4lfte. Bei jeder Aufteilung w\u00e4hlt er eine zuf\u00e4llige Teilmenge der Merkmale. Das ergibt nur mit mehr als einem Merkmal Sinn. Diese Kurve hat nur eines. Also zeigt sich hier allein das Bootstrap-Sampling. Der Kniff mit den Merkmalen bekommt im n\u00e4chsten Modul seinen eigenen Auftritt.',
+        'footer.title': 'Ein Baum l\u00fcgt',
+        'footer.repo': 'Quellcode auf GitHub',
+        'footer.course': 'Passt, Stunde 8'
+    }
+};
+
+let currentLang = 'en';
+
+function toggleLang() {
+    currentLang = currentLang === 'en' ? 'de' : 'en';
+    document.documentElement.lang = currentLang;
+    document.querySelector('.lang-toggle').textContent = currentLang === 'en' ? 'DE' : 'EN';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (T[currentLang] && T[currentLang][key]) el.innerHTML = T[currentLang][key];
+    });
+    // Re-render KaTeX after language switch
+    if (typeof renderMathInElement !== 'undefined') {
+        renderMathInElement(document.body, {
+            delimiters: [
+                { left: '$$', right: '$$', display: true  },
+                { left: '\\(', right: '\\)', display: false }
+            ],
+            throwOnError: false
+        });
+    }
+}
+
+// ─── Quiz ─────────────────────────────────────────────────────────────────────
+function answerQuiz(quizId, btn, isCorrect) {
+    const quiz     = document.getElementById(quizId);
+    const feedback = document.getElementById(quizId + '-feedback');
+    quiz.querySelectorAll('.quiz-btn').forEach(b => b.classList.add('disabled'));
+    btn.classList.add(isCorrect ? 'correct' : 'wrong');
+    feedback.className = 'quiz-feedback ' + (isCorrect ? 'success' : 'fail');
+    const key = quizId + (isCorrect ? '.ok' : '.no');
+    feedback.innerHTML = (T[currentLang] && T[currentLang][key]) ? T[currentLang][key] : T.en[key];
+}
+
+// ─── Interactive ensemble widget ──────────────────────────────────────────────
+// All curves are computed for real: CART regression trees, bootstrap bagging,
+// gradient boosting on residuals, and stacking with a 2-fold out-of-fold blend.
+
+function mulberry32(a) {
+    return function () {
+        a |= 0; a = a + 0x6D2B79F5 | 0;
+        let t = Math.imul(a ^ a >>> 15, 1 | a);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+}
+function gauss(rng) {
+    let u = 0, v = 0;
+    while (u === 0) u = rng();
+    while (v === 0) v = rng();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+const mean = arr => arr.reduce((a, b) => a + b, 0) / arr.length;
+
+// Noisy sine, fixed seed so the picture is stable between renders.
+const DATA = (function () {
+    const rng = mulberry32(12345), n = 100, pts = [];
+    for (let i = 0; i < n; i++) {
+        const x = (i / (n - 1)) * 2 * Math.PI;
+        pts.push({ x, y: Math.sin(x) + 0.12 * gauss(rng), i });
+    }
+    return pts;
+})();
+const TRAIN = DATA.filter(p => p.i % 10 >= 3);   // 70%
+const TEST  = DATA.filter(p => p.i % 10 < 3);    // 30%
+const GRID  = (function () { const g = []; for (let i = 0; i <= 240; i++) g.push(i / 240 * 2 * Math.PI); return g; })();
+
+// CART regression tree on a single feature, split by variance reduction.
+function buildTree(xs, ys, depth, maxDepth) {
+    const n = xs.length, m = mean(ys);
+    if (depth >= maxDepth || n <= 1) return { leaf: true, value: m };
+    const idx = [...Array(n).keys()].sort((a, b) => xs[a] - xs[b]);
+    const sx = idx.map(k => xs[k]), sy = idx.map(k => ys[k]);
+    const totSum = sy.reduce((a, b) => a + b, 0), totSq = sy.reduce((a, b) => a + b * b, 0);
+    let prefix = 0, prefixSq = 0, bestSSE = Infinity, bestThr = null;
+    for (let k = 0; k < n - 1; k++) {
+        prefix += sy[k]; prefixSq += sy[k] * sy[k];
+        if (sx[k] === sx[k + 1]) continue;
+        const nl = k + 1, nr = n - nl;
+        const sseL = prefixSq - prefix * prefix / nl;
+        const sseR = (totSq - prefixSq) - (totSum - prefix) * (totSum - prefix) / nr;
+        if (sseL + sseR < bestSSE) { bestSSE = sseL + sseR; bestThr = (sx[k] + sx[k + 1]) / 2; }
+    }
+    if (bestThr === null) return { leaf: true, value: m };
+    const lx = [], ly = [], rx = [], ry = [];
+    for (let j = 0; j < n; j++) {
+        if (xs[j] <= bestThr) { lx.push(xs[j]); ly.push(ys[j]); }
+        else { rx.push(xs[j]); ry.push(ys[j]); }
+    }
+    return { leaf: false, thr: bestThr, left: buildTree(lx, ly, depth + 1, maxDepth), right: buildTree(rx, ry, depth + 1, maxDepth) };
+}
+function predictTree(t, x) { while (!t.leaf) t = x <= t.thr ? t.left : t.right; return t.value; }
+
+function fitLinear(xs, ys) {
+    const mx = mean(xs), my = mean(ys);
+    let num = 0, den = 0;
+    for (let i = 0; i < xs.length; i++) { num += (xs[i] - mx) * (ys[i] - my); den += (xs[i] - mx) ** 2; }
+    const b = den ? num / den : 0;
+    return { a: my - b * mx, b };
+}
+const predictLinear = (m, x) => m.a + m.b * x;
+
+// ── Bagging ──
+function fitBagging(count, depth) {
+    const trees = [];
+    for (let i = 0; i < count; i++) {
+        const rng = mulberry32(777 + i * 7919), samp = [];
+        for (let j = 0; j < TRAIN.length; j++) samp.push(TRAIN[(rng() * TRAIN.length) | 0]);
+        trees.push(buildTree(samp.map(p => p.x), samp.map(p => p.y), 0, depth));
+    }
+    return trees;
+}
+const baggingPredict = (trees, x) => mean(trees.map(t => predictTree(t, x)));
+
+// ── Gradient boosting (squared error) ──
+function fitBoosting(count, depth, lr) {
+    const xs = TRAIN.map(p => p.x), ys = TRAIN.map(p => p.y), base = mean(ys);
+    let F = ys.map(() => base);
+    const stages = [];
+    for (let m = 0; m < count; m++) {
+        const resid = ys.map((y, i) => y - F[i]);
+        const tree = buildTree(xs, resid, 0, depth);
+        for (let i = 0; i < xs.length; i++) F[i] += lr * predictTree(tree, xs[i]);
+        stages.push(tree);
+    }
+    return { base, lr, stages };
+}
+const boostPredict = (m, x) => m.base + m.lr * m.stages.reduce((s, t) => s + predictTree(t, x), 0);
+
+// ── Stacking (heterogeneous base learners + out-of-fold linear meta-blend) ──
+function solveLinearSystem(A, b) {
+    const n = b.length, M = A.map((r, i) => r.concat(b[i]));
+    for (let c = 0; c < n; c++) {
+        let piv = c;
+        for (let r = c + 1; r < n; r++) if (Math.abs(M[r][c]) > Math.abs(M[piv][c])) piv = r;
+        [M[c], M[piv]] = [M[piv], M[c]];
+        const d = M[c][c] || 1e-9;
+        for (let r = 0; r < n; r++) {
+            if (r === c) continue;
+            const f = M[r][c] / d;
+            for (let k = c; k <= n; k++) M[r][k] -= f * M[c][k];
+        }
+    }
+    return M.map((r, i) => r[n] / (r[i] || 1e-9));
+}
+function leastSquares(rows, y) {
+    const dim = rows[0].length + 1;
+    const X = rows.map(r => [1, ...r]);
+    const XtX = Array.from({ length: dim }, () => new Array(dim).fill(0)), Xty = new Array(dim).fill(0);
+    for (let i = 0; i < X.length; i++)
+        for (let a = 0; a < dim; a++) {
+            Xty[a] += X[i][a] * y[i];
+            for (let b = 0; b < dim; b++) XtX[a][b] += X[i][a] * X[i][b];
+        }
+    for (let a = 0; a < dim; a++) XtX[a][a] += 1e-6;   // tiny ridge for stability
+    return solveLinearSystem(XtX, Xty);
+}
+function fitStacking(count, depth) {
+    const specs = [{ type: 'linear' }];
+    const nTrees = Math.max(1, count - 1);
+    for (let j = 0; j < nTrees; j++) {
+        const d = nTrees === 1 ? depth : Math.round(1 + (depth - 1) * j / (nTrees - 1));
+        specs.push({ type: 'tree', depth: Math.max(1, d) });
+    }
+    const fitBase = (spec, pts) => {
+        const xs = pts.map(p => p.x), ys = pts.map(p => p.y);
+        return spec.type === 'linear'
+            ? { spec, model: fitLinear(xs, ys) }
+            : { spec, model: buildTree(xs, ys, 0, spec.depth) };
+    };
+    const predBase = (b, x) => b.spec.type === 'linear' ? predictLinear(b.model, x) : predictTree(b.model, x);
+    const A = TRAIN.filter((_, i) => i % 2 === 0), B = TRAIN.filter((_, i) => i % 2 === 1);
+    const baseA = specs.map(s => fitBase(s, A)), baseB = specs.map(s => fitBase(s, B));
+    const metaX = [], metaY = [];
+    B.forEach(p => { metaX.push(baseA.map(b => predBase(b, p.x))); metaY.push(p.y); });
+    A.forEach(p => { metaX.push(baseB.map(b => predBase(b, p.x))); metaY.push(p.y); });
+    const w = leastSquares(metaX, metaY);
+    const baseFull = specs.map(s => fitBase(s, TRAIN));
+    return { baseFull, w, predBase };
+}
+function stackPredict(m, x) {
+    let yhat = m.w[0];
+    const preds = m.baseFull.map(b => m.predBase(b, x));
+    for (let j = 0; j < preds.length; j++) yhat += m.w[j + 1] * preds[j];
+    return yhat;
+}
+
+function mseOf(predFn) {
+    let tr = 0, te = 0;
+    TRAIN.forEach(p => tr += (predFn(p.x) - p.y) ** 2);
+    TEST.forEach(p => te += (predFn(p.x) - p.y) ** 2);
+    return { train: tr / TRAIN.length, test: te / TEST.length };
+}
+
+function drawChart(individuals, ensemble, mode) {
+    const cv = document.getElementById('ens-canvas'), wrap = cv.parentElement;
+    const cssW = wrap.clientWidth - 24, cssH = Math.round(cssW * 0.6), dpr = window.devicePixelRatio || 1;
+    cv.style.width = cssW + 'px'; cv.style.height = cssH + 'px';
+    cv.width = Math.round(cssW * dpr); cv.height = Math.round(cssH * dpr);
+    const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, cssW, cssH);
+    const padL = 34, padR = 12, padT = 12, padB = 22, xmax = 2 * Math.PI, ymin = -1.4, ymax = 1.4;
+    const X = x => padL + x / xmax * (cssW - padL - padR);
+    const Y = y => padT + (ymax - y) / (ymax - ymin) * (cssH - padT - padB);
+    ctx.strokeStyle = '#2a2a40'; ctx.lineWidth = 1; ctx.fillStyle = '#555'; ctx.font = '11px sans-serif';
+    [-1, 0, 1].forEach(yy => { ctx.beginPath(); ctx.moveTo(X(0), Y(yy)); ctx.lineTo(X(xmax), Y(yy)); ctx.stroke(); ctx.fillText(String(yy), 6, Y(yy) + 3); });
+    for (let t = 0; t <= 6; t++) ctx.fillText(String(t), X(t) - 3, cssH - 7);
+    ctx.fillStyle = 'rgba(150,150,160,0.45)';
+    DATA.forEach(p => { ctx.beginPath(); ctx.arc(X(p.x), Y(p.y), 3, 0, 2 * Math.PI); ctx.fill(); });
+    ctx.lineWidth = 1;
+    individuals.forEach((curve, ci) => {
+        const alpha = mode === 'boosting' ? (0.10 + 0.55 * (ci + 1) / individuals.length) : 0.30;
+        ctx.strokeStyle = 'rgba(120,140,190,' + alpha.toFixed(2) + ')';
+        ctx.beginPath();
+        curve.forEach((y, gi) => { const px = X(GRID[gi]), py = Y(y); gi ? ctx.lineTo(px, py) : ctx.moveTo(px, py); });
+        ctx.stroke();
+    });
+    ctx.strokeStyle = '#80b4f0'; ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ensemble.forEach((y, gi) => { const px = X(GRID[gi]), py = Y(y); gi ? ctx.lineTo(px, py) : ctx.moveTo(px, py); });
+    ctx.stroke();
+}
+
+function render() {
+    const mode = document.getElementById('sl-mode').value;
+    const count = +document.getElementById('sl-count').value;
+    const depth = +document.getElementById('sl-depth').value;
+    document.getElementById('val-count').textContent = count;
+    document.getElementById('val-depth').textContent = depth;
+
+    let predFn, individuals;
+    if (mode === 'bagging') {
+        const trees = fitBagging(count, depth);
+        predFn = x => baggingPredict(trees, x);
+        individuals = trees.map(t => GRID.map(x => predictTree(t, x)));
+    } else if (mode === 'boosting') {
+        const m = fitBoosting(count, depth, 0.3);
+        predFn = x => boostPredict(m, x);
+        individuals = [];
+        let cum = GRID.map(() => m.base);
+        for (const t of m.stages) { cum = cum.map((v, gi) => v + m.lr * predictTree(t, GRID[gi])); individuals.push(cum.slice()); }
+    } else {
+        const m = fitStacking(count, depth);
+        predFn = x => stackPredict(m, x);
+        individuals = m.baseFull.map(b => GRID.map(x => m.predBase(b, x)));
+    }
+    const ensemble = GRID.map(x => predFn(x));
+    drawChart(individuals, ensemble, mode);
+
+    const e = mseOf(predFn);
+    document.getElementById('val-train').textContent = e.train.toFixed(3);
+    document.getElementById('val-test').textContent = e.test.toFixed(3);
+
+    const tr = k => (T[currentLang] && T[currentLang][k]) || T.en[k];
+    const lc = document.getElementById('lbl-count'); lc.setAttribute('data-i18n', 'lbl.count.' + mode); lc.innerHTML = tr('lbl.count.' + mode);
+    const li = document.getElementById('legend-ind'); li.setAttribute('data-i18n', 'lg.ind.' + mode); li.innerHTML = tr('lg.ind.' + mode);
+    const cap = document.getElementById('widget-cap'); cap.setAttribute('data-i18n', 'cap.' + mode); cap.innerHTML = tr('cap.' + mode);
+}
+
+window.addEventListener('load', render);
+window.addEventListener('resize', render);
+
+// ─── KaTeX ────────────────────────────────────────────────────────────────────
+window.addEventListener('load', function () {
+    if (typeof renderMathInElement !== 'undefined') {
+        renderMathInElement(document.body, {
+            delimiters: [
+                { left: '$$', right: '$$', display: true  },
+                { left: '\\(', right: '\\)', display: false }
+            ],
+            throwOnError: false
+        });
+    }
+});
+</script>
+
+</body>
+</html>

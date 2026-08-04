@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Self-Test · Modules 1–6</title>
+
+<!-- KaTeX -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        background-color: #141420;
+        color: #e8e8f0;
+        font-family: 'Georgia', 'Times New Roman', serif;
+        line-height: 1.8;
+        font-size: 18px;
+    }
+
+    .container { max-width: 820px; margin: 0 auto; padding: 0 24px; }
+
+    /* === Language toggle === */
+    .lang-toggle {
+        position: fixed; top: 16px; right: 16px;
+        background: #2a2a44; border: 1px solid #4a4a70; border-radius: 20px;
+        padding: 6px 14px; cursor: pointer; font-size: 13px;
+        font-family: sans-serif; color: #a0a0d0; z-index: 100;
+        transition: background 0.2s;
+    }
+    .lang-toggle:hover { background: #363658; }
+
+    /* Hero */
+    .hero { text-align: center; padding: 80px 24px 30px; }
+    .hero h1 {
+        font-size: 42px; font-weight: 700; color: #fff;
+        line-height: 1.3; max-width: 700px; margin: 0 auto;
+    }
+    .hero .subtitle { margin-top: 16px; color: #888; font-size: 16px; font-style: italic; }
+
+    /* Progress */
+    .progress { margin: 10px 0 4px; }
+    .bar { height: 6px; background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 20px; overflow: hidden; }
+    .bar > i { display: block; height: 100%; background: #80b4f0; width: 0; transition: width .35s ease; }
+    .counter {
+        margin-top: 8px; font-family: sans-serif; font-size: 13px; color: #888; text-align: right;
+    }
+
+    /* Card (shared box, matches .quiz) */
+    .card {
+        background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px;
+        padding: 28px; margin: 18px 0;
+    }
+    .qtag {
+        font-family: sans-serif; font-size: 12px; letter-spacing: .12em;
+        text-transform: uppercase; color: #6f6fa0; margin-bottom: 14px;
+    }
+    .qtext { font-size: 21px; color: #fff; line-height: 1.4; margin-bottom: 22px; }
+
+    /* Options */
+    .opt {
+        display: flex; gap: 14px; align-items: flex-start; width: 100%; text-align: left;
+        background: #2a2a44; color: #e0e0f0; border: 1px solid #3a3a55; border-radius: 8px;
+        padding: 14px 18px; margin: 10px 0; font-family: inherit; font-size: 16px;
+        line-height: 1.5; cursor: pointer; transition: background 0.2s, border-color 0.2s;
+    }
+    .opt:hover:not(.locked) { background: #363658; border-color: #5a5a80; }
+    .opt .mark {
+        font-family: sans-serif; font-size: 14px; width: 26px; height: 26px; flex: 0 0 26px;
+        border-radius: 6px; display: grid; place-items: center; margin-top: 1px;
+        background: #1c1c2e; border: 1px solid #4a4a70; color: #a0a0d0;
+    }
+    .opt.locked { cursor: default; }
+    .opt.correct { background: #1a4a2a; border-color: #50b878; color: #70e898; }
+    .opt.correct .mark { background: #50b878; border-color: #50b878; color: #0d2417; }
+    .opt.wrong { background: #2a2248; border-color: #8264dc; color: #a88ef0; }
+    .opt.wrong .mark { background: #8264dc; border-color: #8264dc; color: #160f2a; }
+    .opt.dim { opacity: 0.45; }
+
+    /* Feedback / explanation */
+    .explain {
+        margin-top: 16px; font-size: 16px; line-height: 1.6; display: none;
+        border-left: 3px solid #50b878; padding: 4px 0 4px 16px; color: #ccc;
+    }
+    .explain.show { display: block; }
+    .explain .tag { font-family: sans-serif; font-size: 13px; color: #70e898; display: block; margin-bottom: 4px; }
+
+    /* Open question */
+    textarea {
+        width: 100%; min-height: 150px; resize: vertical;
+        font-family: inherit; font-size: 16px; line-height: 1.6;
+        background: #141420; border: 1px solid #3a3a55; border-radius: 8px;
+        padding: 14px; color: #e8e8f0; margin-bottom: 14px;
+    }
+    textarea:focus { outline: none; border-color: #5a5a80; }
+    textarea::placeholder { color: #555; font-style: italic; }
+    .model {
+        margin-top: 16px; border: 1px dashed #4a4a70; background: #16162a;
+        border-radius: 8px; padding: 18px 20px; display: none;
+    }
+    .model.show { display: block; }
+    .model h4 {
+        font-family: sans-serif; font-size: 13px; letter-spacing: .08em; text-transform: uppercase;
+        color: #70e898; margin-bottom: 10px; font-weight: 600;
+    }
+    .model p { color: #ccc; margin-bottom: 12px; font-size: 16px; }
+    .model p:last-child { margin-bottom: 0; }
+    .model .sub { color: #a88ef0; }
+
+    /* Buttons */
+    .btn {
+        font-family: inherit; font-size: 16px; cursor: pointer; border-radius: 8px;
+        padding: 12px 26px; transition: background 0.2s, border-color 0.2s, opacity 0.2s;
+        border: 1px solid #5a5a80; background: #3a3a60; color: #fff;
+    }
+    .btn:hover { background: #45456f; }
+    .btn.ghost { background: transparent; border-color: #3a3a55; color: #a0a0d0; }
+    .btn.ghost:hover { background: #1c1c2e; }
+    .btn.reveal { background: #2a2a44; border-color: #4a4a70; color: #cfcff0; }
+    .btn.reveal:hover { background: #363658; }
+    .btn:disabled { opacity: 0.35; cursor: not-allowed; background: #3a3a60; }
+
+    .nav { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 8px; }
+
+    /* Intro / Result panels reuse .card */
+    .panel h2 { font-size: 28px; color: #fff; line-height: 1.3; margin-bottom: 18px; }
+    .panel p { color: #ccc; margin-bottom: 16px; }
+    .meta {
+        display: flex; gap: 24px; flex-wrap: wrap; margin: 18px 0;
+        font-family: sans-serif; font-size: 13px; color: #888;
+    }
+    .meta b { color: #e0e0f0; font-weight: 600; }
+    .fine { font-size: 14px; color: #888; font-style: italic; }
+
+    .result { text-align: center; }
+    .score { font-size: 72px; color: #fff; line-height: 1; margin: 8px 0 4px; }
+    .score small { color: #555; font-size: 36px; }
+    .verdict { font-size: 18px; color: #ccc; margin-bottom: 6px; }
+
+    .hidden { display: none; }
+
+    a { color: #80b4f0; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    footer { text-align: center; padding: 40px 24px; color: #444; font-size: 14px; }
+
+    @media (max-width: 680px) {
+        .hero h1 { font-size: 28px; }
+        body { font-size: 16px; }
+        .qtext { font-size: 19px; }
+        .panel h2 { font-size: 24px; }
+        .score { font-size: 56px; }
+    }
+</style>
+</head>
+<body>
+
+<button class="lang-toggle" onclick="toggleLang()">DE</button>
+
+<!-- Hero -->
+<div class="hero">
+    <h1 data-i18n="title">Self-Test</h1>
+    <p class="subtitle" data-i18n="hook">Modules 1 to 6. Fourteen multiple-choice questions and two open ones. One at a time.</p>
+</div>
+
+<div class="container">
+
+  <!-- INTRO -->
+  <section id="intro" class="card panel">
+    <h2 data-i18n="iH">Instructions</h2>
+    <p data-i18n="iP1"></p>
+    <div class="meta">
+      <span><b data-i18n="iM1"></b></span>
+      <span><b data-i18n="iM2"></b></span>
+      <span><b data-i18n="iM3"></b></span>
+    </div>
+    <p class="fine" data-i18n="iP2"></p>
+    <div class="nav" style="justify-content:flex-end">
+      <button class="btn" id="i-start" onclick="start()" data-i18n="start">Begin</button>
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="quiz" class="hidden">
+    <div class="progress">
+      <div class="bar"><i id="prog"></i></div>
+      <div class="counter" id="counter"></div>
+    </div>
+    <div class="card" id="card"></div>
+    <div class="nav">
+      <button class="btn ghost" id="prev" onclick="go(-1)" data-i18n="prev">Back</button>
+      <button class="btn" id="next" onclick="go(1)" disabled data-i18n="next">Next</button>
+    </div>
+  </section>
+
+  <!-- RESULT -->
+  <section id="result" class="card panel result hidden">
+    <h2 id="r-h"></h2>
+    <div class="score"><span id="r-score">0</span><small>/14</small></div>
+    <p class="verdict" id="r-verdict"></p>
+    <p class="fine" id="r-note"></p>
+    <div class="nav" style="justify-content:center;margin-top:22px">
+      <button class="btn ghost" id="r-review" onclick="review()"></button>
+      <button class="btn" id="r-restart" onclick="restart()"></button>
+    </div>
+  </section>
+
+</div>
+
+<footer><span id="foot"></span></footer>
+
+<script>
+/* ============================================================
+   Source: German Selbsttest (Prof. Yamshchikov). EN is a
+   faithful translation. correct = 0-based index of right option.
+   ============================================================ */
+const T = {
+  en:{
+    title:"Self-Test",
+    hook:"Modules 1 to 6. Fourteen multiple-choice questions and two open ones. One at a time.",
+    iH:"Instructions",
+    iP1:"A timed self-test on modules 1 to 6. Part A holds fourteen multiple-choice questions. All fourteen should be correct to clear the passing bar. Part B holds two open questions that probe understanding beyond it. Mark exactly one option per question. Length is not the point. Clarity is.",
+    iM1:"Duration: 45 min", iM2:"Part A: 14 questions", iM3:"Part B: 2 questions",
+    iP2:"Click an option to reveal the correct answer. For the open questions, write your own answer first, then uncover the model answer.",
+    start:"Begin", prev:"Back", next:"Next", finish:"Results",
+    counterMC:n=>`Part A · Question ${n} of 14`,
+    counterOpen:n=>`Part B · Open question ${n} of 2`,
+    correctLabel:"Correct", yourAnswer:"Your answer",
+    reveal:"Reveal model answer", modelTitle:"Model answer",
+    rH:"Results",
+    verdict:s=> s===14 ? "Passed. All fourteen." : `${s} of 14. The passing bar is all fourteen.`,
+    rNote:"Part B is not scored automatically. Compare your answer to the model answer.",
+    review:"Review answers", restart:"Restart",
+    foot:'AI Foundations · Modules 1–6 · Self-test. Source on GitHub.'
+  },
+  de:{
+    title:"Selbsttest",
+    hook:"Module 1 bis 6. Vierzehn Multiple-Choice-Fragen und zwei offene. Eine nach der anderen.",
+    iH:"Hinweise",
+    iP1:"Ein zeitlich begrenzter Selbsttest zu den Modulen 1 bis 6. Teil A enthält vierzehn Multiple-Choice-Fragen. Alle vierzehn sollten korrekt sein, um die Bestehensgrenze zu erreichen. Teil B enthält zwei offene Fragen, die das Verständnis darüber hinaus prüfen. Markieren Sie pro Frage genau eine Option. Nicht die Länge zählt, sondern die Klarheit.",
+    iM1:"Dauer: 45 min", iM2:"Teil A: 14 Fragen", iM3:"Teil B: 2 Fragen",
+    iP2:"Klick auf eine Option zeigt die richtige Antwort. Bei den offenen Fragen schreiben Sie zuerst selbst, dann decken Sie die Musterantwort auf.",
+    start:"Beginnen", prev:"Zurück", next:"Weiter", finish:"Auswertung",
+    counterMC:n=>`Teil A · Frage ${n} von 14`,
+    counterOpen:n=>`Teil B · Offene Frage ${n} von 2`,
+    correctLabel:"Richtig", yourAnswer:"Ihre Antwort",
+    reveal:"Musterantwort aufdecken", modelTitle:"Musterantwort",
+    rH:"Auswertung",
+    verdict:s=> s===14 ? "Bestanden. Alle vierzehn." : `${s} von 14. Die Bestehensgrenze ist alle vierzehn.`,
+    rNote:"Teil B wird nicht automatisch bewertet. Vergleichen Sie Ihre Antwort mit der Musterantwort.",
+    review:"Antworten ansehen", restart:"Neu starten",
+    foot:'KI Grundlagen · Module 1–6 · Selbsttest. Quellcode auf GitHub.'
+  }
+};
+
+const MC = [
+{ correct:1,
+  en:{q:"In his 1950 paper, Alan Turing asked whether:",
+      o:["machines can compute faster than humans.","machines can think.","machines can replicate themselves.","machines can have consciousness."],
+      e:"Turing\u2019s 1950 paper opens with \u201cCan machines think?\u201d and then replaces it with the imitation game."},
+  de:{q:"In seinem Aufsatz von 1950 fragte Alan Turing, ob:",
+      o:["Maschinen schneller rechnen k\u00f6nnen als Menschen.","Maschinen denken k\u00f6nnen.","Maschinen sich selbst replizieren k\u00f6nnen.","Maschinen ein Bewusstsein haben k\u00f6nnen."],
+      e:"Turings Aufsatz von 1950 beginnt mit der Frage \u201eKann eine Maschine denken?\u201c und ersetzt sie dann durch das Imitationsspiel."} },
+
+{ correct:1,
+  en:{q:"Karl Popper\u2019s falsifiability criterion states that a scientific claim:",
+      o:["must be confirmed by repeated experiments.","must in principle be refutable by observation.","must be expressible in mathematical form.","must be accepted by a majority of experts."],
+      e:"A claim is scientific only if an observation could, in principle, prove it wrong. \u201cAll swans are white\u201d is falsifiable. \u201cThe universe has a purpose\u201d is not."},
+  de:{q:"Karl Poppers Falsifizierbarkeitskriterium besagt, dass eine wissenschaftliche Aussage:",
+      o:["durch wiederholte Experimente best\u00e4tigt werden muss.","im Prinzip durch Beobachtung widerlegbar sein muss.","in mathematischer Form ausdr\u00fcckbar sein muss.","von der Mehrheit der Fachleute akzeptiert sein muss."],
+      e:"Eine Aussage ist nur dann wissenschaftlich, wenn eine Beobachtung sie im Prinzip widerlegen k\u00f6nnte. \u201eAlle Schw\u00e4ne sind wei\u00df\u201c ist falsifizierbar. \u201eDas Universum hat einen Sinn\u201c nicht."} },
+
+{ correct:2,
+  en:{q:"\u201cStrong AI\u201d in the sense of Module 1 refers to:",
+      o:["a model trained on a very large dataset.","a system with billions of parameters.","a system with general cognitive ability comparable to a human.","a model that beats humans on a single benchmark."],
+      e:"Strong AI means general intelligence across domains, like a human. Model size or one benchmark win is not it."},
+  de:{q:"\u201eStarke KI\u201c im Sinne von Modul 1 bezeichnet:",
+      o:["ein Modell, das auf einem sehr gro\u00dfen Datensatz trainiert wurde.","ein System mit Milliarden von Parametern.","ein System mit allgemeiner kognitiver F\u00e4higkeit, vergleichbar mit der eines Menschen.","ein Modell, das Menschen in einem einzelnen Benchmark \u00fcbertrifft."],
+      e:"Starke KI meint allgemeine Intelligenz \u00fcber Bereiche hinweg, wie beim Menschen. Modellgr\u00f6\u00dfe oder ein einzelner Benchmark-Sieg sind es nicht."} },
+
+{ correct:0,
+  en:{q:"Deduction proceeds:",
+      o:["from general rules to specific cases.","from specific cases to general rules.","from observation to model fitting.","from input to output via random sampling."],
+      e:"Deduction goes rule \u2192 case. Induction goes case \u2192 rule. That is the whole difference."},
+  de:{q:"Deduktion verl\u00e4uft:",
+      o:["von allgemeinen Regeln zu konkreten F\u00e4llen.","von konkreten F\u00e4llen zu allgemeinen Regeln.","von der Beobachtung zur Modellanpassung.","von Eingabe zu Ausgabe durch Zufallsstichproben."],
+      e:"Deduktion geht Regel \u2192 Fall. Induktion geht Fall \u2192 Regel. Das ist der ganze Unterschied."} },
+
+{ correct:1,
+  en:{q:"Anscombe\u2019s Quartet shows that:",
+      o:["four different regression models can fit the same dataset equally well.","summary statistics can be identical for datasets of very different shape.","linear regression cannot handle outliers.","correlation does not imply causation."],
+      e:"Four datasets share mean, variance, correlation and regression line, yet look nothing alike. Plot your data."},
+  de:{q:"Anscombes Quartett zeigt, dass:",
+      o:["vier verschiedene Regressionsmodelle denselben Datensatz gleich gut anpassen k\u00f6nnen.","Kennzahlen f\u00fcr Datens\u00e4tze sehr unterschiedlicher Form identisch sein k\u00f6nnen.","lineare Regression keine Ausrei\u00dfer verarbeiten kann.","Korrelation keine Kausalit\u00e4t impliziert."],
+      e:"Vier Datens\u00e4tze teilen Mittelwert, Varianz, Korrelation und Regressionsgerade, sehen aber v\u00f6llig verschieden aus. Schauen Sie Ihre Daten an."} },
+
+{ correct:1,
+  en:{q:"A parametric model is a model that:",
+      o:["has no adjustable parameters.","assumes a fixed functional form with a finite, predetermined number of parameters.","stores all training data and queries it at prediction time.","cannot be regularized."],
+      e:"Parametric means fixed form, fixed parameter count (a line has two). Storing all data and querying it is non-parametric, such as K-NN."},
+  de:{q:"Ein parametrisches Modell ist ein Modell, das:",
+      o:["keine einstellbaren Parameter besitzt.","eine feste funktionale Form mit einer endlichen, vorab festgelegten Anzahl von Parametern annimmt.","alle Trainingsdaten speichert und sie zum Vorhersagezeitpunkt abfragt.","nicht regularisiert werden kann."],
+      e:"Parametrisch hei\u00dft feste Form, feste Anzahl Parameter (eine Gerade hat zwei). Alle Daten speichern und abfragen ist nicht-parametrisch, etwa K-NN."} },
+
+{ correct:0,
+  en:{q:"Ordinary least squares (OLS) for linear regression yields:",
+      o:["a closed-form analytic solution.","only an iteratively obtained approximation.","a probabilistic output between 0 and 1.","the same result as K-NN with K equal to 1."],
+      e:"OLS has a closed-form solution (the normal equations). You solve it directly, no iteration needed."},
+  de:{q:"Die Methode der kleinsten Quadrate (OLS) f\u00fcr die lineare Regression liefert:",
+      o:["eine geschlossene analytische L\u00f6sung.","nur eine iterativ ermittelte N\u00e4herungsl\u00f6sung.","eine probabilistische Ausgabe zwischen 0 und 1.","dasselbe Ergebnis wie K-NN mit K gleich 1."],
+      e:"OLS hat eine geschlossene L\u00f6sung (die Normalengleichungen). Man l\u00f6st sie direkt, ohne Iteration."} },
+
+{ correct:1,
+  en:{q:"Stochastic gradient descent updates the parameters:",
+      o:["using the gradient computed over the whole training set at each step.","using the gradient from a single sample or a small batch per step.","without using gradients at all.","only once the loss has reached zero."],
+      e:"SGD uses a single sample or a mini-batch per step. The full dataset per step is batch gradient descent."},
+  de:{q:"Stochastischer Gradientenabstieg aktualisiert die Parameter:",
+      o:["mithilfe des Gradienten, der bei jedem Schritt \u00fcber den gesamten Trainingsdatensatz berechnet wird.","mithilfe des Gradienten aus einer einzelnen Stichprobe oder einem kleinen Batch pro Schritt.","ohne Gradienten zu verwenden.","erst, wenn der Verlust null erreicht hat."],
+      e:"SGD nutzt pro Schritt eine einzelne Stichprobe oder einen Mini-Batch. Der ganze Datensatz pro Schritt ist Batch-Gradientenabstieg."} },
+
+{ correct:1,
+  en:{q:"K-nearest-neighbours with K equal to 1 generally produces:",
+      o:["high bias and low variance.","low bias and high variance.","both high bias and high variance.","both low bias and low variance."],
+      e:"$K=1$ follows every point exactly: low bias, high variance. Small changes in the data swing the boundary."},
+  de:{q:"K-Nearest-Neighbours mit K gleich 1 erzeugt im Allgemeinen:",
+      o:["hohen Bias und niedrige Varianz.","niedrigen Bias und hohe Varianz.","sowohl hohen Bias als auch hohe Varianz.","sowohl niedrigen Bias als auch niedrige Varianz."],
+      e:"$K=1$ folgt jedem Punkt exakt: niedriger Bias, hohe Varianz. Kleine \u00c4nderungen in den Daten kippen die Entscheidungsgrenze."} },
+
+{ correct:1,
+  en:{q:"In very high-dimensional spaces, the volume of a hypersphere inscribed in a hypercube of equal edge length behaves as follows:",
+      o:["it approaches the volume of the cube.","it goes to zero as a fraction of the cube\u2019s volume.","it stays a fixed ratio, independent of dimension.","it diverges to infinity."],
+      e:"As dimension grows, the inscribed hypersphere\u2019s volume vanishes relative to the cube. Almost all the volume sits in the corners."},
+  de:{q:"In sehr hochdimensionalen R\u00e4umen verh\u00e4lt sich das Volumen einer in einen Hyperw\u00fcrfel einbeschriebenen Hyperkugel gleicher Kantenl\u00e4nge wie folgt:",
+      o:["Es n\u00e4hert sich dem W\u00fcrfelvolumen.","Es geht als Anteil des W\u00fcrfelvolumens gegen null.","Es bleibt ein festes Verh\u00e4ltnis, unabh\u00e4ngig von der Dimension.","Es divergiert gegen unendlich."],
+      e:"Mit wachsender Dimension verschwindet das Volumen der einbeschriebenen Hyperkugel relativ zum W\u00fcrfel. Fast das gesamte Volumen sitzt in den Ecken."} },
+
+{ correct:1,
+  en:{q:"Compared with ridge regularization (L2), lasso (L1):",
+      o:["always shrinks coefficients uniformly smaller across all features.","can set individual coefficients exactly to zero, implicitly performing feature selection.","needs no hyperparameter for regularization strength.","is applicable only to classification problems."],
+      e:"$L_1$ can push coefficients to exactly zero and drop features. $L_2$ shrinks them but keeps them all."},
+  de:{q:"Im Vergleich zur Ridge-Regularisierung (L2) gilt f\u00fcr Lasso (L1):",
+      o:["Die Koeffizienten fallen \u00fcber alle Merkmale hinweg stets gleichm\u00e4\u00dfig kleiner aus.","Einzelne Koeffizienten k\u00f6nnen exakt auf null gesetzt werden, was implizit eine Merkmalsauswahl bewirkt.","Es ist kein Hyperparameter zur Regularisierungsst\u00e4rke n\u00f6tig.","Das Verfahren ist nur auf Klassifikationsprobleme anwendbar."],
+      e:"$L_1$ kann Koeffizienten exakt auf null dr\u00fccken und Merkmale entfernen. $L_2$ verkleinert sie, beh\u00e4lt sie aber alle."} },
+
+{ correct:1,
+  en:{q:"Increasing the regularization strength typically causes:",
+      o:["lower bias and higher variance.","higher bias and lower variance.","no effect on the bias-variance trade-off.","simultaneously higher bias and higher variance."],
+      e:"More regularization means a simpler model: higher bias, lower variance."},
+  de:{q:"Eine Erh\u00f6hung der Regularisierungsst\u00e4rke bewirkt typischerweise:",
+      o:["niedrigeren Bias und h\u00f6here Varianz.","h\u00f6heren Bias und niedrigere Varianz.","keinen Effekt auf den Bias-Varianz-Trade-off.","gleichzeitig sowohl h\u00f6heren Bias als auch h\u00f6here Varianz."],
+      e:"Mehr Regularisierung hei\u00dft einfacheres Modell: h\u00f6herer Bias, niedrigere Varianz."} },
+
+{ correct:1,
+  en:{q:"The fundamental difference between regression and classification is that:",
+      o:["regression uses gradient descent, classification does not.","regression predicts a continuous value, while classification predicts a discrete category.","classification is not possible with linear models.","classification needs no labeled training data."],
+      e:"Regression predicts a number, classification predicts a class. Both can use gradient descent, both need labels."},
+  de:{q:"Der grundlegende Unterschied zwischen Regression und Klassifikation besteht darin, dass:",
+      o:["Regression Gradientenabstieg verwendet, Klassifikation nicht.","Regression einen stetigen Wert vorhersagt, Klassifikation hingegen eine diskrete Kategorie.","Klassifikation nicht mit linearen Modellen m\u00f6glich ist.","Klassifikation keine annotierten Trainingsdaten ben\u00f6tigt."],
+      e:"Regression sagt eine Zahl vorher, Klassifikation eine Klasse. Beide k\u00f6nnen Gradientenabstieg nutzen, beide brauchen Labels."} },
+
+{ correct:1,
+  en:{q:"Accuracy as a classification metric can be misleading when:",
+      o:["the classes in the dataset are balanced.","the classes in the dataset are strongly imbalanced.","the model uses too few features.","the decision boundary is exactly linear."],
+      e:"With strongly imbalanced classes, predicting the majority gives high accuracy and tells you nothing. 95% accuracy on 95% negatives is the \u201calways no\u201d model."},
+  de:{q:"Die Genauigkeit (Accuracy) als Klassifikationsmetrik kann irref\u00fchrend sein, wenn:",
+      o:["die Klassen im Datensatz ausgewogen sind.","die Klassen im Datensatz stark unausgewogen sind.","das Modell zu wenige Merkmale verwendet.","die Entscheidungsgrenze exakt linear ist."],
+      e:"Bei stark unausgewogenen Klassen liefert das Vorhersagen der Mehrheitsklasse hohe Genauigkeit und sagt nichts. 95 % Accuracy bei 95 % Negativen ist das \u201eimmer Nein\u201c-Modell."} }
+];
+
+const OPEN = [
+{ en:{q:"Explain the difference between deduction and induction. Give a short example of each from outside computer science. Which of the two underlies most of statistical machine learning, and why?",
+      model:[
+        ["","Deduction reasons from a general rule to a specific case. If the rule holds, the conclusion is certain. Example: all mammals breathe air; a whale is a mammal; therefore a whale breathes air."],
+        ["","Induction reasons from specific observations to a general rule. The conclusion is probable, not guaranteed. Example: every winter so far has been cold, so the next one will probably be cold too."],
+        ["Induction.","Most statistical machine learning is inductive. The model sees a finite sample of examples and infers a general rule meant to hold on data it has never seen. That is exactly why it can be wrong on new data."]
+      ]},
+  de:{q:"Erl\u00e4utern Sie den Unterschied zwischen Deduktion und Induktion. Geben Sie f\u00fcr beide jeweils ein kurzes Beispiel au\u00dferhalb der Informatik an. Welches der beiden Verfahren liegt dem Gro\u00dfteil des statistischen maschinellen Lernens zugrunde, und warum?",
+      model:[
+        ["","Deduktion schlie\u00dft von einer allgemeinen Regel auf einen konkreten Fall. Ist die Regel wahr, ist die Schlussfolgerung sicher. Beispiel: Alle S\u00e4ugetiere atmen Luft; ein Wal ist ein S\u00e4ugetier; also atmet ein Wal Luft."],
+        ["","Induktion schlie\u00dft von konkreten Beobachtungen auf eine allgemeine Regel. Die Schlussfolgerung ist wahrscheinlich, nicht garantiert. Beispiel: Jeder bisherige Winter war kalt, also wird der n\u00e4chste wahrscheinlich auch kalt."],
+        ["Induktion.","Der Gro\u00dfteil des statistischen maschinellen Lernens ist induktiv. Das Modell sieht eine endliche Stichprobe von Beispielen und leitet daraus eine allgemeine Regel ab, die auf nie gesehenen Daten gelten soll. Genau deshalb kann es bei neuen Daten falsch liegen."]
+      ]} },
+
+{ en:{q:"You train a regression model with 200 input features on a dataset of 100 observations. The training error is near zero, the test error is large. (a) Name and explain the phenomenon. (b) How do ridge (L2) and lasso (L1) react differently here? (c) Which would you choose if you also want to identify the small subset of truly relevant features, and why?",
+      model:[
+        ["(a) Overfitting.","With 200 features and 100 observations the model has more freedom than data. It fits the noise in the training set and learns nothing that transfers. Training error collapses while test error stays high."],
+        ["(b) Ridge vs lasso.","Ridge (L2) shrinks all coefficients toward zero but keeps every feature, spreading weight across correlated ones. Lasso (L1) can drive coefficients exactly to zero, removing features entirely and producing a sparse model."],
+        ["(c) Lasso.","Zeroing coefficients performs feature selection and hands you the small subset it kept as the relevant features. Ridge would shrink everything but identify nothing."]
+      ]},
+  de:{q:"Sie trainieren ein Regressionsmodell mit 200 Eingabemerkmalen auf einem Datensatz von 100 Beobachtungen. Der Trainingsfehler liegt nahe null, der Testfehler ist gro\u00df. (a) Benennen und erkl\u00e4ren Sie das Ph\u00e4nomen. (b) Wie reagieren Ridge (L2) und Lasso (L1) hier jeweils unterschiedlich? (c) Welche w\u00fcrden Sie w\u00e4hlen, wenn Sie zus\u00e4tzlich die kleine Teilmenge der wirklich relevanten Merkmale identifizieren m\u00f6chten, und warum?",
+      model:[
+        ["(a) \u00dcberanpassung (Overfitting).","Bei 200 Merkmalen und 100 Beobachtungen hat das Modell mehr Freiheitsgrade als Daten. Es passt sich dem Rauschen der Trainingsdaten an und lernt nichts \u00dcbertragbares. Der Trainingsfehler geht gegen null, der Testfehler bleibt gro\u00df."],
+        ["(b) Ridge gegen Lasso.","Ridge (L2) verkleinert alle Koeffizienten in Richtung null, beh\u00e4lt aber jedes Merkmal und verteilt Gewicht \u00fcber korrelierte Merkmale. Lasso (L1) kann Koeffizienten exakt auf null setzen, entfernt Merkmale vollst\u00e4ndig und erzeugt ein d\u00fcnn besetztes Modell."],
+        ["(c) Lasso.","Das Nullsetzen der Koeffizienten bewirkt eine Merkmalsauswahl und weist genau die kleine Teilmenge der behaltenen Merkmale als relevant aus. Ridge w\u00fcrde alles verkleinern, aber nichts identifizieren."]
+      ]} }
+];
+
+/* ---------------- state ---------------- */
+let lang = "en";
+let idx = 0;
+const TOTAL = MC.length + OPEN.length;
+const answers = new Array(MC.length).fill(null);
+const opened  = new Array(OPEN.length).fill(false);
+const openText = ["",""];
+const $ = id => document.getElementById(id);
+const LET = ["a","b","c","d"];
+
+function toggleLang(){
+  lang = lang === "en" ? "de" : "en";
+  document.documentElement.lang = lang;
+  document.querySelector(".lang-toggle").textContent = lang === "en" ? "DE" : "EN";
+  paintStatic();
+  if(!$("quiz").classList.contains("hidden")) render();
+  if(!$("result").classList.contains("hidden")) showResult();
+  typeset();
+}
+
+function paintStatic(){
+  const t = T[lang];
+  document.querySelectorAll("[data-i18n]").forEach(el=>{
+    const k = el.getAttribute("data-i18n");
+    if(t[k]!==undefined && typeof t[k]==="string") el.textContent = t[k];
+  });
+  $("prev").textContent = t.prev;
+  $("r-review").textContent = t.review;
+  $("r-restart").textContent = t.restart;
+  $("foot").textContent = t.foot;
+}
+
+function start(){
+  $("intro").classList.add("hidden");
+  $("result").classList.add("hidden");
+  $("quiz").classList.remove("hidden");
+  idx = 0; render();
+}
+
+function render(){
+  const t = T[lang];
+  $("prog").style.width = (idx/TOTAL*100) + "%";
+  $("prev").disabled = idx===0;
+  if(idx < MC.length) renderMC(idx);
+  else renderOpen(idx - MC.length);
+  $("next").textContent = (idx === TOTAL-1) ? t.finish : t.next;
+  typeset();
+}
+
+function renderMC(i){
+  const t = T[lang], d = MC[i][lang], c = MC[i].correct, done = answers[i]!==null;
+  $("counter").textContent = t.counterMC(i+1);
+  let html = `<div class="qtag">${t.counterMC(i+1)}</div><div class="qtext">${d.q}</div>`;
+  d.o.forEach((opt,k)=>{
+    let cls = "opt";
+    if(done){ cls += " locked";
+      if(k===c) cls += " correct";
+      else if(k===answers[i]) cls += " wrong";
+      else cls += " dim";
+    }
+    html += `<button class="${cls}" onclick="pick(${i},${k})"><span class="mark">${LET[k]}</span><span>${opt}</span></button>`;
+  });
+  html += `<div class="explain${done?' show':''}"><span class="tag">${t.correctLabel}: ${LET[c]}</span>${d.e}</div>`;
+  $("card").innerHTML = html;
+  $("next").disabled = !done;
+}
+
+function pick(i,k){
+  if(answers[i]!==null) return;
+  answers[i] = k;
+  renderMC(i); typeset();
+}
+
+function renderOpen(j){
+  const t = T[lang], d = OPEN[j][lang], shown = opened[j];
+  $("counter").textContent = t.counterOpen(j+1);
+  let model = `<div class="model${shown?' show':''}"><h4>${t.modelTitle}</h4>`;
+  d.model.forEach(p=>{ model += `<p>${p[0]?`<span class="sub">${p[0]}</span> `:''}${p[1]}</p>`; });
+  model += `</div>`;
+  $("card").innerHTML =
+    `<div class="qtag">${t.counterOpen(j+1)}</div>`+
+    `<div class="qtext">${d.q}</div>`+
+    `<textarea id="ta${j}" placeholder="${t.yourAnswer}\u2026" oninput="saveTA(${j})">${openText[j]||""}</textarea>`+
+    `<button class="btn reveal" onclick="reveal(${j})">${t.reveal}</button>`+
+    model;
+  $("next").disabled = false;
+}
+
+function saveTA(j){ openText[j] = $("ta"+j).value; }
+function reveal(j){ opened[j]=true; saveTA(j); renderOpen(j); typeset(); }
+
+function go(dir){
+  const j = idx - MC.length;
+  if(j>=0 && $("ta"+j)) openText[j] = $("ta"+j).value;
+  if(dir>0 && idx===TOTAL-1){ finish(); return; }
+  idx = Math.max(0, Math.min(TOTAL-1, idx+dir));
+  render();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function finish(){
+  $("prog").style.width = "100%";
+  $("quiz").classList.add("hidden");
+  showResult();
+}
+
+function showResult(){
+  const t = T[lang];
+  const score = answers.reduce((s,a,i)=> s + (a===MC[i].correct?1:0), 0);
+  $("result").classList.remove("hidden");
+  $("r-h").textContent = t.rH;
+  $("r-score").textContent = score;
+  $("r-verdict").textContent = t.verdict(score);
+  $("r-note").textContent = t.rNote;
+}
+
+function review(){
+  $("result").classList.add("hidden");
+  $("quiz").classList.remove("hidden");
+  idx = 0; render();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function restart(){
+  answers.fill(null); opened.fill(false); openText[0]=""; openText[1]="";
+  $("result").classList.add("hidden");
+  $("quiz").classList.add("hidden");
+  $("intro").classList.remove("hidden");
+  $("prog").style.width = "0%";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function typeset(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.body,{
+      delimiters:[{left:"$$",right:"$$",display:true},{left:"$",right:"$",display:false},{left:"\\(",right:"\\)",display:false}],
+      throwOnError:false
+    });
+  }
+}
+
+window.addEventListener("load",()=>{ paintStatic(); typeset(); });
+</script>
+</body>
+</html>

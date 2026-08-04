@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>No One Drew the Glider</title>
+
+    <!-- KaTeX -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #141420;
+            color: #e8e8f0;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            line-height: 1.8;
+            font-size: 18px;
+        }
+
+        .container { max-width: 820px; margin: 0 auto; padding: 0 24px; }
+
+        /* Language toggle */
+        .lang-toggle {
+            position: fixed; top: 16px; right: 16px;
+            background: #2a2a44; border: 1px solid #4a4a70; border-radius: 20px;
+            padding: 6px 14px; cursor: pointer;
+            font-size: 13px; font-family: sans-serif; color: #a0a0d0; z-index: 100; transition: background 0.2s;
+        }
+        .lang-toggle:hover { background: #363658; }
+
+        /* Hero */
+        .hero { text-align: center; padding: 80px 24px 40px; }
+        .hero h1 { font-size: 42px; font-weight: 700; color: #fff; line-height: 1.3; max-width: 700px; margin: 0 auto; }
+        .hero .subtitle { margin-top: 16px; color: #888; font-size: 16px; font-style: italic; }
+
+        section { padding: 50px 0; }
+        h2 { font-size: 30px; color: #fff; margin-bottom: 24px; line-height: 1.3; }
+        h3 { font-size: 20px; color: #ccc; margin: 28px 0 12px; }
+        p { margin-bottom: 20px; color: #ccc; }
+
+        .formula-block { margin: 24px auto; text-align: center; overflow-x: auto; padding: 10px 0; }
+
+        /* Quiz */
+        .quiz { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px; padding: 28px; margin: 36px 0; }
+        .quiz-question { font-size: 18px; color: #e0e0f0; margin-bottom: 18px; font-style: italic; }
+        .quiz-options { display: flex; gap: 12px; flex-wrap: wrap; }
+        .quiz-btn {
+            background: #2a2a44; color: #e0e0f0; border: 1px solid #3a3a55; border-radius: 8px;
+            padding: 12px 24px; font-size: 16px; font-family: inherit; cursor: pointer;
+            transition: background 0.2s, border-color 0.2s; flex: 1; min-width: 160px; text-align: center;
+        }
+        .quiz-btn:hover { background: #363658; border-color: #5a5a80; }
+        .quiz-btn.correct { background: #1a4a2a; border-color: #50b878; color: #70e898; }
+        .quiz-btn.wrong { background: #2a2248; border-color: #8264dc; color: #a88ef0; }
+        .quiz-btn.disabled { pointer-events: none; opacity: 0.6; }
+        .quiz-feedback { margin-top: 14px; font-size: 16px; min-height: 24px; line-height: 1.5; }
+        .quiz-feedback.success { color: #70e898; }
+        .quiz-feedback.fail { color: #a88ef0; }
+
+        /* ── Game of Life ───────────────────────────────────────────────────── */
+        .gol {
+            background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px;
+            padding: 22px; margin: 36px 0;
+        }
+        .board-wrap {
+            border: 1px solid #2a2a40; border-radius: 8px; overflow: hidden;
+            background: #0f0f18; line-height: 0;
+        }
+        #board { width: 100%; display: block; cursor: crosshair; touch-action: none; }
+
+        .gol-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 16px; }
+        .gol-btn {
+            font-family: sans-serif; font-size: 14px; cursor: pointer;
+            background: #2a2a44; color: #e0e0f0; border: 1px solid #3a3a55; border-radius: 8px; padding: 9px 18px;
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .gol-btn:hover { background: #363658; border-color: #5a5a80; }
+        .gol-btn.primary { background: #1a4a2a; border-color: #50b878; color: #70e898; }
+        .gol-btn.primary:hover { background: #205a34; }
+
+        .gol-speed { display: flex; align-items: center; gap: 10px; font-family: sans-serif; font-size: 13px; color: #888; margin-left: auto; }
+        .gol-speed input[type=range] { width: 120px; accent-color: #50b878; }
+
+        .gol-readout { display: flex; gap: 22px; margin-top: 14px; font-family: sans-serif; font-size: 13px; color: #888; }
+        .gol-readout b { color: #70e898; font-weight: 600; }
+
+        .gol-label { font-family: sans-serif; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: #888; margin: 20px 0 9px; }
+        .chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+        .chip {
+            font-family: sans-serif; font-size: 14px; cursor: pointer; user-select: none;
+            background: #2a2a44; color: #cfcfe6; border: 1px solid #3a3a55; border-radius: 16px; padding: 6px 14px;
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .chip:hover { background: #363658; border-color: #5a5a80; }
+        .chip.active { background: #1e2a44; border-color: #80b4f0; color: #cfe0ff; }
+
+        .rule-desc {
+            margin-top: 12px; font-family: sans-serif; font-size: 14px; color: #aaa; line-height: 1.5;
+            display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap;
+        }
+        .rule-badge {
+            font-family: 'Courier New', monospace; font-size: 13px; color: #80b4f0;
+            background: #141420; border: 1px solid #2a2a40; border-radius: 6px; padding: 2px 8px; white-space: nowrap;
+        }
+
+        /* ── Rules list + before/after visualization ────────────────────────── */
+        .rules-layout { display: flex; gap: 30px; align-items: flex-start; margin: 26px 0; }
+        .rules-list { flex: 1; list-style: none; margin: 0; padding: 0; }
+        .rules-list li {
+            position: relative; padding-left: 22px; margin-bottom: 16px; color: #ccc; line-height: 1.6;
+        }
+        .rules-list li::before { content: ""; position: absolute; left: 2px; top: 12px; width: 8px; height: 8px; border-radius: 2px; background: #50b878; }
+        .rules-list li strong { color: #e8e8f0; }
+        .rules-viz { flex-shrink: 0; display: flex; flex-direction: column; gap: 12px; }
+
+        .viz-row { display: flex; align-items: center; gap: 9px; }
+        .minigrid { display: grid; grid-template-columns: repeat(3, 18px); grid-template-rows: repeat(3, 18px); gap: 2px; flex-shrink: 0; }
+        .mcell { background: #20202e; border-radius: 3px; }
+        .mcell.on { background: #74e0a4; }
+        .mcell.center { box-shadow: inset 0 0 0 2px #80b4f0; }
+        .mcell.center.off { background: #14141d; }
+        .miniarrow { color: #666; font-family: sans-serif; font-size: 15px; }
+        .minires { font-family: sans-serif; font-size: 12px; padding: 4px 11px; border-radius: 12px; white-space: nowrap; }
+        .minires.live { background: #1a4a2a; border: 1px solid #2f6a45; color: #70e898; }
+        .minires.die  { background: #2a2248; border: 1px solid #4a3a78; color: #a88ef0; }
+        .vlabel { font-family: sans-serif; font-size: 12px; color: #888; }
+
+        /* three-universe rule cards */
+        .rule-cards { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 12px; }
+        .rule-card {
+            flex: 1; min-width: 210px; background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px; padding: 18px;
+        }
+        .rule-card .rc-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+        .rule-card .rc-name { font-family: sans-serif; font-size: 16px; color: #fff; font-weight: 600; }
+        .rule-card .rc-cap { font-family: sans-serif; font-size: 13px; color: #999; line-height: 1.5; margin-top: 14px; }
+
+        @media (max-width: 680px) {
+            .rules-layout { flex-direction: column; }
+            .rules-viz { flex-direction: row; flex-wrap: wrap; }
+        }
+
+        details.deep-dive { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px; padding: 0 28px; margin: 36px 0; }
+        details.deep-dive summary { cursor: pointer; padding: 22px 0; color: #80b4f0; font-family: sans-serif; font-size: 15px; list-style: none; }
+        details.deep-dive summary::-webkit-details-marker { display: none; }
+        details.deep-dive summary::before { content: "\25B8  "; color: #80b4f0; }
+        details.deep-dive[open] summary::before { content: "\25BE  "; }
+        details.deep-dive[open] summary { border-bottom: 1px solid #2a2a40; }
+        details.deep-dive .dd-body { padding: 20px 0 28px; }
+        details.deep-dive .dd-body p { color: #ccc; }
+
+        .section-rule { border: none; border-top: 1px solid #2a2a40; margin: 0; }
+
+        a { color: #80b4f0; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        footer { text-align: center; padding: 40px 24px; color: #444; font-size: 14px; }
+
+        @media (max-width: 680px) {
+            .hero h1 { font-size: 28px; }
+            h2 { font-size: 24px; }
+            body { font-size: 16px; }
+            .quiz-options { flex-direction: column; }
+            .gol-speed { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<button class="lang-toggle" onclick="toggleLang()">DE</button>
+
+<div class="hero">
+    <h1>No One Drew the Glider</h1>
+    <p class="subtitle" data-i18n="hero.subtitle">A minimodule on cellular automata and emergence.</p>
+</div>
+
+<div class="container">
+
+<!-- The rules -->
+<section>
+    <h2 data-i18n="s1.h2">Four Rules</h2>
+    <p data-i18n="s1.p1">A cell is alive or dead. Count its eight live neighbors. From that one number, four rules decide what happens next.</p>
+
+    <div class="rules-layout">
+        <ul class="rules-list">
+            <li data-i18n="s1.rule1"><strong>Underpopulation.</strong> A live cell with fewer than two live neighbors dies.</li>
+            <li data-i18n="s1.rule2"><strong>Survival.</strong> A live cell with two or three live neighbors stays alive.</li>
+            <li data-i18n="s1.rule3"><strong>Overcrowding.</strong> A live cell with more than three live neighbors dies.</li>
+            <li data-i18n="s1.rule4"><strong>Birth.</strong> A dead cell with exactly three live neighbors comes to life.</li>
+        </ul>
+        <div class="rules-viz" id="conway-viz"></div>
+    </div>
+
+    <p data-i18n="s1.p2">Written tighter: a cell is born when its neighbor count is three, and survives when the count is two or three.</p>
+    <div class="formula-block">$$\text{born if } n = 3 \qquad \text{survive if } n \in \{2, 3\}$$</div>
+    <p data-i18n="s1.p3">John Conway published this in 1970 and called it a game with no players and no winner. You place a few cells, then step back. Nothing in those four lines mentions a glider, a gun, or motion of any kind. Run it anyway and watch what walks out.</p>
+</section>
+
+<hr class="section-rule">
+
+<!-- The game -->
+<section>
+    <h2 data-i18n="game.h2">Run It Yourself</h2>
+    <p data-i18n="game.p">Click and drag on the grid to draw cells. Press play, or drop in one of the starters and let it go. The edges wrap around, so anything that leaves the right side comes back on the left.</p>
+
+    <div class="gol" id="gol">
+        <div class="board-wrap"><canvas id="board"></canvas></div>
+
+        <div class="gol-row">
+            <button class="gol-btn primary" id="gol-play" onclick="golTogglePlay()"></button>
+            <button class="gol-btn" id="gol-step" onclick="golStepOnce()"></button>
+            <button class="gol-btn" id="gol-clear" onclick="golClear()"></button>
+            <button class="gol-btn" id="gol-random" onclick="golRandom()"></button>
+            <label class="gol-speed">
+                <span id="gol-speed-label">Speed</span>
+                <input type="range" min="1" max="30" value="12" id="gol-speed" oninput="golSpeed(this.value)">
+            </label>
+        </div>
+
+        <div class="gol-readout">
+            <span id="gol-gen"></span>
+            <span id="gol-pop"></span>
+        </div>
+
+        <div class="gol-label" data-i18n="ui.starters">Starters</div>
+        <div class="chip-row" id="gol-starters"></div>
+
+        <div class="gol-label" data-i18n="ui.rules">Rules</div>
+        <div class="chip-row" id="gol-rules"></div>
+        <div class="rule-desc"><span class="rule-badge" id="gol-rule-badge"></span><span id="gol-rule-desc"></span></div>
+    </div>
+
+    <!-- Quiz: movement -->
+    <div class="quiz" id="quiz_move">
+        <div class="quiz-question" data-i18n="quiz_move.q">Which of the four rules contains the instruction that makes a glider move across the grid?</div>
+        <div class="quiz-options">
+            <button class="quiz-btn" onclick="answerQuiz('quiz_move', this, true)" data-i18n="quiz_move.a1">None of them. The motion emerges from how the rules interact.</button>
+            <button class="quiz-btn" onclick="answerQuiz('quiz_move', this, false)" data-i18n="quiz_move.a2">The survival rule, which keeps the cell alive as it travels.</button>
+        </div>
+        <div class="quiz-feedback" id="quiz_move-feedback"></div>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- Starters explained -->
+<section>
+    <h2 data-i18n="starters.h2">The Starters</h2>
+    <p data-i18n="starters.p1">The blinker just blinks, three cells flipping back and forth forever. The glider is five cells that walk diagonally across the grid and never stop. The Gosper gun is stranger: a fixed contraption that manufactures gliders out of empty space, one after another, with no end.</p>
+    <p data-i18n="starters.p2">Then there is the R-pentomino. Five cells. It thrashes for over a thousand generations, throwing off gliders and debris, before it finally settles. Nobody can look at those five cells and tell you that in advance. The only way to find out what a starting pattern does is to run it. That is the catch with emergence. The behavior is not sitting in the rules where you can read it off. It is in what the rules do once they start, and they do not announce it beforehand.</p>
+</section>
+
+<hr class="section-rule">
+
+<!-- Three other rules -->
+<section>
+    <h2 data-i18n="rules3.h2">Three Other Universes</h2>
+    <p data-i18n="rules3.p1">Change one number in the rules and you get a different world. HighLife adds a single birth condition to Conway: born on three neighbors, or six. That one extra clause is enough to produce a replicator, a small pattern that copies itself across the grid like a crystal that will not stop.</p>
+    <p data-i18n="rules3.p2">Seeds is harsher. Every living cell dies every single step, no exceptions, and a dead cell is born on exactly two neighbors. A handful of cells should vanish. Instead it explodes into a flickering bloom that never settles. Maze goes the other way: cells survive almost no matter how crowded they get. Drop in random noise and it freezes into long winding corridors, a maze nobody drew. Switch between all three with the Rules buttons above and watch each one take over.</p>
+
+    <div class="rule-cards" id="universe-viz"></div>
+</section>
+
+<hr class="section-rule">
+
+<!-- Why it matters -->
+<section>
+    <h2 data-i18n="why.h2">Why This Matters</h2>
+    <p data-i18n="why.p1">Four rules, and no author of the glider. The glider is real, it moves, people have built working computers out of nothing but gliders, and yet no line of the rules contains it. The rules never state it. It follows from them. This is what emergence means: behavior the parts do not carry and nobody put in by hand.</p>
+    <p data-i18n="why.p2">A neural network is the same bargain at a larger scale. Simple units, a simple rule for nudging weights, run a few billion times. What comes out can translate languages and write code, and nobody wrote a rule for translating or coding. The designers set the local rules and let them run, the same way you just did.</p>
+
+    <details class="deep-dive">
+        <summary data-i18n="dd.summary">For the curious: the rule in B/S notation</summary>
+        <div class="dd-body">
+            <p data-i18n="dd.p1">Every rule on this page is written as B then S: which neighbor counts cause a birth, and which counts let a live cell survive. Conway is B3/S23. Born on 3, survives on 2 or 3.</p>
+            <p data-i18n="dd.p2">HighLife is B36/S23, one extra birth count. Seeds is B2/S, where the empty survive list means nothing ever lives past one step. Maze is B3/S12345. Four short codes, four worlds that look nothing alike.</p>
+        </div>
+    </details>
+</section>
+
+<!-- Source -->
+<section>
+    <h2 data-i18n="src.h2">Source Code</h2>
+    <p data-i18n="src.p">This page lives here:</p>
+    <p><a href="https://github.com/i-yam/passt/tree/main/modules/game_of_life" target="_blank">https://github.com/i-yam/passt/tree/main/modules/game_of_life</a></p>
+</section>
+
+</div>
+
+<footer>
+    <span data-i18n="footer.title">No One Drew the Glider</span>
+    <br>&copy; All rights reserved
+</footer>
+
+<script>
+// ─── i18n ─────────────────────────────────────────────────────────────────────
+const T = {
+    en: {
+        'hero.subtitle': 'A minimodule on cellular automata and emergence.',
+
+        's1.h2': 'Four Rules',
+        's1.p1': 'A cell is alive or dead. Count its eight live neighbors. From that one number, four rules decide what happens next.',
+        's1.rule1': '<strong>Underpopulation.</strong> A live cell with fewer than two live neighbors dies.',
+        's1.rule2': '<strong>Survival.</strong> A live cell with two or three live neighbors stays alive.',
+        's1.rule3': '<strong>Overcrowding.</strong> A live cell with more than three live neighbors dies.',
+        's1.rule4': '<strong>Birth.</strong> A dead cell with exactly three live neighbors comes to life.',
+        's1.p2': 'Written tighter: a cell is born when its neighbor count is three, and survives when the count is two or three.',
+        's1.p3': 'John Conway published this in 1970 and called it a game with no players and no winner. You place a few cells, then step back. Nothing in those four lines mentions a glider, a gun, or motion of any kind. Run it anyway and watch what walks out.',
+
+        'game.h2': 'Run It Yourself',
+        'game.p':  'Click and drag on the grid to draw cells. Press play, or drop in one of the starters and let it go. The edges wrap around, so anything that leaves the right side comes back on the left.',
+
+        'starters.h2': 'The Starters',
+        'starters.p1': 'The blinker just blinks, three cells flipping back and forth forever. The glider is five cells that walk diagonally across the grid and never stop. The Gosper gun is stranger: a fixed contraption that manufactures gliders out of empty space, one after another, with no end.',
+        'starters.p2': 'Then there is the R-pentomino. Five cells. It thrashes for over a thousand generations, throwing off gliders and debris, before it finally settles. Nobody can look at those five cells and tell you that in advance. The only way to find out what a starting pattern does is to run it. That is the catch with emergence. The behavior is not sitting in the rules where you can read it off. It is in what the rules do once they start, and they do not announce it beforehand.',
+
+        'rules3.h2': 'Three Other Universes',
+        'rules3.p1': 'Change one number in the rules and you get a different world. HighLife adds a single birth condition to Conway: born on three neighbors, or six. That one extra clause is enough to produce a replicator, a small pattern that copies itself across the grid like a crystal that will not stop.',
+        'rules3.p2': 'Seeds is harsher. Every living cell dies every single step, no exceptions, and a dead cell is born on exactly two neighbors. A handful of cells should vanish. Instead it explodes into a flickering bloom that never settles. Maze goes the other way: cells survive almost no matter how crowded they get. Drop in random noise and it freezes into long winding corridors, a maze nobody drew. Switch between all three with the Rules buttons above and watch each one take over.',
+
+        'why.h2': 'Why This Matters',
+        'why.p1': 'Four rules, and no author of the glider. The glider is real, it moves, people have built working computers out of nothing but gliders, and yet no line of the rules contains it. The rules never state it. It follows from them. This is what emergence means: behavior the parts do not carry and nobody put in by hand.',
+        'why.p2': 'A neural network is the same bargain at a larger scale. Simple units, a simple rule for nudging weights, run a few billion times. What comes out can translate languages and write code, and nobody wrote a rule for translating or coding. The designers set the local rules and let them run, the same way you just did.',
+
+        'dd.summary': 'For the curious: the rule in B/S notation',
+        'dd.p1': 'Every rule on this page is written as B then S: which neighbor counts cause a birth, and which counts let a live cell survive. Conway is B3/S23. Born on 3, survives on 2 or 3.',
+        'dd.p2': 'HighLife is B36/S23, one extra birth count. Seeds is B2/S, where the empty survive list means nothing ever lives past one step. Maze is B3/S12345. Four short codes, four worlds that look nothing alike.',
+
+        'src.h2': 'Source Code',
+        'src.p':  'This page lives here:',
+        'footer.title': 'No One Drew the Glider',
+
+        'quiz_move.q':  'Which of the four rules contains the instruction that makes a glider move across the grid?',
+        'quiz_move.a1': 'None of them. The motion emerges from how the rules interact.',
+        'quiz_move.a2': 'The survival rule, which keeps the cell alive as it travels.',
+        'quiz_move.ok': 'Right. No rule mentions movement at all. The glider walks because of how the birth and death rules interact from one step to the next. That is emergence: the behavior is written down nowhere, it just happens.',
+        'quiz_move.no': 'Not quite. The survival rule only says a cell with two or three neighbors stays alive. It says nothing about direction or motion. The glider walks because of all four rules interacting across steps, and that walk is written down nowhere.',
+
+        // dynamic UI
+        'ui.play': 'Play', 'ui.pause': 'Pause', 'ui.step': 'Step', 'ui.clear': 'Clear', 'ui.random': 'Random',
+        'ui.speed': 'Speed', 'ui.gen': 'Generation', 'ui.pop': 'Population', 'ui.starters': 'Starters', 'ui.rules': 'Rules',
+
+        'st.glider': 'Glider', 'st.blinker': 'Blinker', 'st.pulsar': 'Pulsar', 'st.penta': 'Pentadecathlon',
+        'st.lwss': 'Spaceship', 'st.gun': 'Glider Gun', 'st.rpent': 'R-pentomino', 'st.acorn': 'Acorn',
+
+        'rule.life': 'Conway', 'rule.high': 'HighLife', 'rule.seeds': 'Seeds', 'rule.maze': 'Maze',
+        'rule.life.d':  'The original. Born on 3, survives on 2 or 3. Gliders, guns, and the rest live here.',
+        'rule.high.d':  'Conway plus birth on 6. Loaded with a replicator, a pattern that copies itself across the grid.',
+        'rule.seeds.d': 'Every cell dies each step. Born on exactly 2. A 2x2 block explodes into a bloom that never settles.',
+        'rule.maze.d':  'Cells almost never die. Random noise freezes into long winding corridors, a maze nobody drew.',
+
+        'res.live': 'survives', 'res.die': 'dies', 'res.born': 'born',
+        'v.under': 'Underpopulation', 'v.survive': 'Survival', 'v.crowd': 'Overcrowding', 'v.birth': 'Birth',
+        'v.high.cap':  'Six live neighbors light up a dead cell. Conway allows only three, so here it would stay dark.',
+        'v.seeds.cap': 'Two neighbors, and the cell still dies. Conway would let it survive. In Seeds nothing lives past a single step.',
+        'v.maze.cap':  'Five neighbors and the cell holds on. Conway kills a cell once it reaches four.',
+    },
+
+    de: {
+        'hero.subtitle': 'Ein Mini-Modul über zelluläre Automaten und Emergenz.',
+
+        's1.h2': 'Vier Regeln',
+        's1.p1': 'Eine Zelle ist lebendig oder tot. Zähle ihre acht lebenden Nachbarn. Aus dieser einen Zahl entscheiden vier Regeln, was als Nächstes passiert.',
+        's1.rule1': '<strong>Unterbevölkerung.</strong> Eine lebende Zelle mit weniger als zwei lebenden Nachbarn stirbt.',
+        's1.rule2': '<strong>Überleben.</strong> Eine lebende Zelle mit zwei oder drei lebenden Nachbarn bleibt am Leben.',
+        's1.rule3': '<strong>Überfüllung.</strong> Eine lebende Zelle mit mehr als drei lebenden Nachbarn stirbt.',
+        's1.rule4': '<strong>Geburt.</strong> Eine tote Zelle mit genau drei lebenden Nachbarn erwacht zum Leben.',
+        's1.p2': 'Knapper gesagt: Eine Zelle wird geboren, wenn sie genau drei Nachbarn hat. Bei zwei oder drei Nachbarn überlebt sie.',
+        's1.p3': 'John Conway hat das 1970 veröffentlicht. Er nannte es ein Spiel ohne Spieler und ohne Gewinner. Du setzt ein paar Zellen, dann trittst du zurück. Nichts in diesen vier Zeilen erwähnt einen Gleiter, eine Kanone oder irgendeine Bewegung. Lass es trotzdem laufen und sieh, was herausspaziert.',
+
+        'game.h2': 'Probier es selbst',
+        'game.p':  'Klick und zieh über das Gitter, um Zellen zu zeichnen. Drück auf Play. Oder wirf einen der Starter hinein und lass ihn laufen. Die Ränder sind verbunden. Was rechts hinausläuft, kommt links wieder herein.',
+
+        'starters.h2': 'Die Starter',
+        'starters.p1': 'Der Blinker blinkt einfach. Drei Zellen kippen ewig hin und her. Der Gleiter besteht aus fünf Zellen, die diagonal über das Gitter wandern und nie aufhören. Die Gosper-Kanone ist seltsamer: eine feste Apparatur, die Gleiter aus dem leeren Raum herstellt. Einen nach dem anderen, ohne Ende.',
+        'starters.p2': 'Dann gibt es das R-Pentomino. Fünf Zellen. Es tobt über tausend Generationen lang. Dabei schleudert es Gleiter und Trümmer heraus. Erst dann beruhigt es sich. Niemand kann diese fünf Zellen ansehen und dir das vorhersagen. Du musst ein Startmuster laufen lassen, um zu sehen, was es tut. Das ist der Haken an der Emergenz. Das Verhalten steckt nicht in den Regeln. Dort kannst du es nicht ablesen. Es entsteht erst, wenn die Regeln loslaufen. Angekündigt wird es vorher nie.',
+
+        'rules3.h2': 'Drei andere Universen',
+        'rules3.p1': 'Ändere eine Zahl in den Regeln und du bekommst eine andere Welt. HighLife fügt Conway eine einzige Geburtsbedingung hinzu: geboren bei drei Nachbarn oder bei sechs. Diese eine Zeile reicht schon für einen Replikator. Das ist ein kleines Muster, das sich selbst über das Gitter kopiert. Wie ein Kristall ohne Stoppknopf.',
+        'rules3.p2': 'Seeds ist härter. Jede lebende Zelle stirbt in jedem Schritt, ohne Ausnahme. Eine tote Zelle wird bei genau zwei Nachbarn geboren. Eine Handvoll Zellen sollte also verschwinden. Stattdessen explodiert sie zu einer flackernden Blüte. Die beruhigt sich nie. Maze geht den anderen Weg. Hier überleben Zellen fast immer, egal wie eng es wird. Wirf zufälliges Rauschen hinein. Es friert zu langen, gewundenen Korridoren ein, einem Labyrinth ohne Zeichner. Wechsle oben mit den Regel-Buttons zwischen allen dreien. Sieh zu, wie jede die Welt übernimmt.',
+
+        'why.h2': 'Warum das wichtig ist',
+        'why.p1': 'Vier Regeln, und niemand hat den Gleiter erfunden. Der Gleiter ist real und er bewegt sich. Leute haben funktionierende Computer aus nichts als Gleitern gebaut. Trotzdem steht er in keiner Zeile der Regeln. Die Regeln nennen ihn nie. Er folgt aus ihnen. Genau das bedeutet Emergenz: Verhalten, das die Teile nicht in sich tragen. Niemand hat es von Hand eingesetzt.',
+        'why.p2': 'Ein neuronales Netz macht denselben Deal, nur viel größer. Einfache Einheiten, eine einfache Regel zum Anpassen der Gewichte, ein paar Milliarden Mal ausgeführt. Was herauskommt, kann Sprachen übersetzen und Code schreiben. Eine Regel fürs Übersetzen oder Programmieren hat niemand geschrieben. Die Entwickler setzen die lokalen Regeln und lassen sie laufen. Genau so, wie du es gerade getan hast.',
+
+        'dd.summary': 'Für die Neugierigen: die Regel in B/S-Notation',
+        'dd.p1': 'Jede Regel auf dieser Seite steht als B und dann S. B sagt, welche Nachbarzahlen eine Geburt auslösen. S sagt, bei welchen Zahlen eine lebende Zelle überlebt. Conway ist B3/S23. Geboren bei 3, überlebt bei 2 oder 3.',
+        'dd.p2': 'HighLife ist B36/S23, eine zusätzliche Geburtszahl. Seeds ist B2/S. Die leere Überlebensliste bedeutet: Nichts lebt länger als einen Schritt. Maze ist B3/S12345. Vier kurze Codes, vier Welten, die sich kein bisschen ähneln.',
+
+        'src.h2': 'Quellcode',
+        'src.p':  'Diese Seite liegt hier:',
+        'footer.title': 'Niemand hat den Gleiter gezeichnet',
+
+        'quiz_move.q':  'Welche der vier Regeln enthält die Anweisung, die einen Gleiter über das Gitter bewegt?',
+        'quiz_move.a1': 'Keine. Die Bewegung entsteht daraus, wie die Regeln zusammenwirken.',
+        'quiz_move.a2': 'Die Überlebensregel, die die Zelle während der Reise am Leben hält.',
+        'quiz_move.ok': 'Richtig. Keine einzige Regel erwähnt Bewegung. Der Gleiter wandert, weil Geburts- und Sterberegeln von Schritt zu Schritt zusammenwirken. Das ist Emergenz: Das Verhalten steht nirgends geschrieben. Es passiert einfach.',
+        'quiz_move.no': 'Nicht ganz. Die Überlebensregel sagt nur: Eine Zelle mit zwei oder drei Nachbarn bleibt am Leben. Über Richtung oder Bewegung sagt sie nichts. Der Gleiter wandert, weil alle vier Regeln über die Schritte hinweg zusammenwirken. Dieser Gang steht nirgends geschrieben.',
+
+        'ui.play': 'Play', 'ui.pause': 'Pause', 'ui.step': 'Schritt', 'ui.clear': 'Leeren', 'ui.random': 'Zufall',
+        'ui.speed': 'Tempo', 'ui.gen': 'Generation', 'ui.pop': 'Population', 'ui.starters': 'Starter', 'ui.rules': 'Regeln',
+
+        'st.glider': 'Gleiter', 'st.blinker': 'Blinker', 'st.pulsar': 'Pulsar', 'st.penta': 'Pentadecathlon',
+        'st.lwss': 'Raumschiff', 'st.gun': 'Gleiterkanone', 'st.rpent': 'R-Pentomino', 'st.acorn': 'Eichel',
+
+        'rule.life': 'Conway', 'rule.high': 'HighLife', 'rule.seeds': 'Seeds', 'rule.maze': 'Maze',
+        'rule.life.d':  'Das Original. Geboren bei 3, überlebt bei 2 oder 3. Gleiter, Kanonen und der Rest wohnen hier.',
+        'rule.high.d':  'Conway plus Geburt bei 6. Geladen mit einem Replikator: ein Muster, das sich selbst über das Gitter kopiert.',
+        'rule.seeds.d': 'Jede Zelle stirbt in jedem Schritt. Geboren bei genau 2. Ein 2x2-Block explodiert zu einer Blüte, die sich nie beruhigt.',
+        'rule.maze.d':  'Zellen sterben fast nie. Zufälliges Rauschen friert zu langen, gewundenen Korridoren ein, einem Labyrinth ohne Zeichner.',
+
+        'res.live': 'überlebt', 'res.die': 'stirbt', 'res.born': 'geboren',
+        'v.under': 'Unterbevölkerung', 'v.survive': 'Überleben', 'v.crowd': 'Überfüllung', 'v.birth': 'Geburt',
+        'v.high.cap':  'Sechs lebende Nachbarn erwecken eine tote Zelle. Conway erlaubt nur drei, also bliebe sie hier dunkel.',
+        'v.seeds.cap': 'Zwei Nachbarn, und die Zelle stirbt trotzdem. Conway ließe sie überleben. In Seeds lebt nichts länger als einen einzigen Schritt.',
+        'v.maze.cap':  'Fünf Nachbarn, und die Zelle hält durch. Conway tötet eine Zelle schon bei vier.',
+    }
+};
+
+let currentLang = 'en';
+function t(key) { return (T[currentLang] && T[currentLang][key] != null) ? T[currentLang][key] : T.en[key]; }
+
+// ─── Engine ───────────────────────────────────────────────────────────────────
+const COLS = 80, ROWS = 46;
+let grid = new Uint8Array(COLS * ROWS);
+let buf  = new Uint8Array(COLS * ROWS);
+const gi = (x, y) => y * COLS + x;
+
+const RULES = {
+    life:  { b: [3],    s: [2, 3],          code: 'B3/S23' },
+    high:  { b: [3, 6], s: [2, 3],          code: 'B36/S23' },
+    seeds: { b: [2],    s: [],              code: 'B2/S' },
+    maze:  { b: [3],    s: [1, 2, 3, 4, 5], code: 'B3/S12345' }
+};
+let ruleKey = 'life';
+let B = [], S = [];
+function setRuleArrays() {
+    B = new Array(9).fill(false); S = new Array(9).fill(false);
+    RULES[ruleKey].b.forEach(n => B[n] = true);
+    RULES[ruleKey].s.forEach(n => S[n] = true);
+}
+setRuleArrays();
+
+let generation = 0;
+
+function stepGrid() {
+    for (let y = 0; y < ROWS; y++) {
+        const ym = (y - 1 + ROWS) % ROWS, yp = (y + 1) % ROWS;
+        for (let x = 0; x < COLS; x++) {
+            const xm = (x - 1 + COLS) % COLS, xp = (x + 1) % COLS;
+            const c = grid[gi(xm, ym)] + grid[gi(x, ym)] + grid[gi(xp, ym)]
+                    + grid[gi(xm, y)]               + grid[gi(xp, y)]
+                    + grid[gi(xm, yp)] + grid[gi(x, yp)] + grid[gi(xp, yp)];
+            buf[gi(x, y)] = grid[gi(x, y)] ? (S[c] ? 1 : 0) : (B[c] ? 1 : 0);
+        }
+    }
+    const tmp = grid; grid = buf; buf = tmp;
+    generation++;
+}
+
+function population() { let p = 0; for (let i = 0; i < grid.length; i++) p += grid[i]; return p; }
+
+// ─── Patterns (verified by simulation) ────────────────────────────────────────
+const PATTERNS = {
+    glider:  [[1,0],[2,1],[0,2],[1,2],[2,2]],
+    blinker: [[0,0],[1,0],[2,0]],
+    pulsar:  [[2,0],[3,0],[4,0],[8,0],[9,0],[10,0],[0,2],[5,2],[7,2],[12,2],[0,3],[5,3],[7,3],[12,3],[0,4],[5,4],[7,4],[12,4],[2,5],[3,5],[4,5],[8,5],[9,5],[10,5],[2,7],[3,7],[4,7],[8,7],[9,7],[10,7],[0,8],[5,8],[7,8],[12,8],[0,9],[5,9],[7,9],[12,9],[0,10],[5,10],[7,10],[12,10],[2,12],[3,12],[4,12],[8,12],[9,12],[10,12]],
+    penta:   [[1,0],[1,1],[0,2],[2,2],[1,3],[1,4],[1,5],[1,6],[0,7],[2,7],[1,8],[1,9]],
+    lwss:    [[1,0],[2,0],[3,0],[4,0],[0,1],[4,1],[4,2],[0,3],[3,3]],
+    gun:     [[0,4],[0,5],[1,4],[1,5],[10,4],[10,5],[10,6],[11,3],[11,7],[12,2],[12,8],[13,2],[13,8],[14,5],[15,3],[15,7],[16,4],[16,5],[16,6],[17,5],[20,2],[20,3],[20,4],[21,2],[21,3],[21,4],[22,1],[22,5],[24,0],[24,1],[24,5],[24,6],[34,2],[34,3],[35,2],[35,3]],
+    rpent:   [[1,0],[2,0],[0,1],[1,1],[1,2]],
+    acorn:   [[1,0],[3,1],[0,2],[1,2],[4,2],[5,2],[6,2]],
+    replicator: [[2,0],[3,0],[4,0],[1,1],[4,1],[0,2],[4,2],[0,3],[3,3],[0,4],[1,4],[2,4]],
+    block:   [[0,0],[1,0],[0,1],[1,1]]
+};
+const STARTERS = ['glider','blinker','pulsar','penta','lwss','gun','rpent','acorn'];
+
+function clearGrid() { grid.fill(0); generation = 0; }
+
+function stampPattern(name, autoplay) {
+    const cells = PATTERNS[name];
+    let maxx = 0, maxy = 0;
+    cells.forEach(([x, y]) => { if (x > maxx) maxx = x; if (y > maxy) maxy = y; });
+    const ox = Math.floor((COLS - (maxx + 1)) / 2);
+    const oy = Math.floor((ROWS - (maxy + 1)) / 2);
+    clearGrid();
+    cells.forEach(([x, y]) => { grid[gi((ox + x + COLS) % COLS, (oy + y + ROWS) % ROWS)] = 1; });
+    draw(); updateReadout();
+    if (autoplay) golPlay(); else golPause();
+}
+
+function randomFill(density) {
+    clearGrid();
+    for (let i = 0; i < grid.length; i++) grid[i] = Math.random() < density ? 1 : 0;
+    draw(); updateReadout();
+}
+
+// ─── Canvas / render ──────────────────────────────────────────────────────────
+const canvas = document.getElementById('board');
+const ctx = (canvas && canvas.getContext) ? canvas.getContext('2d') : null;
+let cell = 10, dpr = 1;
+
+function fitCanvas() {
+    if (!ctx) return;
+    const cssW = canvas.clientWidth || (canvas.parentElement ? canvas.parentElement.clientWidth : COLS * 10);
+    cell = Math.max(3, Math.floor(cssW / COLS));
+    dpr = window.devicePixelRatio || 1;
+    const cssH = cell * ROWS;
+    canvas.style.height = cssH + 'px';
+    canvas.width = Math.floor(COLS * cell * dpr);
+    canvas.height = Math.floor(ROWS * cell * dpr);
+    draw();
+}
+
+function draw() {
+    if (!ctx) return;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.fillStyle = '#0f0f18';
+    ctx.fillRect(0, 0, COLS * cell, ROWS * cell);
+    // subtle grid
+    ctx.strokeStyle = '#1a1a28';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let x = 0; x <= COLS; x++) { ctx.moveTo(x * cell + 0.5, 0); ctx.lineTo(x * cell + 0.5, ROWS * cell); }
+    for (let y = 0; y <= ROWS; y++) { ctx.moveTo(0, y * cell + 0.5); ctx.lineTo(COLS * cell, y * cell + 0.5); }
+    ctx.stroke();
+    // live cells
+    ctx.fillStyle = '#74e0a4';
+    for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) {
+        if (grid[gi(x, y)]) ctx.fillRect(x * cell + 1, y * cell + 1, cell - 1, cell - 1);
+    }
+}
+
+function updateReadout() {
+    const g = document.getElementById('gol-gen');
+    const p = document.getElementById('gol-pop');
+    if (g) g.innerHTML = t('ui.gen') + ': <b>' + generation + '</b>';
+    if (p) p.innerHTML = t('ui.pop') + ': <b>' + population() + '</b>';
+}
+
+// ─── Loop ─────────────────────────────────────────────────────────────────────
+let playing = false, stepsPerSec = 12, lastTime = 0, acc = 0, rafId = null;
+
+function loop(ts) {
+    if (!playing) return;
+    if (!lastTime) lastTime = ts;
+    acc += (ts - lastTime) / 1000;
+    lastTime = ts;
+    const interval = 1 / stepsPerSec;
+    let steps = 0;
+    while (acc >= interval && steps < 8) { stepGrid(); acc -= interval; steps++; }
+    if (steps) { draw(); updateReadout(); }
+    rafId = requestAnimationFrame(loop);
+}
+function golPlay() {
+    if (playing) return;
+    playing = true; lastTime = 0; acc = 0;
+    setPlayLabel();
+    if (typeof requestAnimationFrame !== 'undefined') rafId = requestAnimationFrame(loop);
+}
+function golPause() {
+    playing = false; setPlayLabel();
+    if (rafId && typeof cancelAnimationFrame !== 'undefined') cancelAnimationFrame(rafId);
+}
+function golTogglePlay() { playing ? golPause() : golPlay(); }
+function setPlayLabel() {
+    const b = document.getElementById('gol-play');
+    if (b) b.textContent = playing ? t('ui.pause') : t('ui.play');
+}
+function golStepOnce() { golPause(); stepGrid(); draw(); updateReadout(); }
+function golClear() { golPause(); clearGrid(); draw(); updateReadout(); }
+function golRandom() { golPause(); randomFill(0.2); }
+function golSpeed(v) { stepsPerSec = +v; }
+
+// ─── Rules + starters UI ──────────────────────────────────────────────────────
+function selectRule(key) {
+    ruleKey = key; setRuleArrays();
+    document.querySelectorAll('#gol-rules .chip').forEach(c => c.classList.toggle('active', c.dataset.rule === key));
+    document.getElementById('gol-rule-badge').textContent = RULES[key].code;
+    document.getElementById('gol-rule-desc').textContent = t('rule.' + key + '.d');
+    if (key === 'high') stampPattern('replicator', true);
+    else if (key === 'seeds') stampPattern('block', true);
+    else if (key === 'maze') randomFill(0.38), golPlay();
+    // 'life' keeps the current board
+    draw();
+}
+
+function renderStarters() {
+    const row = document.getElementById('gol-starters');
+    if (!row) return;
+    row.innerHTML = STARTERS.map(n => '<div class="chip" data-st="' + n + '" onclick="golPause();stampPattern(\'' + n + '\',false)">' + t('st.' + n) + '</div>').join('');
+}
+function renderRules() {
+    const row = document.getElementById('gol-rules');
+    if (!row) return;
+    row.innerHTML = Object.keys(RULES).map(k =>
+        '<div class="chip' + (k === ruleKey ? ' active' : '') + '" data-rule="' + k + '" onclick="selectRule(\'' + k + '\')">' + t('rule.' + k) + '</div>'
+    ).join('');
+}
+function renderControls() {
+    const set = (id, key) => { const e = document.getElementById(id); if (e) e.textContent = t(key); };
+    set('gol-step', 'ui.step'); set('gol-clear', 'ui.clear'); set('gol-random', 'ui.random');
+    set('gol-speed-label', 'ui.speed');
+    setPlayLabel();
+    document.getElementById('gol-rule-badge').textContent = RULES[ruleKey].code;
+    document.getElementById('gol-rule-desc').textContent = t('rule.' + ruleKey + '.d');
+    updateReadout();
+}
+
+// ─── Drawing on the grid ──────────────────────────────────────────────────────
+let drawing = false, paintVal = 1;
+function cellFromEvent(ev) {
+    const r = canvas.getBoundingClientRect();
+    const x = Math.floor((ev.clientX - r.left) / r.width * COLS);
+    const y = Math.floor((ev.clientY - r.top) / r.height * ROWS);
+    if (x < 0 || y < 0 || x >= COLS || y >= ROWS) return null;
+    return [x, y];
+}
+if (canvas) {
+    canvas.addEventListener('pointerdown', ev => {
+        const c = cellFromEvent(ev); if (!c) return;
+        ev.preventDefault();
+        drawing = true;
+        paintVal = grid[gi(c[0], c[1])] ? 0 : 1;
+        grid[gi(c[0], c[1])] = paintVal;
+        draw(); updateReadout();
+        if (canvas.setPointerCapture) try { canvas.setPointerCapture(ev.pointerId); } catch (e) {}
+    });
+    canvas.addEventListener('pointermove', ev => {
+        if (!drawing) return;
+        const c = cellFromEvent(ev); if (!c) return;
+        grid[gi(c[0], c[1])] = paintVal;
+        draw(); updateReadout();
+    });
+    canvas.addEventListener('pointerup', () => { drawing = false; });
+    canvas.addEventListener('pointerleave', () => { drawing = false; });
+}
+
+// ─── Quiz ─────────────────────────────────────────────────────────────────────
+function answerQuiz(quizId, btn, isCorrect) {
+    const quiz = document.getElementById(quizId);
+    const feedback = document.getElementById(quizId + '-feedback');
+    quiz.querySelectorAll('.quiz-btn').forEach(b => b.classList.add('disabled'));
+    btn.classList.add(isCorrect ? 'correct' : 'wrong');
+    feedback.className = 'quiz-feedback ' + (isCorrect ? 'success' : 'fail');
+    const key = quizId + (isCorrect ? '.ok' : '.no');
+    feedback.innerHTML = (T[currentLang] && T[currentLang][key]) ? T[currentLang][key] : T.en[key];
+}
+
+// ─── KaTeX ────────────────────────────────────────────────────────────────────
+function katexAll() {
+    if (typeof renderMathInElement !== 'undefined') {
+        renderMathInElement(document.body, {
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '\\(', right: '\\)', display: false }
+            ],
+            throwOnError: false
+        });
+    }
+}
+
+// ─── Language toggle ──────────────────────────────────────────────────────────
+function toggleLang() {
+    currentLang = currentLang === 'en' ? 'de' : 'en';
+    document.documentElement.lang = currentLang;
+    document.querySelector('.lang-toggle').textContent = currentLang === 'en' ? 'DE' : 'EN';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (T[currentLang] && T[currentLang][key]) el.innerHTML = T[currentLang][key];
+    });
+    renderStarters(); renderRules(); renderControls();
+    renderConwayViz(); renderUniverseViz();
+    katexAll();
+}
+
+// ─── Rule visualizations (before -> after mini-grids) ─────────────────────────
+const CONWAY_VIZ = [
+    { lbl: 'v.under',   center: true,  neighbors: [1],          res: 'die'  },
+    { lbl: 'v.survive', center: true,  neighbors: [3, 5],       res: 'live' },
+    { lbl: 'v.crowd',   center: true,  neighbors: [1, 3, 5, 7], res: 'die'  },
+    { lbl: 'v.birth',   center: false, neighbors: [1, 3, 5],    res: 'born' }
+];
+const UNIVERSE_VIZ = [
+    { key: 'high',  center: false, neighbors: [0, 1, 2, 3, 5, 6], res: 'born', cap: 'v.high.cap'  },
+    { key: 'seeds', center: true,  neighbors: [1, 7],             res: 'die',  cap: 'v.seeds.cap' },
+    { key: 'maze',  center: true,  neighbors: [0, 1, 3, 5, 7],    res: 'live', cap: 'v.maze.cap'  }
+];
+
+function miniGridHTML(center, neighbors) {
+    let cells = '';
+    for (let i = 0; i < 9; i++) {
+        if (i === 4) cells += '<div class="mcell center ' + (center ? 'on' : 'off') + '"></div>';
+        else cells += '<div class="mcell ' + (neighbors.includes(i) ? 'on' : '') + '"></div>';
+    }
+    return '<div class="minigrid">' + cells + '</div>';
+}
+function resChipHTML(res) {
+    const cls = res === 'die' ? 'die' : 'live';
+    return '<span class="minires ' + cls + '">' + t('res.' + res) + '</span>';
+}
+
+function renderConwayViz() {
+    const box = document.getElementById('conway-viz');
+    if (!box) return;
+    box.innerHTML = CONWAY_VIZ.map(v =>
+        '<div class="viz-row">' + miniGridHTML(v.center, v.neighbors)
+        + '<span class="miniarrow">\u2192</span>' + resChipHTML(v.res) + '</div>'
+    ).join('');
+}
+function renderUniverseViz() {
+    const box = document.getElementById('universe-viz');
+    if (!box) return;
+    box.innerHTML = UNIVERSE_VIZ.map(v =>
+        '<div class="rule-card">'
+        + '<div class="rc-head"><span class="rc-name">' + t('rule.' + v.key) + '</span>'
+        + '<span class="rule-badge">' + RULES[v.key].code + '</span></div>'
+        + '<div class="viz-row">' + miniGridHTML(v.center, v.neighbors)
+        + '<span class="miniarrow">\u2192</span>' + resChipHTML(v.res) + '</div>'
+        + '<div class="rc-cap">' + t(v.cap) + '</div>'
+        + '</div>'
+    ).join('');
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+function golInit() {
+    renderStarters(); renderRules(); renderControls();
+    renderConwayViz(); renderUniverseViz();
+    selectRule('life');
+    stampPattern('glider', false);
+    fitCanvas();
+}
+window.addEventListener('load', function () {
+    golInit();
+    katexAll();
+});
+window.addEventListener('resize', fitCanvas);
+</script>
+</body>
+</html>

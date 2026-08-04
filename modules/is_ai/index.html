@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Is This AI?</title>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #141420;
+            color: #e8e8f0;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            line-height: 1.8;
+            font-size: 18px;
+        }
+
+        .container {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* === Language toggle === */
+        .lang-toggle {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            background: #2a2a44;
+            border: 1px solid #4a4a70;
+            border-radius: 20px;
+            padding: 6px 14px;
+            cursor: pointer;
+            font-size: 13px;
+            font-family: sans-serif;
+            color: #a0a0d0;
+            z-index: 100;
+            transition: background 0.2s;
+        }
+        .lang-toggle:hover { background: #363658; }
+
+        /* === Hero === */
+        .hero {
+            text-align: center;
+            padding: 80px 24px 50px;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 28px;
+        }
+
+        .tag {
+            background: #1c1c2e;
+            color: #8888b0;
+            border: 1px solid #2a2a40;
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 12px;
+            font-family: sans-serif;
+            letter-spacing: 0.3px;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.2;
+            margin-bottom: 16px;
+        }
+
+        .hero p {
+            color: #666;
+            font-size: 16px;
+            font-family: sans-serif;
+            margin: 0;
+        }
+
+        /* === Game card === */
+        .game-area {
+            padding: 40px 0 80px;
+        }
+
+        .item-card {
+            background: #1c1c2e;
+            border: 1px solid #2a2a40;
+            border-radius: 14px;
+            padding: 40px 40px 36px;
+            position: relative;
+        }
+
+        .item-number {
+            font-size: 12px;
+            font-family: sans-serif;
+            color: #333;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+        }
+
+        .item-name {
+            font-size: 34px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+
+        .item-context {
+            font-size: 17px;
+            color: #777;
+            margin-bottom: 32px;
+            font-style: italic;
+            line-height: 1.7;
+        }
+
+        /* === Vote buttons === */
+        .vote-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-vote {
+            flex: 1;
+            padding: 12px 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: sans-serif;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+            border: 1px solid #3a3a55;
+            background: #2a2a44;
+            color: #a0a0d0;
+        }
+        .btn-vote:hover { background: #363658; border-color: #5a5a80; }
+        .btn-vote:disabled { opacity: 0.4; cursor: default; }
+
+        /* Chosen vote highlight */
+        .btn-vote.voted-ai      { background: #1a3a2a; border-color: #40a868; color: #70e898; opacity: 1; }
+        .btn-vote.voted-not     { background: #1e1e34; border-color: #4a4a80; color: #9090c0; opacity: 1; }
+        .btn-vote.voted-depends { background: #2a1e08; border-color: #806020; color: #c09030; opacity: 1; }
+
+        /* === Reveal === */
+        .reveal-area {
+            display: none;
+            margin-top: 28px;
+            padding-top: 28px;
+            border-top: 1px solid #2a2a40;
+        }
+
+        .reveal-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .verdict {
+            display: inline-block;
+            font-size: 13px;
+            font-family: sans-serif;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 5px 14px;
+            border-radius: 20px;
+        }
+        .verdict-ai      { background: #1a3a2a; border: 1px solid #40a868; color: #70e898; }
+        .verdict-not     { background: #22223a; border: 1px solid #44447a; color: #8888b0; }
+        .verdict-depends { background: #2a2010; border: 1px solid #806020; color: #c09030; }
+
+        .result-indicator {
+            font-size: 13px;
+            font-family: sans-serif;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+        .result-correct { color: #70e898; }
+        .result-wrong   { color: #e07858; }
+
+        .reveal-text {
+            font-size: 16px;
+            color: #999;
+            line-height: 1.7;
+        }
+
+        /* === Navigation === */
+        .nav-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 28px;
+        }
+
+        .btn-nav {
+            background: transparent;
+            border: 1px solid #2a2a40;
+            border-radius: 6px;
+            padding: 8px 20px;
+            color: #555;
+            font-size: 14px;
+            font-family: sans-serif;
+            cursor: pointer;
+            transition: border-color 0.2s, color 0.2s;
+        }
+        .btn-nav:hover { border-color: #4a4a70; color: #a0a0d0; }
+        .btn-nav:disabled { opacity: 0.2; cursor: default; }
+
+        .progress {
+            font-size: 12px;
+            font-family: sans-serif;
+            color: #333;
+            letter-spacing: 0.5px;
+        }
+
+        /* === Done screen === */
+        .done-screen {
+            display: none;
+            text-align: center;
+            padding: 40px 20px 60px;
+        }
+
+        .score-display {
+            font-size: 64px;
+            font-weight: 700;
+            font-family: sans-serif;
+            color: #fff;
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+
+        .score-label {
+            display: block;
+            font-size: 15px;
+            font-family: sans-serif;
+            color: #444;
+            margin-bottom: 36px;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-container {
+            margin: 0 auto 32px;
+            max-width: 380px;
+        }
+
+        .badge-img {
+            width: 100%;
+            border-radius: 12px;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        .done-screen h2 {
+            font-size: 26px;
+            color: #fff;
+            margin-bottom: 14px;
+            line-height: 1.3;
+        }
+
+        .done-screen > p {
+            font-size: 16px;
+            color: #666;
+            font-family: sans-serif;
+            max-width: 460px;
+            margin: 0 auto 28px;
+            line-height: 1.7;
+        }
+
+        .movie-links {
+            margin-bottom: 32px;
+            font-family: sans-serif;
+        }
+
+        .movie-links-label {
+            color: #444;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .movie-links a { color: #6688cc; }
+        .movie-links a:hover { text-decoration: underline; }
+
+        .btn-restart {
+            margin-top: 8px;
+            background: #2a2a44;
+            border: 1px solid #4a4a70;
+            border-radius: 8px;
+            padding: 12px 28px;
+            color: #a0a0d0;
+            font-size: 15px;
+            font-family: sans-serif;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-restart:hover { background: #363658; }
+
+        /* === Ghost in the Shell theme === */
+        @keyframes ghostGlow {
+            0%, 100% { text-shadow: 0 0 20px rgba(0,255,200,0.25); }
+            50%       { text-shadow: 0 0 44px rgba(0,255,200,0.55); }
+        }
+        .theme-gits .score-display { color: #00ffcc; animation: ghostGlow 3s ease-in-out infinite; }
+        .theme-gits h2             { color: #00ffcc; animation: ghostGlow 3s ease-in-out infinite; }
+        .theme-gits .badge-img     { box-shadow: 0 0 40px rgba(0,255,200,0.2); }
+        .theme-gits .movie-links a { color: #00ccaa; }
+
+        /* === Blade Runner theme === */
+        @keyframes bladeGlow {
+            0%, 100% { text-shadow: 0 0 20px rgba(255,160,50,0.25); }
+            50%       { text-shadow: 0 0 44px rgba(255,160,50,0.55); }
+        }
+        .theme-bladerunner .score-display { color: #ffaa33; animation: bladeGlow 4s ease-in-out infinite; }
+        .theme-bladerunner h2             { color: #ffaa33; animation: bladeGlow 4s ease-in-out infinite; }
+        .theme-bladerunner .badge-img     { box-shadow: 0 0 40px rgba(255,160,50,0.15); }
+        .theme-bladerunner .movie-links a { color: #cc8822; }
+
+        /* === Links === */
+        a { color: #80b4f0; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* === Footer === */
+        footer { text-align: center; padding: 40px 24px; color: #444; font-size: 14px; }
+        footer a { color: #555; }
+
+        @media (max-width: 600px) {
+            .hero h1    { font-size: 36px; }
+            .item-name  { font-size: 26px; }
+            .vote-row   { flex-direction: column; }
+            .item-card  { padding: 28px 24px; }
+            .score-display { font-size: 48px; }
+            .progress   { font-size: 10px; letter-spacing: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<button class="lang-toggle" onclick="toggleLang()">DE</button>
+
+<div class="hero">
+    <div class="tags">
+        <span class="tag">all</span>
+        <span class="tag">no-code</span>
+        <span class="tag">intermediate</span>
+        <span class="tag">try-without-ai</span>
+        <span class="tag">ml-fundamentals</span>
+    </div>
+    <h1 data-i18n="hero.title">Is This AI?</h1>
+    <p data-i18n="hero.sub">Vote first. Then find out.</p>
+</div>
+
+<div class="container">
+<div class="game-area">
+
+    <div class="item-card" id="item-card">
+        <div class="item-number" id="item-number">1 / 12</div>
+        <div class="item-name" id="item-name"></div>
+        <div class="item-context" id="item-context"></div>
+        <div class="vote-row">
+            <button class="btn-vote" id="btn-yes"     onclick="vote('ai')"      data-i18n="vote.yes">Yes, AI</button>
+            <button class="btn-vote" id="btn-depends" onclick="vote('depends')" data-i18n="vote.depends">It Depends</button>
+            <button class="btn-vote" id="btn-no"      onclick="vote('not')"     data-i18n="vote.no">Not AI</button>
+        </div>
+        <div class="reveal-area" id="reveal-area">
+            <div class="reveal-header">
+                <span class="verdict" id="verdict-badge"></span>
+                <span class="result-indicator" id="result-indicator"></span>
+            </div>
+            <div class="reveal-text" id="reveal-text"></div>
+        </div>
+        <div class="nav-row">
+            <button class="btn-nav" id="btn-prev" onclick="navigate(-1)" disabled data-i18n="nav.prev">← prev</button>
+            <span class="progress" id="progress-dots"></span>
+            <button class="btn-nav" id="btn-next" data-i18n="nav.next">next →</button>
+        </div>
+    </div>
+
+    <div class="done-screen" id="done-screen">
+        <div class="score-display" id="score-num">0</div>
+        <span class="score-label" id="score-label" data-i18n="done.score_label">/ 12 correct</span>
+        <div class="badge-container">
+            <img id="badge-img" class="badge-img" src="" alt="Your AI Detective Badge">
+        </div>
+        <h2 id="done-title"></h2>
+        <p id="done-sub"></p>
+        <div id="movie-links" class="movie-links"></div>
+        <button class="btn-restart" onclick="restart()" data-i18n="done.restart">Start over</button>
+    </div>
+
+</div>
+</div>
+
+<footer>
+    <a href="https://github.com/i-yam/passt/tree/main/modules/is_ai" target="_blank">github.com/i-yam/passt</a>
+    &nbsp;·&nbsp;
+    <a href="../../" target="_blank">overfit &amp; chill</a>
+    <br>&copy; All rights reserved
+</footer>
+
+<script>
+
+const items = [
+    {
+        name: 'Calculator',
+        name_de: 'Taschenrechner',
+        context: 'You type 2 + 2. It says 4. You type it again tomorrow. It says 4.',
+        context_de: 'Du tippst 2 + 2. Er sagt 4. Du tippst es morgen nochmal. Er sagt 4.',
+        verdict: 'not',
+        label: 'Not AI',
+        label_de: 'Keine KI',
+        text: 'Fixed rules. No data, no learning, no adaptation. Every input maps to exactly one output, always. A very good tool.',
+        text_de: 'Feste Regeln. Keine Daten, kein Lernen, keine Anpassung. Jede Eingabe führt zu genau einer Ausgabe, immer. Ein sehr gutes Werkzeug.'
+    },
+    {
+        name: 'Spam Filter',
+        name_de: 'Spam-Filter',
+        context: 'You never see 99% of the junk sent to your inbox. Something is deciding.',
+        context_de: 'Du siehst 99\u00A0% des Mülls in deinem Postfach nie. Irgendetwas entscheidet.',
+        verdict: 'ai',
+        label: 'AI',
+        label_de: 'KI',
+        text: 'Trained on millions of labeled emails. It learned what spam looks like. The filter you have today is not the one that shipped ten years ago.',
+        text_de: 'Trainiert auf Millionen beschrifteter E-Mails. Er hat gelernt, wie Spam aussieht. Der Filter von heute ist nicht mehr der von vor zehn Jahren.'
+    },
+    {
+        name: 'Google Search',
+        name_de: 'Google-Suche',
+        context: 'You type "good coffee near me" without specifying what "near" or "good" means.',
+        context_de: 'Du tippst „guter Kaffee in der Nähe“. Was „in der Nähe“ oder „gut“ heißt, erklärst du nicht.',
+        verdict: 'depends',
+        label: 'It depends',
+        label_de: 'Kommt drauf an',
+        text: 'Crawling and indexing pages is algorithmic. Understanding what you meant when you typed it, and ranking results for your context, uses machine learning. The same search box, two different mechanisms.',
+        text_de: 'Seiten zu crawlen und zu indexieren ist algorithmisch. Zu verstehen, was du meintest, ist maschinelles Lernen. Das Ranking für deinen Kontext auch. Dieselbe Suchleiste, zwei verschiedene Mechanismen.'
+    },
+    {
+        name: 'GPS Navigation',
+        name_de: 'GPS-Navigation',
+        context: 'It tells you to take a different route than yesterday for the same journey.',
+        context_de: 'Es schlägt eine andere Route vor als gestern, für dieselbe Fahrt.',
+        verdict: 'depends',
+        label: 'It depends',
+        label_de: 'Kommt drauf an',
+        text: 'Finding the shortest path is a graph algorithm, decades old. Predicting where traffic will slow down in 20 minutes is machine learning trained on millions of past journeys.',
+        text_de: 'Den kürzesten Weg zu finden ist ein Graphenalgorithmus, jahrzehntealt. Etwas anderes ist die Frage, wo der Verkehr in 20 Minuten stockt. Diese Vorhersage ist maschinelles Lernen, trainiert auf Millionen früherer Fahrten.'
+    },
+    {
+        name: 'Face ID',
+        name_de: 'Face ID',
+        context: 'It unlocks when you look at it. Even after you got a haircut.',
+        context_de: 'Es entsperrt, wenn du draufschaust. Auch nach dem Haarschnitt.',
+        verdict: 'ai',
+        label: 'AI',
+        label_de: 'KI',
+        text: 'A neural network trained on face data. It does not compare a stored photo. It learned what makes your face yours, and it updates that model over time.',
+        text_de: 'Ein neuronales Netz, trainiert auf Gesichtsdaten. Es vergleicht kein gespeichertes Foto. Es hat gelernt, was dein Gesicht ausmacht, und aktualisiert dieses Modell mit der Zeit.'
+    },
+    {
+        name: 'Autocorrect',
+        name_de: 'Autokorrektur',
+        context: 'Sometimes it fixes "teh" to "the". Sometimes it finishes your entire sentence.',
+        context_de: 'Manchmal korrigiert es „teh“ zu „the“. Manchmal vervollständigt es deinen ganzen Satz.',
+        verdict: 'depends',
+        label: 'It depends',
+        label_de: 'Kommt drauf an',
+        text: 'Correcting common typos is a lookup table. Predicting the next word in your sentence is a language model. The same keyboard, two very different things happening underneath.',
+        text_de: 'Häufige Tippfehler zu korrigieren ist eine Nachschlagetabelle. Das nächste Wort vorherzusagen ist ein Sprachmodell. Dieselbe Tastatur, darunter zwei völlig verschiedene Mechanismen.'
+    },
+    {
+        name: 'Thermostat',
+        name_de: 'Thermostat',
+        context: 'The old kind. The dial on the wall.',
+        context_de: 'Das alte. Der Drehregler an der Wand.',
+        verdict: 'not',
+        label: 'Not AI',
+        label_de: 'Keine KI',
+        text: 'If temperature drops below X, turn on heat. The rule never changes. No data, no learning. It has one job and it does not need to think.',
+        text_de: 'Wenn die Temperatur unter X fällt, Heizung an. Die Regel ändert sich nie. Keine Daten, kein Lernen. Es hat einen Job und muss nicht denken.'
+    },
+    {
+        name: 'Netflix Recommendations',
+        name_de: 'Netflix-Empfehlungen',
+        context: 'It suggested something you never searched for. You watched it for three hours.',
+        context_de: 'Es hat etwas vorgeschlagen, nach dem du nie gesucht hast. Du hast es drei Stunden lang geschaut.',
+        verdict: 'ai',
+        label: 'AI',
+        label_de: 'KI',
+        text: 'Collaborative filtering trained on millions of viewing patterns. When it recommends something you did not ask for and you watch it, that is the system doing exactly what it was optimized to do.',
+        text_de: 'Kollaboratives Filtern, trainiert auf Millionen Sehmustern. Es empfiehlt dir etwas, wonach du nie gefragt hast. Du schaust es trotzdem. Genau dafür wurde das System optimiert.'
+    },
+    {
+        name: 'Shazam',
+        name_de: 'Shazam',
+        context: 'You hold your phone up in a loud bar. It names the song in four seconds.',
+        context_de: 'Du hältst dein Handy in einer lauten Bar hoch. Es nennt den Song in vier Sekunden.',
+        verdict: 'ai',
+        label: 'AI',
+        label_de: 'KI',
+        text: 'It does not compare the raw audio to a stored recording. It extracts spectral fingerprints and matches them against a database built from machine learning. Works with noise, distortion, and a cheap microphone.',
+        text_de: 'Es vergleicht das Rohaudio nicht mit einer gespeicherten Aufnahme. Es extrahiert spektrale Fingerabdrücke. Diese gleicht es mit einer Datenbank ab, die aus maschinellem Lernen stammt. Funktioniert mit Lärm, Verzerrung und einem billigen Mikrofon.'
+    },
+    {
+        name: 'Excel Sort',
+        name_de: 'Excel-Sortierung',
+        context: 'You select a column, click Sort A→Z, and the rows rearrange.',
+        context_de: 'Du wählst eine Spalte aus, klickst auf Sortieren A→Z, und die Zeilen ordnen sich neu.',
+        verdict: 'not',
+        label: 'Not AI',
+        label_de: 'Keine KI',
+        text: 'A deterministic sorting algorithm. Same column, same result, every time. No training, no model, no inference. Very fast and completely uninteresting from a machine learning standpoint.',
+        text_de: 'Ein deterministischer Sortieralgorithmus. Gleiche Spalte, gleiches Ergebnis, jedes Mal. Kein Training, kein Modell, keine Inferenz. Sehr schnell, und für das maschinelle Lernen völlig uninteressant.'
+    },
+    {
+        name: 'Fraud Detection',
+        name_de: 'Betrugserkennung',
+        context: 'Your card gets declined in a city you have never visited. You did not call the bank.',
+        context_de: 'Deine Karte wird in einer Stadt abgelehnt, in der du noch nie warst. Du hast die Bank nicht angerufen.',
+        verdict: 'ai',
+        label: 'AI',
+        label_de: 'KI',
+        text: 'Pattern recognition trained on millions of transactions. It learned what your spending looks like. When something deviates, it flags it. The rules were not written by a human. They were inferred from data.',
+        text_de: 'Mustererkennung, trainiert auf Millionen Transaktionen. Sie hat gelernt, wie deine Ausgaben aussehen. Weicht etwas ab, schlägt sie Alarm. Kein Mensch hat diese Regeln geschrieben. Sie wurden aus Daten abgeleitet.'
+    },
+    {
+        name: 'Weather Forecast',
+        name_de: 'Wettervorhersage',
+        context: 'The app says 73% chance of rain at 4 pm. Not "it might rain." A percentage.',
+        context_de: 'Die App sagt 73\u00A0% Regenwahrscheinlichkeit um 16 Uhr. Nicht „es könnte regnen“. Ein Prozentwert.',
+        verdict: 'depends',
+        label: 'It depends',
+        label_de: 'Kommt drauf an',
+        text: 'The underlying physics model is classical: differential equations, decades old. The probability estimate and local fine-tuning are machine learning trained on historical forecast errors. A 73% figure is not a rule. It is a learned calibration.',
+        text_de: 'Das Physikmodell dahinter ist klassisch: Differentialgleichungen, jahrzehntealt. Die Wahrscheinlichkeit und die lokale Feinabstimmung kommen aus maschinellem Lernen. Trainiert wurde es auf historischen Vorhersagefehlern. Eine Angabe von 73\u00A0% ist keine Regel. Sie ist eine gelernte Kalibrierung.'
+    }
+];
+
+const verdictClass = { ai: 'verdict-ai', not: 'verdict-not', depends: 'verdict-depends' };
+const voteClass    = { ai: 'voted-ai',   not: 'voted-not',   depends: 'voted-depends' };
+
+let idx       = 0;
+let userVotes = new Array(items.length).fill(null);
+
+function render() {
+    const item     = items[idx];
+    const hasVoted = userVotes[idx] !== null;
+
+    const de = currentLang === 'de';
+
+    document.getElementById('item-number').textContent  = (idx + 1) + ' / ' + items.length;
+    document.getElementById('item-name').textContent    = de ? item.name_de    : item.name;
+    document.getElementById('item-context').textContent = de ? item.context_de : item.context;
+
+    // Verdict badge
+    const badge = document.getElementById('verdict-badge');
+    badge.textContent = de ? item.label_de : item.label;
+    badge.className   = 'verdict ' + verdictClass[item.verdict];
+    document.getElementById('reveal-text').textContent = de ? item.text_de : item.text;
+
+    // Result indicator
+    const resultEl = document.getElementById('result-indicator');
+    if (hasVoted) {
+        const correct = userVotes[idx] === item.verdict;
+        resultEl.textContent = correct
+            ? (currentLang === 'de' ? '✓ richtig' : '✓ correct')
+            : (currentLang === 'de' ? '✗ daneben' : '✗ not quite');
+        resultEl.className = 'result-indicator ' + (correct ? 'result-correct' : 'result-wrong');
+    } else {
+        resultEl.textContent = '';
+        resultEl.className   = 'result-indicator';
+    }
+
+    // Reveal area
+    document.getElementById('reveal-area').style.display = hasVoted ? 'block' : 'none';
+
+    // Vote buttons
+    const btnYes     = document.getElementById('btn-yes');
+    const btnDepends = document.getElementById('btn-depends');
+    const btnNo      = document.getElementById('btn-no');
+
+    [btnYes, btnDepends, btnNo].forEach(btn => {
+        btn.disabled = hasVoted;
+        btn.classList.remove('voted-ai', 'voted-not', 'voted-depends');
+    });
+
+    if (hasVoted) {
+        const chosenBtn = { ai: btnYes, not: btnNo, depends: btnDepends }[userVotes[idx]];
+        chosenBtn.classList.add(voteClass[userVotes[idx]]);
+    }
+
+    // Navigation
+    document.getElementById('btn-prev').disabled = (idx === 0);
+
+    const isLast  = idx === items.length - 1;
+    const btnNext = document.getElementById('btn-next');
+    if (isLast && hasVoted) {
+        btnNext.textContent = currentLang === 'de' ? 'Fertig' : 'Done';
+        btnNext.onclick     = finish;
+        btnNext.disabled    = false;
+    } else {
+        btnNext.textContent = currentLang === 'de' ? 'weiter →' : 'next →';
+        btnNext.onclick     = () => navigate(1);
+        btnNext.disabled    = !hasVoted;
+    }
+
+    // Progress dots: ● current  ◆ voted  · not yet
+    const dots = document.getElementById('progress-dots');
+    dots.textContent = items.map((_, i) => {
+        if (i === idx) return '●';
+        return userVotes[i] !== null ? '◆' : '·';
+    }).join(' ');
+}
+
+function vote(choice) {
+    if (userVotes[idx] !== null) return;
+    userVotes[idx] = choice;
+    render();
+}
+
+function navigate(dir) {
+    idx += dir;
+    render();
+}
+
+function calcScore() {
+    return items.reduce((score, item, i) => score + (userVotes[i] === item.verdict ? 1 : 0), 0);
+}
+
+function renderDone() {
+    const score = calcScore();
+    const isTop = score >= 10;
+    const done  = document.getElementById('done-screen');
+
+    document.getElementById('score-num').textContent = score;
+
+    const imgSrc = isTop ? 'images/best.jpg' : 'images/default.jpg';
+    document.getElementById('badge-img').src = imgSrc;
+    if (isTop) {
+        done.className = 'done-screen theme-gits';
+
+        document.getElementById('done-title').textContent = currentLang === 'de'
+            ? 'Du siehst den Geist in der Maschine.'
+            : 'You see the ghost in the machine.';
+
+        document.getElementById('done-sub').textContent = currentLang === 'de'
+            ? score + ' von 12. Die meisten sehen nur die Oberfläche. Du siehst, was darunter läuft. Das ist selten.'
+            : score + ' out of 12. Most people see the interface. You see what runs underneath. That is rare.';
+
+        document.getElementById('movie-links').innerHTML =
+            '<p class="movie-links-label">' +
+            (currentLang === 'de' ? 'Du bist bereit dafür:' : 'You are ready for:') +
+            '</p>' +
+            '<a href="https://www.imdb.com/title/tt0113568/" target="_blank">Ghost in the Shell (1995)</a>' +
+            ' &nbsp;·&nbsp; ' +
+            '<a href="https://www.imdb.com/title/tt0346314/" target="_blank">Stand Alone Complex</a>' +
+            ' &nbsp;·&nbsp; ' +
+            '<a href="https://www.imdb.com/title/tt1219827/" target="_blank">Ghost in the Shell (2017)</a>';
+
+    } else {
+        done.className = 'done-screen theme-bladerunner';
+
+        document.getElementById('done-title').textContent = currentLang === 'de'
+            ? 'Selbst Deckard war sich nicht immer sicher.'
+            : "Even Deckard wasn't always sure.";
+
+        document.getElementById('done-sub').textContent = currentLang === 'de'
+            ? score + ' von 12. Die Grenze zwischen Maschine und Geist ist unschärfer, als sie aussieht. Das ist der Punkt.'
+            : score + ' out of 12. The line between machine and mind is blurrier than it looks. That is the point.';
+
+        document.getElementById('movie-links').innerHTML =
+            '<p class="movie-links-label">' +
+            (currentLang === 'de' ? 'Pflichtprogramm:' : 'Required viewing:') +
+            '</p>' +
+            '<a href="https://www.imdb.com/title/tt0083658/" target="_blank">Blade Runner (1982)</a>' +
+            ' &nbsp;·&nbsp; ' +
+            '<a href="https://www.imdb.com/title/tt1856101/" target="_blank">Blade Runner 2049 (2017)</a>';
+    }
+}
+
+function finish() {
+    document.getElementById('item-card').style.display  = 'none';
+    document.getElementById('done-screen').style.display = 'block';
+    renderDone();
+}
+
+function restart() {
+    idx       = 0;
+    userVotes = new Array(items.length).fill(null);
+    document.getElementById('item-card').style.display  = 'block';
+    document.getElementById('done-screen').style.display = 'none';
+    render();
+}
+
+// ─── Language toggle ─────────────────────────────────────────────────────────
+const T = {
+    en: {
+        'hero.title':       'Is This AI?',
+        'hero.sub':         'Vote first. Then find out.',
+        'vote.yes':         'Yes, AI',
+        'vote.depends':     'It Depends',
+        'vote.no':          'Not AI',
+        'nav.prev':         '← prev',
+        'nav.next':         'next →',
+        'done.score_label': '/ 12 correct',
+        'done.restart':     'Start over',
+    },
+    de: {
+        'hero.title':       'Ist das KI?',
+        'hero.sub':         'Erst abstimmen. Dann nachschauen.',
+        'vote.yes':         'Ja, KI',
+        'vote.depends':     'Kommt drauf an',
+        'vote.no':          'Keine KI',
+        'nav.prev':         '← zurück',
+        'nav.next':         'weiter →',
+        'done.score_label': '/ 12 richtig',
+        'done.restart':     'Nochmal',
+    }
+};
+
+let currentLang = 'en';
+
+function toggleLang() {
+    currentLang = currentLang === 'en' ? 'de' : 'en';
+    document.documentElement.lang = currentLang;
+    document.querySelector('.lang-toggle').textContent = currentLang === 'en' ? 'DE' : 'EN';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (T[currentLang] && T[currentLang][key]) el.textContent = T[currentLang][key];
+    });
+    const doneVisible = document.getElementById('done-screen').style.display === 'block';
+    if (doneVisible) {
+        renderDone();
+    } else {
+        render();
+    }
+}
+
+// Init
+render();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pilzwanderung, The Four Mistakes</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #141420;
+      color: #e8e8f0;
+      font-family: Georgia, 'Times New Roman', serif;
+      line-height: 1.8;
+      font-size: 18px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .lang-toggle {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      background: #2a2a44;
+      border: 1px solid #4a4a70;
+      border-radius: 20px;
+      padding: 6px 14px;
+      cursor: pointer;
+      font-size: 13px;
+      font-family: sans-serif;
+      color: #a0a0d0;
+      z-index: 100;
+      transition: background 0.2s;
+    }
+    .lang-toggle:hover { background: #363658; }
+
+    .hero {
+      text-align: center;
+      padding: 80px 24px 50px;
+    }
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 28px;
+    }
+    .tag {
+      background: #1c1c2e;
+      color: #8888b0;
+      border: 1px solid #2a2a40;
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 12px;
+      font-family: sans-serif;
+      letter-spacing: 0.3px;
+    }
+    .hero h1 {
+      font-size: 42px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.3;
+      max-width: 720px;
+      margin: 0 auto 24px;
+    }
+    .hero-sub {
+      color: #a0a0c0;
+      font-style: italic;
+      font-size: 20px;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    section {
+      padding: 50px 0;
+      border-top: 1px solid #1e1e30;
+    }
+    h2 {
+      font-size: 30px;
+      color: #fff;
+      margin-bottom: 24px;
+      line-height: 1.3;
+    }
+    h3 {
+      font-size: 20px;
+      color: #ddd;
+      margin: 36px 0 14px;
+      font-weight: 600;
+    }
+    p {
+      margin-bottom: 20px;
+      color: #ccc;
+    }
+    a { color: #80b4f0; text-decoration: none; }
+    a:hover { color: #a0c8ff; }
+    em { color: #e8e8f0; font-style: italic; }
+    code {
+      font-family: 'Courier New', monospace;
+      font-size: 0.95em;
+      background: #1c1c2e;
+      padding: 2px 6px;
+      border-radius: 3px;
+      color: #d0d0e8;
+    }
+
+    blockquote {
+      border-left: 3px solid #4a4a70;
+      padding: 6px 22px;
+      margin: 30px 0;
+      color: #b0b0c8;
+      font-style: italic;
+      font-size: 18px;
+    }
+    blockquote .attrib {
+      display: block;
+      margin-top: 10px;
+      font-style: normal;
+      font-size: 14px;
+      color: #888;
+      font-family: sans-serif;
+    }
+
+    /* Static confusion matrix */
+    .confmat {
+      display: grid;
+      grid-template-columns: 110px 1fr 1fr;
+      grid-template-rows: 40px 1fr 1fr;
+      gap: 0;
+      margin: 32px 0 24px;
+      font-family: sans-serif;
+      font-size: 14px;
+    }
+    .cm-corner { background: transparent; }
+    .cm-toplabel {
+      grid-column: 2 / 4;
+      grid-row: 1;
+      text-align: center;
+      padding: 10px;
+      color: #8888b0;
+      font-size: 12px;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      align-self: center;
+    }
+    .cm-sidelabel {
+      grid-column: 1;
+      grid-row: 2 / 4;
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      text-align: center;
+      color: #8888b0;
+      font-size: 12px;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      align-self: center;
+      justify-self: center;
+    }
+    .cm-cell {
+      padding: 18px 16px;
+      border: 1px solid #2a2a40;
+      background: #181826;
+      color: #ccc;
+    }
+    .cm-cell .cm-name {
+      font-weight: bold;
+      margin-bottom: 6px;
+      color: #fff;
+      font-size: 15px;
+    }
+    .cm-cell .cm-desc {
+      font-size: 13px;
+      color: #999;
+      line-height: 1.55;
+    }
+    .cm-cell.tp { background: rgba(110, 196, 110, 0.10); border-color: rgba(110, 196, 110, 0.35); }
+    .cm-cell.fp { background: rgba(232, 69, 69, 0.13); border-color: rgba(232, 69, 69, 0.40); }
+    .cm-cell.fn { background: rgba(240, 180, 60, 0.10); border-color: rgba(240, 180, 60, 0.35); }
+    .cm-cell.tn { background: rgba(140, 140, 160, 0.08); border-color: rgba(140, 140, 160, 0.28); }
+
+    /* Static metric cards */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 28px 0;
+    }
+    @media (max-width: 640px) {
+      .metrics-grid { grid-template-columns: 1fr; }
+    }
+    .metric-card {
+      background: #1c1c2e;
+      border: 1px solid #2a2a40;
+      border-radius: 8px;
+      padding: 22px;
+    }
+    .metric-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+    .metric-card h4 {
+      color: #fff;
+      font-size: 18px;
+      margin: 0;
+      font-family: sans-serif;
+    }
+    .mini-matrix {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 2px;
+      width: 56px;
+      height: 56px;
+      flex-shrink: 0;
+    }
+    .mc {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 3px;
+      font-family: sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+    .mc-gray  { background: #232336; color: #555; border: 1px solid #2a2a40; }
+    .mc-muted { background: #161622; color: #3a3a4a; border: 1px dashed #2a2a40; }
+    .mc-green {
+      background: rgba(110, 196, 110, 0.22);
+      color: #8ed68e;
+      border: 1px solid rgba(110, 196, 110, 0.55);
+    }
+    .mc-red {
+      background: rgba(232, 69, 69, 0.22);
+      color: #ef6060;
+      border: 1px solid rgba(232, 69, 69, 0.55);
+    }
+    .formula-frac {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      background: #0f0f1a;
+      padding: 8px 14px;
+      border-radius: 6px;
+      margin-bottom: 14px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      line-height: 1.25;
+      min-width: 130px;
+    }
+    .formula-frac .num { color: #8ed68e; font-weight: 600; }
+    .formula-frac .den { color: #ef6060; font-weight: 600; }
+    .formula-frac .bar {
+      width: 100%;
+      height: 1px;
+      background: #888;
+      margin: 4px 0;
+    }
+    .metric-card .desc {
+      font-size: 15px;
+      color: #b0b0c8;
+      line-height: 1.7;
+    }
+
+    /* Game container */
+    .game {
+      background: #181826;
+      border: 1px solid #2a2a40;
+      border-radius: 12px;
+      padding: 28px;
+      margin: 32px 0;
+    }
+    .canvas-wrap {
+      position: relative;
+      width: 100%;
+      background: #0d0d18;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    .axis-label {
+      text-align: center;
+      font-size: 13px;
+      color: #888;
+      margin-top: 14px;
+      font-family: sans-serif;
+      letter-spacing: 0.3px;
+    }
+
+    .threshold-control {
+      margin: 28px 0 16px;
+    }
+    .threshold-control .label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 10px;
+      font-family: sans-serif;
+    }
+    .threshold-control .label-row .name {
+      font-size: 14px;
+      color: #b0b0c8;
+    }
+    .threshold-control .label-row .val {
+      font-family: 'Courier New', monospace;
+      color: #80b4f0;
+      font-size: 16px;
+      font-weight: bold;
+    }
+    .threshold-slider {
+      width: 100%;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 6px;
+      background: #2a2a40;
+      border-radius: 3px;
+      outline: none;
+    }
+    .threshold-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      background: #80b4f0;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+    }
+    .threshold-slider::-moz-range-thumb {
+      width: 22px;
+      height: 22px;
+      background: #80b4f0;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+    }
+    .threshold-ticks {
+      display: flex;
+      justify-content: space-between;
+      font-family: sans-serif;
+      font-size: 11px;
+      color: #666;
+      margin-top: 6px;
+    }
+
+    .game-controls {
+      display: flex;
+      gap: 10px;
+      margin: 20px 0 10px;
+      flex-wrap: wrap;
+    }
+    .game-btn {
+      background: #2a2a44;
+      border: 1px solid #4a4a70;
+      color: #d0d0e8;
+      padding: 9px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: sans-serif;
+      font-size: 13px;
+      transition: background 0.2s;
+    }
+    .game-btn:hover { background: #363658; }
+
+    /* Status banner */
+    .status-banner {
+      padding: 14px 16px;
+      border-radius: 8px;
+      text-align: center;
+      font-family: sans-serif;
+      font-size: 15px;
+      margin: 22px 0 6px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+    .status-banner.alive {
+      background: rgba(110, 196, 110, 0.12);
+      border: 1px solid rgba(110, 196, 110, 0.4);
+      color: #6ec46e;
+    }
+    .status-banner.dead {
+      background: rgba(232, 69, 69, 0.20);
+      border: 1px solid rgba(232, 69, 69, 0.5);
+      color: #ef6060;
+    }
+    .status-banner.idle {
+      background: rgba(140, 140, 160, 0.08);
+      border: 1px solid rgba(140, 140, 160, 0.25);
+      color: #999;
+    }
+
+    /* Live confusion 4 cells */
+    .live-confmat {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 24px 0 16px;
+    }
+    .live-cell {
+      padding: 14px;
+      border-radius: 6px;
+      text-align: center;
+      font-family: sans-serif;
+      border: 1px solid;
+    }
+    .live-cell .lbl {
+      font-size: 11px;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      opacity: 0.85;
+    }
+    .live-cell .sub {
+      font-size: 12px;
+      opacity: 0.7;
+      margin-bottom: 8px;
+    }
+    .live-cell .cnt {
+      font-size: 30px;
+      font-weight: bold;
+      font-family: 'Courier New', monospace;
+    }
+    .live-cell.tp { background: rgba(110, 196, 110, 0.13); border-color: rgba(110, 196, 110, 0.40); color: #8ed68e; }
+    .live-cell.fp { background: rgba(232, 69, 69, 0.20); border-color: rgba(232, 69, 69, 0.55); color: #ef6060; }
+    .live-cell.fn { background: rgba(240, 180, 60, 0.13); border-color: rgba(240, 180, 60, 0.40); color: #f0b43c; }
+    .live-cell.tn { background: rgba(140, 140, 160, 0.08); border-color: rgba(140, 140, 160, 0.30); color: #b0b0c0; }
+
+    /* Live metrics */
+    .live-metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin: 14px 0 4px;
+    }
+    @media (max-width: 600px) {
+      .live-metrics { grid-template-columns: 1fr 1fr; }
+    }
+    .metric-pill {
+      background: #1c1c2e;
+      border: 1px solid #2a2a40;
+      border-radius: 6px;
+      padding: 12px 8px;
+      text-align: center;
+      font-family: sans-serif;
+    }
+    .metric-pill .nm {
+      font-size: 11px;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 4px;
+    }
+    .metric-pill .v {
+      font-size: 22px;
+      font-weight: bold;
+      color: #fff;
+      font-family: 'Courier New', monospace;
+    }
+
+    .hint-box {
+      background: #14141f;
+      border-left: 3px solid #80b4f0;
+      padding: 14px 18px;
+      margin: 20px 0;
+      font-size: 14px;
+      color: #aab;
+      font-style: italic;
+    }
+
+    /* Paradox section */
+    .paradox-box {
+      background: #181826;
+      border: 1px solid #2a2a40;
+      border-radius: 12px;
+      padding: 26px;
+      margin: 28px 0;
+    }
+    .paradox-grid {
+      display: grid;
+      grid-template-columns: repeat(20, 1fr);
+      gap: 4px;
+      margin: 16px 0 20px;
+      max-width: 520px;
+    }
+    .pmush {
+      aspect-ratio: 1;
+      border-radius: 50% 50% 25% 25% / 65% 65% 35% 35%;
+      position: relative;
+    }
+    .pmush.edible {
+      background: #6b4824;
+      box-shadow: inset 0 -2px 0 #3d2912;
+    }
+    .pmush.poison {
+      background: #cc3030;
+      box-shadow: inset 0 -2px 0 #831c1c;
+    }
+    .pmush.poison::before, .pmush.poison::after {
+      content: '';
+      position: absolute;
+      width: 22%;
+      height: 22%;
+      background: #ffffff;
+      border-radius: 50%;
+      top: 18%;
+    }
+    .pmush.poison::before { left: 20%; }
+    .pmush.poison::after { right: 20%; }
+    .paradox-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 18px;
+      font-family: sans-serif;
+      font-size: 14px;
+    }
+    .paradox-stat {
+      background: #0f0f1a;
+      border: 1px solid #2a2a40;
+      border-radius: 6px;
+      padding: 10px 14px;
+    }
+    .paradox-stat .k { color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .paradox-stat .v { color: #fff; font-family: 'Courier New', monospace; font-size: 18px; margin-top: 2px; }
+    .paradox-stat.bad .v { color: #ef6060; }
+    .paradox-caption {
+      font-size: 14px;
+      color: #888;
+      font-style: italic;
+      margin-top: 16px;
+      font-family: sans-serif;
+      line-height: 1.6;
+    }
+
+    /* Footer */
+    .site-footer {
+      margin-top: 100px;
+      padding-top: 32px;
+      border-top: 1px solid #1e1e30;
+      text-align: center;
+      font-size: 13px;
+      color: #666;
+      font-family: sans-serif;
+      letter-spacing: 0.3px;
+    }
+    .site-footer a { color: #888; }
+    .site-footer a:hover { color: #ccc; }
+    .site-footer .dot { margin: 0 8px; color: #444; }
+
+    /* Closing thesis */
+    .closing-thesis {
+      font-size: 30px;
+      line-height: 1.45;
+      color: #fff;
+      font-style: italic;
+      text-align: center;
+      margin: 50px auto 10px;
+      max-width: 700px;
+      padding: 28px 16px;
+      font-family: Georgia, 'Times New Roman', serif;
+      letter-spacing: 0.2px;
+    }
+    .closing-thesis::before,
+    .closing-thesis::after {
+      content: '';
+      display: block;
+      width: 56px;
+      height: 1px;
+      background: #4a4a70;
+      margin: 0 auto;
+    }
+    .closing-thesis::before { margin-bottom: 28px; }
+    .closing-thesis::after  { margin-top: 28px; }
+
+    @media (max-width: 600px) {
+      .closing-thesis { font-size: 24px; padding: 20px 8px; }
+    }
+
+    @media (max-width: 600px) {
+      body { font-size: 17px; }
+      .hero h1 { font-size: 34px; }
+      .hero-sub { font-size: 18px; }
+      h2 { font-size: 26px; }
+      .confmat { grid-template-columns: 80px 1fr 1fr; }
+      .container { padding: 0 18px 60px; }
+    }
+  </style>
+</head>
+<body>
+  <button class="lang-toggle" onclick="toggleLang()">DE</button>
+
+  <div class="container">
+
+    <section class="hero">
+      <div class="tags">
+        <span class="tag">mini-module</span>
+        <span class="tag">~25 min</span>
+        <span class="tag">no-code</span>
+        <span class="tag">try-without-ai</span>
+        <span class="tag">classification</span>
+        <span class="tag">evaluation</span>
+      </div>
+      <h1 data-i18n="hero.title">Pilzwanderung, The Four Mistakes</h1>
+      <p class="hero-sub" data-i18n="hero.sub">Precision, recall, accuracy, F1. Four numbers arguing about the same basket of mushrooms.</p>
+    </section>
+
+    <section>
+      <blockquote>
+        <span data-i18n="quote.text">There are old mushroom hunters, and there are bold mushroom hunters, but there are no old, bold mushroom hunters.</span>
+        <span class="attrib" data-i18n="quote.attr">old saying</span>
+      </blockquote>
+
+      <p data-i18n="intro.p1">Every mushroom in the forest is either food or poison. The forager does not know which is which until they look closer, and even then they can be wrong. The question is not whether the model makes mistakes. It will. The question is which mistakes you are willing to pay for.</p>
+
+      <p data-i18n="intro.p2">Each mushroom carries one of two true labels: edible or poisonous. Your model makes one of two decisions: pick or leave. Two labels times two decisions gives four cells. Almost every classification metric is some way of reading those four numbers.</p>
+
+      <h3 data-i18n="confmat.h">The four cells</h3>
+
+      <div class="confmat">
+        <div class="cm-corner"></div>
+        <div class="cm-toplabel" data-i18n="confmat.truthtitle">Truth in the forest</div>
+        <div class="cm-sidelabel" data-i18n="confmat.predtitle">Your decision</div>
+
+        <div class="cm-cell tp">
+          <div class="cm-name" data-i18n="confmat.tp.name">True positive (TP)</div>
+          <div class="cm-desc" data-i18n="confmat.tp.desc">Edible, picked. Dinner.</div>
+        </div>
+        <div class="cm-cell fp">
+          <div class="cm-name" data-i18n="confmat.fp.name">False positive (FP)</div>
+          <div class="cm-desc" data-i18n="confmat.fp.desc">Poisonous, picked. Funeral.</div>
+        </div>
+        <div class="cm-cell fn">
+          <div class="cm-name" data-i18n="confmat.fn.name">False negative (FN)</div>
+          <div class="cm-desc" data-i18n="confmat.fn.desc">Edible, left behind. Hunger.</div>
+        </div>
+        <div class="cm-cell tn">
+          <div class="cm-name" data-i18n="confmat.tn.name">True negative (TN)</div>
+          <div class="cm-desc" data-i18n="confmat.tn.desc">Poisonous, left behind.</div>
+        </div>
+      </div>
+
+      <p data-i18n="intro.p3">Two of these are right. Two are wrong. The two wrong ones have wildly different costs and implications. That gap is where the metrics live.</p>
+    </section>
+
+    <section>
+      <h2 data-i18n="metrics.h">The four metrics</h2>
+      <p data-i18n="metrics.intro">Each metric compresses those four counts into a single number. Each one answers a different question. Each one is wrong by itself.</p>
+
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-head">
+            <h4 data-i18n="m.precision.name">Precision</h4>
+            <div class="mini-matrix" aria-hidden="true">
+              <span class="mc mc-green">TP</span>
+              <span class="mc mc-red">FP</span>
+              <span class="mc mc-gray">FN</span>
+              <span class="mc mc-gray">TN</span>
+            </div>
+          </div>
+          <div class="formula-frac">
+            <span class="num">TP</span>
+            <span class="bar"></span>
+            <span class="den">TP + FP</span>
+          </div>
+          <div class="desc" data-i18n="m.precision.desc">Of the mushrooms in your basket, how many are actually safe to eat. If precision is one hundred percent, nothing in the basket will kill you. At fifty percent, your dinner is a deadly coin toss.</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-head">
+            <h4 data-i18n="m.recall.name">Recall</h4>
+            <div class="mini-matrix" aria-hidden="true">
+              <span class="mc mc-green">TP</span>
+              <span class="mc mc-gray">FP</span>
+              <span class="mc mc-red">FN</span>
+              <span class="mc mc-gray">TN</span>
+            </div>
+          </div>
+          <div class="formula-frac">
+            <span class="num">TP</span>
+            <span class="bar"></span>
+            <span class="den">TP + FN</span>
+          </div>
+          <div class="desc" data-i18n="m.recall.desc">Of all the edible mushrooms in the forest, how many you brought home. Low recall means you walked past a lot of edible mushrooms.</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-head">
+            <h4 data-i18n="m.accuracy.name">Accuracy</h4>
+            <div class="mini-matrix" aria-hidden="true">
+              <span class="mc mc-green">TP</span>
+              <span class="mc mc-red">FP</span>
+              <span class="mc mc-red">FN</span>
+              <span class="mc mc-green">TN</span>
+            </div>
+          </div>
+          <div class="formula-frac">
+            <span class="num">TP + TN</span>
+            <span class="bar"></span>
+            <span class="den">TP + TN + FP + FN</span>
+          </div>
+          <div class="desc" data-i18n="m.accuracy.desc">Of all the mushrooms in the forest, in how many you made the right call. Accuracy treats every decision the same. It does not care whether you missed a dinner or ate a death cap.</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-head">
+            <h4 data-i18n="m.f1.name">F1</h4>
+            <div class="mini-matrix" aria-hidden="true">
+              <span class="mc mc-green">TP</span>
+              <span class="mc mc-red">FP</span>
+              <span class="mc mc-red">FN</span>
+              <span class="mc mc-muted">TN</span>
+            </div>
+          </div>
+          <div class="formula-frac">
+            <span class="num">2 · TP</span>
+            <span class="bar"></span>
+            <span class="den">2 · TP + FP + FN</span>
+          </div>
+          <div class="desc" data-i18n="m.f1.desc">The truce between precision and recall. Their harmonic mean, which is a polite way of saying it punishes you for being terrible at either one. A model has to do reasonably well on both, or F1 collapses. F1 ignores TN entirely. The correct skip does not count toward this metric.</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2 data-i18n="game.h">Pilzwanderung, the game</h2>
+      <p data-i18n="game.intro1">Sixty mushrooms grow in the clearing. Thirty are edible, thirty are poisonous. A model has looked at each one and given it a number between zero and one: how confident it is that the mushroom is edible. The two distributions overlap, because nothing in the forest is ever quite that clean.</p>
+      <p data-i18n="game.intro2">Your job is the threshold. Pick a number. Every mushroom whose score sits above that line goes into the basket. Drag the slider. Watch the four numbers fight.</p>
+
+      <div class="game">
+        <div class="canvas-wrap">
+          <canvas id="forest" width="760" height="320"></canvas>
+        </div>
+        <div class="axis-label" data-i18n="game.axis">Model confidence: how edible the model thinks it is</div>
+
+        <div class="threshold-control">
+          <div class="label-row">
+            <span class="name" data-i18n="game.threshold">Threshold</span>
+            <span class="val" id="thresholdVal">0.50</span>
+          </div>
+          <input type="range" min="0" max="100" value="50" class="threshold-slider" id="thresholdSlider">
+          <div class="threshold-ticks">
+            <span>0.0</span><span>0.5</span><span>1.0</span>
+          </div>
+        </div>
+
+        <div class="game-controls">
+          <button class="game-btn" onclick="setPreset('paranoid')" data-i18n="game.paranoid">Paranoid forager</button>
+          <button class="game-btn" onclick="setPreset('hungry')" data-i18n="game.hungry">Hungry forager</button>
+          <button class="game-btn" onclick="resampleForest()" data-i18n="game.resample">New forest</button>
+        </div>
+
+        <div class="live-confmat">
+          <div class="live-cell tp">
+            <div class="lbl" data-i18n="game.tp_lbl">TP</div>
+            <div class="sub" data-i18n="game.tp">Edible &amp; picked</div>
+            <div class="cnt" id="cntTP">0</div>
+          </div>
+          <div class="live-cell fp">
+            <div class="lbl" data-i18n="game.fp_lbl">FP</div>
+            <div class="sub" data-i18n="game.fp">Poisonous &amp; picked</div>
+            <div class="cnt" id="cntFP">0</div>
+          </div>
+          <div class="live-cell fn">
+            <div class="lbl" data-i18n="game.fn_lbl">FN</div>
+            <div class="sub" data-i18n="game.fn">Edible &amp; left behind</div>
+            <div class="cnt" id="cntFN">0</div>
+          </div>
+          <div class="live-cell tn">
+            <div class="lbl" data-i18n="game.tn_lbl">TN</div>
+            <div class="sub" data-i18n="game.tn">Poisonous &amp; left behind</div>
+            <div class="cnt" id="cntTN">0</div>
+          </div>
+        </div>
+
+        <div class="live-metrics">
+          <div class="metric-pill">
+            <div class="nm" data-i18n="game.precision">Precision</div>
+            <div class="v" id="valP">, </div>
+          </div>
+          <div class="metric-pill">
+            <div class="nm" data-i18n="game.recall">Recall</div>
+            <div class="v" id="valR">, </div>
+          </div>
+          <div class="metric-pill">
+            <div class="nm" data-i18n="game.accuracy">Accuracy</div>
+            <div class="v" id="valA">, </div>
+          </div>
+          <div class="metric-pill">
+            <div class="nm" data-i18n="game.f1">F1</div>
+            <div class="v" id="valF1">, </div>
+          </div>
+        </div>
+
+        <div class="status-banner idle" id="statusBanner" data-i18n="game.idle">Move the slider. The forest is waiting.</div>
+      </div>
+
+      <div class="hint-box" data-i18n="game.hint">Two failure modes to try. Push the slider all the way left. You pick everything. Perfect recall. You die. Push it all the way right. You pick nothing. Precision is undefined. Recall is zero. Hungry.</div>
+    </section>
+
+    <section>
+      <h2 data-i18n="paradox.h">Why accuracy lies</h2>
+      <p data-i18n="paradox.p1">Picture a different forest. Most of what grows there is edible. Ninety-nine mushrooms in a hundred are safe. One is a death cap. A model that says "pick everything" is right ninety-nine percent of the time. Ninety-nine percent accuracy. Standing ovation. The forager eats the basket and dies that evening, because the one poisonous mushroom was in there along with the ninety-nine good ones.</p>
+
+      <div class="paradox-box">
+        <div class="paradox-grid" id="paradoxGrid"></div>
+        <div class="paradox-stats">
+          <div class="paradox-stat">
+            <div class="k" data-i18n="paradox.k_acc">Accuracy</div>
+            <div class="v">99%</div>
+          </div>
+          <div class="paradox-stat">
+            <div class="k" data-i18n="paradox.k_prec">Precision</div>
+            <div class="v">99%</div>
+          </div>
+          <div class="paradox-stat">
+            <div class="k" data-i18n="paradox.k_rec">Recall</div>
+            <div class="v">100%</div>
+          </div>
+          <div class="paradox-stat bad">
+            <div class="k" data-i18n="paradox.k_status">Forager status</div>
+            <div class="v" data-i18n="paradox.dead">Dead</div>
+          </div>
+        </div>
+        <div class="paradox-caption" data-i18n="paradox.caption">One hundred mushrooms. Ninety-nine edible, one death cap. The model says "pick everything." The numbers look like a triumph. The forager does not see breakfast.</div>
+      </div>
+
+      <p data-i18n="paradox.p2">Accuracy averages over correct and incorrect decisions without asking what each one costs. When one class is rare, or when one kind of error is much worse than the other, accuracy rewards you for the wrong behaviour. Precision and recall split the question into pieces that can be weighted separately. F1 forces both to be reasonable at once.</p>
+    </section>
+
+    <section>
+      <h2 data-i18n="fbeta.h">F1 and the F-beta family</h2>
+      <p data-i18n="fbeta.p1">F1 weights precision and recall equally. Sometimes that is wrong. A mushroom forager fears poison more than hunger, so they care more about precision. A cancer screening test fears the missed tumour more than the false alarm, so it cares more about recall. The F-beta family lets you write down which side you worry about.</p>
+      <p data-i18n="fbeta.p2">F0.5 weights precision twice as much as recall. F2 weights recall twice as much as precision. The number changes. The argument does not. Beta is the dial that tells the metric how scared of poison you are.</p>
+    </section>
+
+    <section>
+      <h2 data-i18n="closing.h">And so</h2>
+      <p data-i18n="closing.p1">There is no single best threshold. There is no single best metric. There is a forest, a basket, and a forager who has to decide how often they are willing to be wrong, and in which direction.</p>
+      <p class="closing-thesis" data-i18n="closing.thesis">You estimate the costs of error and choose your target metrics accordingly.</p>
+    </section>
+
+    <footer class="site-footer">
+      <span data-i18n="footer.part">Part of</span>
+      <a href="../../">Passt</a>
+      <span class="dot">·</span>
+      <span data-i18n="footer.class">Class 06, Classification Fundamentals</span>
+      <br><br>
+      <a href="https://github.com/i-yam/passt/tree/main/modules/shrooms">github.com/i-yam/passt</a>
+    </footer>
+
+  </div>
+
+<script>
+  // ============================================================
+  // Translations
+  // ============================================================
+  const T = {
+    en: {
+      'hero.title': 'Pilzwanderung, The Four Mistakes',
+      'hero.sub': 'Precision, recall, accuracy, F1. Four numbers arguing about the same basket of mushrooms.',
+      'quote.text': '"There are old mushroom hunters, and there are bold mushroom hunters, but there are no old, bold mushroom hunters."',
+      'quote.attr': 'old saying',
+      'intro.p1': 'Every mushroom in the forest is either food or poison. The forager does not know which is which until they look closer, and even then they can be wrong. The question is not whether the model makes mistakes. It will. The question is which mistakes you are willing to pay for.',
+      'intro.p2': 'Each mushroom carries one of two true labels: edible or poisonous. Your model makes one of two decisions: pick or leave. Two labels times two decisions gives four cells. Almost every classification metric is some way of reading those four numbers.',
+      'intro.p3': 'Two of these are right. Two are wrong. The two wrong ones have wildly different costs and implications. That gap is where the metrics live.',
+      'confmat.h': 'The four cells',
+      'confmat.predtitle': 'Your decision',
+      'confmat.truthtitle': 'Truth in the forest',
+      'confmat.tp.name': 'True positive (TP)',
+      'confmat.tp.desc': 'Edible, picked. Dinner.',
+      'confmat.fp.name': 'False positive (FP)',
+      'confmat.fp.desc': 'Poisonous, picked. Funeral.',
+      'confmat.fn.name': 'False negative (FN)',
+      'confmat.fn.desc': 'Edible, left behind. Hunger.',
+      'confmat.tn.name': 'True negative (TN)',
+      'confmat.tn.desc': 'Poisonous, left behind.',
+      'metrics.h': 'The four metrics',
+      'metrics.intro': 'Each metric compresses those four counts into a single number. Each one answers a different question. Each one is wrong by itself.',
+      'm.precision.name': 'Precision',
+      'm.precision.formula': 'TP / (TP + FP)',
+      'm.precision.desc': 'Of the mushrooms in your basket, how many are actually safe to eat. If precision is one hundred percent, nothing in the basket will kill you. At fifty percent, your dinner is a deadly coin toss.',
+      'm.recall.name': 'Recall',
+      'm.recall.formula': 'TP / (TP + FN)',
+      'm.recall.desc': 'Of all the edible mushrooms in the forest, how many you brought home. Low recall means you walked past a lot of edible mushrooms.',
+      'm.accuracy.name': 'Accuracy',
+      'm.accuracy.formula': '(TP + TN) / total',
+      'm.accuracy.desc': 'Of all the mushrooms in the forest, in how many you made the right call. Accuracy treats every decision the same. It does not care whether you missed a dinner or ate a death cap.',
+      'm.f1.name': 'F1',
+      'm.f1.formula': '2 · P · R / (P + R)',
+      'm.f1.desc': 'The truce between precision and recall. Their harmonic mean, which is a polite way of saying it punishes you for being terrible at either one. A model has to do reasonably well on both, or F1 collapses. F1 ignores TN entirely. The correct skip does not count toward this metric.',
+      'game.h': 'Pilzwanderung, the game',
+      'game.intro1': 'Sixty mushrooms grow in the clearing. Thirty are edible, thirty are poisonous. A model has looked at each one and given it a number between zero and one: how confident it is that the mushroom is edible. The two distributions overlap, because nothing in the forest is ever quite that clean.',
+      'game.intro2': 'Your job is the threshold. Pick a number. Every mushroom whose score sits above that line goes into the basket. Drag the slider. Watch the four numbers fight.',
+      'game.axis': 'Model confidence: how edible the model thinks it is',
+      'game.threshold': 'Threshold',
+      'game.paranoid': 'Paranoid forager',
+      'game.hungry': 'Hungry forager',
+      'game.resample': 'New forest',
+      'game.tp_lbl': 'TP',
+      'game.fp_lbl': 'FP',
+      'game.fn_lbl': 'FN',
+      'game.tn_lbl': 'TN',
+      'game.tp': 'Edible & picked',
+      'game.fp': 'Poisonous & picked',
+      'game.fn': 'Edible & left behind',
+      'game.tn': 'Poisonous & left behind',
+      'game.precision': 'Precision',
+      'game.recall': 'Recall',
+      'game.accuracy': 'Accuracy',
+      'game.f1': 'F1',
+      'game.idle': 'Move the slider. The forest is waiting.',
+      'game.alive': 'You ate well and slept easy.',
+      'game.alive_partial': 'No poison in the basket. Some dinner is still in the forest.',
+      'game.dead': 'You ate poison. The forest has the last word.',
+      'game.hungry_status': 'Empty basket. Empty stomach.',
+      'game.hint': 'Two failure modes to try. Push the slider all the way left. You pick everything. Perfect recall. You die. Push it all the way right. You pick nothing. Precision is undefined. Recall is zero. Hungry.',
+      'paradox.h': 'Why accuracy lies',
+      'paradox.p1': 'Picture a different forest. Most of what grows there is edible. Ninety-nine mushrooms in a hundred are safe. One is a death cap. A model that says "pick everything" is right ninety-nine percent of the time. Ninety-nine percent accuracy. Standing ovation. The forager eats the basket and dies that evening, because the one poisonous mushroom was in there along with the ninety-nine good ones.',
+      'paradox.p2': 'Accuracy averages over correct and incorrect decisions without asking what each one costs. When one class is rare, or when one kind of error is much worse than the other, accuracy rewards you for the wrong behaviour. Precision and recall split the question into pieces that can be weighted separately. F1 forces both to be reasonable at once.',
+      'paradox.k_acc': 'Accuracy',
+      'paradox.k_prec': 'Precision',
+      'paradox.k_rec': 'Recall',
+      'paradox.k_status': 'Forager status',
+      'paradox.dead': 'Dead',
+      'paradox.caption': 'One hundred mushrooms. Ninety-nine edible, one death cap. The model says "pick everything." The numbers look like a triumph. The forager does not see breakfast.',
+      'fbeta.h': 'F1 and the F-beta family',
+      'fbeta.p1': 'F1 weights precision and recall equally. Sometimes that is wrong. A mushroom forager fears poison more than hunger, so they care more about precision. A cancer screening test fears the missed tumour more than the false alarm, so it cares more about recall. The F-beta family lets you write down which side you worry about.',
+      'fbeta.p2': 'F0.5 weights precision twice as much as recall. F2 weights recall twice as much as precision. The number changes. The argument does not. Beta is the dial that tells the metric how scared of poison you are.',
+      'closing.h': 'And so',
+      'closing.p1': 'There is no single best threshold. There is no single best metric. There is a forest, a basket, and a forager who has to decide how often they are willing to be wrong, and in which direction.',
+      'closing.thesis': 'You estimate the costs of error and choose your target metrics accordingly.',
+      'footer.part': 'Part of',
+      'footer.class': 'Class 06, Classification Fundamentals'
+    },
+    de: {
+      'hero.title': 'Pilzwanderung: Die vier Fehler',
+      'hero.sub': 'Präzision, Recall, Trefferquote, F1. Vier Zahlen, die sich über denselben Pilzkorb streiten.',
+      'quote.text': '„Es gibt alte Pilzsammler und es gibt mutige Pilzsammler, aber es gibt keine alten mutigen Pilzsammler.“',
+      'quote.attr': 'altes Sprichwort',
+      'intro.p1': 'Jeder Pilz im Wald ist entweder Nahrung oder Gift. Der Sammler sieht einem Pilz nicht an, was er ist. Er muss genauer hinsehen. Und selbst dann irrt er sich manchmal. Die Frage ist nicht, ob das Modell Fehler macht. Das wird es. Die Frage ist, für welche Fehler du zu zahlen bereit bist.',
+      'intro.p2': 'Jeder Pilz trägt eines von zwei wahren Etiketten: essbar oder giftig. Dein Modell trifft eine von zwei Entscheidungen: nehmen oder lassen. Zwei Etiketten mal zwei Entscheidungen ergeben vier Felder. Fast jede Klassifikationsmetrik ist eine Art, diese vier Zahlen zu lesen.',
+      'intro.p3': 'Zwei davon sind richtig. Zwei sind falsch. Die zwei falschen haben sehr unterschiedliche Kosten und Folgen. In dieser Lücke wohnen die Metriken.',
+      'confmat.h': 'Die vier Felder',
+      'confmat.predtitle': 'Deine Entscheidung',
+      'confmat.truthtitle': 'Wahrheit im Wald',
+      'confmat.tp.name': 'Richtig positiv (TP)',
+      'confmat.tp.desc': 'Essbar, genommen. Abendessen.',
+      'confmat.fp.name': 'Falsch positiv (FP)',
+      'confmat.fp.desc': 'Giftig, genommen. Beerdigung.',
+      'confmat.fn.name': 'Falsch negativ (FN)',
+      'confmat.fn.desc': 'Essbar, liegen gelassen. Hunger.',
+      'confmat.tn.name': 'Richtig negativ (TN)',
+      'confmat.tn.desc': 'Giftig, liegen gelassen.',
+      'metrics.h': 'Die vier Metriken',
+      'metrics.intro': 'Jede Metrik komprimiert diese vier Zahlen in eine einzige. Jede beantwortet eine andere Frage. Jede ist für sich allein falsch.',
+      'm.precision.name': 'Präzision',
+      'm.precision.formula': 'TP / (TP + FP)',
+      'm.precision.desc': 'Wie viele Pilze in deinem Korb sind tatsächlich essbar? Bei hundert Prozent Präzision bringt dich nichts im Korb um. Bei fünfzig Prozent ist dein Abendessen ein tödlicher Münzwurf.',
+      'm.recall.name': 'Recall',
+      'm.recall.formula': 'TP / (TP + FN)',
+      'm.recall.desc': 'Wie viele der essbaren Pilze im Wald hast du mit nach Hause genommen? Wir nennen diese Zahl hier durchgehend Recall. Ein niedriger Recall heißt: Du bist an vielen essbaren Pilzen vorbeigelaufen.',
+      'm.accuracy.name': 'Trefferquote',
+      'm.accuracy.formula': '(TP + TN) / Gesamt',
+      'm.accuracy.desc': 'Bei wie vielen Pilzen im Wald hast du richtig entschieden? Die Trefferquote behandelt jede Entscheidung gleich. Ihr ist egal, ob du ein Abendessen verpasst oder einen Knollenblätterpilz gegessen hast.',
+      'm.f1.name': 'F1',
+      'm.f1.formula': '2 · P · R / (P + R)',
+      'm.f1.desc': 'Der Waffenstillstand zwischen Präzision und Recall. F1 ist ihr harmonisches Mittel. Höflich gesagt: Es bestraft dich, sobald du in einem von beiden katastrophal bist. Ein Modell muss in beidem ordentlich abschneiden, sonst bricht F1 zusammen. F1 ignoriert TN völlig. Der richtige Verzicht zählt für diese Metrik nicht.',
+      'game.h': 'Pilzwanderung: das Spiel',
+      'game.intro1': 'Auf der Lichtung wachsen sechzig Pilze. Dreißig sind essbar, dreißig sind giftig. Ein Modell hat jeden angesehen. Jeder bekommt eine Zahl zwischen null und eins: wie sicher das Modell den Pilz für essbar hält. Die beiden Verteilungen überlappen sich. Im Wald ist nichts je ganz sauber.',
+      'game.intro2': 'Deine Aufgabe ist die Schwelle. Wähle eine Zahl. Jeder Pilz über dieser Linie wandert in den Korb. Schiebe den Regler. Sieh zu, wie die vier Zahlen sich streiten.',
+      'game.axis': 'Modellvertrauen: für wie essbar das Modell den Pilz hält',
+      'game.threshold': 'Schwelle',
+      'game.paranoid': 'Vorsichtiger Sammler',
+      'game.hungry': 'Hungriger Sammler',
+      'game.resample': 'Neuer Wald',
+      'game.tp_lbl': 'TP',
+      'game.fp_lbl': 'FP',
+      'game.fn_lbl': 'FN',
+      'game.tn_lbl': 'TN',
+      'game.tp': 'Essbar & genommen',
+      'game.fp': 'Giftig & genommen',
+      'game.fn': 'Essbar & gelassen',
+      'game.tn': 'Giftig & gelassen',
+      'game.precision': 'Präzision',
+      'game.recall': 'Recall',
+      'game.accuracy': 'Trefferquote',
+      'game.f1': 'F1',
+      'game.idle': 'Schiebe den Regler. Der Wald wartet.',
+      'game.alive': 'Du hast gut gegessen und ruhig geschlafen.',
+      'game.alive_partial': 'Kein Gift im Korb. Ein Teil des Abendessens steht noch im Wald. Passt schon.',
+      'game.dead': 'Du hast Gift gegessen. Der Wald hat das letzte Wort.',
+      'game.hungry_status': 'Leerer Korb. Leerer Magen.',
+      'game.hint': 'Zwei Arten zu scheitern, zum Ausprobieren. Schiebe den Regler ganz nach links. Du nimmst jeden Pilz mit. Perfekter Recall. Du stirbst. Schiebe ihn ganz nach rechts. Du nimmst keinen mit. Präzision undefiniert. Recall null. Hungrig.',
+      'paradox.h': 'Warum die Trefferquote lügt',
+      'paradox.p1': 'Stell dir einen anderen Wald vor. Das meiste, was dort wächst, ist essbar. Neunundneunzig von hundert Pilzen sind ungefährlich. Einer ist ein Knollenblätterpilz. Ein Modell sagt: „nimm alles mit“. Damit hat es in neunundneunzig Prozent der Fälle recht. Neunundneunzig Prozent Trefferquote. Standing Ovation. Der Sammler isst den Korb und stirbt am selben Abend. Der eine giftige Pilz lag mit den neunundneunzig guten darin.',
+      'paradox.p2': 'Die Trefferquote mittelt über richtige und falsche Entscheidungen. Was die einzelne Entscheidung kostet, fragt sie nicht. Ist eine Klasse selten, belohnt sie dich für das falsche Verhalten. Dasselbe passiert, wenn ein Fehlertyp viel schlimmer ist als der andere. Präzision und Recall zerlegen die Frage in zwei Teile. Die kannst du einzeln gewichten. F1 zwingt beide gleichzeitig in den vernünftigen Bereich.',
+      'paradox.k_acc': 'Trefferquote',
+      'paradox.k_prec': 'Präzision',
+      'paradox.k_rec': 'Recall',
+      'paradox.k_status': 'Sammler-Status',
+      'paradox.dead': 'Tot',
+      'paradox.caption': 'Hundert Pilze. Neunundneunzig essbar, einer Knollenblätterpilz. Das Modell sagt „nimm alles mit“. Die Zahlen sehen aus wie ein Triumph. Der Sammler sieht kein Frühstück mehr.',
+      'fbeta.h': 'F1 und die F-beta-Familie',
+      'fbeta.p1': 'F1 gewichtet Präzision und Recall gleich. Manchmal ist das falsch. Ein Pilzsammler fürchtet Gift mehr als Hunger. Ihn interessiert also die Präzision. Ein Krebsscreening fürchtet den übersehenen Tumor mehr als den Fehlalarm. Es interessiert sich also für den Recall. Mit der F-beta-Familie schreibst du auf, welche Seite dir mehr Sorgen macht.',
+      'fbeta.p2': 'F0.5 gewichtet die Präzision doppelt so stark wie den Recall. F2 gewichtet den Recall doppelt so stark wie die Präzision. Die Zahl ändert sich. Die Logik bleibt. Beta ist der Regler für deine Angst vor dem Gift.',
+      'closing.h': 'Und also',
+      'closing.p1': 'Es gibt keine einzig beste Schwelle. Es gibt keine einzig beste Metrik. Es gibt einen Wald, einen Korb und einen Sammler. Der muss entscheiden, wie oft er sich irren darf. Und in welche Richtung.',
+      'closing.thesis': 'Du schätzt die Kosten der Fehler ab und wählst deine Zielmetriken entsprechend.',
+      'footer.part': 'Teil von',
+      'footer.class': 'Klasse 06: Grundlagen der Klassifikation'
+    }
+  };
+
+  let currentLang = 'en';
+
+  function applyLang() {
+    document.documentElement.lang = currentLang;
+    document.querySelector('.lang-toggle').textContent = currentLang === 'en' ? 'DE' : 'EN';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (T[currentLang][key] !== undefined) el.textContent = T[currentLang][key];
+    });
+    updateStatusBanner();
+  }
+
+  function toggleLang() {
+    currentLang = currentLang === 'en' ? 'de' : 'en';
+    applyLang();
+  }
+
+  // ============================================================
+  // Game
+  // ============================================================
+  const canvas = document.getElementById('forest');
+  const ctx = canvas.getContext('2d');
+  const slider = document.getElementById('thresholdSlider');
+
+  let mushrooms = [];
+  let threshold = 0.5;
+  let drawingW = 760;
+  let drawingH = 320;
+
+  function randn() {
+    const u = 1 - Math.random();
+    const v = Math.random();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  }
+
+  function clamp(x, a, b) { return Math.max(a, Math.min(b, x)); }
+
+  function generateForest() {
+    mushrooms = [];
+    // 30 edible
+    for (let i = 0; i < 30; i++) {
+      mushrooms.push({
+        type: 'edible',
+        score: clamp(0.65 + 0.16 * randn(), 0.05, 0.97),
+        yRand: 0.05 + Math.random() * 0.90
+      });
+    }
+    // 30 poisonous
+    for (let i = 0; i < 30; i++) {
+      mushrooms.push({
+        type: 'poisonous',
+        score: clamp(0.32 + 0.16 * randn(), 0.03, 0.95),
+        yRand: 0.05 + Math.random() * 0.90
+      });
+    }
+  }
+
+  function drawMushroom(x, y, type, picked) {
+    ctx.save();
+    if (!picked) {
+      ctx.globalAlpha = 0.30;
+    }
+    // Stem
+    ctx.fillStyle = '#e8dcc0';
+    ctx.fillRect(x - 2.5, y - 1, 5, 11);
+    // Cap (semicircle)
+    ctx.beginPath();
+    ctx.arc(x, y, 9.5, Math.PI, 0);
+    ctx.lineTo(x + 9.5, y + 1);
+    ctx.lineTo(x - 9.5, y + 1);
+    ctx.closePath();
+    if (type === 'edible') {
+      // Steinpilz - rich brown
+      ctx.fillStyle = '#8b5a2b';
+    } else {
+      // Fliegenpilz - red
+      ctx.fillStyle = '#cc3030';
+    }
+    ctx.fill();
+    // Cap highlight
+    ctx.beginPath();
+    ctx.arc(x - 3, y - 4, 2, 0, 2 * Math.PI);
+    ctx.fillStyle = type === 'edible' ? 'rgba(255,220,180,0.18)' : 'rgba(255,255,255,0.20)';
+    ctx.fill();
+    // White spots on poisonous
+    if (type === 'poisonous') {
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.arc(x - 4, y - 3, 1.5, 0, 2 * Math.PI); ctx.fill();
+      ctx.beginPath(); ctx.arc(x + 3, y - 5, 1.4, 0, 2 * Math.PI); ctx.fill();
+      ctx.beginPath(); ctx.arc(x + 2, y - 1, 1.2, 0, 2 * Math.PI); ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function draw() {
+    const w = drawingW;
+    const h = drawingH;
+    const padL = 36, padR = 24, padT = 28, padB = 28;
+    const xRange = w - padL - padR;
+    const yRange = h - padT - padB;
+    const thresholdX = padL + threshold * xRange;
+
+    ctx.clearRect(0, 0, w, h);
+
+    // Background gradient subtle
+    const grad = ctx.createLinearGradient(0, 0, 0, h);
+    grad.addColorStop(0, '#0d0d18');
+    grad.addColorStop(1, '#10101c');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+
+    // Picked region (right of threshold) - basket zone
+    ctx.fillStyle = 'rgba(110, 196, 110, 0.06)';
+    ctx.fillRect(thresholdX, 0, w - thresholdX, h);
+
+    // Left zone (forest)
+    ctx.fillStyle = 'rgba(140, 140, 160, 0.025)';
+    ctx.fillRect(0, 0, thresholdX, h);
+
+    // Axis baseline
+    ctx.strokeStyle = '#2a2a3e';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(padL, h - padB + 6);
+    ctx.lineTo(w - padR, h - padB + 6);
+    ctx.stroke();
+
+    // Tick marks
+    ctx.fillStyle = '#555';
+    ctx.font = '10px sans-serif';
+    ctx.textAlign = 'center';
+    for (let t = 0; t <= 10; t += 2) {
+      const tx = padL + (t / 10) * xRange;
+      ctx.strokeStyle = '#2a2a3e';
+      ctx.beginPath();
+      ctx.moveTo(tx, h - padB + 6);
+      ctx.lineTo(tx, h - padB + 10);
+      ctx.stroke();
+      ctx.fillStyle = '#555';
+      ctx.fillText((t / 10).toFixed(1), tx, h - padB + 22);
+    }
+
+    // Mushrooms
+    mushrooms.forEach(m => {
+      const x = padL + m.score * xRange;
+      const y = padT + m.yRand * yRange;
+      const picked = m.score >= threshold;
+      drawMushroom(x, y, m.type, picked);
+    });
+
+    // Threshold line
+    ctx.beginPath();
+    ctx.strokeStyle = '#80b4f0';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 5]);
+    ctx.moveTo(thresholdX, 6);
+    ctx.lineTo(thresholdX, h - padB + 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Threshold label
+    ctx.font = 'bold 12px sans-serif';
+    ctx.textAlign = 'center';
+    const tlbl = 'T = ' + threshold.toFixed(2);
+    const tlblW = ctx.measureText(tlbl).width + 12;
+    ctx.fillStyle = '#0d0d18';
+    ctx.fillRect(thresholdX - tlblW / 2, 4, tlblW, 18);
+    ctx.fillStyle = '#80b4f0';
+    ctx.fillText(tlbl, thresholdX, 17);
+  }
+
+  function computeMetrics() {
+    let tp = 0, fp = 0, tn = 0, fn = 0;
+    mushrooms.forEach(m => {
+      const picked = m.score >= threshold;
+      if (m.type === 'edible' && picked) tp++;
+      else if (m.type === 'poisonous' && picked) fp++;
+      else if (m.type === 'poisonous' && !picked) tn++;
+      else if (m.type === 'edible' && !picked) fn++;
+    });
+    const precision = (tp + fp) > 0 ? tp / (tp + fp) : null;
+    const recall = (tp + fn) > 0 ? tp / (tp + fn) : null;
+    const accuracy = (tp + tn) / Math.max(1, mushrooms.length);
+    let f1 = null;
+    if (precision !== null && recall !== null && (precision + recall) > 0) {
+      f1 = 2 * precision * recall / (precision + recall);
+    }
+    return { tp, fp, tn, fn, precision, recall, accuracy, f1 };
+  }
+
+  function fmt(x) {
+    if (x === null || x === undefined || isNaN(x)) return ', ';
+    return Math.round(x * 100) + '%';
+  }
+
+  function updateStatusBanner() {
+    const m = computeMetrics();
+    const banner = document.getElementById('statusBanner');
+    if (!banner) return;
+    if (m.tp + m.fp === 0) {
+      banner.className = 'status-banner idle';
+      banner.textContent = T[currentLang]['game.hungry_status'];
+    } else if (m.fp > 0) {
+      banner.className = 'status-banner dead';
+      banner.textContent = T[currentLang]['game.dead'];
+    } else if (m.fn > 0) {
+      banner.className = 'status-banner alive';
+      banner.textContent = T[currentLang]['game.alive_partial'];
+    } else {
+      banner.className = 'status-banner alive';
+      banner.textContent = T[currentLang]['game.alive'];
+    }
+  }
+
+  function updateDisplay() {
+    const m = computeMetrics();
+    document.getElementById('cntTP').textContent = m.tp;
+    document.getElementById('cntFP').textContent = m.fp;
+    document.getElementById('cntFN').textContent = m.fn;
+    document.getElementById('cntTN').textContent = m.tn;
+    document.getElementById('valP').textContent = fmt(m.precision);
+    document.getElementById('valR').textContent = fmt(m.recall);
+    document.getElementById('valA').textContent = fmt(m.accuracy);
+    document.getElementById('valF1').textContent = fmt(m.f1);
+    document.getElementById('thresholdVal').textContent = threshold.toFixed(2);
+    updateStatusBanner();
+    draw();
+  }
+
+  function setPreset(kind) {
+    if (kind === 'paranoid') {
+      threshold = 0.85;
+      slider.value = 85;
+    } else if (kind === 'hungry') {
+      threshold = 0.15;
+      slider.value = 15;
+    }
+    updateDisplay();
+  }
+
+  function resampleForest() {
+    generateForest();
+    updateDisplay();
+  }
+
+  slider.addEventListener('input', e => {
+    threshold = e.target.value / 100;
+    updateDisplay();
+  });
+
+  // ============================================================
+  // Paradox grid
+  // ============================================================
+  function buildParadoxGrid() {
+    const grid = document.getElementById('paradoxGrid');
+    grid.innerHTML = '';
+    // 100 mushrooms, 99 edible, 1 poisonous, poisonous placed at a random non-corner index
+    const poisonIdx = 47; // fixed for deterministic visual
+    for (let i = 0; i < 100; i++) {
+      const d = document.createElement('div');
+      d.className = 'pmush ' + (i === poisonIdx ? 'poison' : 'edible');
+      grid.appendChild(d);
+    }
+  }
+
+  // ============================================================
+  // Init
+  // ============================================================
+  // Resize canvas to high-DPI
+  function setupCanvas() {
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = Math.round(rect.width * dpr);
+    canvas.height = Math.round(320 * dpr);
+    canvas.style.height = '320px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    // Now the logical drawing space is rect.width x 320
+    // Update canvas internal sizing for our draw function
+    drawingW = rect.width;
+    drawingH = 320;
+  }
+
+  window.addEventListener('resize', () => {
+    setupCanvas();
+    draw();
+  });
+
+  // Initial setup
+  setupCanvas();
+  generateForest();
+  buildParadoxGrid();
+  updateDisplay();
+  applyLang();
+</script>
+</body>
+</html>

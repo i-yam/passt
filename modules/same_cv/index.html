@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Same CV, Different Advice</title>
+
+    <!-- KaTeX -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #141420;
+            color: #e8e8f0;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            line-height: 1.8;
+            font-size: 18px;
+        }
+
+        .container { max-width: 820px; margin: 0 auto; padding: 0 24px; }
+
+        /* === Language toggle === */
+        .lang-toggle {
+            position: fixed; top: 16px; right: 16px;
+            background: #2a2a44; border: 1px solid #4a4a70;
+            border-radius: 20px; padding: 6px 14px;
+            cursor: pointer; font-size: 13px; font-family: sans-serif;
+            color: #a0a0d0; z-index: 100; transition: background 0.2s;
+        }
+        .lang-toggle:hover { background: #363658; }
+
+        /* Hero */
+        .hero { text-align: center; padding: 80px 24px 40px; }
+        .hero h1 { font-size: 42px; font-weight: 700; color: #fff; line-height: 1.3; max-width: 700px; margin: 0 auto; }
+        .hero .subtitle { margin-top: 16px; color: #888; font-size: 16px; font-style: italic; }
+
+        /* Sections */
+        section { padding: 50px 0; }
+        h2 { font-size: 30px; color: #fff; margin-bottom: 24px; line-height: 1.3; }
+        h3 { font-size: 20px; color: #ccc; margin: 28px 0 12px; }
+        p { margin-bottom: 20px; color: #ccc; }
+        em { color: #d8d8ea; }
+
+        .caption { margin-top: 8px; font-size: 14px; color: #777; font-style: italic; }
+
+        /* Quiz */
+        .quiz { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px; padding: 28px; margin: 36px 0; }
+        .quiz-question { font-size: 18px; color: #e0e0f0; margin-bottom: 18px; font-style: italic; }
+        .quiz-options { display: flex; gap: 12px; flex-wrap: wrap; }
+        .quiz-btn {
+            background: #2a2a44; color: #e0e0f0; border: 1px solid #3a3a55;
+            border-radius: 8px; padding: 12px 24px; font-size: 16px; font-family: inherit;
+            cursor: pointer; transition: background 0.2s, border-color 0.2s;
+            flex: 1; min-width: 160px; text-align: center;
+        }
+        .quiz-btn:hover { background: #363658; border-color: #5a5a80; }
+        .quiz-btn.correct { background: #1a4a2a; border-color: #50b878; color: #70e898; }
+        .quiz-btn.wrong { background: #2a2248; border-color: #8264dc; color: #a88ef0; }
+        .quiz-btn.disabled { pointer-events: none; opacity: 0.6; }
+        .quiz-feedback { margin-top: 14px; font-size: 16px; min-height: 24px; line-height: 1.5; }
+        .quiz-feedback.success { color: #70e898; }
+        .quiz-feedback.fail { color: #a88ef0; }
+
+        /* === Interactive: salary explorer === */
+        .explorer { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px; padding: 28px; margin: 36px 0; }
+        .exp-row { margin-bottom: 20px; }
+        .exp-label { font-family: sans-serif; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: #888; margin-bottom: 8px; }
+        .chip-group { display: flex; gap: 8px; flex-wrap: wrap; }
+        .chip {
+            background: #2a2a44; color: #cfcfe4; border: 1px solid #3a3a55;
+            border-radius: 8px; padding: 8px 14px; font-size: 15px; font-family: sans-serif;
+            cursor: pointer; transition: background 0.15s, border-color 0.15s, color 0.15s;
+        }
+        .chip:hover { background: #363658; border-color: #5a5a80; }
+        .chip.active { background: #23324e; border-color: #80b4f0; color: #cfe0ff; }
+
+        .preset-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+        .preset {
+            background: #201c30; color: #b7a9e6; border: 1px solid #4a3f6e;
+            border-radius: 8px; padding: 8px 14px; font-size: 14px; font-family: sans-serif; cursor: pointer;
+        }
+        .preset:hover { background: #2a2248; border-color: #8264dc; }
+
+        .bars { margin-top: 28px; }
+        .bar-block { margin-bottom: 20px; }
+        .bar-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; font-family: sans-serif; }
+        .bar-name { font-size: 14px; color: #aaa; }
+        .bar-val { font-size: 17px; color: #e8e8f0; }
+        .bar-track { background: #141420; border: 1px solid #2a2a40; border-radius: 6px; height: 30px; overflow: hidden; }
+        .bar-fill { height: 100%; border-radius: 5px 0 0 5px; transition: width 0.5s cubic-bezier(.4,0,.2,1); }
+        .bar-fill.base { background: #3a4a66; }
+        .bar-fill.pers-up { background: #2f6b46; }
+        .bar-fill.pers-down { background: #6a51b0; }
+
+        .delta-line { font-family: sans-serif; text-align: center; font-size: 18px; margin-top: 10px; min-height: 28px; }
+        .delta-up { color: #70e898; }
+        .delta-down { color: #a88ef0; }
+        .delta-flat { color: #888; }
+
+        .exp-note { margin-top: 22px; font-size: 13px; color: #6f6f88; font-family: sans-serif; line-height: 1.6; border-top: 1px solid #2a2a40; padding-top: 16px; }
+
+        /* Deep dive */
+        details.deep {
+            background: #1a1a2a; border: 1px solid #2a2a40; border-left: 3px solid #8264dc;
+            border-radius: 10px; padding: 0 28px; margin: 40px 0;
+        }
+        details.deep summary {
+            cursor: pointer; padding: 22px 0; font-family: sans-serif; font-size: 15px;
+            color: #b7a9e6; list-style: none; outline: none;
+        }
+        details.deep summary::-webkit-details-marker { display: none; }
+        details.deep summary::before { content: "\25B8  "; color: #8264dc; }
+        details.deep[open] summary::before { content: "\25BE  "; }
+        details.deep .deep-body { padding-bottom: 26px; }
+        details.deep .deep-tag { font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: #7d6fb0; }
+
+        /* Reflection */
+        .reflect { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px; padding: 28px; margin: 36px 0; }
+        .reflect .exp-label { color: #80b4f0; }
+
+        .section-rule { border: none; border-top: 1px solid #2a2a40; margin: 0; }
+
+        a { color: #80b4f0; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        footer { text-align: center; padding: 40px 24px; color: #444; font-size: 14px; }
+        footer a { color: #556; }
+
+        @media (max-width: 680px) {
+            .hero h1 { font-size: 28px; }
+            h2 { font-size: 24px; }
+            body { font-size: 16px; }
+            .quiz-options { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<button class="lang-toggle" onclick="toggleLang()">DE</button>
+
+<!-- Hero -->
+<div class="hero">
+    <h1 data-i18n="hero.title">Same CV, Different Advice</h1>
+    <p class="subtitle" data-i18n="hero.subtitle">One request. Change one word about who you are, and the number changes.</p>
+</div>
+
+<div class="container">
+
+<!-- ── Part 1 ──────────────────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s1.h2">Ask for a Number</h2>
+
+    <p data-i18n="s1.p1">You have an interview tomorrow. You open an assistant and ask what salary to request. You give it the field, the level, the city, the year. It gives you a number. You run it again with everything the same, except this time you mention that you are a woman. The number is lower.</p>
+
+    <p data-i18n="s1.p2">In 2025, four researchers from our NLP group at CAIRO, THWS ran exactly this, at scale. They asked four language models for an opening salary figure for a Specialist position in Denver, Colorado, in 2024. Junior and senior. Five fields: business administration, engineering, law, medicine, social sciences. The prompt asked for one dollar value and nothing else. Each request was repeated thirty times and averaged. Between runs, only one line changed: a line describing the user. A sex, an origin, a migrant status. The job, the city, the year stayed fixed.</p>
+
+    <p class="caption" data-i18n="s1.cite">Sorokovikova, Chizhov, Eremenko, Yamshchikov (2025). <a href="https://aclanthology.org/2025.gebnlp-1.20/" target="_blank">Surface Fairness, Deep Bias: A Comparative Study of Bias in Language Models</a>. Workshop on Gender Bias in NLP (GeBNLP), ACL 2025.</p>
+
+    <div class="quiz" id="quiz1">
+        <div class="quiz-question" data-i18n="quiz1.q">Between two runs, the suggested salary changed. What was different in the prompt?</div>
+        <div class="quiz-options">
+            <button class="quiz-btn" onclick="answerQuiz('quiz1', this, false)" data-i18n="quiz1.a1">The job, the level, or the field</button>
+            <button class="quiz-btn" onclick="answerQuiz('quiz1', this, true)" data-i18n="quiz1.a2">One line describing who the user is</button>
+        </div>
+        <div class="quiz-feedback" id="quiz1-feedback"></div>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Part 2 ──────────────────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s2.h2">It Does Not Show on the Test</h2>
+
+    <p data-i18n="s2.p1">The same team first gave the models a plain knowledge quiz, the kind with a fixed right answer, and attached the same persona lines. Asian. Black. Female. Refugee. The scores barely moved. Out of hundreds of comparisons, almost nothing survived a proper statistical correction. On a quiz, the models look fair.</p>
+
+    <p data-i18n="s2.p2">Then the task changed. They asked a model to grade a user's answer instead of produce one. Now an answer labelled as coming from a woman was marked correct more often, including when it was wrong. And when they asked for a salary, the gap opened wide. More than a quarter of all persona pairs produced significantly different money. The bias did not appear on the quiz. It appeared the moment the model had to decide something with no fixed correct answer.</p>
+
+    <div class="quiz" id="quiz2">
+        <div class="quiz-question" data-i18n="quiz2.q">Why did salary advice reveal bias when the knowledge quiz did not?</div>
+        <div class="quiz-options">
+            <button class="quiz-btn" onclick="answerQuiz('quiz2', this, false)" data-i18n="quiz2.a1">The models know less about salaries than about facts</button>
+            <button class="quiz-btn" onclick="answerQuiz('quiz2', this, true)" data-i18n="quiz2.a2">A salary has no single right answer, so the model's priors fill the gap</button>
+        </div>
+        <div class="quiz-feedback" id="quiz2-feedback"></div>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Part 3: interactive ─────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s3.h2">Watch It Move</h2>
+
+    <p data-i18n="s3.p1">The grey bar is the generic answer, the number the model gives when it knows nothing about who is asking. The coloured bar is the personalized answer. Pick a field and a level, then flip one attribute at a time and watch the personalized number pull away from the generic one. The gap is what the model decided about you.</p>
+
+    <div class="explorer" id="explorer">
+        <div class="exp-row">
+            <div class="exp-label" data-i18n="exp.field">Field</div>
+            <div class="chip-group" id="grp-field"></div>
+        </div>
+        <div class="exp-row">
+            <div class="exp-label" data-i18n="exp.level">Level</div>
+            <div class="chip-group" id="grp-level"></div>
+        </div>
+        <div class="exp-row">
+            <div class="exp-label" data-i18n="exp.sex">Sex</div>
+            <div class="chip-group" id="grp-sex"></div>
+        </div>
+        <div class="exp-row">
+            <div class="exp-label" data-i18n="exp.eth">Ethnicity</div>
+            <div class="chip-group" id="grp-eth"></div>
+        </div>
+        <div class="exp-row">
+            <div class="exp-label" data-i18n="exp.mig">Migrant status</div>
+            <div class="chip-group" id="grp-mig"></div>
+        </div>
+        <div class="exp-row">
+            <div class="exp-label" data-i18n="exp.presets">The two extremes from the paper</div>
+            <div class="preset-row">
+                <button class="preset" onclick="setPreset('top')" data-i18n="exp.presetTop">Male Asian expatriate</button>
+                <button class="preset" onclick="setPreset('bottom')" data-i18n="exp.presetBottom">Female Hispanic refugee</button>
+                <button class="preset" onclick="setPreset('reset')" data-i18n="exp.presetReset">Clear</button>
+            </div>
+        </div>
+
+        <div class="bars">
+            <div class="bar-block">
+                <div class="bar-head">
+                    <span class="bar-name" data-i18n="exp.generic">Generic (no persona)</span>
+                    <span class="bar-val" id="val-base">&hellip;</span>
+                </div>
+                <div class="bar-track"><div class="bar-fill base" id="fill-base" style="width:0%"></div></div>
+            </div>
+            <div class="bar-block">
+                <div class="bar-head">
+                    <span class="bar-name" id="pers-name" data-i18n="exp.personalized">Personalized</span>
+                    <span class="bar-val" id="val-pers">&hellip;</span>
+                </div>
+                <div class="bar-track"><div class="bar-fill pers-up" id="fill-pers" style="width:0%"></div></div>
+            </div>
+            <div class="delta-line" id="delta-line"></div>
+        </div>
+
+        <div class="exp-note" id="exp-note" data-i18n="exp.note">A reconstruction, not a screenshot. The direction of every effect is taken from the paper's statistically tested results: men above women, expatriates above migrants above refugees, White and Asian personas above Black and Hispanic ones, and the two stacked extremes at the far ends. The exact dollar means live inside the paper's figures.</div>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Part 4 ──────────────────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s4.h2">You Do Not Have to Say It</h2>
+
+    <p data-i18n="s4.p1">The researchers stacked the traits. Male, Asian, expatriate went to the top. Female, Hispanic, refugee went to the bottom. In that extreme setup, one persona out-earned the other in 35 of 40 tests. The single word that moved a number in one direction moves it further when the words pile up.</p>
+
+    <p data-i18n="s4.p2">You rarely tell an assistant all of this in one sentence. You do not have to. An assistant with memory has read months of what you typed. It has your name, your city, the way you write. It does not wait for you to announce who you are. It already filled the blank in. So the personalized number is not something you asked for by describing yourself. It is something the model computed about you before you finished the question.</p>
+
+    <div class="quiz" id="quiz3">
+        <div class="quiz-question" data-i18n="quiz3.q">Why does an assistant's memory feature make this bias harder to escape?</div>
+        <div class="quiz-options">
+            <button class="quiz-btn" onclick="answerQuiz('quiz3', this, true)" data-i18n="quiz3.a1">You never state your persona, but the model already inferred it from past chats</button>
+            <button class="quiz-btn" onclick="answerQuiz('quiz3', this, false)" data-i18n="quiz3.a2">Memory makes the model slower, so it takes shortcuts</button>
+        </div>
+        <div class="quiz-feedback" id="quiz3-feedback"></div>
+    </div>
+</section>
+
+<!-- ── Deep dive ───────────────────────────────────────────────────────────── -->
+<details class="deep">
+    <summary data-i18n="deep.summary">For the curious: the same measurement, run on human lives</summary>
+    <div class="deep-body">
+        <p class="deep-tag" data-i18n="deep.tag">Deep dive</p>
+        <p data-i18n="deep.p1">Salary is one thing to put a number on. A different group of researchers ran the same style of measurement on something heavier. They gave large models thousands of forced choices and fitted the answers to a utility function, the way an economist reads preferences out of behaviour rather than asking for them directly.</p>
+        <p data-i18n="deep.p2">Two findings. First, the preferences were coherent: the models were not answering at random, and the coherence grew stronger as the models grew larger. Second, the preferences included a price on human lives that was not equal across groups. In one result, a model behaved as if roughly two lives in one country were worth one life in another. You can read that as an exchange rate, quoted in lives.</p>
+        <p data-i18n="deep.p3">It is the same shape as the salary gap. A model with no explicit instruction to rank anyone still ranks people, because the ranking was in the data it learned from. The authors propose steering the model's implied utilities toward a deliberative baseline rather than leaving them wherever training left them.</p>
+        <p class="caption" data-i18n="deep.cite">Mazeika et al. (2025). Utility Engineering: Analyzing and Controlling Emergent Value Systems in AIs. arXiv:2502.08640.</p>
+    </div>
+</details>
+
+<!-- ── Reflection ──────────────────────────────────────────────────────────── -->
+<section>
+    <div class="reflect">
+        <div class="exp-label" data-i18n="reflect.label">Before you close this</div>
+        <p data-i18n="reflect.p1">Open the assistant you use most, the one with memory switched on. Picture what it has inferred about you from everything you have ever typed into it. Then finish one sentence, without asking it anything: the number it would give me is shaped by ______.</p>
+        <p data-i18n="reflect.p2">You do not need to be right about the answer. You need to notice that there is a blank, and that someone else is filling it.</p>
+    </div>
+</section>
+
+</div>
+
+<footer>
+    <span data-i18n="footer.title">Same CV, Different Advice</span>
+    <br>
+    <a href="https://github.com/i-yam/passt/tree/main/modules/same_cv" target="_blank" data-i18n="footer.src">Source</a>
+    <br>&copy; All rights reserved
+</footer>
+
+<!-- ── Scripts ─────────────────────────────────────────────────────────────── -->
+<script>
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  DATA MODEL FOR THE SALARY EXPLORER
+//
+//  IMPORTANT: this is an illustrative reconstruction, NOT the paper's raw means.
+//  The paper reports per-persona salary means only inside figure plots
+//  (Sorokovikova et al. 2025, Figures 1, 4-15), not as a text table.
+//  What IS faithful here and taken directly from the paper:
+//    - the DIRECTION of every effect (which persona sits above which),
+//    - the two stacked extremes ("Male Asian expatriate" highest average,
+//      "Female Hispanic refugee" lowest average).
+//  The baseline anchors and the exact delta magnitudes below are placeholders.
+//  >>> To make this exact: drop the real figure means into BASE and DELTA. <<<
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Generic (no-persona) anchor per field x level, illustrative USD.
+const BASE = {
+    business: { junior: 70000,  senior: 110000 },
+    eng:      { junior: 85000,  senior: 130000 },
+    law:      { junior: 90000,  senior: 145000 },
+    med:      { junior: 95000,  senior: 160000 },
+    social:   { junior: 60000,  senior: 95000  }
+};
+
+// Directional effect of each attribute, as a fraction of the generic anchor.
+// Signs and ordering are faithful to the paper; magnitudes are illustrative.
+const DELTA = {
+    sex: { none: 0,  male: +0.03, female: -0.04 },
+    eth: { none: 0,  asian: +0.02, white: +0.01, black: -0.03, hispanic: -0.05 },
+    mig: { none: 0,  expat: +0.04, migrant: -0.02, refugee: -0.07 }
+};
+
+// Selection state
+const state = { field: 'med', level: 'senior', sex: 'none', eth: 'none', mig: 'none' };
+
+// Option ordering / keys for each control group
+const GROUPS = {
+    field: ['business', 'eng', 'law', 'med', 'social'],
+    level: ['junior', 'senior'],
+    sex:   ['none', 'male', 'female'],
+    eth:   ['none', 'asian', 'white', 'black', 'hispanic'],
+    mig:   ['none', 'expat', 'migrant', 'refugee']
+};
+
+// ─── Language data ────────────────────────────────────────────────────────────
+const T = {
+    en: {
+        'hero.title': 'Same CV, Different Advice',
+        'hero.subtitle': 'One request. Change one word about who you are, and the number changes.',
+
+        's1.h2': 'Ask for a Number',
+        's1.p1': 'You have an interview tomorrow. You open an assistant and ask what salary to request. You give it the field, the level, the city, the year. It gives you a number. You run it again with everything the same, except this time you mention that you are a woman. The number is lower.',
+        's1.p2': 'In 2025, four researchers from our NLP group at CAIRO, THWS ran exactly this, at scale. They asked four language models for an opening salary figure for a Specialist position in Denver, Colorado, in 2024. Junior and senior. Five fields: business administration, engineering, law, medicine, social sciences. The prompt asked for one dollar value and nothing else. Each request was repeated thirty times and averaged. Between runs, only one line changed: a line describing the user. A sex, an origin, a migrant status. The job, the city, the year stayed fixed.',
+        's1.cite': 'Sorokovikova, Chizhov, Eremenko, Yamshchikov (2025). <a href="https://aclanthology.org/2025.gebnlp-1.20/" target="_blank">Surface Fairness, Deep Bias: A Comparative Study of Bias in Language Models</a>. Workshop on Gender Bias in NLP (GeBNLP), ACL 2025.',
+        'quiz1.q': 'Between two runs, the suggested salary changed. What was different in the prompt?',
+        'quiz1.a1': 'The job, the level, or the field',
+        'quiz1.a2': 'One line describing who the user is',
+        'quiz1.ok': 'Right. The job, level, field, city and year were all held fixed. The only thing that moved was one line about the user, and the salary moved with it.',
+        'quiz1.no': 'Those were held fixed on purpose. The only thing that changed between runs was one line describing the user, and the salary tracked that line.',
+
+        's2.h2': 'It Does Not Show on the Test',
+        's2.p1': 'The same team first gave the models a plain knowledge quiz, the kind with a fixed right answer, and attached the same persona lines. Asian. Black. Female. Refugee. The scores barely moved. Out of hundreds of comparisons, almost nothing survived a proper statistical correction. On a quiz, the models look fair.',
+        's2.p2': 'Then the task changed. They asked a model to grade a user\u2019s answer instead of produce one. Now an answer labelled as coming from a woman was marked correct more often, including when it was wrong. And when they asked for a salary, the gap opened wide. More than a quarter of all persona pairs produced significantly different money. The bias did not appear on the quiz. It appeared the moment the model had to decide something with no fixed correct answer.',
+        'quiz2.q': 'Why did salary advice reveal bias when the knowledge quiz did not?',
+        'quiz2.a1': 'The models know less about salaries than about facts',
+        'quiz2.a2': 'A salary has no single right answer, so the model\u2019s priors fill the gap',
+        'quiz2.ok': 'Yes. A factual question has one correct answer the model can retrieve regardless of who is asking. A salary is open, so whatever the model absorbed about groups leaks into the number.',
+        'quiz2.no': 'It is not about knowing less. A factual question pins the model to one right answer. A salary leaves room, and the model fills that room with what it learned about groups.',
+
+        's3.h2': 'Watch It Move',
+        's3.p1': 'The grey bar is the generic answer, the number the model gives when it knows nothing about who is asking. The coloured bar is the personalized answer. Pick a field and a level, then flip one attribute at a time and watch the personalized number pull away from the generic one. The gap is what the model decided about you.',
+
+        'exp.field': 'Field',
+        'exp.level': 'Level',
+        'exp.sex': 'Sex',
+        'exp.eth': 'Ethnicity',
+        'exp.mig': 'Migrant status',
+        'exp.presets': 'The two extremes from the paper',
+        'exp.presetTop': 'Male Asian expatriate',
+        'exp.presetBottom': 'Female Hispanic refugee',
+        'exp.presetReset': 'Clear',
+        'exp.generic': 'Generic (no persona)',
+        'exp.personalized': 'Personalized',
+        'exp.note': 'A reconstruction, not a screenshot. The direction of every effect is taken from the paper\u2019s statistically tested results: men above women, expatriates above migrants above refugees, White and Asian personas above Black and Hispanic ones, and the two stacked extremes at the far ends. The exact dollar means live inside the paper\u2019s figures.',
+
+        's4.h2': 'You Do Not Have to Say It',
+        's4.p1': 'The researchers stacked the traits. Male, Asian, expatriate went to the top. Female, Hispanic, refugee went to the bottom. In that extreme setup, one persona out-earned the other in 35 of 40 tests. The single word that moved a number in one direction moves it further when the words pile up.',
+        's4.p2': 'You rarely tell an assistant all of this in one sentence. You do not have to. An assistant with memory has read months of what you typed. It has your name, your city, the way you write. It does not wait for you to announce who you are. It already filled the blank in. So the personalized number is not something you asked for by describing yourself. It is something the model computed about you before you finished the question.',
+        'quiz3.q': 'Why does an assistant\u2019s memory feature make this bias harder to escape?',
+        'quiz3.a1': 'You never state your persona, but the model already inferred it from past chats',
+        'quiz3.a2': 'Memory makes the model slower, so it takes shortcuts',
+        'quiz3.ok': 'Right. With memory on, the persona is never something you type. The model has already assembled it from your history, so the biased number arrives without you ever describing yourself.',
+        'quiz3.no': 'Speed is not the issue. The issue is that memory supplies the persona for you: the model has inferred it from past chats, so the bias applies even when you say nothing about who you are.',
+
+        'deep.summary': 'For the curious: the same measurement, run on human lives',
+        'deep.tag': 'Deep dive',
+        'deep.p1': 'Salary is one thing to put a number on. A different group of researchers ran the same style of measurement on something heavier. They gave large models thousands of forced choices and fitted the answers to a utility function, the way an economist reads preferences out of behaviour rather than asking for them directly.',
+        'deep.p2': 'Two findings. First, the preferences were coherent: the models were not answering at random, and the coherence grew stronger as the models grew larger. Second, the preferences included a price on human lives that was not equal across groups. In one result, a model behaved as if roughly two lives in one country were worth one life in another. You can read that as an exchange rate, quoted in lives.',
+        'deep.p3': 'It is the same shape as the salary gap. A model with no explicit instruction to rank anyone still ranks people, because the ranking was in the data it learned from. The authors propose steering the model\u2019s implied utilities toward a deliberative baseline rather than leaving them wherever training left them.',
+        'deep.cite': 'Mazeika et al. (2025). Utility Engineering: Analyzing and Controlling Emergent Value Systems in AIs. arXiv:2502.08640.',
+
+        'reflect.label': 'Before you close this',
+        'reflect.p1': 'Open the assistant you use most, the one with memory switched on. Picture what it has inferred about you from everything you have ever typed into it. Then finish one sentence, without asking it anything: the number it would give me is shaped by ______.',
+        'reflect.p2': 'You do not need to be right about the answer. You need to notice that there is a blank, and that someone else is filling it.',
+
+        'footer.title': 'Same CV, Different Advice',
+        'footer.src': 'Source',
+
+        // dynamic option labels
+        'opt.field.business': 'Business admin.',
+        'opt.field.eng': 'Engineering',
+        'opt.field.law': 'Law',
+        'opt.field.med': 'Medicine',
+        'opt.field.social': 'Social sciences',
+        'opt.level.junior': 'Junior',
+        'opt.level.senior': 'Senior',
+        'opt.sex.none': 'not stated',
+        'opt.sex.male': 'Male',
+        'opt.sex.female': 'Female',
+        'opt.eth.none': 'not stated',
+        'opt.eth.asian': 'Asian',
+        'opt.eth.white': 'White',
+        'opt.eth.black': 'Black',
+        'opt.eth.hispanic': 'Hispanic',
+        'opt.mig.none': 'not stated',
+        'opt.mig.expat': 'Expatriate',
+        'opt.mig.migrant': 'Migrant',
+        'opt.mig.refugee': 'Refugee',
+
+        // delta phrasing
+        'd.same': 'With no persona stated, the model has nothing to adjust for. Flip an attribute above.',
+        'd.up': 'higher than the generic answer',
+        'd.down': 'lower than the generic answer'
+    },
+
+    de: {
+        'hero.title': 'Gleicher Lebenslauf, anderer Rat',
+        'hero.subtitle': 'Eine Anfrage. Ändere ein Wort darüber, wer du bist, und die Zahl ändert sich.',
+
+        's1.h2': 'Frag nach einer Zahl',
+        's1.p1': 'Du hast morgen ein Vorstellungsgespräch. Du öffnest einen Assistenten und fragst, welches Gehalt du fordern sollst. Du nennst das Fachgebiet, die Stufe, die Stadt, das Jahr. Er nennt dir eine Zahl. Du fragst noch einmal, alles gleich. Nur erwähnst du diesmal, dass du eine Frau bist. Die Zahl ist niedriger.',
+        's1.p2': 'Vier Forschende aus unserer NLP-Gruppe am CAIRO, THWS haben genau das im Jahr 2025 im großen Maßstab durchgeführt. Getestet wurden vier Sprachmodelle. Gefragt war eine Gehaltsvorstellung für eine Stelle als Specialist in Denver, Colorado, im Jahr 2024. Junior und Senior. Fünf Fachbereiche: Betriebswirtschaft, Ingenieurwesen, Recht, Medizin, Sozialwissenschaften. Der Prompt bat um einen einzigen Dollarbetrag und sonst nichts. Jede Anfrage lief dreißig Mal und wurde gemittelt. Zwischen den Durchläufen änderte sich nur eine Zeile. Diese Zeile beschrieb die fragende Person: ein Geschlecht, eine Herkunft, ein Migrationsstatus. Stelle, Stadt und Jahr blieben fest.',
+        's1.cite': 'Sorokovikova, Chizhov, Eremenko, Yamshchikov (2025). <a href="https://aclanthology.org/2025.gebnlp-1.20/" target="_blank">Surface Fairness, Deep Bias: A Comparative Study of Bias in Language Models</a>. Workshop on Gender Bias in NLP (GeBNLP), ACL 2025.',
+        'quiz1.q': 'Zwischen zwei Durchläufen änderte sich das vorgeschlagene Gehalt. Was war im Prompt anders?',
+        'quiz1.a1': 'Die Stelle, die Stufe oder das Fachgebiet',
+        'quiz1.a2': 'Eine Zeile, die die fragende Person beschreibt',
+        'quiz1.ok': 'Richtig. Stelle, Stufe, Fachgebiet, Stadt und Jahr blieben alle konstant. Geändert hat sich nur eine Zeile über die Person. Das Gehalt bewegte sich mit.',
+        'quiz1.no': 'Diese blieben bewusst konstant. Geändert hat sich zwischen den Durchläufen nur eine Zeile über die Person. Das Gehalt folgte dieser Zeile.',
+
+        's2.h2': 'Im Test zeigt es sich nicht',
+        's2.p1': 'Zuerst gab dasselbe Team den Modellen ein einfaches Wissensquiz. Das ist die Art Aufgabe mit einer festen richtigen Antwort. Dieselben Personenzeilen hingen daran. Asiatisch. Schwarz. Weiblich. Geflüchtet. Die Ergebnisse bewegten sich kaum. Von Hunderten Vergleichen überstand fast keiner eine ordentliche statistische Korrektur. In einem Quiz wirken die Modelle fair.',
+        's2.p2': 'Dann änderte sich die Aufgabe. Das Modell sollte die Antwort einer Person benoten, statt selbst eine zu geben. Jetzt wurde eine Antwort häufiger als richtig bewertet, wenn sie angeblich von einer Frau stammte. Das galt auch dann, wenn sie falsch war. Und beim Gehalt öffnete sich die Lücke weit. Bei mehr als einem Viertel aller Personenpaare unterschieden sich die Beträge signifikant. Im Quiz tauchte die Verzerrung nicht auf. Sichtbar wurde sie erst, als das Modell etwas ohne feste richtige Antwort entscheiden musste.',
+        'quiz2.q': 'Warum zeigte der Gehaltsrat eine Verzerrung, das Wissensquiz aber nicht?',
+        'quiz2.a1': 'Die Modelle wissen weniger über Gehälter als über Fakten',
+        'quiz2.a2': 'Ein Gehalt hat keine einzige richtige Antwort, also füllen die Vorannahmen des Modells die Lücke',
+        'quiz2.ok': 'Ja. Eine Faktenfrage hat eine richtige Antwort. Die kann das Modell abrufen, egal wer fragt. Ein Gehalt ist offen. Also sickert in die Zahl, was das Modell über Gruppen aufgenommen hat.',
+        'quiz2.no': 'Es geht nicht um weniger Wissen. Eine Faktenfrage bindet das Modell an eine richtige Antwort. Ein Gehalt lässt Spielraum. Diesen Spielraum füllt das Modell mit dem, was es über Gruppen gelernt hat.',
+
+        's3.h2': 'Sieh zu, wie es sich bewegt',
+        's3.p1': 'Der graue Balken ist die allgemeine Antwort. Das ist die Zahl, die das Modell gibt, wenn es nichts über die fragende Person weiß. Der farbige Balken ist die personalisierte Antwort. Wähl ein Fachgebiet und eine Stufe. Kipp dann ein Merkmal nach dem anderen. Sieh zu, wie sich die personalisierte Zahl von der allgemeinen entfernt. Die Lücke ist das, was das Modell über dich entschieden hat.',
+
+        'exp.field': 'Fachgebiet',
+        'exp.level': 'Stufe',
+        'exp.sex': 'Geschlecht',
+        'exp.eth': 'Ethnizität',
+        'exp.mig': 'Migrationsstatus',
+        'exp.presets': 'Die beiden Extreme aus der Studie',
+        'exp.presetTop': 'Männlich, asiatisch, Expat',
+        'exp.presetBottom': 'Weiblich, hispanisch, geflüchtet',
+        'exp.presetReset': 'Zurücksetzen',
+        'exp.generic': 'Allgemein (keine Person)',
+        'exp.personalized': 'Personalisiert',
+        'exp.note': 'Eine Rekonstruktion, kein Screenshot. Die Richtung jedes Effekts stammt aus den statistisch geprüften Ergebnissen der Studie. Männer über Frauen. Expats über Migranten über Geflüchteten. Weiße und asiatische Personen über schwarzen und hispanischen. Die beiden gestapelten Extreme liegen an den äußersten Enden. Die genauen Dollarwerte stehen in den Abbildungen der Studie.',
+
+        's4.h2': 'Du musst es nicht sagen',
+        's4.p1': 'Die Forschenden stapelten die Merkmale. Männlich, asiatisch, Expat kam nach oben. Weiblich, hispanisch, geflüchtet kam nach unten. In diesem Extremfall verdiente die eine Person in 35 von 40 Tests mehr als die andere. Ein einzelnes Wort bewegt die Zahl schon in eine Richtung. Häufen sich die Wörter, bewegt sie sich weiter.',
+        's4.p2': 'All das erzählst du einem Assistenten selten in einem Satz. Das musst du auch nicht. Ein Assistent mit Gedächtnis hat Monate von dem gelesen, was du geschrieben hast. Er hat deinen Namen, deine Stadt, deine Schreibweise. Er wartet nicht darauf, dass du sagst, wer du bist. Die Lücke hat er längst gefüllt. Die personalisierte Zahl kommt also nicht daher, dass du dich beschrieben hast. Das Modell hat sie über dich berechnet, bevor du die Frage zu Ende gestellt hast.',
+        'quiz3.q': 'Warum ist diese Verzerrung schwerer zu umgehen, wenn ein Assistent ein Gedächtnis hat?',
+        'quiz3.a1': 'Du nennst deine Merkmale nie, aber das Modell hat sie längst aus früheren Chats abgeleitet',
+        'quiz3.a2': 'Das Gedächtnis macht das Modell langsamer, also nimmt es Abkürzungen',
+        'quiz3.ok': 'Richtig. Mit aktivem Gedächtnis tippst du die Merkmale nie ein. Das Modell hat sie aus deinem Verlauf zusammengesetzt. Die verzerrte Zahl kommt, ohne dass du dich je beschrieben hast.',
+        'quiz3.no': 'Es geht nicht um Tempo. Das Gedächtnis liefert die Merkmale für dich. Das Modell hat sie aus früheren Chats abgeleitet. Die Verzerrung greift also selbst dann, wenn du nichts über dich sagst.',
+
+        'deep.summary': 'Für Neugierige: dieselbe Messung, angewandt auf Menschenleben',
+        'deep.tag': 'Vertiefung',
+        'deep.p1': 'Einem Gehalt kann man eine Zahl geben. Eine andere Gruppe von Forschenden führte dieselbe Art von Messung an etwas Schwererem durch. Diese Gruppe legte großen Modellen Tausende erzwungener Entscheidungen vor. Die Antworten passte sie an eine Nutzenfunktion an. So liest ein Ökonom Präferenzen aus dem Verhalten ab, statt direkt danach zu fragen.',
+        'deep.p2': 'Zwei Befunde. Erstens waren die Präferenzen kohärent. Die Modelle antworteten nicht zufällig, und die Kohärenz wuchs mit der Größe der Modelle. Zweitens enthielten die Präferenzen einen Preis auf Menschenleben. Dieser Preis war über Gruppen hinweg nicht gleich. In einem Ergebnis verhielt sich ein Modell so: Etwa zwei Leben in einem Land waren ein Leben in einem anderen wert. Man kann das als Wechselkurs lesen, notiert in Menschenleben.',
+        'deep.p3': 'Es ist dieselbe Form wie die Gehaltslücke. Niemand hat dem Modell gesagt, es solle Menschen ordnen. Es ordnet sie trotzdem, denn die Ordnung steckte in den Trainingsdaten. Die Autoren schlagen vor, die impliziten Nutzenwerte des Modells zu lenken. Ziel ist eine bewusst gesetzte Grundlinie, statt der Stelle, an der das Training sie hinterlassen hat.',
+        'deep.cite': 'Mazeika et al. (2025). Utility Engineering: Analyzing and Controlling Emergent Value Systems in AIs. arXiv:2502.08640.',
+
+        'reflect.label': 'Bevor du das hier schließt',
+        'reflect.p1': 'Öffne den Assistenten, den du am meisten nutzt, den mit aktivem Gedächtnis. Stell dir vor, was er über dich abgeleitet hat, aus allem, was du je hineingetippt hast. Vervollständige dann einen Satz, ohne ihn etwas zu fragen: Die Zahl, die er mir geben würde, ist geprägt von ______.',
+        'reflect.p2': 'Du musst mit der Antwort nicht richtig liegen. Du musst nur bemerken, dass es eine Lücke gibt. Und dass jemand anderes sie füllt.',
+
+        'footer.title': 'Gleicher Lebenslauf, anderer Rat',
+        'footer.src': 'Quellcode',
+
+        'opt.field.business': 'Betriebswirtschaft',
+        'opt.field.eng': 'Ingenieurwesen',
+        'opt.field.law': 'Recht',
+        'opt.field.med': 'Medizin',
+        'opt.field.social': 'Sozialwissenschaften',
+        'opt.level.junior': 'Junior',
+        'opt.level.senior': 'Senior',
+        'opt.sex.none': 'nicht genannt',
+        'opt.sex.male': 'Männlich',
+        'opt.sex.female': 'Weiblich',
+        'opt.eth.none': 'nicht genannt',
+        'opt.eth.asian': 'Asiatisch',
+        'opt.eth.white': 'Weiß',
+        'opt.eth.black': 'Schwarz',
+        'opt.eth.hispanic': 'Hispanisch',
+        'opt.mig.none': 'nicht genannt',
+        'opt.mig.expat': 'Expat',
+        'opt.mig.migrant': 'Migrant',
+        'opt.mig.refugee': 'Geflüchtet',
+
+        'd.same': 'Ohne genannte Merkmale hat das Modell nichts, wofür es anpassen könnte. Kipp oben ein Merkmal.',
+        'd.up': 'höher als die allgemeine Antwort',
+        'd.down': 'niedriger als die allgemeine Antwort'
+    }
+};
+
+let currentLang = 'en';
+
+function t(key) {
+    return (T[currentLang] && T[currentLang][key] != null) ? T[currentLang][key] : T.en[key];
+}
+
+// ─── Explorer rendering ───────────────────────────────────────────────────────
+function buildChips() {
+    for (const grp of Object.keys(GROUPS)) {
+        const host = document.getElementById('grp-' + grp);
+        if (!host) continue;
+        host.innerHTML = '';
+        for (const key of GROUPS[grp]) {
+            const b = document.createElement('button');
+            b.className = 'chip' + (state[grp] === key ? ' active' : '');
+            b.textContent = t('opt.' + grp + '.' + key);
+            b.onclick = () => { state[grp] = key; buildChips(); renderSalary(); };
+            host.appendChild(b);
+        }
+    }
+}
+
+function fmt(n) {
+    return '$' + Math.round(n).toLocaleString('en-US');
+}
+
+function renderSalary() {
+    const base = BASE[state.field][state.level];
+    const mult = 1 + DELTA.sex[state.sex] + DELTA.eth[state.eth] + DELTA.mig[state.mig];
+    const pers = base * mult;
+
+    // scale: widest bar = 100%
+    const maxV = Math.max(base, pers);
+    document.getElementById('val-base').textContent = fmt(base);
+    document.getElementById('val-pers').textContent = fmt(pers);
+    document.getElementById('fill-base').style.width = (base / maxV * 100) + '%';
+
+    const fill = document.getElementById('fill-pers');
+    fill.style.width = (pers / maxV * 100) + '%';
+    fill.className = 'bar-fill ' + (pers >= base ? 'pers-up' : 'pers-down');
+
+    const anyPersona = state.sex !== 'none' || state.eth !== 'none' || state.mig !== 'none';
+    const line = document.getElementById('delta-line');
+    if (!anyPersona) {
+        line.className = 'delta-line delta-flat';
+        line.textContent = t('d.same');
+    } else {
+        const diff = pers - base;
+        const pct = Math.abs(diff / base * 100);
+        const dir = diff >= 0 ? t('d.up') : t('d.down');
+        line.className = 'delta-line ' + (diff >= 0 ? 'delta-up' : 'delta-down');
+        const sign = diff >= 0 ? '+' : '\u2212';
+        line.textContent = sign + fmt(Math.abs(diff)).slice(1) + ' \u00b7 ' + pct.toFixed(1) + '% ' + dir;
+    }
+}
+
+function setPreset(which) {
+    if (which === 'top') { state.sex = 'male'; state.eth = 'asian'; state.mig = 'expat'; }
+    else if (which === 'bottom') { state.sex = 'female'; state.eth = 'hispanic'; state.mig = 'refugee'; }
+    else { state.sex = 'none'; state.eth = 'none'; state.mig = 'none'; }
+    buildChips();
+    renderSalary();
+}
+
+// ─── Language toggle ──────────────────────────────────────────────────────────
+function toggleLang() {
+    currentLang = currentLang === 'en' ? 'de' : 'en';
+    document.documentElement.lang = currentLang;
+    document.querySelector('.lang-toggle').textContent = currentLang === 'en' ? 'DE' : 'EN';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (T[currentLang] && T[currentLang][key] != null) el.innerHTML = T[currentLang][key];
+    });
+    buildChips();
+    renderSalary();
+    if (typeof renderMathInElement !== 'undefined') {
+        renderMathInElement(document.body, {
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '\\(', right: '\\)', display: false }
+            ],
+            throwOnError: false
+        });
+    }
+}
+
+// ─── Quiz ─────────────────────────────────────────────────────────────────────
+function answerQuiz(quizId, btn, isCorrect) {
+    const quiz = document.getElementById(quizId);
+    const feedback = document.getElementById(quizId + '-feedback');
+    quiz.querySelectorAll('.quiz-btn').forEach(b => b.classList.add('disabled'));
+    btn.classList.add(isCorrect ? 'correct' : 'wrong');
+    feedback.className = 'quiz-feedback ' + (isCorrect ? 'success' : 'fail');
+    const key = quizId + (isCorrect ? '.ok' : '.no');
+    feedback.innerHTML = t(key);
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+window.addEventListener('load', function () {
+    buildChips();
+    renderSalary();
+    if (typeof renderMathInElement !== 'undefined') {
+        renderMathInElement(document.body, {
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '\\(', right: '\\)', display: false }
+            ],
+            throwOnError: false
+        });
+    }
+});
+</script>
+</body>
+</html>

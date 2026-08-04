@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>People Like You</title>
+
+    <!-- KaTeX -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #141420;
+            color: #e8e8f0;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            line-height: 1.8;
+            font-size: 18px;
+        }
+
+        .container { max-width: 820px; margin: 0 auto; padding: 0 24px; }
+
+        /* Language toggle */
+        .lang-toggle {
+            position: fixed; top: 16px; right: 16px;
+            background: #2a2a44; border: 1px solid #4a4a70; border-radius: 20px;
+            padding: 6px 14px; cursor: pointer;
+            font-size: 13px; font-family: sans-serif; color: #a0a0d0;
+            z-index: 100; transition: background 0.2s;
+        }
+        .lang-toggle:hover { background: #363658; }
+
+        /* Hero */
+        .hero { text-align: center; padding: 80px 24px 40px; }
+        .hero h1 { font-size: 42px; font-weight: 700; color: #fff; line-height: 1.3; max-width: 700px; margin: 0 auto; }
+        .hero .subtitle { margin-top: 16px; color: #888; font-size: 16px; font-style: italic; }
+
+        /* Sections */
+        section { padding: 50px 0; }
+        h2 { font-size: 30px; color: #fff; margin-bottom: 24px; line-height: 1.3; }
+        h3 { font-size: 20px; color: #ccc; margin: 28px 0 12px; }
+        p { margin-bottom: 20px; color: #ccc; }
+
+        .formula-block { margin: 24px auto; text-align: center; overflow-x: auto; padding: 10px 0; }
+
+        /* Movie feature table */
+        .table-wrap { overflow-x: auto; margin: 28px 0; }
+        table.movie-table { width: 100%; border-collapse: collapse; font-family: sans-serif; font-size: 14px; color: #ccc; }
+        table.movie-table th, table.movie-table td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #2a2a40; white-space: nowrap; }
+        table.movie-table th { color: #a0a0d0; font-weight: 600; border-bottom: 1px solid #3a3a55; }
+        table.movie-table td.title { color: #e8e8f0; font-weight: 600; white-space: normal; }
+        table.movie-table tr:hover td { background: #1c1c2e; }
+
+        /* Quiz */
+        .quiz { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px; padding: 28px; margin: 36px 0; }
+        .quiz-question { font-size: 18px; color: #e0e0f0; margin-bottom: 18px; font-style: italic; }
+        .quiz-options { display: flex; gap: 12px; flex-wrap: wrap; }
+        .quiz-btn {
+            background: #2a2a44; color: #e0e0f0; border: 1px solid #3a3a55; border-radius: 8px;
+            padding: 12px 24px; font-size: 16px; font-family: inherit; cursor: pointer;
+            transition: background 0.2s, border-color 0.2s; flex: 1; min-width: 160px; text-align: center;
+        }
+        .quiz-btn:hover { background: #363658; border-color: #5a5a80; }
+        .quiz-btn.correct { background: #1a4a2a; border-color: #50b878; color: #70e898; }
+        .quiz-btn.wrong { background: #2a2248; border-color: #8264dc; color: #a88ef0; }
+        .quiz-btn.disabled { pointer-events: none; opacity: 0.6; }
+        .quiz-feedback { margin-top: 14px; font-size: 16px; min-height: 24px; line-height: 1.5; }
+        .quiz-feedback.success { color: #70e898; }
+        .quiz-feedback.fail { color: #a88ef0; }
+
+        /* ── Interactive demo shell ─────────────────────────────────────────── */
+        .demo {
+            background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px;
+            padding: 28px; margin: 36px 0;
+        }
+        .demo-name {
+            font-family: sans-serif; font-size: 12px; letter-spacing: 0.08em;
+            text-transform: uppercase; color: #80b4f0; margin-bottom: 6px;
+        }
+        .demo-title { font-size: 22px; color: #fff; margin-bottom: 8px; }
+        .demo-instr { color: #aaa; font-size: 15px; font-style: italic; margin-bottom: 22px; }
+        .demo-sub { font-family: sans-serif; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: #888; margin: 22px 0 10px; }
+
+        /* Demo 1: vote cards */
+        .vote-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        .vote-card {
+            display: flex; align-items: center; gap: 14px;
+            background: #141420; border: 1px solid #2a2a40; border-radius: 8px; padding: 12px 14px;
+        }
+        .vote-film { flex: 1; font-family: sans-serif; font-size: 15px; color: #e0e0f0; }
+        .vote-film .yr { color: #777; font-size: 13px; }
+        .vote-btn {
+            font-family: sans-serif; font-size: 14px; cursor: pointer;
+            background: #2a2a44; color: #ccc; border: 1px solid #3a3a55; border-radius: 16px;
+            padding: 6px 16px; transition: all 0.15s;
+        }
+        .vote-btn:hover { background: #363658; }
+        .vote-btn.like.on { background: #1a4a2a; border-color: #50b878; color: #70e898; }
+        .vote-btn.dislike.on { background: #2a2248; border-color: #8264dc; color: #a88ef0; }
+
+        .demo-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 18px; flex-wrap: wrap; }
+        .demo-progress { font-family: sans-serif; font-size: 13px; color: #888; }
+        .demo-reset {
+            font-family: sans-serif; font-size: 13px; cursor: pointer;
+            background: #2a2a44; color: #a0a0d0; border: 1px solid #3a3a55; border-radius: 16px; padding: 6px 16px;
+        }
+        .demo-reset:hover { background: #363658; }
+
+        /* Demo 1: result */
+        .d1-result { margin-top: 24px; border-top: 1px solid #2a2a40; padding-top: 22px; }
+        .d1-match { color: #e0e0f0; font-size: 17px; margin-bottom: 6px; }
+        .d1-match strong { color: #70e898; }
+        .d1-agree { color: #999; font-size: 14px; font-family: sans-serif; margin-bottom: 18px; }
+        .rec-card {
+            display: flex; align-items: center; gap: 14px;
+            background: #141420; border: 1px solid #50b878; border-radius: 8px; padding: 16px 18px;
+        }
+        .rec-lead { font-family: sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: #70e898; margin-bottom: 10px; }
+        .rec-title { font-size: 18px; color: #fff; }
+        .rec-meta { font-family: sans-serif; font-size: 13px; color: #888; }
+
+        /* Demo 1: viewer matrix */
+        .matrix-wrap { overflow-x: auto; margin-top: 8px; }
+        table.matrix { border-collapse: collapse; font-family: sans-serif; font-size: 13px; }
+        table.matrix th, table.matrix td { padding: 7px 9px; text-align: center; border-bottom: 1px solid #23233a; }
+        table.matrix th { color: #888; font-weight: 600; }
+        table.matrix th.rowhead, table.matrix td.rowhead { text-align: left; color: #a0a0d0; white-space: nowrap; }
+        table.matrix td .cell { display: inline-block; width: 20px; height: 20px; line-height: 20px; border-radius: 4px; font-size: 12px; }
+        table.matrix td .like { background: #1a4a2a; color: #70e898; }
+        table.matrix td .dislike { background: #2a2248; color: #a88ef0; }
+        table.matrix td .na { background: #23233a; color: #666; }
+        table.matrix tr.you td { background: #181826; }
+        table.matrix tr.you .rowhead { color: #80b4f0; }
+        table.matrix tr.match td { background: #14241a; }
+        table.matrix tr.match .rowhead { color: #70e898; font-weight: 700; }
+        .matrix-legend { font-family: sans-serif; font-size: 12px; color: #777; margin-top: 10px; display: flex; gap: 16px; flex-wrap: wrap; }
+        .matrix-legend span { display: inline-flex; align-items: center; gap: 6px; }
+        .lg-dot { width: 14px; height: 14px; border-radius: 3px; display: inline-block; }
+
+        /* Demo 2: feature matcher */
+        .chip-cloud { display: flex; flex-wrap: wrap; gap: 8px; min-height: 10px; }
+        .chip {
+            font-family: sans-serif; font-size: 14px; cursor: pointer; user-select: none;
+            background: #2a2a44; color: #cfcfe6; border: 1px solid #3a3a55; border-radius: 16px; padding: 6px 14px;
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .chip:hover { background: #363658; border-color: #5a5a80; }
+        .chip.in-drop { background: #1e2a44; border-color: #80b4f0; color: #cfe0ff; }
+        .dropzone {
+            margin-top: 10px; border: 1px dashed #3a3a55; border-radius: 8px; padding: 16px;
+            min-height: 64px; background: #141420; transition: border-color 0.15s, background 0.15s;
+        }
+        .dropzone.over { border-color: #80b4f0; background: #181826; }
+        .dropzone .empty { color: #777; font-style: italic; font-family: sans-serif; font-size: 14px; }
+
+        .ranklist { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+        .rank-item {
+            display: flex; align-items: center; gap: 12px;
+            background: #141420; border: 1px solid #2a2a40; border-radius: 8px; padding: 11px 14px;
+        }
+        .rank-item.top { border-color: #50b878; }
+        .rank-film { flex: 1; font-family: sans-serif; font-size: 15px; color: #e0e0f0; }
+        .rank-tags { font-family: sans-serif; font-size: 12px; color: #777; margin-top: 3px; }
+        .rank-tags .hit { color: #70e898; }
+        .rank-score {
+            font-family: sans-serif; font-size: 12px; color: #888;
+            background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 12px; padding: 3px 10px; white-space: nowrap;
+        }
+        .rank-item.top .rank-score { color: #70e898; border-color: #2f4a38; }
+
+        /* Deep dive */
+        details.deep-dive { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px; padding: 0 28px; margin: 36px 0; }
+        details.deep-dive summary { cursor: pointer; padding: 22px 0; color: #80b4f0; font-family: sans-serif; font-size: 15px; list-style: none; }
+        details.deep-dive summary::-webkit-details-marker { display: none; }
+        details.deep-dive summary::before { content: "\25B8  "; color: #80b4f0; }
+        details.deep-dive[open] summary::before { content: "\25BE  "; }
+        details.deep-dive[open] summary { border-bottom: 1px solid #2a2a40; }
+        details.deep-dive .dd-body { padding: 20px 0 28px; }
+        details.deep-dive .dd-body p { color: #ccc; }
+
+        .section-rule { border: none; border-top: 1px solid #2a2a40; margin: 0; }
+
+        a { color: #80b4f0; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        footer { text-align: center; padding: 40px 24px; color: #444; font-size: 14px; }
+
+        @media (max-width: 680px) {
+            .hero h1 { font-size: 28px; }
+            h2 { font-size: 24px; }
+            body { font-size: 16px; }
+            .quiz-options { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<button class="lang-toggle" onclick="toggleLang()">DE</button>
+
+<!-- Hero -->
+<div class="hero">
+    <h1>People Like You</h1>
+    <p class="subtitle" data-i18n="hero.subtitle">A minimodule on recommendation systems. Two ways a machine decides what you see next.</p>
+</div>
+
+<div class="container">
+
+<!-- Intro -->
+<section>
+    <h2 data-i18n="intro.h2">The Row at the Top</h2>
+    <p data-i18n="intro.p1">Spotify built you a playlist you never asked for. Netflix put a row at the top of the screen before you typed anything. Amazon told you what people who bought this also bought. Different companies, different screens, the same move: a machine guessing what you want next.</p>
+    <p data-i18n="intro.p2">Two very different machines can produce that guess. They are built on opposite ideas, and they fail in opposite ways. This module is about both.</p>
+</section>
+
+<hr class="section-rule">
+
+<!-- Collaborative filtering -->
+<section>
+    <h2 data-i18n="s1.h2">Users Like You</h2>
+    <p data-i18n="s1.p1">Somewhere in the system there is a person who rated almost every film exactly the way you did. You agreed on six of them. Then that person raved about a seventh you have never seen. The machine hands it to you.</p>
+    <p data-i18n="s1.p2">That is collaborative filtering. It never looks at the film. It does not know that Barbie is pink or that Top Gun has fighter jets. It knows that you and one other viewer keep agreeing, so whatever that viewer loved and you have not watched is a good bet. Your taste is defined by the company you keep.</p>
+    <p data-i18n="s1.p3">It breaks in two ways. If nobody resembles you, it has nothing to offer. And if you just signed up and have rated nothing, it cannot find your neighbors at all. A new user is invisible to it. That second failure has a name, the cold-start problem, and it is the reason every app nags you to rate things the moment you arrive.</p>
+
+    <!-- Demo 1: Neighbor Finder -->
+    <div class="demo" id="demo1">
+        <div class="demo-name" data-i18n="demo1.name">Interactive Demo</div>
+        <div class="demo-title" data-i18n="demo1.title">The Neighbor Finder</div>
+        <p class="demo-instr" data-i18n="demo1.instr">Rate these five films. The machine compares your votes to nine other viewers, finds the one most like you, and recommends a film they liked that you haven't rated.</p>
+        <div class="vote-grid" id="d1-votes"></div>
+        <div class="demo-bar">
+            <span class="demo-progress" id="d1-progress"></span>
+            <button class="demo-reset" id="d1-reset" onclick="d1Reset()"></button>
+        </div>
+        <div id="d1-result"></div>
+    </div>
+
+    <!-- Quiz: collaborative -->
+    <div class="quiz" id="quiz_collab">
+        <div class="quiz-question" data-i18n="quiz_collab.q">A stranger rated the same six films almost exactly as you did, then raved about a seventh you have never seen. Recommending it to you is the core idea behind which method?</div>
+        <div class="quiz-options">
+            <button class="quiz-btn" onclick="answerQuiz('quiz_collab', this, true)" data-i18n="quiz_collab.a1">Collaborative filtering</button>
+            <button class="quiz-btn" onclick="answerQuiz('quiz_collab', this, false)" data-i18n="quiz_collab.a2">Content-based filtering</button>
+        </div>
+        <div class="quiz-feedback" id="quiz_collab-feedback"></div>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- Content-based filtering -->
+<section>
+    <h2 data-i18n="s2.h2">Movies Like That</h2>
+    <p data-i18n="s2.p1">Now forget the other viewers. You liked Encanto. The machine pulls up its sheet: animated, musical, original, leans female. It scans every other film for the same tags. Wicked shares three of them. It recommends Wicked, and it never consulted a single other person to do it. Just you and the feature sheet.</p>
+    <p data-i18n="s2.p2">That is content-based filtering. It reads what a thing is made of and finds more things made of the same stuff. Here is the sheet it reads for our nine films:</p>
+
+    <div class="table-wrap">
+        <table class="movie-table" id="movie-table"></table>
+    </div>
+
+    <p data-i18n="s2.p3">It has one obvious flaw. It only ever shows you more of the same. Like one animated film and it serves you the rest of the animated films, then stops. Nothing surprising ever reaches you, because surprise is not on the sheet. This is how a feed quietly narrows to a single genre.</p>
+
+    <!-- Demo 2: Feature Matcher -->
+    <div class="demo" id="demo2">
+        <div class="demo-name" data-i18n="demo2.name">Interactive Demo</div>
+        <div class="demo-title" data-i18n="demo2.title">The Feature Matcher</div>
+        <p class="demo-instr" data-i18n="demo2.instr">Drag the features you like into the box. The list reranks by how many of your features each film has. The chips click, too, if you'd rather not drag.</p>
+
+        <div class="demo-sub" data-i18n="demo2.palette">Features</div>
+        <div class="chip-cloud" id="d2-palette"></div>
+
+        <div class="demo-sub" data-i18n="demo2.dropLabel">Features I like</div>
+        <div class="dropzone" id="d2-drop"
+             ondragover="d2Over(event)" ondragleave="d2Leave(event)" ondrop="d2Drop(event)"></div>
+
+        <div class="demo-bar">
+            <span></span>
+            <button class="demo-reset" id="d2-clear" onclick="d2Clear()"></button>
+        </div>
+
+        <div class="demo-sub" data-i18n="demo2.ranked">Recommended for you</div>
+        <div class="ranklist" id="d2-rank"></div>
+    </div>
+
+    <!-- Quiz: content / cold-start -->
+    <div class="quiz" id="quiz_content">
+        <div class="quiz-question" data-i18n="quiz_content.q">A brand new user signs up and has rated nothing. Which method can still recommend something the moment they click one film they like?</div>
+        <div class="quiz-options">
+            <button class="quiz-btn" onclick="answerQuiz('quiz_content', this, false)" data-i18n="quiz_content.a1">Collaborative filtering</button>
+            <button class="quiz-btn" onclick="answerQuiz('quiz_content', this, true)" data-i18n="quiz_content.a2">Content-based filtering</button>
+        </div>
+        <div class="quiz-feedback" id="quiz_content-feedback"></div>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- Synthesis -->
+<section>
+    <h2 data-i18n="s3.h2">Same Seed, Two Paths</h2>
+    <p data-i18n="s3.p1">Give both machines the same starting point. You liked Top Gun: Maverick. Content-based reads the sheet: action, serious, live action, a sequel that leans male. It finds Spider-Man and Avatar and hands you more of that. Safe, predictable, the kind of thing you could have named yourself.</p>
+    <p data-i18n="s3.p2">Collaborative ignores the sheet. It finds the viewers who rated Top Gun the way you did, then notices that half of them also loved Barbie, which shares not one feature with a fighter-jet movie. It hands you Barbie. You would never have asked for it.</p>
+    <p data-i18n="s3.p3">One method shows you the nearest thing. The other shows you the surprising thing. Most real systems run both and blend the results, then spend years tuning the blend. The row at the top of your feed is that blend, decided for you, every time the page loads.</p>
+</section>
+
+<hr class="section-rule">
+
+<!-- The trick -->
+<section>
+    <h2 data-i18n="trick.h2">The Trick</h2>
+    <p data-i18n="trick.p1">Both demos ran the same move. The Neighbor Finder turned you into a row of likes and dislikes, then looked for the row most like yours. The Feature Matcher turned every film into a row of features, then looked for the rows closest to what you picked. Users, films, it makes no difference. Everything becomes a list of numbers.</p>
+    <p data-i18n="trick.p2">Once two things are lists of numbers, you can measure how far apart they point. Close together means similar. The recommendation is whatever sits nearest to you that you have not seen yet. Collaborative filtering measures distance between people. Content-based filtering measures distance between things. Same ruler, different objects.</p>
+
+    <details class="deep-dive">
+        <summary data-i18n="dd.summary">For the curious: how a machine measures taste</summary>
+        <div class="dd-body">
+            <p data-i18n="dd.p1">To compare two rows, the machine treats each one as a vector and measures the angle between them. Entries that only one row has are ignored. The score runs from 0 (nothing in common) toward 1 (pointing the same way):</p>
+            <div class="formula-block">$$\text{sim}(a, b) = \frac{\sum_i a_i\, b_i}{\sqrt{\sum_i a_i^2}\;\sqrt{\sum_i b_i^2}}$$</div>
+            <p data-i18n="dd.p2">In the Neighbor Finder, the rows are viewers and the entries are ratings. In the Feature Matcher, the rows are films and the entries are feature flags. The formula does not care which. The smaller the angle, the stronger the match.</p>
+        </div>
+    </details>
+</section>
+
+<!-- Source -->
+<section>
+    <h2 data-i18n="src.h2">Source Code</h2>
+    <p data-i18n="src.p">This page and its demos live here:</p>
+    <p><a href="https://github.com/i-yam/passt/tree/main/modules/people_like_you" target="_blank">https://github.com/i-yam/passt/tree/main/modules/people_like_you</a></p>
+</section>
+
+</div>
+
+<footer>
+    <span data-i18n="footer.title">People Like You</span>
+    <br>&copy; All rights reserved
+</footer>
+
+<!-- Scripts -->
+<script>
+
+// ─── Dataset: nine real Hollywood films, 2021-2025 ────────────────────────────
+// Worldwide gross figures approx (Box Office Mojo / studio reporting).
+const MOVIES = [
+    { id: 'spiderman',  title: 'Spider-Man: No Way Home',    year: 2021, gross: '$1.92B', grossNum: 1.92, genre: 'action',  tone: 'serious', animated: false, original: false, skew: 'male'   },
+    { id: 'topgun',     title: 'Top Gun: Maverick',          year: 2022, gross: '$1.49B', grossNum: 1.49, genre: 'action',  tone: 'serious', animated: false, original: false, skew: 'male'   },
+    { id: 'avatar',     title: 'Avatar: The Way of Water',   year: 2022, gross: '$2.32B', grossNum: 2.32, genre: 'scifi',   tone: 'serious', animated: false, original: false, skew: 'broad'  },
+    { id: 'barbie',     title: 'Barbie',                     year: 2023, gross: '$1.45B', grossNum: 1.45, genre: 'comedy',  tone: 'light',   animated: false, original: true,  skew: 'female' },
+    { id: 'mario',      title: 'The Super Mario Bros. Movie',year: 2023, gross: '$1.36B', grossNum: 1.36, genre: 'family',  tone: 'light',   animated: true,  original: false, skew: 'broad'  },
+    { id: 'insideout2', title: 'Inside Out 2',               year: 2024, gross: '$1.70B', grossNum: 1.70, genre: 'family',  tone: 'light',   animated: true,  original: false, skew: 'broad'  },
+    { id: 'wicked',     title: 'Wicked',                     year: 2024, gross: '$759M',  grossNum: 0.759,genre: 'musical', tone: 'light',   animated: false, original: true,  skew: 'female' },
+    { id: 'zootopia2',  title: 'Zootopia 2',                 year: 2025, gross: '$1.27B', grossNum: 1.27, genre: 'family',  tone: 'light',   animated: true,  original: false, skew: 'broad'  },
+    { id: 'encanto',    title: 'Encanto',                    year: 2021, gross: '$261M',  grossNum: 0.261,genre: 'musical', tone: 'light',   animated: true,  original: true,  skew: 'female' }
+];
+const MOVIE = Object.fromEntries(MOVIES.map(m => [m.id, m]));
+// Feature tags derived from fields, so the table and the matcher never drift.
+function tagsOf(m) {
+    return [ m.genre, m.tone, m.animated ? 'animated' : 'liveaction', m.original ? 'original' : 'sequel', m.skew ];
+}
+
+// ─── Synthetic viewers (collaborative filtering) ──────────────────────────────
+// +1 liked, -1 disliked. Distinct on the five voting films; tuned for variety.
+const USERS = [
+ { id: 1, r: { spiderman: 1, topgun: 1, barbie:-1, wicked:-1, zootopia2:-1, avatar: 1, mario:-1, insideout2:-1, encanto:-1 } },
+ { id: 2, r: { spiderman: 1, topgun: 1, barbie:-1, wicked:-1, zootopia2: 1, avatar: 1, mario: 1, insideout2: 1, encanto:-1 } },
+ { id: 3, r: { spiderman:-1, topgun:-1, barbie: 1, wicked: 1, zootopia2:-1, avatar:-1, mario:-1, insideout2: 1, encanto: 1 } },
+ { id: 4, r: { spiderman:-1, topgun:-1, barbie: 1, wicked: 1, zootopia2: 1, avatar: 1, mario:-1, insideout2:-1, encanto: 1 } },
+ { id: 5, r: { spiderman:-1, topgun:-1, barbie:-1, wicked:-1, zootopia2: 1, avatar:-1, mario: 1, insideout2: 1, encanto:-1 } },
+ { id: 6, r: { spiderman: 1, topgun:-1, barbie:-1, wicked: 1, zootopia2: 1, avatar:-1, mario: 1, insideout2: 1, encanto:-1 } },
+ { id: 7, r: { spiderman: 1, topgun: 1, barbie: 1, wicked: 1, zootopia2: 1, avatar: 1, mario: 1, insideout2: 1, encanto: 1 } },
+ { id: 8, r: { spiderman:-1, topgun:-1, barbie:-1, wicked:-1, zootopia2:-1, avatar:-1, mario:-1, insideout2:-1, encanto: 1 } },
+ { id: 9, r: { spiderman: 1, topgun:-1, barbie: 1, wicked:-1, zootopia2:-1, avatar: 1, mario:-1, insideout2: 1, encanto: 1 } }
+];
+const VOTING = ['spiderman', 'topgun', 'barbie', 'wicked', 'zootopia2'];
+const UNSEEN = ['avatar', 'mario', 'insideout2', 'encanto'];
+
+// ─── i18n ─────────────────────────────────────────────────────────────────────
+const T = {
+    en: {
+        'hero.subtitle': 'A minimodule on recommendation systems. Two ways a machine decides what you see next.',
+
+        'intro.h2':  'The Row at the Top',
+        'intro.p1':  'Spotify built you a playlist you never asked for. Netflix put a row at the top of the screen before you typed anything. Amazon told you what people who bought this also bought. Different companies, different screens, the same move: a machine guessing what you want next.',
+        'intro.p2':  'Two very different machines can produce that guess. They are built on opposite ideas, and they fail in opposite ways. This module is about both.',
+
+        's1.h2':  'Users Like You',
+        's1.p1':  'Somewhere in the system there is a person who rated almost every film exactly the way you did. You agreed on six of them. Then that person raved about a seventh you have never seen. The machine hands it to you.',
+        's1.p2':  'That is collaborative filtering. It never looks at the film. It does not know that Barbie is pink or that Top Gun has fighter jets. It knows that you and one other viewer keep agreeing, so whatever that viewer loved and you have not watched is a good bet. Your taste is defined by the company you keep.',
+        's1.p3':  'It breaks in two ways. If nobody resembles you, it has nothing to offer. And if you just signed up and have rated nothing, it cannot find your neighbors at all. A new user is invisible to it. That second failure has a name, the cold-start problem, and it is the reason every app nags you to rate things the moment you arrive.',
+
+        'demo1.name':  'Interactive Demo',
+        'demo1.title': 'The Neighbor Finder',
+        'demo1.instr': 'Rate these five films. The machine compares your votes to nine other viewers, finds the one most like you, and recommends a film they liked that you haven\'t rated.',
+
+        'quiz_collab.q':  'A stranger rated the same six films almost exactly as you did, then raved about a seventh you have never seen. Recommending it to you is the core idea behind which method?',
+        'quiz_collab.a1': 'Collaborative filtering',
+        'quiz_collab.a2': 'Content-based filtering',
+        'quiz_collab.ok': 'Right. Collaborative filtering finds people whose taste matches yours and passes you what they liked. It never looks at the film itself, only at who agreed with you.',
+        'quiz_collab.no': 'Not this one. Content-based filtering reads the film\'s own features and ignores other viewers. Here the recommendation came entirely from a person who shares your taste, which is collaborative filtering.',
+
+        's2.h2':  'Movies Like That',
+        's2.p1':  'Now forget the other viewers. You liked Encanto. The machine pulls up its sheet: animated, musical, original, leans female. It scans every other film for the same tags. Wicked shares three of them. It recommends Wicked, and it never consulted a single other person to do it. Just you and the feature sheet.',
+        's2.p2':  'That is content-based filtering. It reads what a thing is made of and finds more things made of the same stuff. Here is the sheet it reads for our nine films:',
+        's2.p3':  'It has one obvious flaw. It only ever shows you more of the same. Like one animated film and it serves you the rest of the animated films, then stops. Nothing surprising ever reaches you, because surprise is not on the sheet. This is how a feed quietly narrows to a single genre.',
+
+        'demo2.name':     'Interactive Demo',
+        'demo2.title':    'The Feature Matcher',
+        'demo2.instr':    'Drag the features you like into the box. The list reranks by how many of your features each film has. The chips click, too, if you\'d rather not drag.',
+        'demo2.palette':  'Features',
+        'demo2.dropLabel':'Features I like',
+        'demo2.ranked':   'Recommended for you',
+
+        'quiz_content.q':  'A brand new user signs up and has rated nothing. Which method can still recommend something the moment they click one film they like?',
+        'quiz_content.a1': 'Collaborative filtering',
+        'quiz_content.a2': 'Content-based filtering',
+        'quiz_content.ok': 'Right. Content-based filtering only needs the features of the one film they clicked. Collaborative filtering needs a history of ratings to find neighbors, which a new user does not have yet. That gap is the cold-start problem.',
+        'quiz_content.no': 'Not quite. Collaborative filtering needs a rating history to find people similar to you, and a brand new user has none. Content-based filtering works from the film\'s own features, so one click is enough.',
+
+        's3.h2':  'Same Seed, Two Paths',
+        's3.p1':  'Give both machines the same starting point. You liked Top Gun: Maverick. Content-based reads the sheet: action, serious, live action, a sequel that leans male. It finds Spider-Man and Avatar and hands you more of that. Safe, predictable, the kind of thing you could have named yourself.',
+        's3.p2':  'Collaborative ignores the sheet. It finds the viewers who rated Top Gun the way you did, then notices that half of them also loved Barbie, which shares not one feature with a fighter-jet movie. It hands you Barbie. You would never have asked for it.',
+        's3.p3':  'One method shows you the nearest thing. The other shows you the surprising thing. Most real systems run both and blend the results, then spend years tuning the blend. The row at the top of your feed is that blend, decided for you, every time the page loads.',
+
+        'trick.h2': 'The Trick',
+        'trick.p1': 'Both demos ran the same move. The Neighbor Finder turned you into a row of likes and dislikes, then looked for the row most like yours. The Feature Matcher turned every film into a row of features, then looked for the rows closest to what you picked. Users, films, it makes no difference. Everything becomes a list of numbers.',
+        'trick.p2': 'Once two things are lists of numbers, you can measure how far apart they point. Close together means similar. The recommendation is whatever sits nearest to you that you have not seen yet. Collaborative filtering measures distance between people. Content-based filtering measures distance between things. Same ruler, different objects.',
+
+        'dd.summary': 'For the curious: how a machine measures taste',
+        'dd.p1':  'To compare two rows, the machine treats each one as a vector and measures the angle between them. Entries that only one row has are ignored. The score runs from 0 (nothing in common) toward 1 (pointing the same way):',
+        'dd.p2':  'In the Neighbor Finder, the rows are viewers and the entries are ratings. In the Feature Matcher, the rows are films and the entries are feature flags. The formula does not care which. The smaller the angle, the stronger the match.',
+
+        'src.h2': 'Source Code',
+        'src.p':  'This page and its demos live here:',
+
+        'footer.title': 'People Like You',
+
+        // dynamic (JS-filled) ─ Demo 1
+        'd1.like': 'Like', 'd1.dislike': 'Dislike',
+        'd1.progress': '{n} of 5 rated',
+        'd1.reset': 'Start over',
+        'd1.match': 'You rated films most like Viewer {id}.',
+        'd1.agree': 'You agreed on {k} of your five votes, more than any other viewer.',
+        'd1.recLead': 'A film they liked that you haven\'t rated',
+        'd1.tableTitle': 'How the nine viewers rated every film',
+        'd1.you': 'You',
+        'd1.viewer': 'Viewer {id}',
+        'd1.legLiked': 'liked', 'd1.legDisliked': 'disliked', 'd1.legNA': 'you didn\'t rate',
+
+        // dynamic ─ Demo 2
+        'd2.clear': 'Clear',
+        'd2.empty': 'Drag features here, or click them.',
+        'd2.rankEmpty': 'Pick a few features to see recommendations.',
+        'd2.match': '{k} matching',
+
+        // table headers + tokens
+        'tbl.movie': 'Movie', 'tbl.year': 'Year', 'tbl.genre': 'Genre', 'tbl.tone': 'Tone',
+        'tbl.animated': 'Animated', 'tbl.original': 'Original', 'tbl.skew': 'Skew',
+        'val.yes': 'yes', 'val.no': 'no',
+        'genre.action': 'action', 'genre.scifi': 'sci-fi', 'genre.comedy': 'comedy', 'genre.family': 'family', 'genre.musical': 'musical',
+        'tone.serious': 'serious', 'tone.light': 'light',
+        'fmt.animated': 'animated', 'fmt.liveaction': 'live action',
+        'origin.original': 'original', 'origin.sequel': 'sequel',
+        'skew.male': 'male', 'skew.female': 'female', 'skew.broad': 'broad',
+    },
+
+    de: {
+        'hero.subtitle': 'Ein Mini-Modul über Empfehlungssysteme. Zwei Wege, wie eine Maschine entscheidet, was du als Nächstes siehst.',
+        'intro.h2': 'Die Zeile ganz oben',
+        'intro.p1': 'Spotify hat dir eine Playlist gebaut, um die du nie gebeten hast. Netflix hat eine Zeile oben auf den Bildschirm gesetzt, bevor du irgendetwas getippt hast. Amazon hat dir gesagt, was andere Käufer dieses Artikels ebenfalls gekauft haben. Andere Firmen, andere Bildschirme, derselbe Zug: Eine Maschine rät, was du als Nächstes willst.',
+        'intro.p2': 'Zwei sehr unterschiedliche Maschinen können dieses Raten erzeugen. Sie beruhen auf gegensätzlichen Ideen. Und sie versagen auf gegensätzliche Weise. In diesem Modul geht es um beide.',
+        's1.h2': 'Leute wie du',
+        's1.p1': 'Irgendwo im System gibt es eine Person, die fast jeden Film genau so bewertet hat wie du. Bei sechs davon wart ihr euch einig. Dann schwärmte diese Person von einem siebten, den du nie gesehen hast. Die Maschine reicht ihn dir.',
+        's1.p2': 'Das ist Collaborative Filtering. Es schaut sich den Film nie an. Es weiß nicht, dass Barbie pink ist oder dass in Top Gun Kampfjets fliegen. Es weiß nur eines: Du und ein anderer Zuschauer, ihr seid euch immer wieder einig. Also ist alles ein guter Tipp, was dieser Zuschauer geliebt und du noch nicht gesehen hast. Dein Geschmack wird durch die Gesellschaft bestimmt, in der du dich bewegst.',
+        's1.p3': 'Es scheitert auf zwei Arten. Ähnelt dir niemand, hat es nichts zu bieten. Und wenn du dich gerade erst angemeldet hast, hast du noch nichts bewertet. Dann findet es deine Nachbarn überhaupt nicht. Für das System ist ein neuer Nutzer unsichtbar. Dieses zweite Versagen hat einen Namen: das Cold-Start-Problem. Es ist der Grund, warum dich jede App gleich bei der Ankunft drängt, Dinge zu bewerten.',
+        'demo1.name': 'Interaktive Demo',
+        'demo1.title': 'Der Nachbar-Finder',
+        'demo1.instr': 'Bewerte diese fünf Filme. Die Maschine vergleicht deine Stimmen mit neun anderen Zuschauern. Sie findet den, der dir am ähnlichsten ist. Dann empfiehlt sie dir einen Film, den er mochte und den du nicht bewertet hast.',
+        'quiz_collab.q': 'Ein Fremder hat dieselben sechs Filme fast genau so bewertet wie du. Dann schwärmte er von einem siebten, den du nie gesehen hast. Ihn dir zu empfehlen, ist die Grundidee hinter welcher Methode?',
+        'quiz_collab.a1': 'Collaborative Filtering',
+        'quiz_collab.a2': 'Content-Based Filtering',
+        'quiz_collab.ok': 'Richtig. Collaborative Filtering findet Leute, deren Geschmack zu deinem passt. Dann reicht es dir, was sie mochten. Den Film selbst schaut es sich nie an, nur die Leute, die mit dir übereingestimmt haben.',
+        'quiz_collab.no': 'Nicht diese Methode. Content-Based Filtering liest die eigenen Merkmale des Films und ignoriert andere Zuschauer. Hier kam die Empfehlung ganz von einer Person, die deinen Geschmack teilt. Das ist Collaborative Filtering.',
+        's2.h2': 'Filme wie dieser',
+        's2.p1': 'Jetzt vergiss die anderen Zuschauer. Dir hat Encanto gefallen. Die Maschine zieht sein Merkmalsblatt heraus: animiert, Musical, Original, weiblich geprägt. Sie durchsucht jeden anderen Film nach denselben Tags. Wicked teilt drei davon. Also empfiehlt sie Wicked. Dafür hat sie keine einzige andere Person befragt. Nur du und das Merkmalsblatt.',
+        's2.p2': 'Das ist Content-Based Filtering. Es liest, woraus eine Sache gemacht ist, und findet mehr Dinge aus demselben Stoff. Hier ist das Merkmalsblatt, das es für unsere neun Filme liest:',
+        's2.p3': 'Es hat einen offensichtlichen Fehler. Es zeigt dir immer nur mehr vom Gleichen. Mag einen animierten Film, und es serviert dir den Rest der animierten Filme. Danach ist Schluss. Nichts Überraschendes erreicht dich je, denn Überraschung steht nicht auf dem Merkmalsblatt. So verengt sich ein Feed leise auf ein einziges Genre.',
+        'demo2.name': 'Interaktive Demo',
+        'demo2.title': 'Der Merkmalsvergleich',
+        'demo2.instr': 'Zieh die Merkmale, die dir gefallen, in die Box. Die Liste sortiert sich danach, wie viele deiner Merkmale jeder Film hat. Die Chips lassen sich auch anklicken, falls du nicht ziehen möchtest.',
+        'demo2.palette': 'Merkmale',
+        'demo2.dropLabel': 'Merkmale, die ich mag',
+        'demo2.ranked': 'Für dich empfohlen',
+        'quiz_content.q': 'Ein brandneuer Nutzer meldet sich an und hat nichts bewertet. Er klickt auf einen Film, der ihm gefällt. Welche Methode kann ihm trotzdem sofort etwas empfehlen?',
+        'quiz_content.a1': 'Collaborative Filtering',
+        'quiz_content.a2': 'Content-Based Filtering',
+        'quiz_content.ok': 'Richtig. Content-Based Filtering braucht nur die Merkmale des einen Films, auf den er geklickt hat. Collaborative Filtering braucht dagegen eine Bewertungshistorie, um Nachbarn zu finden. Ein neuer Nutzer hat noch keine. Diese Lücke ist das Cold-Start-Problem.',
+        'quiz_content.no': 'Nicht ganz. Collaborative Filtering braucht eine Bewertungshistorie, um dir ähnliche Leute zu finden. Ein brandneuer Nutzer hat keine. Content-Based Filtering arbeitet aus den eigenen Merkmalen des Films, also reicht ein einziger Klick.',
+        's3.h2': 'Gleicher Anstoß, zwei Wege',
+        's3.p1': 'Gib beiden Maschinen denselben Ausgangspunkt. Dir hat Top Gun: Maverick gefallen. Content-Based liest das Merkmalsblatt: Action, ernst, Live-Action, ein Sequel, männlich geprägt. Es findet Spider-Man und Avatar und reicht dir mehr davon. Sicher, vorhersehbar, die Art Sache, die du selbst hättest nennen können.',
+        's3.p2': 'Collaborative ignoriert das Merkmalsblatt. Es findet die Zuschauer, die Top Gun so bewertet haben wie du. Dann bemerkt es etwas: Die Hälfte von ihnen liebte auch Barbie. Barbie teilt kein einziges Merkmal mit einem Kampfjet-Film. Es reicht dir Barbie. Du hättest nie danach gefragt.',
+        's3.p3': 'Eine Methode zeigt dir das Nächstliegende. Die andere zeigt dir das Überraschende. Die meisten echten Systeme lassen beide laufen und mischen die Ergebnisse. Danach stimmen sie die Mischung jahrelang ab. Die Zeile oben in deinem Feed ist genau diese Mischung. Für dich entschieden, jedes Mal, wenn die Seite lädt.',
+        'trick.h2': 'Der Trick',
+        'trick.p1': 'Beide Demos haben denselben Zug gemacht. Der Nachbar-Finder hat dich in eine Zeile aus Likes und Dislikes verwandelt. Dann hat er die Zeile gesucht, die deiner am ähnlichsten ist. Der Merkmalsvergleich hat jeden Film in eine Zeile aus Merkmalen verwandelt. Dann hat er die Zeilen gesucht, die deiner Auswahl am nächsten liegen. Nutzer, Filme, das macht keinen Unterschied. Alles wird zu einer Liste von Zahlen.',
+        'trick.p2': 'Sobald zwei Dinge Listen von Zahlen sind, kannst du messen, wie weit sie auseinanderliegen. Nah beieinander heißt ähnlich. Die Empfehlung ist das, was dir am nächsten liegt und was du noch nicht gesehen hast. Collaborative Filtering misst den Abstand zwischen Menschen. Content-Based Filtering misst den Abstand zwischen Dingen. Dasselbe Lineal, andere Objekte.',
+        'dd.summary': 'Für Neugierige: wie eine Maschine Geschmack misst',
+        'dd.p1': 'Um zwei Zeilen zu vergleichen, behandelt die Maschine jede Zeile als Vektor. Dann misst sie den Winkel zwischen ihnen. Einträge, die nur eine der beiden Zeilen hat, werden ignoriert. Der Wert läuft von 0 (nichts gemeinsam) bis 1 (zeigt in dieselbe Richtung):',
+        'dd.p2': 'Im Nachbar-Finder sind die Zeilen Zuschauer und die Einträge Bewertungen. Im Merkmalsvergleich sind die Zeilen Filme und die Einträge Merkmalswerte. Der Formel ist es egal, was davon. Je kleiner der Winkel, desto stärker der Treffer.',
+        'src.h2': 'Quellcode',
+        'src.p': 'Diese Seite und ihre Demos liegen hier:',
+        'footer.title': 'Leute wie du',
+        'd1.like': 'Mag ich',
+        'd1.dislike': 'Mag ich nicht',
+        'd1.progress': '{n} von 5 bewertet',
+        'd1.reset': 'Neu starten',
+        'd1.match': 'Du hast Filme am ähnlichsten zu Zuschauer {id} bewertet.',
+        'd1.agree': 'Ihr wart euch bei {k} deiner fünf Stimmen einig, mehr als jeder andere Zuschauer.',
+        'd1.recLead': 'Ein Film, den er mochte und den du nicht bewertet hast',
+        'd1.tableTitle': 'Wie die neun Zuschauer jeden Film bewertet haben',
+        'd1.you': 'Du',
+        'd1.viewer': 'Zuschauer {id}',
+        'd1.legLiked': 'mochte',
+        'd1.legDisliked': 'mochte nicht',
+        'd1.legNA': 'nicht bewertet',
+        'd2.clear': 'Leeren',
+        'd2.empty': 'Zieh Merkmale hierher oder klick sie an.',
+        'd2.rankEmpty': 'Wähle ein paar Merkmale, um Empfehlungen zu sehen.',
+        'd2.match': '{k} passend',
+        'tbl.movie': 'Film',
+        'tbl.year': 'Jahr',
+        'tbl.genre': 'Genre',
+        'tbl.tone': 'Ton',
+        'tbl.animated': 'Animiert',
+        'tbl.original': 'Original',
+        'tbl.skew': 'Prägung',
+        'val.yes': 'ja',
+        'val.no': 'nein',
+        'genre.action': 'Action',
+        'genre.scifi': 'Sci-Fi',
+        'genre.comedy': 'Komödie',
+        'genre.family': 'Familie',
+        'genre.musical': 'Musical',
+        'tone.serious': 'ernst',
+        'tone.light': 'leicht',
+        'fmt.animated': 'animiert',
+        'fmt.liveaction': 'Live-Action',
+        'origin.original': 'Original',
+        'origin.sequel': 'Sequel',
+        'skew.male': 'männlich',
+        'skew.female': 'weiblich',
+        'skew.broad': 'breit'
+    }
+};
+
+let currentLang = 'en';
+function t(key) { return (T[currentLang] && T[currentLang][key] != null) ? T[currentLang][key] : T.en[key]; }
+function fill(key, vars) { let s = t(key); for (const k in vars) s = s.replace('{' + k + '}', vars[k]); return s; }
+
+// short codes for the matrix header
+const CODE = { spiderman:'SM', topgun:'TG', avatar:'AV', barbie:'BB', mario:'MR', insideout2:'IO2', wicked:'WK', zootopia2:'Z2', encanto:'EN' };
+
+// label a feature token via the i18n maps
+function featLabel(tok) {
+    if (['action','scifi','comedy','family','musical'].includes(tok)) return t('genre.' + tok);
+    if (['serious','light'].includes(tok)) return t('tone.' + tok);
+    if (tok === 'animated') return t('fmt.animated');
+    if (tok === 'liveaction') return t('fmt.liveaction');
+    if (tok === 'original') return t('origin.original');
+    if (tok === 'sequel') return t('origin.sequel');
+    if (['male','female','broad'].includes(tok)) return t('skew.' + tok);
+    return tok;
+}
+const FEATURE_TOKENS = ['action','scifi','comedy','family','musical','serious','light','animated','liveaction','original','sequel','female','male','broad'];
+
+// ─── Movie feature table ──────────────────────────────────────────────────────
+function renderMovieTable() {
+    const heads = ['tbl.movie','tbl.year','tbl.genre','tbl.tone','tbl.animated','tbl.original','tbl.skew'];
+    let h = '<thead><tr>' + heads.map(k => '<th>' + t(k) + '</th>').join('') + '</tr></thead><tbody>';
+    MOVIES.forEach(m => {
+        h += '<tr>'
+            + '<td class="title">' + m.title + '</td>'
+            + '<td>' + m.year + '</td>'
+            + '<td>' + t('genre.' + m.genre) + '</td>'
+            + '<td>' + t('tone.' + m.tone) + '</td>'
+            + '<td>' + (m.animated ? t('val.yes') : t('val.no')) + '</td>'
+            + '<td>' + (m.original ? t('val.yes') : t('val.no')) + '</td>'
+            + '<td>' + t('skew.' + m.skew) + '</td>'
+            + '</tr>';
+    });
+    document.getElementById('movie-table').innerHTML = h + '</tbody>';
+}
+
+// ─── Demo 1: Neighbor Finder ──────────────────────────────────────────────────
+let d1Votes = {};   // filmId -> 1 | -1
+
+function cosineVotes(votes, user) {
+    let dot = 0, na = 0, nb = 0;
+    VOTING.forEach(f => { if (votes[f] !== undefined) { dot += votes[f] * user.r[f]; na += votes[f] * votes[f]; nb += user.r[f] * user.r[f]; } });
+    if (na === 0 || nb === 0) return 0;
+    return dot / (Math.sqrt(na) * Math.sqrt(nb));
+}
+// pure: returns {closestId, agree, recId, sims}
+function computeRecommendation(votes) {
+    const sims = USERS.map(u => ({
+        id: u.id, user: u,
+        sim: cosineVotes(votes, u),
+        agree: VOTING.filter(f => votes[f] !== undefined && votes[f] === u.r[f]).length
+    })).sort((a, b) => b.sim - a.sim || a.id - b.id);
+    const closest = sims[0];
+    let pool = UNSEEN.filter(f => closest.user.r[f] === 1);
+    if (!pool.length) pool = UNSEEN.slice();
+    const score = f => sims.reduce((s, x) => s + (x.sim > 0 ? x.sim * x.user.r[f] : 0), 0);
+    pool.sort((a, b) => score(b) - score(a) || MOVIE[b].grossNum - MOVIE[a].grossNum);
+    return { closestId: closest.id, agree: closest.agree, recId: pool[0], sims };
+}
+
+function renderD1Votes() {
+    const grid = document.getElementById('d1-votes');
+    grid.innerHTML = VOTING.map(fid => {
+        const m = MOVIE[fid];
+        const v = d1Votes[fid];
+        return '<div class="vote-card">'
+            + '<div class="vote-film">' + m.title + ' <span class="yr">' + m.year + '</span></div>'
+            + '<button class="vote-btn like ' + (v === 1 ? 'on' : '') + '" onclick="d1Vote(\'' + fid + '\',1)">' + t('d1.like') + '</button>'
+            + '<button class="vote-btn dislike ' + (v === -1 ? 'on' : '') + '" onclick="d1Vote(\'' + fid + '\',-1)">' + t('d1.dislike') + '</button>'
+            + '</div>';
+    }).join('');
+    document.getElementById('d1-progress').textContent = fill('d1.progress', { n: Object.keys(d1Votes).length });
+    document.getElementById('d1-reset').textContent = t('d1.reset');
+}
+
+function d1Vote(fid, val) {
+    d1Votes[fid] = val;
+    renderD1Votes();
+    renderD1Result();
+}
+function d1Reset() {
+    d1Votes = {};
+    renderD1Votes();
+    renderD1Result();
+}
+
+function renderD1Result() {
+    const box = document.getElementById('d1-result');
+    if (Object.keys(d1Votes).length < VOTING.length) { box.innerHTML = ''; return; }
+    const res = computeRecommendation(d1Votes);
+    const rec = MOVIE[res.recId];
+
+    // viewer matrix (You row + 9 viewers)
+    const cols = MOVIES.map(m => m.id);
+    let head = '<th class="rowhead"></th>' + cols.map(id => '<th title="' + MOVIE[id].title + '">' + CODE[id] + '</th>').join('');
+    const cellHTML = (val, rated) => {
+        if (!rated) return '<td><span class="cell na">?</span></td>';
+        return val === 1 ? '<td><span class="cell like">+</span></td>' : '<td><span class="cell dislike">\u2212</span></td>';
+    };
+    let youRow = '<tr class="you"><td class="rowhead">' + t('d1.you') + '</td>'
+        + cols.map(id => cellHTML(d1Votes[id], d1Votes[id] !== undefined)).join('') + '</tr>';
+    let rows = USERS.map(u => {
+        const cls = u.id === res.closestId ? ' class="match"' : '';
+        return '<tr' + cls + '><td class="rowhead">' + fill('d1.viewer', { id: u.id }) + '</td>'
+            + cols.map(id => cellHTML(u.r[id], true)).join('') + '</tr>';
+    }).join('');
+
+    box.innerHTML =
+        '<div class="d1-match">' + fill('d1.match', { id: '<strong>' + res.closestId + '</strong>' }) + '</div>'
+        + '<div class="d1-agree">' + fill('d1.agree', { k: res.agree }) + '</div>'
+        + '<div class="rec-lead">' + t('d1.recLead') + '</div>'
+        + '<div class="rec-card"><div style="flex:1"><div class="rec-title">' + rec.title + '</div>'
+        + '<div class="rec-meta">' + rec.year + ' \u00b7 ' + rec.gross + '</div></div></div>'
+        + '<div class="demo-sub">' + t('d1.tableTitle') + '</div>'
+        + '<div class="matrix-wrap"><table class="matrix"><thead><tr>' + head + '</tr></thead><tbody>'
+        + youRow + rows + '</tbody></table></div>'
+        + '<div class="matrix-legend">'
+        + '<span><span class="lg-dot" style="background:#1a4a2a"></span>' + t('d1.legLiked') + '</span>'
+        + '<span><span class="lg-dot" style="background:#2a2248"></span>' + t('d1.legDisliked') + '</span>'
+        + '<span><span class="lg-dot" style="background:#23233a"></span>' + t('d1.legNA') + '</span>'
+        + '</div>';
+}
+
+// ─── Demo 2: Feature Matcher ──────────────────────────────────────────────────
+let d2Selected = new Set();
+
+function rankMovies(selected) {
+    const sel = (selected instanceof Set) ? selected : new Set(selected);
+    return MOVIES.map(m => {
+        const tags = tagsOf(m);
+        const hits = tags.filter(tag => sel.has(tag));
+        return { id: m.id, score: hits.length, hits, tags };
+    }).sort((a, b) => b.score - a.score || MOVIE[b.id].grossNum - MOVIE[a.id].grossNum);
+}
+
+function renderD2Palette() {
+    const pal = document.getElementById('d2-palette');
+    pal.innerHTML = FEATURE_TOKENS.filter(tok => !d2Selected.has(tok)).map(tok =>
+        '<div class="chip" draggable="true" ondragstart="d2Drag(event,\'' + tok + '\')" onclick="d2Add(\'' + tok + '\')">' + featLabel(tok) + '</div>'
+    ).join('');
+}
+function renderD2Drop() {
+    const dz = document.getElementById('d2-drop');
+    if (d2Selected.size === 0) { dz.innerHTML = '<span class="empty">' + t('d2.empty') + '</span>'; }
+    else {
+        dz.innerHTML = '<div class="chip-cloud">' + [...d2Selected].map(tok =>
+            '<div class="chip in-drop" onclick="d2Remove(\'' + tok + '\')">' + featLabel(tok) + ' \u00d7</div>'
+        ).join('') + '</div>';
+    }
+    document.getElementById('d2-clear').textContent = t('d2.clear');
+}
+function renderD2Rank() {
+    const list = document.getElementById('d2-rank');
+    if (d2Selected.size === 0) { list.innerHTML = '<div class="rank-item"><span class="rank-film" style="color:#777;font-style:italic">' + t('d2.rankEmpty') + '</span></div>'; return; }
+    const ranked = rankMovies(d2Selected);
+    const topScore = ranked[0].score;
+    list.innerHTML = ranked.map(r => {
+        const m = MOVIE[r.id];
+        const tagStr = r.tags.map(tag => r.hits.includes(tag) ? '<span class="hit">' + featLabel(tag) + '</span>' : featLabel(tag)).join(' \u00b7 ');
+        const topCls = (r.score > 0 && r.score === topScore) ? ' top' : '';
+        return '<div class="rank-item' + topCls + '">'
+            + '<div style="flex:1"><div class="rank-film">' + m.title + '</div><div class="rank-tags">' + tagStr + '</div></div>'
+            + '<span class="rank-score">' + fill('d2.match', { k: r.score }) + '</span>'
+            + '</div>';
+    }).join('');
+}
+function renderD2() { renderD2Palette(); renderD2Drop(); renderD2Rank(); }
+
+function d2Add(tok) { d2Selected.add(tok); renderD2(); }
+function d2Remove(tok) { d2Selected.delete(tok); renderD2(); }
+function d2Clear() { d2Selected.clear(); renderD2(); }
+function d2Drag(ev, tok) { ev.dataTransfer.setData('text/plain', tok); }
+function d2Over(ev) { ev.preventDefault(); document.getElementById('d2-drop').classList.add('over'); }
+function d2Leave(ev) { document.getElementById('d2-drop').classList.remove('over'); }
+function d2Drop(ev) {
+    ev.preventDefault();
+    document.getElementById('d2-drop').classList.remove('over');
+    const tok = ev.dataTransfer.getData('text/plain');
+    if (tok) d2Add(tok);
+}
+
+// ─── Quiz ─────────────────────────────────────────────────────────────────────
+function answerQuiz(quizId, btn, isCorrect) {
+    const quiz = document.getElementById(quizId);
+    const feedback = document.getElementById(quizId + '-feedback');
+    quiz.querySelectorAll('.quiz-btn').forEach(b => b.classList.add('disabled'));
+    btn.classList.add(isCorrect ? 'correct' : 'wrong');
+    feedback.className = 'quiz-feedback ' + (isCorrect ? 'success' : 'fail');
+    const key = quizId + (isCorrect ? '.ok' : '.no');
+    feedback.innerHTML = (T[currentLang] && T[currentLang][key]) ? T[currentLang][key] : T.en[key];
+}
+
+// ─── Language toggle ──────────────────────────────────────────────────────────
+function toggleLang() {
+    currentLang = currentLang === 'en' ? 'de' : 'en';
+    document.documentElement.lang = currentLang;
+    document.querySelector('.lang-toggle').textContent = currentLang === 'en' ? 'DE' : 'EN';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (T[currentLang] && T[currentLang][key]) el.innerHTML = T[currentLang][key];
+    });
+    renderMovieTable();
+    renderD1Votes(); renderD1Result();
+    renderD2();
+    katexAll();
+}
+
+// ─── KaTeX ────────────────────────────────────────────────────────────────────
+function katexAll() {
+    if (typeof renderMathInElement !== 'undefined') {
+        renderMathInElement(document.body, {
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '\\(', right: '\\)', display: false }
+            ],
+            throwOnError: false
+        });
+    }
+}
+
+window.addEventListener('load', function () {
+    renderMovieTable();
+    renderD1Votes(); renderD1Result();
+    renderD2();
+    katexAll();
+});
+</script>
+</body>
+</html>

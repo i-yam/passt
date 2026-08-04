@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KNN Regression & the Bias-Variance Trade-off</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #141420; color: #e8e8f0; font-family: Georgia,'Times New Roman',serif; line-height: 1.8; font-size: 18px; }
+.container { max-width: 820px; margin: 0 auto; padding: 0 24px 80px; }
+
+.lang-toggle { position: fixed; top: 16px; right: 16px; background: #2a2a44; border: 1px solid #4a4a70; border-radius: 20px; padding: 6px 14px; cursor: pointer; font-size: 13px; font-family: sans-serif; color: #a0a0d0; z-index: 100; transition: background 0.2s; }
+.lang-toggle:hover { background: #363658; }
+
+.hero { text-align: center; padding: 80px 24px 50px; }
+.tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 28px; }
+.tag { background: #1c1c2e; color: #8888b0; border: 1px solid #2a2a40; border-radius: 20px; padding: 4px 12px; font-size: 12px; font-family: sans-serif; letter-spacing: 0.3px; }
+.hero h1 { font-size: 42px; font-weight: 700; color: #fff; line-height: 1.3; max-width: 700px; margin: 0 auto 24px; }
+.hero-sub { color: #a0a0c0; font-style: italic; font-size: 20px; max-width: 620px; margin: 0 auto; }
+
+section { padding: 50px 0; border-top: 1px solid #1e1e30; }
+h2 { font-size: 30px; color: #fff; margin-bottom: 24px; line-height: 1.3; }
+p { margin-bottom: 20px; color: #ccc; }
+a { color: #80b4f0; }
+em { color: #e0e0f0; font-style: italic; }
+
+blockquote { border-left: 3px solid #4a4a70; padding: 16px 24px; margin: 28px 0; color: #a0a0c0; font-style: italic; font-size: 19px; line-height: 1.7; }
+blockquote cite { display: block; margin-top: 12px; font-size: 14px; color: #555; font-style: normal; }
+
+/* CONCEPT CARDS */
+.cc-grid { display: grid; gap: 12px; margin: 24px 0; }
+.cc { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 8px; padding: 18px 20px; display: flex; gap: 16px; align-items: flex-start; }
+.cc-num { width: 30px; height: 30px; border-radius: 50%; background: #2a2a50; color: #a0a0d0; font-family: sans-serif; font-size: 13px; font-weight: bold; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+.cc-body { font-size: 15px; line-height: 1.7; color: #ccc; }
+.cc-body strong { display: block; font-family: sans-serif; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: normal; margin-bottom: 4px; color: #6060a0; }
+
+/* FORMULA BOX */
+.formula-box { background: #0e0e1a; border: 1px solid #2a2a40; border-radius: 8px; padding: 20px 24px; margin: 20px 0; }
+.formula-main { font-family: 'Courier New', monospace; font-size: 16px; color: #c0d0a0; margin-bottom: 14px; text-align: center; letter-spacing: 0.5px; }
+.formula-terms { display: grid; gap: 8px; margin-top: 12px; border-top: 1px solid #2a2a40; padding-top: 12px; }
+.formula-term { display: flex; gap: 12px; align-items: baseline; font-family: sans-serif; font-size: 13px; }
+.formula-term .sym { font-family: 'Courier New', monospace; color: #c0d0a0; min-width: 120px; font-size: 13px; }
+.formula-term .def { color: #888; line-height: 1.5; }
+
+/* DEMO */
+.demo-wrap { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px; padding: 20px; margin: 28px 0; }
+.demo-label { font-family: sans-serif; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: #5050a0; margin-bottom: 14px; }
+canvas { display: block; border: 1px solid #2a2a40; border-radius: 4px; max-width: 100%; background: #141420; }
+.ctrl-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
+.ctrl-row label { font-family: sans-serif; font-size: 13px; color: #7070a0; }
+.ctrl-row input[type=range] { width: 100px; accent-color: #6060b0; }
+.ctrl-row .val { font-family: 'Courier New', monospace; font-size: 13px; color: #a0a0d0; min-width: 24px; }
+.ctrl-row select, .ctrl-row button { background: #141420; border: 1px solid #3a3a55; border-radius: 4px; padding: 5px 10px; color: #a0a0d0; font-size: 13px; font-family: sans-serif; cursor: pointer; transition: border-color 0.2s; }
+.ctrl-row button:hover, .ctrl-row select:hover { border-color: #6060a0; }
+.mode-btn { font-family: sans-serif; font-size: 12px; padding: 5px 14px; border: 1px solid #2a2a40; border-radius: 20px; background: transparent; color: #666; cursor: pointer; transition: all 0.2s; }
+.mode-btn.active { border-color: #6060b0; color: #a0a0d0; background: rgba(60,60,120,0.2); }
+.demo-note { font-family: sans-serif; font-size: 12px; color: #444; margin-top: 10px; line-height: 1.6; }
+
+/* STATS BAR */
+.stats-bar { display: flex; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
+.stat-pill { background: #141420; border: 1px solid #2a2a40; border-radius: 6px; padding: 7px 14px; font-family: 'Courier New', monospace; font-size: 13px; }
+.stat-pill .stat-label { color: #5050a0; margin-right: 6px; font-family: sans-serif; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; }
+.stat-pill .stat-val { color: #c0d0a0; }
+
+/* TRADEOFF TABLE */
+.tradeoff { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px; padding: 24px 28px; margin: 28px 0; }
+.tradeoff-head { display: flex; gap: 0; padding-bottom: 12px; border-bottom: 1px solid #2a2a40; margin-bottom: 4px; font-family: sans-serif; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; }
+.th0 { min-width: 130px; color: #3a3a60; }
+.th1 { flex: 1; color: #8060b0; }
+.th2 { flex: 1; color: #50a090; }
+.tradeoff-row { display: flex; gap: 0; padding: 12px 0; border-bottom: 1px solid #1e1e2e; align-items: flex-start; }
+.tradeoff-row:last-child { border-bottom: none; }
+.td0 { min-width: 130px; font-family: sans-serif; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #4a4a70; padding-top: 3px; }
+.td1 { flex: 1; font-size: 14px; color: #a080c0; font-family: sans-serif; line-height: 1.6; padding-right: 16px; }
+.td2 { flex: 1; font-size: 14px; color: #60a090; font-family: sans-serif; line-height: 1.6; }
+
+/* QUIZ */
+.quiz { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px; padding: 28px; margin: 28px 0; }
+.quiz-question { font-size: 18px; color: #e0e0f0; margin-bottom: 20px; font-style: italic; line-height: 1.6; }
+.quiz-options { display: flex; gap: 12px; flex-wrap: wrap; }
+.quiz-btn { background: #2a2a44; color: #e0e0f0; border: 1px solid #3a3a55; border-radius: 8px; padding: 12px 28px; font-size: 16px; font-family: Georgia,'Times New Roman',serif; cursor: pointer; transition: background 0.2s, border-color 0.2s; flex: 1; min-width: 120px; text-align: center; }
+.quiz-btn:hover:not(:disabled) { background: #363658; border-color: #5a5a80; }
+.quiz-btn.correct { background: #1a4a2a; border-color: #50b878; color: #70e898; pointer-events: none; }
+.quiz-btn.wrong { background: #2a2248; border-color: #8264dc; color: #a88ef0; pointer-events: none; }
+.quiz-btn:disabled { pointer-events: none; opacity: 0.7; }
+.quiz-feedback { margin-top: 20px; font-size: 16px; line-height: 1.7; color: #ccc; }
+.quiz-feedback.success em { color: #70e898; font-style: normal; }
+.quiz-feedback.fail em { color: #a88ef0; font-style: normal; }
+.quiz-reset { margin-top: 14px; font-family: sans-serif; font-size: 13px; color: #555; cursor: pointer; background: none; border: none; text-decoration: underline; display: none; }
+.quiz-reset:hover { color: #888; }
+
+/* CLOSING */
+.closing { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px; padding: 40px; text-align: center; }
+.closing h3 { font-size: 24px; color: #fff; margin-bottom: 16px; }
+.closing p { font-size: 16px; color: #666; max-width: 520px; margin: 0 auto; font-family: sans-serif; line-height: 1.7; }
+
+footer { padding: 40px 0 20px; border-top: 1px solid #1e1e30; font-family: sans-serif; font-size: 13px; color: #3a3a60; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+footer a { color: #3a3a60; }
+
+/* LANG */
+[data-lang] { display: none; }
+body.lang-en [data-lang="en"] { display: block; }
+body.lang-en [data-lang="en"].inl { display: inline; }
+body.lang-de [data-lang="de"] { display: block; }
+body.lang-de [data-lang="de"].inl { display: inline; }
+.en-i { display: inline; } .de-i { display: none; }
+body.lang-de .en-i { display: none; } body.lang-de .de-i { display: inline; }
+
+@media (max-width: 560px) {
+  .hero h1 { font-size: 28px; }
+  .tradeoff-row, .tradeoff-head { flex-wrap: wrap; }
+  .th0, .td0 { width: 100%; min-width: unset; }
+  .quiz-options { flex-direction: column; }
+}
+</style>
+</head>
+<body class="lang-en">
+
+<button class="lang-toggle" onclick="toggleLang()">DE</button>
+<div class="container">
+
+<!-- HERO -->
+<div class="hero">
+  <div class="tags">
+    <span class="tag">mini-module</span>
+    <span class="tag">no-code</span>
+    <span class="tag">try-without-ai</span>
+    <span class="tag">regression</span>
+    <span class="tag">evaluation</span>
+    <span class="tag">~20 min</span>
+  </div>
+  <h1>
+    <span class="en-i">KNN Regression &amp; the Bias-Variance Trade-off</span>
+    <span class="de-i">KNN-Regression und der Kompromiss aus Verzerrung und Varianz</span>
+  </h1>
+  <p class="hero-sub">
+    <span class="en-i">One number, K, slides you along a curve between two kinds of wrong. Understanding that curve is most of what model selection is about.</span>
+    <span class="de-i">Eine einzige Zahl, K, schiebt dich auf einer Kurve zwischen zwei Arten von Falschsein hin und her. Diese Kurve zu verstehen ist der Kern der Modellauswahl.</span>
+  </p>
+</div>
+
+<!-- SECTION 1: FROM VOTING TO AVERAGING -->
+<section>
+  <h2>
+    <span class="en-i">From voting to averaging</span>
+    <span class="de-i">Vom Abstimmen zum Mitteln</span>
+  </h2>
+
+  <p data-lang="en">In classification, K-NN takes the K nearest neighbours and holds a vote, the majority class wins. Regression works the same way structurally, but instead of a vote, you take an average. The predicted value at any point is the mean of the K nearest training outputs.</p>
+  <p data-lang="de">Bei der Klassifikation nimmt K-NN die K nächsten Nachbarn und lässt sie abstimmen. Die Mehrheitsklasse gewinnt. Die Regression funktioniert im Aufbau genauso. Statt einer Abstimmung nimmst du aber einen Durchschnitt. Der vorhergesagte Wert an einem Punkt ist der Mittelwert der K nächsten Trainingsausgaben.</p>
+
+  <div class="cc-grid">
+    <div class="cc">
+      <div class="cc-num">1</div>
+      <div class="cc-body">
+        <strong><span class="en-i">Pick a query point</span><span class="de-i">Einen Abfragepunkt wählen</span></strong>
+        <span data-lang="en">You want to predict the output for a new input x. You have no equation, only the training data.</span>
+        <span data-lang="de">Du willst die Ausgabe für eine neue Eingabe x vorhersagen. Eine Gleichung hast du nicht, nur die Trainingsdaten.</span>
+      </div>
+    </div>
+    <div class="cc">
+      <div class="cc-num">2</div>
+      <div class="cc-body">
+        <strong><span class="en-i">Find the K nearest training points</span><span class="de-i">Die K nächsten Trainingspunkte finden</span></strong>
+        <span data-lang="en">Measure the distance from your query point to every training point. Keep the K with the smallest distances.</span>
+        <span data-lang="de">Miss den Abstand von deinem Abfragepunkt zu jedem Trainingspunkt. Behalte die K mit den kleinsten Abständen.</span>
+      </div>
+    </div>
+    <div class="cc">
+      <div class="cc-num">3</div>
+      <div class="cc-body">
+        <strong><span class="en-i">Average their outputs</span><span class="de-i">Die Ausgaben mitteln</span></strong>
+        <span data-lang="en">The prediction is the mean of the K neighbours' y values. No fitting step, no parameters, no gradient descent.</span>
+        <span data-lang="de">Die Vorhersage ist der Mittelwert der y-Werte dieser K Nachbarn. Kein Anpassungsschritt, keine Parameter, kein Gradientenabstieg.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="formula-box">
+    <div class="formula-main">ŷ(x) = (1/K) · Σ yᵢ &nbsp;&nbsp; for the K points nearest to x</div>
+    <div class="formula-terms">
+      <div class="formula-term"><span class="sym">ŷ(x)</span><span class="def"><span class="en-i">the predicted output at query point x</span><span class="de-i">der vorhergesagte Ausgabewert am Abfragepunkt x</span></span></div>
+      <div class="formula-term"><span class="sym">K</span><span class="def"><span class="en-i">the number of neighbours to consult, the one hyperparameter you choose</span><span class="de-i">die Anzahl der befragten Nachbarn, der einzige Hyperparameter, den du wählst</span></span></div>
+      <div class="formula-term"><span class="sym">Σ yᵢ</span><span class="def"><span class="en-i">the sum of the K nearest neighbours' actual output values</span><span class="de-i">die Summe der tatsächlichen Ausgabewerte der K nächsten Nachbarn</span></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 2: TWO KINDS OF WRONG -->
+<section>
+  <h2>
+    <span class="en-i">The two kinds of wrong</span>
+    <span class="de-i">Die zwei Arten des Falschseins</span>
+  </h2>
+
+  <blockquote>
+    "All models are wrong, but some are useful."
+    <cite>,  George Box, 1976</cite>
+  </blockquote>
+
+  <p data-lang="en">Every model makes errors. The interesting question is <em>what kind</em>. There are two fundamentally different sources of error, and they pull in opposite directions. You cannot reduce both at once.</p>
+  <p data-lang="de">Jedes Modell macht Fehler. Die interessante Frage ist, <em>welche Art</em>. Es gibt zwei grundverschiedene Fehlerquellen. Sie ziehen in entgegengesetzte Richtungen. Beide zugleich kannst du nicht kleiner machen.</p>
+
+  <div class="cc-grid">
+    <div class="cc">
+      <div class="cc-num" style="background:rgba(120,80,180,0.3);color:#c0a0e0;">B</div>
+      <div class="cc-body">
+        <strong style="color:#8060b0;"><span class="en-i">Bias, systematic error</span><span class="de-i">Verzerrung: systematischer Fehler</span></strong>
+        <span data-lang="en">The model is consistently wrong in the same direction. It misses the true pattern because it is too simple, too rigid to capture real structure. A straight line fitted to a curve has high bias. It does not matter how much data you add. The line will still be wrong in the same way.</span>
+        <span data-lang="de">Das Modell liegt systematisch in dieselbe Richtung daneben. Es verfehlt das wahre Muster, weil es zu einfach ist. Eine Gerade, die an eine Kurve angepasst wird, hat eine hohe Verzerrung. Du kannst so viele Daten hinzufügen, wie du willst. Die Gerade bleibt auf dieselbe Weise falsch.</span>
+      </div>
+    </div>
+    <div class="cc">
+      <div class="cc-num" style="background:rgba(60,160,140,0.3);color:#80d0c0;">V</div>
+      <div class="cc-body">
+        <strong style="color:#50a090;"><span class="en-i">Variance, sensitivity to noise</span><span class="de-i">Varianz: Empfindlichkeit gegenüber Rauschen</span></strong>
+        <span data-lang="en">The model changes dramatically when you change the training data slightly. It has learned the noise as if it were signal. A curve that passes through every single training point has high variance. It will perform well on the training set and badly on anything new.</span>
+        <span data-lang="de">Das Modell ändert sich stark, sobald du die Trainingsdaten leicht änderst. Es hat das Rauschen für Signal gehalten. Eine Kurve durch jeden einzelnen Trainingspunkt hat eine hohe Varianz. Auf den Trainingsdaten sieht sie gut aus, auf neuen Daten schlecht.</span>
+      </div>
+    </div>
+  </div>
+
+  <p data-lang="en">The total prediction error on unseen data can be decomposed as:</p>
+  <p data-lang="de">Der gesamte Vorhersagefehler auf ungesehenen Daten lässt sich zerlegen in:</p>
+
+  <div class="formula-box">
+    <div class="formula-main"><span class="en-i">Total Error &nbsp;=&nbsp; Bias &nbsp;+&nbsp; Variance &nbsp;+&nbsp; Irreducible Noise</span><span class="de-i">Gesamtfehler &nbsp;=&nbsp; Verzerrung &nbsp;+&nbsp; Varianz &nbsp;+&nbsp; nicht reduzierbares Rauschen</span></div>
+    <div class="formula-terms">
+      <div class="formula-term">
+        <span class="sym"><span class="en-i">Bias</span><span class="de-i">Verzerrung</span></span>
+        <span class="def"><span class="en-i">How far the average prediction drifts from the true value. Caused by wrong assumptions in the model.</span><span class="de-i">Wie weit die durchschnittliche Vorhersage vom wahren Wert abdriftet. Ursache sind falsche Annahmen im Modell.</span></span>
+      </div>
+      <div class="formula-term">
+        <span class="sym"><span class="en-i">Variance</span><span class="de-i">Varianz</span></span>
+        <span class="def"><span class="en-i">How much the prediction fluctuates when trained on different samples of the same data. Caused by sensitivity to noise.</span><span class="de-i">Wie stark die Vorhersage schwankt, wenn du das Modell auf verschiedenen Stichproben derselben Daten trainierst. Ursache ist die Empfindlichkeit gegenüber Rauschen.</span></span>
+      </div>
+      <div class="formula-term">
+        <span class="sym"><span class="en-i">Irreducible noise</span><span class="de-i">Irreduzibles Rauschen</span></span>
+        <span class="def"><span class="en-i">Randomness in the world that no model can capture. You can reduce bias and variance, you cannot reduce this.</span><span class="de-i">Zufall in der Welt, den kein Modell erfassen kann. Verzerrung und Varianz kannst du senken, diesen Rest nicht.</span></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 3: K IS THE DIAL -->
+<section>
+  <h2>
+    <span class="en-i">K is the dial</span>
+    <span class="de-i">K ist der Regler</span>
+  </h2>
+
+  <p data-lang="en">In KNN regression, K is the single parameter that moves you along the bias-variance curve. It is unusually transparent, most models hide this trade-off inside dozens of hyperparameters. Here you can see it directly.</p>
+  <p data-lang="de">Bei der KNN-Regression bewegt dich ein einziger Parameter auf der Kurve zwischen Verzerrung und Varianz: K. Das ist ungewöhnlich offen. Die meisten Modelle verstecken diesen Kompromiss in Dutzenden Hyperparametern. Hier siehst du ihn direkt.</p>
+
+  <div class="tradeoff">
+    <div class="tradeoff-head">
+      <div class="th0"></div>
+      <div class="th1"><span class="en-i">Small K (K=1)</span><span class="de-i">Kleines K (K=1)</span></div>
+      <div class="th2"><span class="en-i">Large K (K=N)</span><span class="de-i">Großes K (K=N)</span></div>
+    </div>
+    <div class="tradeoff-row">
+      <div class="td0"><span class="en-i">Bias</span><span class="de-i">Bias</span></div>
+      <div class="td1"><span data-lang="en">Low, follows any shape in the data.</span><span data-lang="de">Niedrig. Folgt jeder Form in den Daten.</span></div>
+      <div class="td2"><span data-lang="en">High, averaging over many points forces the prediction toward a global mean.</span><span data-lang="de">Hoch. Die Mittelung über viele Punkte drängt die Vorhersage zum globalen Mittelwert.</span></div>
+    </div>
+    <div class="tradeoff-row">
+      <div class="td0"><span class="en-i">Variance</span><span class="de-i">Varianz</span></div>
+      <div class="td1"><span data-lang="en">High, every noisy point has full influence.</span><span data-lang="de">Hoch. Jeder verrauschte Punkt hat vollen Einfluss.</span></div>
+      <div class="td2"><span data-lang="en">Low, predictions are stable, averaged over many points.</span><span data-lang="de">Niedrig. Die Vorhersagen sind stabil, weil über viele Punkte gemittelt wird.</span></div>
+    </div>
+    <div class="tradeoff-row">
+      <div class="td0"><span class="en-i">Result</span><span class="de-i">Ergebnis</span></div>
+      <div class="td1"><span data-lang="en">Memorises noise. Overfits.</span><span data-lang="de">Lernt das Rauschen auswendig. Überanpassung.</span></div>
+      <div class="td2"><span data-lang="en">Ignores local structure. Underfits.</span><span data-lang="de">Ignoriert lokale Struktur. Unteranpassung.</span></div>
+    </div>
+  </div>
+
+  <!-- BIAS-VARIANCE EXPLORER -->
+  <div class="demo-wrap">
+    <div class="demo-label">
+      <span class="en-i">Bias-variance explorer</span>
+      <span class="de-i">Verzerrung und Varianz erkunden</span>
+    </div>
+    <canvas id="bv-canvas" width="760" height="300"></canvas>
+    <div class="ctrl-row">
+      <label>K =</label>
+      <input type="range" id="bv-k" min="1" max="20" step="1" value="3">
+      <span class="val" id="bv-k-out">3</span>
+      <label style="margin-left:12px;"><span class="en-i">Noise:</span><span class="de-i">Rauschen:</span></label>
+      <select id="bv-noise-type" onchange="bvNewNoise()">
+        <option value="gaussian" data-en="Gaussian (normal)" data-de="Gauss (normal)">Gaussian (normal)</option>
+        <option value="heavy" data-en="Heavy-tailed (Cauchy)" data-de="Schwere Ränder (Cauchy)">Heavy-tailed (Cauchy)</option>
+      </select>
+      <button onclick="bvNewNoise()">
+        <span class="en-i">New sample</span><span class="de-i">Neue Stichprobe</span>
+      </button>
+    </div>
+    <div class="stats-bar" id="bv-stats"></div>
+    <div class="demo-note" id="bv-note"></div>
+  </div>
+
+  <p data-lang="en">The bias and variance numbers above are estimated by running the same model on many different noise samples drawn from the same distribution. Bias measures how far the average prediction drifts from the true function. Variance measures how much predictions scatter across those samples.</p>
+  <p data-lang="de">Die Werte oben werden geschätzt. Dazu läuft dasselbe Modell auf vielen Rauschstichproben aus derselben Verteilung. Die Verzerrung misst, wie weit die durchschnittliche Vorhersage von der wahren Funktion abdriftet. Die Varianz misst, wie stark die Vorhersagen über diese Stichproben streuen.</p>
+</section>
+
+<!-- SECTION 4: WHEN KNN WINS -->
+<section>
+  <h2>
+    <span class="en-i">When KNN beats linear regression</span>
+    <span class="de-i">Wann KNN die lineare Regression schlägt</span>
+  </h2>
+
+  <p data-lang="en">Linear regression fits one straight line to all the data. That is powerful when the true relationship is actually linear, but it is a hard constraint. KNN makes no assumption about shape at all. This means KNN wins whenever the true pattern is genuinely nonlinear and you have enough data to populate the neighbourhood densely.</p>
+  <p data-lang="de">Die lineare Regression passt eine Gerade an alle Daten an. Ist die wahre Beziehung wirklich linear, ist das stark. Es ist aber auch eine harte Einschränkung. KNN nimmt über die Form gar nichts an. KNN gewinnt, wenn das wahre Muster nichtlinear ist und du genug Daten für dichte Nachbarschaften hast.</p>
+
+  <div class="demo-wrap">
+    <div class="demo-label">
+      <span class="en-i">Shape contest, linear vs K-NN regression, same data</span>
+      <span class="de-i">Formenwettbewerb: lineare gegen K-NN-Regression, gleiche Daten</span>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+      <button class="mode-btn active" id="shape-linear" onclick="setShape('linear')">
+        <span class="en-i">Linear</span><span class="de-i">Linear</span>
+      </button>
+      <button class="mode-btn" id="shape-sine" onclick="setShape('sine')">
+        <span class="en-i">Sine wave</span><span class="de-i">Sinuswelle</span>
+      </button>
+      <button class="mode-btn" id="shape-step" onclick="setShape('step')">
+        <span class="en-i">Step function</span><span class="de-i">Stufenfunktion</span>
+      </button>
+    </div>
+    <canvas id="shape-canvas" width="760" height="280"></canvas>
+    <div class="ctrl-row">
+      <label>K =</label>
+      <input type="range" id="shape-k" min="1" max="15" step="1" value="5">
+      <span class="val" id="shape-k-out">5</span>
+      <span style="font-size:12px;color:#444;font-family:sans-serif;margin-left:6px;" id="shape-verdict"></span>
+      <button onclick="shapeNewNoise()" style="margin-left:auto;">
+        <span class="en-i">New noise sample</span><span class="de-i">Neue Stichprobe</span>
+      </button>
+    </div>
+    <div class="demo-note" id="shape-note"></div>
+  </div>
+</section>
+
+<!-- SECTION 5: QUIZ, more data? -->
+<section>
+  <h2>
+    <span class="en-i">More data: does it help?</span>
+    <span class="de-i">Mehr Daten: hilft das?</span>
+  </h2>
+
+  <p data-lang="en">You have a KNN regression model. Someone offers you ten times as many training points. Before you answer, think about what more data actually changes in a KNN model.</p>
+  <p data-lang="de">Du hast ein KNN-Regressionsmodell. Jemand bietet dir zehnmal so viele Trainingspunkte an. Überleg dir vor der Antwort, was mehr Daten in einem KNN-Modell wirklich verändern.</p>
+
+  <!-- QUIZ 1: more data -->
+  <div class="quiz" id="quiz-data">
+    <div class="quiz-question">
+      <span class="en-i">Does adding more training data make a KNN model better?</span>
+      <span class="de-i">Machen mehr Trainingsdaten ein KNN-Modell besser?</span>
+    </div>
+    <div class="quiz-options">
+      <button class="quiz-btn" onclick="quizAnswer('quiz-data','yes')">
+        <span class="en-i">Yes</span><span class="de-i">Ja</span>
+      </button>
+      <button class="quiz-btn" onclick="quizAnswer('quiz-data','no')">
+        <span class="en-i">No</span><span class="de-i">Nein</span>
+      </button>
+      <button class="quiz-btn" onclick="quizAnswer('quiz-data','depends')">
+        <span class="en-i">It depends</span><span class="de-i">Es kommt darauf an</span>
+      </button>
+    </div>
+    <div id="quiz-data-feedback"></div>
+    <button class="quiz-reset" id="quiz-data-reset" onclick="quizReset('quiz-data')">
+      <span class="en-i">Try again</span><span class="de-i">Nochmal versuchen</span>
+    </button>
+  </div>
+
+  <!-- QUIZ 2: more features -->
+  <p data-lang="en" style="margin-top:32px;">Now a different question. The same offer, but instead of more rows of data, someone offers you more <em>columns</em>, more features to describe each data point.</p>
+  <p data-lang="de" style="margin-top:32px;">Jetzt eine andere Frage. Dasselbe Angebot, aber statt mehr Zeilen bekommst du mehr <em>Spalten</em>, also mehr Merkmale zur Beschreibung jedes Datenpunkts.</p>
+
+  <div class="quiz" id="quiz-features">
+    <div class="quiz-question">
+      <span class="en-i">Does adding more input features make a KNN model better?</span>
+      <span class="de-i">Machen mehr Eingabemerkmale ein KNN-Modell besser?</span>
+    </div>
+    <div class="quiz-options">
+      <button class="quiz-btn" onclick="quizAnswer('quiz-features','yes')">
+        <span class="en-i">Yes</span><span class="de-i">Ja</span>
+      </button>
+      <button class="quiz-btn" onclick="quizAnswer('quiz-features','no')">
+        <span class="en-i">No</span><span class="de-i">Nein</span>
+      </button>
+      <button class="quiz-btn" onclick="quizAnswer('quiz-features','depends')">
+        <span class="en-i">It depends</span><span class="de-i">Es kommt darauf an</span>
+      </button>
+    </div>
+    <div id="quiz-features-feedback"></div>
+    <button class="quiz-reset" id="quiz-features-reset" onclick="quizReset('quiz-features')">
+      <span class="en-i">Try again</span><span class="de-i">Nochmal versuchen</span>
+    </button>
+  </div>
+</section>
+
+
+<footer>
+  <span>
+    <span class="en-i">Part of</span><span class="de-i">Teil von</span>
+    <a href="../../">Passt</a>
+    · Class 04, Local Models &amp; Geometry
+  </span>
+  <a href="https://github.com/i-yam/passt/tree/main/modules/bv" target="_blank">github.com/i-yam/passt</a>
+</footer>
+
+</div>
+
+<script>
+var currentLang = 'en';
+function toggleLang() {
+  currentLang = currentLang === 'en' ? 'de' : 'en';
+  document.body.className = 'lang-' + currentLang;
+  document.querySelector('.lang-toggle').textContent = currentLang === 'en' ? 'DE' : 'EN';
+  quizRefreshAll();
+  bvRender(); shapeRender();
+}
+
+/* ── QUIZ ── */
+var quizAnswered = {};
+
+var QUIZ_FEEDBACK = {
+  'quiz-data': {
+    correct: 'depends',
+    en: {
+      yes: '<em>Mostly right, but the story has a twist.</em> More data genuinely helps KNN, because denser neighbourhoods mean the K nearest points are actually close in input space. This reduces variance: the average is taken over points that are truly similar. But adding data does nothing to reduce bias, if K is too large, the model still averages over too wide a region, and extra points just add more of the same noise to that average.',
+      no: '<em>Not quite.</em> More data does help KNN, specifically by reducing variance. With more training points, the K nearest neighbours are genuinely closer to your query point. What more data does <em>not</em> fix is high bias from a K that is too large. That requires changing K, not adding data.',
+      depends: '<em>Exactly right.</em> More data reduces variance, denser neighbourhoods mean the K nearest points are actually close, so the average is more meaningful. But more data does nothing for bias. If K is too large relative to the local density of the true pattern, the model is still averaging over too wide a region. More data helps one source of error. It cannot help the other.'
+    },
+    de: {
+      yes: '<em>Fast richtig, aber die Sache hat einen Haken.</em> Mehr Daten helfen KNN wirklich. Dichtere Nachbarschaften heißen, dass die K nächsten Punkte auch nah im Eingaberaum liegen. Das senkt die Varianz. Die Verzerrung senken mehr Daten aber nicht. Ist K zu groß, mittelt das Modell weiter über eine zu breite Region.',
+      no: '<em>Nicht ganz.</em> Mehr Daten helfen KNN durchaus, und zwar über die Varianz. Mit mehr Trainingspunkten liegen die K nächsten Nachbarn wirklich näher am Abfragepunkt. Nicht beheben lässt sich damit eine hohe Verzerrung durch ein zu großes K. Dafür musst du K ändern, nicht Daten sammeln.',
+      depends: '<em>Genau richtig.</em> Mehr Daten senken die Varianz. Dichtere Nachbarschaften heißen, dass die K nächsten Punkte wirklich nah sind. Der Verzerrung helfen mehr Daten dagegen nicht. Ist K zu groß für die lokale Dichte, mittelt das Modell weiter über eine zu breite Region. Mehr Daten helfen der einen Fehlerquelle, der anderen nicht.'
+    }
+  },
+  'quiz-features': {
+    correct: 'no',
+    en: {
+      yes: '<em>Usually not, and for KNN, often the opposite.</em> More features only help if they genuinely carry information about the output. Irrelevant features add noise to the distance calculation and spread the data thinner in a larger space, so your K nearest neighbours may be quite far away even from a large dataset.',
+      no: '<em>Correct, for KNN, more features usually hurts.</em> Each new feature adds a dimension. As dimensions increase, distances between points become less meaningful, all points start looking roughly equidistant from each other. Your K "nearest" neighbours are no longer genuinely close in any useful sense. Relevant features can still help, but irrelevant ones actively damage the model.',
+      depends: '<em>True, but in practice the story leans one way.</em> Relevant features improve the distance calculation. But irrelevant features actively hurt it, they dilute the distance signal with noise. And as the number of features grows, even relevant ones start suffering: the data becomes sparse in a large space, and the neighbourhood concept breaks down. For KNN specifically, more features is usually a problem, not an opportunity.'
+    },
+    de: {
+      yes: '<em>Meistens nicht, und bei KNN oft im Gegenteil.</em> Mehr Merkmale helfen nur, wenn sie wirklich etwas über die Ausgabe aussagen. Unwichtige Merkmale bringen Rauschen in die Abstandsberechnung. Sie verteilen die Daten außerdem dünner über einen größeren Raum. Deine K nächsten Nachbarn liegen dann selbst bei vielen Daten ziemlich weit weg.',
+      no: '<em>Richtig, bei KNN schaden mehr Merkmale meistens.</em> Jedes neue Merkmal fügt eine Dimension hinzu. Mit wachsender Dimension sagen Abstände immer weniger aus. Alle Punkte wirken bald ungefähr gleich weit voneinander entfernt. Deine K nächsten Nachbarn sind dann in keinem nützlichen Sinn mehr nah. Wichtige Merkmale können helfen, unwichtige schaden dem Modell aktiv.',
+      depends: '<em>Stimmt, aber in der Praxis geht es meist in eine Richtung.</em> Wichtige Merkmale verbessern die Abstandsberechnung. Unwichtige schaden ihr aktiv, denn sie verwässern das Abstandssignal mit Rauschen. Und mit wachsender Zahl der Merkmale leiden sogar die wichtigen. Die Daten liegen dünn in einem großen Raum, und der Begriff der Nachbarschaft bricht zusammen. Für KNN sind mehr Merkmale meist ein Problem, keine Chance.'
+    }
+  }
+};
+
+function renderQuizFeedback(quizId) {
+  var answer = quizAnswered[quizId];
+  if (!answer) return;
+  var cfg = QUIZ_FEEDBACK[quizId];
+  var isCorrect = (answer === cfg.correct);
+  var langObj = cfg[currentLang] || cfg['en'];
+  var text = langObj[answer] || cfg['en'][answer];
+  var fb = document.getElementById(quizId + '-feedback');
+  if (fb) {
+    fb.className = 'quiz-feedback ' + (isCorrect ? 'success' : 'fail');
+    fb.innerHTML = text;
+  }
+}
+
+function quizAnswer(quizId, answer) {
+  if (quizAnswered[quizId]) return;
+  quizAnswered[quizId] = answer;
+  var cfg = QUIZ_FEEDBACK[quizId];
+  var correct = cfg.correct;
+  var labels = ['yes', 'no', 'depends'];
+  var btns = document.getElementById(quizId).querySelectorAll('.quiz-btn');
+  btns.forEach(function(b, i) {
+    b.disabled = true;
+    if (labels[i] === correct) b.classList.add('correct');
+    else if (labels[i] === answer && answer !== correct) b.classList.add('wrong');
+  });
+  renderQuizFeedback(quizId);
+  document.getElementById(quizId + '-reset').style.display = 'inline';
+}
+
+function quizReset(quizId) {
+  quizAnswered[quizId] = null;
+  document.getElementById(quizId).querySelectorAll('.quiz-btn').forEach(function(b) {
+    b.disabled = false; b.classList.remove('correct', 'wrong');
+  });
+  var fb = document.getElementById(quizId + '-feedback');
+  fb.className = ''; fb.innerHTML = '';
+  document.getElementById(quizId + '-reset').style.display = 'none';
+}
+
+function quizRefreshAll() {
+  Object.keys(quizAnswered).forEach(function(id) { renderQuizFeedback(id); });
+}
+
+
+/* ── SHARED CANVAS HELPERS ── */
+var PAD = {l:52,r:20,t:22,b:40};
+
+function d2px(dx, dy, W, H, yMin, yMax) {
+  return {
+    x: PAD.l + dx * (W - PAD.l - PAD.r),
+    y: PAD.t + (1 - (dy - yMin) / (yMax - yMin)) * (H - PAD.t - PAD.b)
+  };
+}
+
+function drawAxes(ctx, W, H, xL, yL) {
+  ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(PAD.l, PAD.t); ctx.lineTo(PAD.l, H - PAD.b); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(PAD.l, H - PAD.b); ctx.lineTo(W - PAD.r, H - PAD.b); ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)'; ctx.lineWidth = 0.5;
+  for (var i = 1; i <= 9; i++) {
+    var tx = PAD.l + i / 10 * (W - PAD.l - PAD.r);
+    ctx.beginPath(); ctx.moveTo(tx, PAD.t); ctx.lineTo(tx, H - PAD.b); ctx.stroke();
+    var ty = PAD.t + i / 10 * (H - PAD.t - PAD.b);
+    ctx.beginPath(); ctx.moveTo(PAD.l, ty); ctx.lineTo(W - PAD.r, ty); ctx.stroke();
+  }
+  ctx.fillStyle = 'rgba(255,255,255,0.2)'; ctx.font = '12px sans-serif'; ctx.textAlign = 'center';
+  if (xL) ctx.fillText(xL, W - PAD.r - 16, H - PAD.b + 18);
+  if (yL) { ctx.save(); ctx.translate(14, PAD.t + 12); ctx.rotate(-Math.PI / 2); ctx.fillText(yL, 0, 0); ctx.restore(); }
+}
+
+function knnAt(pts, qx, k) {
+  var s = pts.map(function(p) { return { y: p.y, d: Math.abs(p.x - qx) }; });
+  s.sort(function(a, b) { return a.d - b.d; });
+  var nb = s.slice(0, Math.min(k, s.length));
+  var sum = 0; nb.forEach(function(n) { sum += n.y; }); return sum / nb.length;
+}
+
+function linReg(pts) {
+  var n = pts.length; if (n < 2) return null;
+  var sx = 0, sy = 0, sxy = 0, sxx = 0;
+  pts.forEach(function(p) { sx += p.x; sy += p.y; sxy += p.x * p.y; sxx += p.x * p.x; });
+  var d = n * sxx - sx * sx; if (Math.abs(d) < 1e-12) return null;
+  var m = (n * sxy - sx * sy) / d, b = (sy - m * sx) / n;
+  return { m: m, b: b };
+}
+
+function drawCurve(ctx, fn, W, H, yMin, yMax, color, dash) {
+  ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = 2;
+  ctx.setLineDash(dash || []);
+  var started = false;
+  for (var s = 0; s <= W - PAD.l - PAD.r; s += 2) {
+    var dx = s / (W - PAD.l - PAD.r);
+    var dy = fn(dx);
+    if (dy == null || isNaN(dy)) continue;
+    var p = d2px(dx, dy, W, H, yMin, yMax);
+    if (!started) { ctx.moveTo(p.x, p.y); started = true; } else ctx.lineTo(p.x, p.y);
+  }
+  ctx.stroke(); ctx.setLineDash([]);
+}
+
+/* ── NOISE GENERATORS ── */
+function gaussianNoise(sigma) {
+  var u = 0, v = 0;
+  while (u === 0) u = Math.random();
+  while (v === 0) v = Math.random();
+  return sigma * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+function cauchyNoise(scale) {
+  return scale * Math.tan(Math.PI * (Math.random() - 0.5));
+}
+function makeNoise(n, type) {
+  var arr = [];
+  for (var i = 0; i < n; i++) {
+    arr.push(type === 'heavy' ? cauchyNoise(0.12) : gaussianNoise(0.18));
+  }
+  return arr;
+}
+
+/* ── BIAS-VARIANCE EXPLORER ── */
+var N_TRAIN = 30, N_SIMS = 80;
+var bvNoise = [];
+function bvTrueFn(x) { return Math.sin(x * Math.PI * 2) * 0.35 + 0.5; }
+
+function bvMakeNoise() {
+  var type = document.getElementById('bv-noise-type').value;
+  bvNoise = makeNoise(N_TRAIN, type);
+}
+
+function bvPts() {
+  return bvNoise.map(function(n, i) {
+    var x = i / (N_TRAIN - 1);
+    return { x: x, y: Math.max(0.02, Math.min(0.98, bvTrueFn(x) + n)) };
+  });
+}
+
+function estimateBiasVariance(k) {
+  var type = document.getElementById('bv-noise-type').value;
+  var testXs = [];
+  for (var t = 0; t < 20; t++) testXs.push(t / 19);
+  // collect predictions across N_SIMS simulations
+  var preds = testXs.map(function() { return []; });
+  for (var sim = 0; sim < N_SIMS; sim++) {
+    var noise = makeNoise(N_TRAIN, type);
+    var simPts = noise.map(function(n, i) {
+      var x = i / (N_TRAIN - 1);
+      return { x: x, y: Math.max(0.02, Math.min(0.98, bvTrueFn(x) + n)) };
+    });
+    testXs.forEach(function(tx, ti) {
+      preds[ti].push(knnAt(simPts, tx, k));
+    });
+  }
+  var totalBias = 0, totalVar = 0;
+  testXs.forEach(function(tx, ti) {
+    var ps = preds[ti];
+    var mean = ps.reduce(function(a, b) { return a + b; }, 0) / ps.length;
+    var trueY = bvTrueFn(tx);
+    totalBias += Math.abs(mean - trueY);
+    var variance = ps.reduce(function(a, p) { return a + (p - mean) * (p - mean); }, 0) / ps.length;
+    totalVar += variance;
+  });
+  return { bias: totalBias / testXs.length, variance: totalVar / testXs.length };
+}
+
+function bvRender() {
+  var cv = document.getElementById('bv-canvas');
+  var ctx = cv.getContext('2d');
+  var W = cv.width, H = cv.height;
+  ctx.fillStyle = '#141420'; ctx.fillRect(0, 0, W, H);
+  drawAxes(ctx, W, H, 'x', 'y');
+
+  var k = parseInt(document.getElementById('bv-k').value);
+  var pts = bvPts();
+
+  drawCurve(ctx, bvTrueFn, W, H, 0, 1, 'rgba(255,255,255,0.18)', [5, 4]);
+  drawCurve(ctx, function(dx) { return knnAt(pts, dx, k); }, W, H, 0, 1, 'rgba(100,200,160,0.9)', []);
+
+  pts.forEach(function(p) {
+    var cp = d2px(p.x, p.y, W, H, 0, 1);
+    ctx.beginPath(); ctx.arc(cp.x, cp.y, 3.5, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(200,200,220,0.65)'; ctx.fill();
+  });
+
+  // Legend
+  ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+  ctx.fillStyle = 'rgba(255,255,255,0.18)';
+  ctx.fillRect(W - 175, PAD.t + 4, 20, 2);
+  ctx.fillText(currentLang === 'de' ? 'wahre Funktion' : 'true function', W - 151, PAD.t + 10);
+  ctx.fillStyle = 'rgba(100,200,160,0.9)';
+  ctx.fillRect(W - 175, PAD.t + 18, 20, 2);
+  ctx.fillText('KNN (K=' + k + ')', W - 151, PAD.t + 24);
+
+  // Bias/variance estimate
+  var bv = estimateBiasVariance(k);
+  document.getElementById('bv-k-out').textContent = k;
+
+  var de = currentLang === 'de';
+  var verdict = '';
+  if (k <= 2) verdict = de ? 'Starke Überanpassung' : 'Heavy overfit';
+  else if (k >= 16) verdict = de ? 'Starke Unteranpassung' : 'Heavy underfit';
+  else if (k <= 5) verdict = de ? 'Hohe Varianz' : 'High variance';
+  else if (k >= 11) verdict = de ? 'Hohe Verzerrung' : 'High bias';
+  else verdict = de ? 'Ausgewogen' : 'Balanced';
+
+  document.getElementById('bv-stats').innerHTML =
+    '<div class="stat-pill"><span class="stat-label">' + (de ? 'Verzerrung' : 'Bias') + '</span><span class="stat-val">' + bv.bias.toFixed(4) + '</span></div>' +
+    '<div class="stat-pill"><span class="stat-label">' + (de ? 'Varianz' : 'Variance') + '</span><span class="stat-val">' + bv.variance.toFixed(4) + '</span></div>' +
+    '<div class="stat-pill"><span class="stat-label">K</span><span class="stat-val">' + k + '</span></div>' +
+    '<div class="stat-pill"><span class="stat-label">' + (de ? 'Tendenz' : 'Verdict') + '</span><span class="stat-val">' + verdict + '</span></div>';
+
+  var noiseType = document.getElementById('bv-noise-type').value;
+  var noiseDesc = noiseType === 'heavy'
+    ? (de ? 'Cauchy-Rauschen hat schwere Ränder. Es gibt also gelegentlich extreme Ausreißer weit weg vom Mittelwert. Schau, wie die Varianz bei kleinem K hochschnellt, viel stärker als bei gaußschem Rauschen.' : 'Cauchy noise has heavy tails, occasional extreme outliers far from the mean. Notice how variance spikes at small K more dramatically than with Gaussian noise.')
+    : (de ? 'Gaußsches Rauschen ist die bekannte Glockenkurve: symmetrisch, und Ausreißer verirren sich selten weit vom Mittelwert.' : 'Gaussian noise is the familiar bell curve: symmetric, with outliers rarely straying far from the mean.');
+  document.getElementById('bv-note').textContent = (de ? 'Gestrichelt: die wahre Funktion, die du normalerweise nicht kennst. Zieh an K und beobachte, wie sich Verzerrung und Varianz ändern. ' : 'Dashed: true function (normally unknown). Drag K and watch bias and variance change. ') + noiseDesc;
+}
+
+function bvNewNoise() { bvMakeNoise(); bvRender(); }
+document.getElementById('bv-k').addEventListener('input', bvRender);
+
+/* ── SHAPE CONTEST ── */
+var shapeFns = {
+  linear: function(x) { return 0.15 + x * 0.7; },
+  sine: function(x) { return 0.5 + 0.38 * Math.sin(x * Math.PI * 2.2); },
+  step: function(x) { return x < 0.33 ? 0.2 : x < 0.66 ? 0.6 : 0.85; }
+};
+var shapeShape = 'linear', shapeNoise = [];
+
+function shapeMakeNoise() { shapeNoise = makeNoise(N_TRAIN, 'gaussian'); }
+
+function shapePts() {
+  return shapeNoise.map(function(n, i) {
+    var x = i / (N_TRAIN - 1);
+    return { x: x, y: Math.max(0.02, Math.min(0.98, shapeFns[shapeShape](x) + n)) };
+  });
+}
+
+function mse(pts, fn) {
+  var s = 0; pts.forEach(function(p) { var e = fn(p.x) - p.y; s += e * e; }); return s / pts.length;
+}
+
+function setShape(s) {
+  shapeShape = s;
+  ['linear', 'sine', 'step'].forEach(function(x) {
+    document.getElementById('shape-' + x).classList.toggle('active', x === s);
+  });
+  shapeMakeNoise(); shapeRender();
+}
+
+function shapeRender() {
+  var cv = document.getElementById('shape-canvas');
+  var ctx = cv.getContext('2d');
+  var W = cv.width, H = cv.height;
+  ctx.fillStyle = '#141420'; ctx.fillRect(0, 0, W, H);
+  drawAxes(ctx, W, H, 'x', 'y');
+
+  var k = parseInt(document.getElementById('shape-k').value);
+  var pts = shapePts();
+  var lr = linReg(pts);
+  var knnFn = function(dx) { return knnAt(pts, dx, k); };
+  var linFn = lr ? function(dx) { return lr.m * dx + lr.b; } : null;
+
+  drawCurve(ctx, shapeFns[shapeShape], W, H, 0, 1, 'rgba(255,255,255,0.15)', [4, 4]);
+  if (linFn) drawCurve(ctx, linFn, W, H, 0, 1, 'rgba(100,140,220,0.85)', []);
+  drawCurve(ctx, knnFn, W, H, 0, 1, 'rgba(220,100,80,0.85)', []);
+
+  pts.forEach(function(p) {
+    var cp = d2px(p.x, p.y, W, H, 0, 1);
+    ctx.beginPath(); ctx.arc(cp.x, cp.y, 3.5, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(200,200,220,0.6)'; ctx.fill();
+  });
+
+  var mseK = mse(pts, knnFn);
+  var mseL = linFn ? mse(pts, linFn) : 999;
+  var de = currentLang === 'de';
+  var winnerKnn = mseK < mseL;
+
+  ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+  ctx.fillStyle = 'rgba(100,140,220,0.85)'; ctx.fillRect(W - 200, PAD.t + 4, 20, 2);
+  ctx.fillText('Linear  MSE=' + mseL.toFixed(4), W - 176, PAD.t + 11);
+  ctx.fillStyle = 'rgba(220,100,80,0.85)'; ctx.fillRect(W - 200, PAD.t + 18, 20, 2);
+  ctx.fillText('KNN (K=' + k + ')  MSE=' + mseK.toFixed(4), W - 176, PAD.t + 25);
+
+  document.getElementById('shape-k-out').textContent = k;
+  document.getElementById('shape-verdict').textContent = '→ ' + (winnerKnn ? (de ? 'KNN gewinnt' : 'KNN wins') : (de ? 'Linear gewinnt' : 'Linear wins'));
+
+  var notes = {
+    linear: { en: 'True relationship is linear. Linear regression fits it naturally. KNN needs a large K to match, and even then adds noise.', de: 'Die wahre Beziehung ist linear. Die lineare Regression passt hier von selbst. KNN braucht ein großes K, um mitzuhalten, und bringt selbst dann noch Rauschen mit.' },
+    sine: { en: 'True relationship is a sine wave. KNN with the right K follows the curve. Linear can only split the difference.', de: 'Die wahre Beziehung ist eine Sinuswelle. KNN folgt der Kurve, wenn K stimmt. Die Gerade kann nur den Mittelweg nehmen.' },
+    step: { en: 'True relationship has sharp jumps. KNN handles them naturally, linear draws one diagonal line across the whole space.', de: 'Die wahre Beziehung hat scharfe Sprünge. KNN kommt damit problemlos zurecht. Die Gerade zieht nur eine Diagonale durch den ganzen Raum.' }
+  };
+  document.getElementById('shape-note').textContent = notes[shapeShape][currentLang] || '';
+}
+
+function shapeNewNoise() { shapeMakeNoise(); shapeRender(); }
+document.getElementById('shape-k').addEventListener('input', shapeRender);
+
+/* init */
+bvMakeNoise(); shapeMakeNoise();
+bvRender(); shapeRender();
+</script>
+
+<script>
+// <option> elements cannot contain styled spans, so swap their text directly.
+function bvSyncOptionLabels(){
+  var de = document.documentElement.lang === 'de';
+  document.querySelectorAll('option[data-en]').forEach(function(o){
+    o.textContent = de ? o.getAttribute('data-de') : o.getAttribute('data-en');
+  });
+}
+document.addEventListener('DOMContentLoaded', bvSyncOptionLabels);
+new MutationObserver(bvSyncOptionLabels).observe(
+  document.documentElement, {attributes:true, attributeFilter:['lang']});
+</script>
+</body>
+</html>

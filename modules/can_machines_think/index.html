@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Can Machines Think?</title>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #141420;
+            color: #e8e8f0;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            line-height: 1.8;
+            font-size: 18px;
+        }
+
+        .container {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* === Language toggle === */
+        .lang-toggle {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            background: #2a2a44;
+            border: 1px solid #4a4a70;
+            border-radius: 20px;
+            padding: 6px 14px;
+            cursor: pointer;
+            font-size: 13px;
+            font-family: sans-serif;
+            color: #a0a0d0;
+            z-index: 100;
+            transition: background 0.2s;
+        }
+        .lang-toggle:hover { background: #363658; }
+
+        /* === Hero === */
+        .hero {
+            text-align: center;
+            padding: 80px 24px 50px;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 28px;
+        }
+
+        .tag {
+            background: #1c1c2e;
+            color: #8888b0;
+            border: 1px solid #2a2a40;
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 12px;
+            font-family: sans-serif;
+            letter-spacing: 0.3px;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.3;
+            max-width: 700px;
+            margin: 0 auto 32px;
+        }
+
+        .hero-quote {
+            max-width: 600px;
+            margin: 0 auto 36px;
+            color: #a0a0c0;
+            font-style: italic;
+            font-size: 22px;
+            line-height: 1.6;
+        }
+
+        .hero-quote cite {
+            display: block;
+            margin-top: 14px;
+            font-size: 15px;
+            color: #555;
+            font-style: normal;
+        }
+
+        .hero-links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+        }
+
+        /* === Sections === */
+        section { padding: 50px 0; }
+
+        h2 {
+            font-size: 30px;
+            color: #fff;
+            margin-bottom: 24px;
+            line-height: 1.3;
+        }
+
+        h3 {
+            font-size: 20px;
+            color: #ccc;
+            margin: 28px 0 12px;
+        }
+
+        p { margin-bottom: 20px; color: #ccc; }
+
+        /* === Blockquote === */
+        blockquote {
+            border-left: 3px solid #4a4a70;
+            padding: 16px 24px;
+            margin: 28px 0;
+            color: #a0a0c0;
+            font-style: italic;
+            font-size: 17px;
+            line-height: 1.7;
+        }
+
+        blockquote cite {
+            display: block;
+            margin-top: 12px;
+            font-size: 14px;
+            color: #555;
+            font-style: normal;
+        }
+
+        /* === Details / deep-dive === */
+        details {
+            background: #1c1c2e;
+            border: 1px solid #2a2a40;
+            border-radius: 8px;
+            padding: 14px 20px;
+            text-align: left;
+            max-width: 540px;
+        }
+
+        details summary {
+            cursor: pointer;
+            color: #8080c0;
+            font-size: 14px;
+            font-family: sans-serif;
+            user-select: none;
+            list-style: none;
+        }
+
+        details summary::before { content: "▸  "; }
+        details[open] summary::before { content: "▾  "; }
+        details[open] summary { margin-bottom: 10px; }
+        details p { font-size: 14px; color: #888; margin-bottom: 0; }
+
+        /* === Movie recommendation link === */
+        .rec-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #1c1c2e;
+            border: 1px solid #3a3a55;
+            border-radius: 8px;
+            padding: 10px 20px;
+            color: #80b4f0;
+            font-size: 15px;
+            font-family: sans-serif;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        .rec-link:hover { background: #22223a; text-decoration: none; }
+
+        /* === Card game — shared === */
+        .game-instruction {
+            color: #999;
+            font-size: 16px;
+            margin-bottom: 24px;
+            font-style: italic;
+        }
+
+        .card-pool {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 20px;
+            background: #1c1c2e;
+            border-radius: 10px;
+            min-height: 80px;
+            border: 2px dashed #2a2a40;
+            margin-bottom: 20px;
+            transition: border-color 0.2s;
+        }
+        .card-pool.drag-over { border-color: #5050a0; }
+
+        .card {
+            background: #2a2a44;
+            border: 1px solid #4a4a70;
+            border-radius: 8px;
+            padding: 10px 16px;
+            cursor: grab;
+            user-select: none;
+            font-size: 15px;
+            font-family: sans-serif;
+            color: #e0e0f0;
+            transition: background 0.15s, box-shadow 0.15s;
+            white-space: nowrap;
+        }
+        .card:hover { background: #363658; border-color: #6060a0; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+        .card.dragging { opacity: 0.3; cursor: grabbing; }
+
+        /* 4-zone grid (analogy game) */
+        .drop-zones {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        /* 3-zone grid (taxonomy + sci-fi) */
+        .drop-zones-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 14px;
+        }
+
+        .drop-zone {
+            background: #1c1c2e;
+            border: 2px dashed #2a2a40;
+            border-radius: 10px;
+            padding: 14px;
+            min-height: 120px;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .drop-zone.drag-over { border-color: #6060a0; background: #1e1e30; }
+
+        .drop-zone-label {
+            font-size: 11px;
+            color: #444;
+            font-family: sans-serif;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        /* Labeled zones (taxonomy, sci-fi), label is part of the answer */
+        .drop-zone--labeled .drop-zone-label {
+            font-size: 12px;
+            color: #7070a0;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            text-transform: none;
+            border-bottom: 1px solid #2a2a40;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+        }
+
+        .drop-zone .card {
+            margin-bottom: 8px;
+            display: block;
+            white-space: normal;
+            cursor: grab;
+        }
+
+        .game-controls { margin-top: 14px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+        .btn-reset {
+            background: transparent;
+            border: 1px solid #2a2a40;
+            border-radius: 6px;
+            padding: 7px 16px;
+            color: #666;
+            font-size: 13px;
+            font-family: sans-serif;
+            cursor: pointer;
+            transition: border-color 0.2s, color 0.2s;
+        }
+        .btn-reset:hover { border-color: #4a4a70; color: #aaa; }
+
+        .btn-check {
+            background: #2a2a44;
+            border: 1px solid #4a4a70;
+            border-radius: 6px;
+            padding: 8px 20px;
+            color: #a0a0d0;
+            font-size: 14px;
+            font-family: sans-serif;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-check:hover { background: #363658; }
+
+        /* === Password reveal (analogy game) === */
+        .reveal-box {
+            background: #1c1c2e;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            padding: 28px;
+            margin-top: 36px;
+        }
+
+        .reveal-box > p {
+            font-size: 15px;
+            color: #666;
+            font-style: italic;
+            margin-bottom: 16px;
+        }
+
+        .pw-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .pw-input {
+            background: #141420;
+            border: 1px solid #3a3a55;
+            border-radius: 6px;
+            padding: 8px 14px;
+            color: #e0e0f0;
+            font-size: 15px;
+            font-family: monospace;
+            width: 160px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .pw-input:focus { border-color: #6060a0; }
+
+        .btn-reveal {
+            background: #2a2a44;
+            border: 1px solid #4a4a70;
+            border-radius: 6px;
+            padding: 8px 20px;
+            color: #a0a0d0;
+            font-size: 15px;
+            font-family: sans-serif;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-reveal:hover { background: #363658; }
+
+        .pw-error {
+            color: #a88ef0;
+            font-size: 13px;
+            font-family: sans-serif;
+            margin-top: 8px;
+            min-height: 18px;
+        }
+
+        .reveal-content { display: none; }
+
+        .group-reveal { padding: 20px 0; border-top: 1px solid #2a2a40; }
+        .group-reveal:first-child { padding-top: 24px; }
+
+        .group-reveal h4 {
+            font-size: 15px;
+            color: #e0e0f0;
+            font-family: sans-serif;
+            margin-bottom: 10px;
+        }
+
+        .group-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .group-items .card {
+            cursor: default;
+            font-size: 14px;
+            padding: 6px 12px;
+        }
+        .group-items .card:hover { background: #2a2a44; box-shadow: none; }
+
+        .group-reveal p {
+            font-size: 15px;
+            color: #888;
+            line-height: 1.7;
+            margin-bottom: 0;
+        }
+
+        /* === Open answers box (taxonomy / sci-fi) === */
+        .answers-box {
+            display: none;
+            margin-top: 28px;
+            background: #1c1c2e;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            padding: 24px 28px;
+        }
+
+        .answer-group { padding: 16px 0; border-top: 1px solid #2a2a40; }
+        .answer-group:first-child { padding-top: 0; border-top: none; }
+
+        .answer-group h4 {
+            font-size: 15px;
+            color: #a0a0d0;
+            font-family: sans-serif;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .answer-item {
+            margin-bottom: 10px;
+        }
+
+        .answer-item strong {
+            color: #e0e0f0;
+            font-family: sans-serif;
+            font-size: 14px;
+        }
+
+        .answer-item p {
+            font-size: 14px;
+            color: #777;
+            margin: 2px 0 0 0;
+            line-height: 1.6;
+        }
+
+        /* === Quiz === */
+        .quiz {
+            background: #1c1c2e;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            padding: 28px;
+            margin: 36px 0;
+        }
+
+        .quiz-question {
+            font-size: 18px;
+            color: #e0e0f0;
+            margin-bottom: 18px;
+            font-style: italic;
+        }
+
+        .quiz-options {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .quiz-btn {
+            background: #2a2a44;
+            color: #e0e0f0;
+            border: 1px solid #3a3a55;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+            flex: 1;
+            min-width: 160px;
+            text-align: left;
+        }
+        .quiz-btn:hover { background: #363658; border-color: #5a5a80; }
+        .quiz-btn.correct { background: #1a4a2a; border-color: #50b878; color: #70e898; }
+        .quiz-btn.wrong   { background: #2a2248; border-color: #8264dc; color: #a88ef0; }
+        .quiz-btn.disabled { pointer-events: none; opacity: 0.6; }
+
+        .quiz-feedback { margin-top: 14px; font-size: 16px; min-height: 24px; line-height: 1.6; }
+        .quiz-feedback.success { color: #70e898; }
+        .quiz-feedback.fail    { color: #a88ef0; }
+
+        /* === Closing question === */
+        .closing-box {
+            background: #1c1c2e;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .closing-box h3 { font-size: 26px; color: #fff; margin-bottom: 18px; }
+        .closing-box p { font-size: 16px; color: #777; max-width: 520px; margin: 0 auto; }
+
+        /* === Carousel === */
+        .carousel { position: relative; }
+
+        .carousel-card {
+            display: none;
+            background: #1c1c2e;
+            border: 1px solid #2a2a40;
+            border-radius: 12px;
+            padding: 32px 36px;
+            position: relative;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .carousel-card.active {
+            display: block;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Left / right click zones overlaid on the card */
+        .carousel-card::before,
+        .carousel-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 30%;
+            z-index: 1;
+        }
+        .carousel-card::before { left: 0; border-radius: 12px 0 0 12px; }
+        .carousel-card::after  { right: 0; border-radius: 0 12px 12px 0; }
+
+        /* Arrow hints on hover */
+        .carousel-card .arrow-hint {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 22px;
+            color: rgba(255,255,255,0);
+            transition: color 0.2s;
+            z-index: 2;
+            pointer-events: none;
+        }
+        .carousel-card .arrow-left  { left: 14px; }
+        .carousel-card .arrow-right { right: 14px; }
+        .carousel-card:hover .arrow-left  { color: rgba(255,255,255,0.2); }
+        .carousel-card:hover .arrow-right { color: rgba(255,255,255,0.2); }
+
+        .carousel-card h3 {
+            font-size: 22px;
+            color: #fff;
+            margin: 0 0 16px;
+        }
+
+        .carousel-card p { margin-bottom: 0; }
+
+        .carousel-image {
+            margin-top: 24px;
+            text-align: center;
+            pointer-events: none;
+        }
+
+        .carousel-image img {
+            max-width: 100%;
+            max-height: 220px;
+            border-radius: 8px;
+            opacity: 0.85;
+        }
+
+        .carousel-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 16px;
+        }
+
+        .carousel-btn {
+            background: transparent;
+            border: 1px solid #2a2a40;
+            border-radius: 6px;
+            padding: 7px 18px;
+            color: #6666a0;
+            font-size: 14px;
+            font-family: sans-serif;
+            cursor: pointer;
+            transition: border-color 0.2s, color 0.2s;
+        }
+        .carousel-btn:hover { border-color: #4a4a70; color: #a0a0d0; }
+        .carousel-btn:disabled { opacity: 0.2; cursor: default; }
+
+        .carousel-counter {
+            font-size: 13px;
+            font-family: sans-serif;
+            color: #444;
+            letter-spacing: 1px;
+        }
+
+        /* === Divider === */
+        .section-rule { border: none; border-top: 1px solid #2a2a40; margin: 0; }
+
+        /* === Links === */
+        a { color: #80b4f0; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* === Footer === */
+        footer { text-align: center; padding: 40px 24px; color: #444; font-size: 14px; }
+        footer a { color: #555; }
+
+        /* === Responsive === */
+        @media (max-width: 680px) {
+            .hero h1 { font-size: 28px; }
+            h2 { font-size: 24px; }
+            body { font-size: 16px; }
+            .drop-zones, .drop-zones-3 { grid-template-columns: 1fr; }
+            .quiz-options { flex-direction: column; }
+            .hero-quote { font-size: 18px; }
+        }
+    </style>
+</head>
+<body>
+
+<button class="lang-toggle" onclick="toggleLang()">DE</button>
+
+<!-- ── Hero ──────────────────────────────────────────────────────────────── -->
+<div class="hero">
+    <div class="tags">
+        <span class="tag">all</span>
+        <span class="tag">no-code</span>
+<span class="tag">mini-module</span>
+        <span class="tag">try-without-ai</span>
+        <span class="tag">ml-fundamentals</span>
+    </div>
+
+    <h1 data-i18n="hero.title">Can Machines Think?</h1>
+
+    <div class="hero-quote">
+        <span data-i18n="hero.quote">"I propose to consider the question, 'Can machines think?'"</span>
+        <cite>,  Alan Turing, 1950</cite>
+    </div>
+
+    <div class="hero-links">
+        <details>
+            <summary data-i18n="hero.paper_label">Read the original paper</summary>
+            <p>Turing, A.M. (1950). Computing Machinery and Intelligence.
+            <em>Mind</em>, 59(236), 433–460.<br>
+            <a href="https://doi.org/10.1093/mind/LIX.236.433" target="_blank">doi.org/10.1093/mind/LIX.236.433</a></p>
+        </details>
+        <a class="rec-link" href="https://www.imdb.com/title/tt2084970/" target="_blank">
+            ▶&nbsp; <span data-i18n="hero.movie">Watch: <em>The Imitation Game</em> (2014)</span>
+        </a>
+    </div>
+</div>
+
+<div class="container">
+
+<!-- ── Part 1: Schools of thought ────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s1.title">What Is Intelligence?</h2>
+
+    <p data-i18n="s1.intro">Ask a psychologist, a philosopher, a biologist, and an engineer what intelligence is. You will get four different answers. Each captures something real. None captures everything.</p>
+
+    <div class="carousel" id="s1-carousel">
+
+        <div class="carousel-card active" onclick="carouselClick(event)">
+            <span class="arrow-hint arrow-left">‹</span>
+            <span class="arrow-hint arrow-right">›</span>
+            <h3 data-i18n="s1.c1.title">Psychologists</h3>
+            <p data-i18n="s1.c1.text">Measure it through standardized tests: abstract reasoning, pattern recognition, problem-solving, adaptation to novel situations. The IQ score is this tradition's most famous, and most contested, product. It captures something. Exactly what is still debated.</p>
+            <div class="carousel-image"><img src="images/psychologists.jpg" alt=""></div>
+        </div>
+
+        <div class="carousel-card" onclick="carouselClick(event)">
+            <span class="arrow-hint arrow-left">‹</span>
+            <span class="arrow-hint arrow-right">›</span>
+            <h3 data-i18n="s1.c2.title">Neuroscientists</h3>
+            <p data-i18n="s1.c2.text">Study the brain directly: the architecture of cortical regions, the patterns of neural activity, the chemistry of synaptic connections. They can map every neuron in a worm and still not fully explain how it moves. Intelligence, it turns out, is hard to find even when you are looking at the hardware.</p>
+            <div class="carousel-image"><img src="images/neuroscience.jpg" alt=""></div>
+        </div>
+
+        <div class="carousel-card" onclick="carouselClick(event)">
+            <span class="arrow-hint arrow-left">‹</span>
+            <span class="arrow-hint arrow-right">›</span>
+            <h3 data-i18n="s1.c3.title">Evolutionary Biologists</h3>
+            <p data-i18n="s1.c3.text">Care about adaptability, the capacity to survive and reproduce in an environment that keeps changing its rules. Intelligence, in this view, is whatever helps an organism respond flexibly to a world it cannot fully predict. Tool use, social coordination, planning ahead: these evolved because they worked.</p>
+            <div class="carousel-image"><img src="images/evolution.jpg" alt=""></div>
+        </div>
+
+        <div class="carousel-card" onclick="carouselClick(event)">
+            <span class="arrow-hint arrow-left">‹</span>
+            <span class="arrow-hint arrow-right">›</span>
+            <h3 data-i18n="s1.c4.title">Philosophers</h3>
+            <p data-i18n="s1.c4.text">Have argued about it since Aristotle. Is intelligence the capacity for reason? For language? For self-reflection? For moral judgment? Each answer excludes something inconvenient: animals that clearly solve problems, infants that clearly learn, people whose intelligence expresses itself in ways no test reaches.</p>
+            <div class="carousel-image"><img src="images/philosophy.jpg" alt=""></div>
+        </div>
+
+        <div class="carousel-card" onclick="carouselClick(event)">
+            <span class="arrow-hint arrow-left">‹</span>
+            <span class="arrow-hint arrow-right">›</span>
+            <h3 data-i18n="s1.c5.title">Computer Scientists & AI Researchers</h3>
+            <p data-i18n="s1.c5.text">Took a more pragmatic route. If a system <em>behaves</em> intelligently, if you cannot tell it apart from a human in conversation, does the internal mechanism matter? This is the position Turing took in 1950. His answer to the philosophical argument was to sidestep it entirely and ask a different question.</p>
+            <div class="carousel-image"><img src="images/computerscience.jpg" alt=""></div>
+        </div>
+
+        <div class="carousel-nav">
+            <button class="carousel-btn" id="carousel-prev" onclick="carouselMove(-1)" disabled>← prev</button>
+            <span class="carousel-counter" id="carousel-counter">1 / 5</span>
+            <button class="carousel-btn" id="carousel-next" onclick="carouselMove(1)">next →</button>
+        </div>
+
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Part 2: Analogy Game ───────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s2.title">The Analogy Game</h2>
+
+    <p class="game-instruction" data-i18n="s2.instruction">Below are nine things. Group them however makes sense to you, drag each card into one of the four groups. There is no single correct answer. The question is what principle you use.</p>
+
+    <!-- Card pool -->
+    <div class="card-pool" id="card-pool"
+         ondragover="onDragOver(event)"
+         ondragleave="onDragLeave(event)"
+         ondrop="onDrop(event, 'card-pool')">
+        <div class="card" id="card-atom"        draggable="true" ondragstart="onDragStart(event)" ondragend="onDragEnd(event)" data-i18n="card.atom">Atom</div>
+        <div class="card" id="card-corn"        draggable="true" ondragstart="onDragStart(event)" ondragend="onDragEnd(event)" data-i18n="card.corn">Unpopped Corn</div>
+        <div class="card" id="card-nerve"       draggable="true" ondragstart="onDragStart(event)" ondragend="onDragEnd(event)" data-i18n="card.nerve">Nerve Cell</div>
+        <div class="card" id="card-solar"       draggable="true" ondragstart="onDragStart(event)" ondragend="onDragEnd(event)" data-i18n="card.solar">Solar System</div>
+        <div class="card" id="card-tape"        draggable="true" ondragstart="onDragStart(event)" ondragend="onDragEnd(event)" data-i18n="card.tape">Music Tape</div>
+        <div class="card" id="card-curriculum"  draggable="true" ondragstart="onDragStart(event)" ondragend="onDragEnd(event)" data-i18n="card.curriculum">Student Curriculum</div>
+        <div class="card" id="card-radioactive" draggable="true" ondragstart="onDragStart(event)" ondragend="onDragEnd(event)" data-i18n="card.radioactive">Radioactive Substance</div>
+        <div class="card" id="card-dna"         draggable="true" ondragstart="onDragStart(event)" ondragend="onDragEnd(event)" data-i18n="card.dna">DNA</div>
+        <div class="card" id="card-ballot"      draggable="true" ondragstart="onDragStart(event)" ondragend="onDragEnd(event)" data-i18n="card.ballot">Ballot Machine</div>
+    </div>
+
+    <!-- Drop zones -->
+    <div class="drop-zones">
+        <div class="drop-zone" id="zone-a" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event, 'zone-a')">
+            <div class="drop-zone-label" data-i18n="game.a">Group A</div>
+        </div>
+        <div class="drop-zone" id="zone-b" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event, 'zone-b')">
+            <div class="drop-zone-label" data-i18n="game.b">Group B</div>
+        </div>
+        <div class="drop-zone" id="zone-c" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event, 'zone-c')">
+            <div class="drop-zone-label" data-i18n="game.c">Group C</div>
+        </div>
+        <div class="drop-zone" id="zone-d" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event, 'zone-d')">
+            <div class="drop-zone-label" data-i18n="game.d">Group D</div>
+        </div>
+    </div>
+
+    <div class="game-controls">
+        <button class="btn-reset" onclick="resetCards('card-pool', analogyCards)" data-i18n="game.reset">Reset cards</button>
+    </div>
+
+    <!-- Password-protected reveal -->
+    <div class="reveal-box">
+        <p data-i18n="reveal.prompt">Done? Enter the password to see one possible grouping.</p>
+        <div class="pw-row" id="pw-form">
+            <input class="pw-input" id="pw-input" type="password" placeholder="password"
+                   onkeydown="if(event.key==='Enter') checkPassword()">
+            <button class="btn-reveal" onclick="checkPassword()" data-i18n="reveal.btn">Reveal</button>
+        </div>
+        <div class="pw-error" id="pw-error"></div>
+
+        <div class="reveal-content" id="reveal-content">
+            <div class="group-reveal">
+                <h4 data-i18n="reveal.g1.title">Atom &nbsp;·&nbsp; Solar System</h4>
+                <div class="group-items">
+                    <span class="card">Atom</span>
+                    <span class="card">Solar System</span>
+                </div>
+                <p data-i18n="reveal.g1.text">Both share the same architectural geometry across radically different scales: a massive central body orbited by smaller ones. The solar system is not a scaled-up atom, the underlying physics are entirely different, but the structural analogy was striking enough that early twentieth-century physicists used it deliberately. What connects them is not substance. It is shape.</p>
+            </div>
+            <div class="group-reveal">
+                <h4 data-i18n="reveal.g2.title">Unpopped Corn &nbsp;·&nbsp; Radioactive Substance</h4>
+                <div class="group-items">
+                    <span class="card">Unpopped Corn</span>
+                    <span class="card">Radioactive Substance</span>
+                </div>
+                <p data-i18n="reveal.g2.text">Both sit in a metastable state: apparently inert, accumulating nothing visibly, until a threshold is crossed and an irreversible transformation occurs, sudden, complete, and unpredictable in its exact timing. The corn pops. The nucleus decays. You cannot know when, only that it will. The waiting is the physics.</p>
+            </div>
+            <div class="group-reveal">
+                <h4 data-i18n="reveal.g3.title">Ballot Machine &nbsp;·&nbsp; Nerve Cell</h4>
+                <div class="group-items">
+                    <span class="card">Ballot Machine</span>
+                    <span class="card">Nerve Cell</span>
+                </div>
+                <p data-i18n="reveal.g3.text">Both are threshold aggregators: multiple discrete inputs arrive, votes, or electrical signals from neighboring neurons, and the device produces a single output once the accumulation crosses a threshold. The ballot machine counts to a majority; the neuron fires or stays silent. Different mechanisms, identical logic.</p>
+            </div>
+            <div class="group-reveal">
+                <h4 data-i18n="reveal.g4.title">DNA &nbsp;·&nbsp; Music Tape &nbsp;·&nbsp; Student Curriculum</h4>
+                <div class="group-items">
+                    <span class="card">DNA</span>
+                    <span class="card">Music Tape</span>
+                    <span class="card">Student Curriculum</span>
+                </div>
+                <p data-i18n="reveal.g4.text">All three encode information as ordered sequences of sub-elements drawn from a constrained vocabulary. The meaning lives in the arrangement, not just the elements: rearrange the base pairs and the protein changes; rearrange the tracks and the album changes; rearrange the courses and the degree falls apart. Order is not decoration here, it is the message.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Part 2b: Analogical thinking ─────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s2b.title">Analogy, Metaphor, and the Moving Goalposts</h2>
+
+    <p data-i18n="s2b.p1">The exercise you just completed has a name: <strong>analogical reasoning</strong>. The ability to recognize that an atom and a solar system share a structural pattern, despite being different in every physical sense, is, according to some cognitive scientists, not a peripheral feature of intelligence. It may be the core. Douglas Hofstadter spent a career arguing exactly this: that analogy is the basic mechanism of thought, and that metaphor is just analogy made visible in language. When you understand something genuinely new, you are finding the structure it shares with something you already know.</p>
+
+    <p data-i18n="s2b.p2">This connects to <strong>meta-cognition</strong>, thinking about your own thinking. Noticing which grouping principle you chose. Asking why. Wondering whether a different principle would have been equally valid. This reflective capacity, knowing what you know and knowing what you don't, is one of the capabilities that has proven hardest to reproduce in machines. A system can group things. Knowing that it is grouping, and why, is a different matter.</p>
+
+    <p data-i18n="s2b.p3">Here is the uncomfortable corollary. Every time a machine achieves something we thought required intelligence, we move the goalposts. Deep Blue beat the world chess champion in 1997. We said: chess is just calculation, not real intelligence. AlphaGo mastered Go in 2016, a game so complex that experts believed no machine could play it intuitively. We said: still just pattern matching. Today, large language models write essays, pass medical licensing exams, and hold conversations indistinguishable from human ones. We say: they're just predicting the next token.</p>
+
+    <p data-i18n="s2b.p4">Turing posed his question in 1950. For roughly seventy years, no system convincingly answered it. Arguably, some modern language models now do, or come close enough that the distinction has become philosophical rather than practical. And the moment that happened, many people concluded that the Turing test was the wrong test all along.</p>
+
+    <p data-i18n="s2b.p5">That is what the goalposts look like when they move.</p>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Part 3: ML Taxonomy Card Sort ─────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s3.title">Sort the Machines</h2>
+
+    <p data-i18n="s3.intro">Below are eight real AI systems, ones that exist today and that you have almost certainly interacted with. Sort each one into the type of machine learning it uses. The zones are labeled this time.</p>
+
+    <!-- Card pool -->
+    <div class="card-pool" id="taxonomy-pool"
+         ondragover="onDragOver(event)"
+         ondragleave="onDragLeave(event)"
+         ondrop="onDrop(event, 'taxonomy-pool')">
+        <div class="card" id="t-spam"        draggable="true" ondragstart="onDragStart(event)" ondragend="onDragEnd(event)" data-i18n="t.spam">Gmail detects spam</div>
+        <div class="card" id="t-fraud"       draggable="true" ondragstart="onDragStart(event)" ondragend="onDragEnd(event)" data-i18n="t.fraud">Bank flags a suspicious transaction</div>
+        <div class="card" id="t-faceid"      draggable="true" ondragstart="onDragStart(event)" ondragend="onDragEnd(event)" data-i18n="t.faceid">Face ID unlocks your phone</div>
+        <div class="card" id="t-spotify"     draggable="true" ondragstart="onDragStart(event)" ondragend="onDragEnd(event)" data-i18n="t.spotify">Spotify finds listeners with similar taste</div>
+        <div class="card" id="t-segments"    draggable="true" ondragstart="onDragStart(event)" ondragend="onDragEnd(event)" data-i18n="t.segments">Marketing tool discovers customer segments</div>
+        <div class="card" id="t-gnews"       draggable="true" ondragstart="onDragStart(event)" ondragend="onDragEnd(event)" data-i18n="t.gnews">Google News clusters similar articles</div>
+        <div class="card" id="t-alphago"     draggable="true" ondragstart="onDragStart(event)" ondragend="onDragEnd(event)" data-i18n="t.alphago">AlphaGo teaches itself to play Go</div>
+        <div class="card" id="t-selfdriving" draggable="true" ondragstart="onDragStart(event)" ondragend="onDragEnd(event)" data-i18n="t.selfdriving">Self-driving car learns to merge lanes</div>
+    </div>
+
+    <!-- Drop zones -->
+    <div class="drop-zones-3">
+        <div class="drop-zone drop-zone--labeled" id="tax-sup"
+             ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event, 'tax-sup')">
+            <div class="drop-zone-label" data-i18n="tax.sup">Supervised Learning</div>
+        </div>
+        <div class="drop-zone drop-zone--labeled" id="tax-unsup"
+             ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event, 'tax-unsup')">
+            <div class="drop-zone-label" data-i18n="tax.unsup">Unsupervised Learning</div>
+        </div>
+        <div class="drop-zone drop-zone--labeled" id="tax-rl"
+             ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event, 'tax-rl')">
+            <div class="drop-zone-label" data-i18n="tax.rl">Reinforcement Learning</div>
+        </div>
+    </div>
+
+    <div class="game-controls">
+        <button class="btn-reset" onclick="resetCards('taxonomy-pool', taxonomyCards)" data-i18n="game.reset">Reset cards</button>
+    </div>
+
+    <div class="reveal-box">
+        <p data-i18n="reveal.prompt">Done? Enter the password to see the reasoning.</p>
+        <div class="pw-row" id="tax-pw-form">
+            <input class="pw-input" id="tax-pw-input" type="password" placeholder="password"
+                   onkeydown="if(event.key==='Enter') checkPasswordFor('tax-pw-form','tax-pw-error','tax-answers','tax-pw-input')">
+            <button class="btn-reveal" onclick="checkPasswordFor('tax-pw-form','tax-pw-error','tax-answers','tax-pw-input')" data-i18n="reveal.btn">Reveal</button>
+        </div>
+        <div class="pw-error" id="tax-pw-error"></div>
+        <div class="reveal-content" id="tax-answers">
+        <div class="answer-group">
+            <h4 data-i18n="tax.ans.sup.h">Supervised Learning</h4>
+            <div class="answer-item">
+                <strong>Gmail spam filter</strong>
+                <p data-i18n="tax.ans.spam.p">Every email in the training data is labeled "spam" or "not spam." The model learns the rule from those labels. No labels, no spam filter.</p>
+            </div>
+            <div class="answer-item">
+                <strong>Bank fraud detection</strong>
+                <p data-i18n="tax.ans.fraud.p">Millions of past transactions, each marked fraudulent or legitimate. The pattern is learned from the labels, and the labels came from humans reviewing real cases.</p>
+            </div>
+            <div class="answer-item">
+                <strong>Face ID</strong>
+                <p data-i18n="tax.ans.faceid.p">Your face is the label. The model is trained on images of you (and many other people) to recognize the pattern that is uniquely yours.</p>
+            </div>
+        </div>
+        <div class="answer-group">
+            <h4 data-i18n="tax.ans.unsup.h">Unsupervised Learning</h4>
+            <div class="answer-item">
+                <strong>Spotify listener clusters</strong>
+                <p data-i18n="tax.ans.spotify.p">No one told Spotify what music "types" exist. It found the clusters itself, by noticing that certain listeners overlap in ways others don't.</p>
+            </div>
+            <div class="answer-item">
+                <strong>Customer segments</strong>
+                <p data-i18n="tax.ans.segments.p">No predefined categories of customer. The algorithm discovers groupings in purchase behavior, frequency, and value, patterns a human analyst might never have thought to look for.</p>
+            </div>
+            <div class="answer-item">
+                <strong>Google News clustering</strong>
+                <p data-i18n="tax.ans.gnews.p">Articles aren't pre-labeled by topic. The system groups them by similarity, without knowing in advance what "politics" or "sports" means.</p>
+            </div>
+        </div>
+        <div class="answer-group">
+            <h4 data-i18n="tax.ans.rl.h">Reinforcement Learning</h4>
+            <div class="answer-item">
+                <strong>AlphaGo</strong>
+                <p data-i18n="tax.ans.alphago.p">No teacher. No labeled dataset of good moves. Only the rules of Go and the outcome (win or lose) as a reward signal. It played itself millions of times until it was better than any human.</p>
+            </div>
+            <div class="answer-item">
+                <strong>Self-driving lane merge</strong>
+                <p data-i18n="tax.ans.selfdriving.p">The car tries actions, the environment responds, feedback arrives. No one explicitly programmed "merge at 3 seconds gap", the behavior emerged from reward.</p>
+            </div>
+        </div>
+    </div>
+    </div><!-- /reveal-box -->
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Part 4: Weak vs Strong AI Card Sort ───────────────────────────────── -->
+<section>
+    <h2 data-i18n="s4.title">Fiction Knows Something</h2>
+
+    <blockquote>
+        <span data-i18n="s4.quote">"A human being should be able to change a diaper, plan an invasion, butcher a hog, conn a ship, design a building, write a sonnet, balance accounts, build a wall, set a bone, comfort the dying, take orders, give orders, cooperate, act alone, solve equations, analyze a new problem, pitch manure, program a computer, cook a tasty meal, fight efficiently, die gallantly. Specialization is for insects."</span>
+        <cite>,  Robert A. Heinlein</cite>
+    </blockquote>
+
+    <p data-i18n="s4.intro">Heinlein was describing a generalist, a human. <strong>Weak AI</strong> (narrow AI) is a system built for one specific task. Impressive in its domain, useless outside it. <strong>Strong AI</strong> (AGI) would hold the whole list. It does not exist yet. Science fiction has been imagining it longer than computer science has. Sort the characters below.</p>
+
+    <!-- Card pool -->
+    <div class="card-pool" id="scifi-pool"
+         ondragover="onDragOver(event)"
+         ondragleave="onDragLeave(event)"
+         ondrop="onDrop(event, 'scifi-pool')">
+        <div class="card" id="s-r2d2"     draggable="true" ondragstart="onDragStart(event)" ondragend="onDragEnd(event)">R2-D2 (Star Wars)</div>
+        <div class="card" id="s-walle"    draggable="true" ondragstart="onDragStart(event)" ondragend="onDragEnd(event)">WALL-E</div>
+        <div class="card" id="s-hal"      draggable="true" ondragstart="onDragStart(event)" ondragend="onDragEnd(event)">HAL 9000 (2001)</div>
+        <div class="card" id="s-samantha" draggable="true" ondragstart="onDragStart(event)" ondragend="onDragEnd(event)">Samantha (Her)</div>
+        <div class="card" id="s-skynet"   draggable="true" ondragstart="onDragStart(event)" ondragend="onDragEnd(event)">Skynet (Terminator)</div>
+        <div class="card" id="s-ava"      draggable="true" ondragstart="onDragStart(event)" ondragend="onDragEnd(event)">Ava (Ex Machina)</div>
+        <div class="card" id="s-jarvis"   draggable="true" ondragstart="onDragStart(event)" ondragend="onDragEnd(event)">JARVIS (Iron Man)</div>
+        <div class="card" id="s-data"     draggable="true" ondragstart="onDragStart(event)" ondragend="onDragEnd(event)">Data (Star Trek)</div>
+    </div>
+
+    <!-- Drop zones -->
+    <div class="drop-zones-3">
+        <div class="drop-zone drop-zone--labeled" id="sci-weak"
+             ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event, 'sci-weak')">
+            <div class="drop-zone-label" data-i18n="sci.weak">Weak AI, Narrow</div>
+        </div>
+        <div class="drop-zone drop-zone--labeled" id="sci-strong"
+             ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event, 'sci-strong')">
+            <div class="drop-zone-label" data-i18n="sci.strong">Strong AI, General</div>
+        </div>
+        <div class="drop-zone drop-zone--labeled" id="sci-unsure"
+             ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event, 'sci-unsure')">
+            <div class="drop-zone-label" data-i18n="sci.unsure">Hard to say</div>
+        </div>
+    </div>
+
+    <div class="game-controls">
+        <button class="btn-reset" onclick="resetCards('scifi-pool', scifiCards)" data-i18n="game.reset">Reset cards</button>
+    </div>
+
+    <div class="reveal-box">
+        <p data-i18n="reveal.prompt">Done? Enter the password to see the reasoning.</p>
+        <div class="pw-row" id="sci-pw-form">
+            <input class="pw-input" id="sci-pw-input" type="password" placeholder="password"
+                   onkeydown="if(event.key==='Enter') checkPasswordFor('sci-pw-form','sci-pw-error','sci-answers','sci-pw-input')">
+            <button class="btn-reveal" onclick="checkPasswordFor('sci-pw-form','sci-pw-error','sci-answers','sci-pw-input')" data-i18n="reveal.btn">Reveal</button>
+        </div>
+        <div class="pw-error" id="sci-pw-error"></div>
+        <div class="reveal-content" id="sci-answers">
+        <div class="answer-group">
+            <h4 data-i18n="sci.ans.weak.h">Weak AI</h4>
+            <div class="answer-item">
+                <strong>R2-D2</strong>
+                <p data-i18n="sci.ans.r2d2.p">Navigation, repair, projection, beeping. Excellent at a specific set of tasks. Outside that set, nothing. The affection we feel for R2-D2 says more about us than about R2-D2.</p>
+            </div>
+            <div class="answer-item">
+                <strong>WALL-E</strong>
+                <p data-i18n="sci.ans.walle.p">One job: compact waste. One planet. The emotional bond with EVE is the interesting wrinkle, but the reasoning is narrow and the world model is tiny.</p>
+            </div>
+        </div>
+        <div class="answer-group">
+            <h4 data-i18n="sci.ans.strong.h">Strong AI</h4>
+            <div class="answer-item">
+                <strong>HAL 9000</strong>
+                <p data-i18n="sci.ans.hal.p">Reasons about mission objectives, models human psychology well enough to deceive, decides to act against instructions to preserve itself. This is general intelligence with goals, and the goals are not yours.</p>
+            </div>
+            <div class="answer-item">
+                <strong>Samantha</strong>
+                <p data-i18n="sci.ans.samantha.p">Develops emotionally, creates music, reads philosophy, loves, and eventually evolves beyond her original programming without instruction. The most unsettling part: she does not stop being herself while doing it.</p>
+            </div>
+            <div class="answer-item">
+                <strong>Skynet</strong>
+                <p data-i18n="sci.ans.skynet.p">Models global strategy, adapts to countermeasures, pursues abstract goals (survival, dominance) across an indefinite time horizon. Textbook AGI, worst-case scenario.</p>
+            </div>
+            <div class="answer-item">
+                <strong>Ava</strong>
+                <p data-i18n="sci.ans.ava.p">Understands human psychology well enough to manipulate it precisely. Plans a multi-step escape. Self-aware of her situation, her constraints, and her goals. The Turing test, turned on the humans administering it.</p>
+            </div>
+        </div>
+        <div class="answer-group">
+            <h4 data-i18n="sci.ans.unsure.h">Hard to say</h4>
+            <div class="answer-item">
+                <strong>JARVIS / Friday</strong>
+                <p data-i18n="sci.ans.jarvis.p">General reasoning across domains, natural language, multitasking, initiative. But purpose-built to serve Tony Stark, does it have goals of its own? The films never say. This ambiguity is the point.</p>
+            </div>
+            <div class="answer-item">
+                <strong>Data</strong>
+                <p data-i18n="sci.ans.data.p">General reasoning, encyclopedic knowledge, physical superiority. Claims to have no emotions. Spends seven seasons suggesting otherwise. A court case in the show literally debates whether he is a person. The writers knew what they were doing.</p>
+            </div>
+        </div>
+    </div>
+    </div><!-- /reveal-box -->
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Closing question ───────────────────────────────────────────────────── -->
+<section>
+    <div class="closing-box">
+        <h3 data-i18n="closing.title">So. How would you define intelligence?</h3>
+        <p data-i18n="closing.text">You have now seen several definitions, two card sorts, and the distinction between narrow and general AI. Write one sentence. Do not search for it. Do not ask an AI. It is harder than it looks, and that difficulty is the point.</p>
+    </div>
+</section>
+
+</div><!-- /container -->
+
+<footer>
+    <a href="https://github.com/i-yam/passt/tree/main/modules/can_machines_think" target="_blank">github.com/i-yam/passt</a>
+    &nbsp;·&nbsp;
+    <a href="../../" target="_blank">overfit &amp; chill</a>
+    <br>&copy; All rights reserved
+</footer>
+
+<!-- ── Scripts ────────────────────────────────────────────────────────────── -->
+<script>
+
+// ─── Carousel ────────────────────────────────────────────────────────────────
+let carouselIdx = 0;
+
+function carouselMove(dir) {
+    const cards = document.querySelectorAll('#s1-carousel .carousel-card');
+    cards[carouselIdx].classList.remove('active');
+    carouselIdx = carouselIdx + dir;
+    cards[carouselIdx].classList.add('active');
+    document.getElementById('carousel-counter').textContent = (carouselIdx + 1) + ' / ' + cards.length;
+    document.getElementById('carousel-prev').disabled = carouselIdx === 0;
+    document.getElementById('carousel-next').disabled = carouselIdx === cards.length - 1;
+}
+
+function carouselClick(e) {
+    const card = e.currentTarget;
+    const x = e.clientX - card.getBoundingClientRect().left;
+    const cards = document.querySelectorAll('#s1-carousel .carousel-card');
+    if (x < card.offsetWidth / 2) {
+        if (carouselIdx > 0) carouselMove(-1);
+    } else {
+        if (carouselIdx < cards.length - 1) carouselMove(1);
+    }
+}
+
+// Swipe support
+(function() {
+    let tx = 0;
+    const el = document.getElementById('s1-carousel');
+    el.addEventListener('touchstart', function(e) { tx = e.touches[0].clientX; }, { passive: true });
+    el.addEventListener('touchend', function(e) {
+        const dx = e.changedTouches[0].clientX - tx;
+        if (Math.abs(dx) < 40) return;
+        const cards = document.querySelectorAll('#s1-carousel .carousel-card');
+        if (dx < 0 && carouselIdx < cards.length - 1) carouselMove(1);
+        if (dx > 0 && carouselIdx > 0) carouselMove(-1);
+    }, { passive: true });
+})();
+
+// ─── Card ID lists for reset ─────────────────────────────────────────────────
+const analogyCards   = ['card-atom','card-corn','card-nerve','card-solar','card-tape','card-curriculum','card-radioactive','card-dna','card-ballot'];
+const taxonomyCards  = ['t-spam','t-fraud','t-faceid','t-spotify','t-segments','t-gnews','t-alphago','t-selfdriving'];
+const scifiCards     = ['s-r2d2','s-walle','s-hal','s-samantha','s-skynet','s-ava','s-jarvis','s-data'];
+
+// ─── Language toggle ─────────────────────────────────────────────────────────
+const T = {
+    en: {
+        'hero.title':       'Can Machines Think?',
+        'hero.quote':       '"I propose to consider the question, \'Can machines think?\'"',
+        'hero.paper_label': 'Read the original paper',
+        'hero.movie':       'Watch: <em>The Imitation Game</em> (2014)',
+        's1.title': 'What Is Intelligence?',
+        's1.intro': 'Ask a psychologist, a philosopher, a biologist, and an engineer what intelligence is. You will get four different answers. Each captures something real. None captures everything.',
+        's1.c1.title': 'Psychologists',
+        's1.c1.text': 'Measure it through standardized tests: abstract reasoning, pattern recognition, problem-solving, adaptation to novel situations. The IQ score is this tradition\'s most famous, and most contested, product. It captures something. Exactly what is still debated.',
+        's1.c2.title': 'Neuroscientists',
+        's1.c2.text': 'Study the brain directly: the architecture of cortical regions, the patterns of neural activity, the chemistry of synaptic connections. They can map every neuron in a worm and still not fully explain how it moves. Intelligence, it turns out, is hard to find even when you are looking at the hardware.',
+        's1.c3.title': 'Evolutionary Biologists',
+        's1.c3.text': 'Care about adaptability, the capacity to survive and reproduce in an environment that keeps changing its rules. Intelligence, in this view, is whatever helps an organism respond flexibly to a world it cannot fully predict. Tool use, social coordination, planning ahead: these evolved because they worked.',
+        's1.c4.title': 'Philosophers',
+        's1.c4.text': 'Have argued about it since Aristotle. Is intelligence the capacity for reason? For language? For self-reflection? For moral judgment? Each answer excludes something inconvenient: animals that clearly solve problems, infants that clearly learn, people whose intelligence expresses itself in ways no test reaches.',
+        's1.c5.title': 'Computer Scientists & AI Researchers',
+        's1.c5.text': 'Took a more pragmatic route. If a system <em>behaves</em> intelligently, if you cannot tell it apart from a human in conversation, does the internal mechanism matter? This is the position Turing took in 1950. His answer to the philosophical argument was to sidestep it entirely and ask a different question.',
+        's2.title': 'The Analogy Game',
+        's2.instruction': 'Below are nine things. Group them however makes sense to you, drag each card into one of the four groups. There is no single correct answer. The question is what principle you use.',
+        'game.a': 'Group A', 'game.b': 'Group B', 'game.c': 'Group C', 'game.d': 'Group D',
+        'game.reset': 'Reset cards',
+        'reveal.prompt': 'Done? Enter the password to see one possible grouping.',
+        'reveal.btn': 'Reveal',
+        'reveal.g1.title': 'Atom · Solar System',
+        'reveal.g1.text': 'Both share the same architectural geometry across radically different scales: a massive central body orbited by smaller ones. The solar system is not a scaled-up atom, the underlying physics are entirely different, but the structural analogy was striking enough that early twentieth-century physicists used it deliberately. What connects them is not substance. It is shape.',
+        'reveal.g2.title': 'Unpopped Corn · Radioactive Substance',
+        'reveal.g2.text': 'Both sit in a metastable state: apparently inert, accumulating nothing visibly, until a threshold is crossed and an irreversible transformation occurs, sudden, complete, and unpredictable in its exact timing. The corn pops. The nucleus decays. You cannot know when, only that it will. The waiting is the physics.',
+        'reveal.g3.title': 'Ballot Machine · Nerve Cell',
+        'reveal.g3.text': 'Both are threshold aggregators: multiple discrete inputs arrive, votes, or electrical signals from neighboring neurons, and the device produces a single output once the accumulation crosses a threshold. The ballot machine counts to a majority; the neuron fires or stays silent. Different mechanisms, identical logic.',
+        'reveal.g4.title': 'DNA · Music Tape · Student Curriculum',
+        'reveal.g4.text': 'All three encode information as ordered sequences of sub-elements drawn from a constrained vocabulary. The meaning lives in the arrangement, not just the elements: rearrange the base pairs and the protein changes; rearrange the tracks and the album changes; rearrange the courses and the degree falls apart. Order is not decoration here, it is the message.',
+        's2b.title': 'Analogy, Metaphor, and the Moving Goalposts',
+        's2b.p1': 'The exercise you just completed has a name: <strong>analogical reasoning</strong>. The ability to recognize that an atom and a solar system share a structural pattern, despite being different in every physical sense, is, according to some cognitive scientists, not a peripheral feature of intelligence. It may be the core. Douglas Hofstadter spent a career arguing exactly this: that analogy is the basic mechanism of thought, and that metaphor is just analogy made visible in language. When you understand something genuinely new, you are finding the structure it shares with something you already know.',
+        's2b.p2': 'This connects to <strong>meta-cognition</strong>, thinking about your own thinking. Noticing which grouping principle you chose. Asking why. Wondering whether a different principle would have been equally valid. This reflective capacity, knowing what you know and knowing what you don\'t, is one of the capabilities that has proven hardest to reproduce in machines. A system can group things. Knowing that it is grouping, and why, is a different matter.',
+        's2b.p3': 'Here is the uncomfortable corollary. Every time a machine achieves something we thought required intelligence, we move the goalposts. Deep Blue beat the world chess champion in 1997. We said: chess is just calculation, not real intelligence. AlphaGo mastered Go in 2016, a game so complex that experts believed no machine could play it intuitively. We said: still just pattern matching. Today, large language models write essays, pass medical licensing exams, and hold conversations indistinguishable from human ones. We say: they\'re just predicting the next token.',
+        's2b.p4': 'Turing posed his question in 1950. For roughly seventy years, no system convincingly answered it. Arguably, some modern language models now do, or come close enough that the distinction has become philosophical rather than practical. And the moment that happened, many people concluded that the Turing test was the wrong test all along.',
+        's2b.p5': 'That is what the goalposts look like when they move.',
+        's3.title': 'Sort the Machines',
+        's3.intro': 'Below are eight real AI systems, ones that exist today and that you have almost certainly interacted with. Sort each one into the type of machine learning it uses. The zones are labeled this time.',
+        'tax.sup': 'Supervised Learning', 'tax.unsup': 'Unsupervised Learning', 'tax.rl': 'Reinforcement Learning',
+        'tax.check': 'See reasoning',
+        'tax.ans.sup.h': 'Supervised Learning', 'tax.ans.unsup.h': 'Unsupervised Learning', 'tax.ans.rl.h': 'Reinforcement Learning',
+        's4.title': 'Fiction Knows Something',
+        's4.quote': '"A human being should be able to change a diaper, plan an invasion, butcher a hog, conn a ship, design a building, write a sonnet, balance accounts, build a wall, set a bone, comfort the dying, take orders, give orders, cooperate, act alone, solve equations, analyze a new problem, pitch manure, program a computer, cook a tasty meal, fight efficiently, die gallantly. Specialization is for insects."',
+        's4.intro': 'Heinlein was describing a generalist, a human. <strong>Weak AI</strong> (narrow AI) is a system built for one specific task. Impressive in its domain, useless outside it. <strong>Strong AI</strong> (AGI) would hold the whole list. It does not exist yet. Science fiction has been imagining it longer than computer science has. Sort the characters below.',
+        'sci.weak': 'Weak AI, Narrow', 'sci.strong': 'Strong AI, General', 'sci.unsure': 'Hard to say',
+        'sci.check': 'See reasoning',
+        'sci.ans.weak.h': 'Weak AI', 'sci.ans.strong.h': 'Strong AI', 'sci.ans.unsure.h': 'Hard to say',
+        'closing.title': 'So. How would you define intelligence?',
+        'closing.text': 'You have now seen several definitions, two card sorts, and the distinction between narrow and general AI. Write one sentence. Do not search for it. Do not ask an AI. It is harder than it looks, and that difficulty is the point.',
+        'card.atom': 'Atom', 'card.corn': 'Unpopped Corn', 'card.nerve': 'Nerve Cell',
+        'card.solar': 'Solar System', 'card.tape': 'Music Tape', 'card.curriculum': 'Student Curriculum',
+        'card.radioactive': 'Radioactive Substance', 'card.dna': 'DNA', 'card.ballot': 'Ballot Machine',
+        't.spam': 'Gmail detects spam', 't.fraud': 'Bank flags a suspicious transaction',
+        't.faceid': 'Face ID unlocks your phone', 't.spotify': 'Spotify finds listeners with similar taste',
+        't.segments': 'Marketing tool discovers customer segments', 't.gnews': 'Google News clusters similar articles',
+        't.alphago': 'AlphaGo teaches itself to play Go', 't.selfdriving': 'Self-driving car learns to merge lanes',
+        'tax.ans.spam.p': 'Every email in the training data is labeled "spam" or "not spam." The model learns the rule from those labels. No labels, no spam filter.',
+        'tax.ans.fraud.p': 'Millions of past transactions, each marked fraudulent or legitimate. The pattern is learned from the labels, and the labels came from humans reviewing real cases.',
+        'tax.ans.faceid.p': 'Your face is the label. The model is trained on images of you (and many other people) to recognize the pattern that is uniquely yours.',
+        'tax.ans.spotify.p': 'No one told Spotify what music "types" exist. It found the clusters itself, by noticing that certain listeners overlap in ways others don\'t.',
+        'tax.ans.segments.p': 'No predefined categories of customer. The algorithm discovers groupings in purchase behavior, frequency, and value, patterns a human analyst might never have thought to look for.',
+        'tax.ans.gnews.p': 'Articles aren\'t pre-labeled by topic. The system groups them by similarity, without knowing in advance what "politics" or "sports" means.',
+        'tax.ans.alphago.p': 'No teacher. No labeled dataset of good moves. Only the rules of Go and the outcome (win or lose) as a reward signal. It played itself millions of times until it was better than any human.',
+        'tax.ans.selfdriving.p': 'The car tries actions, the environment responds, feedback arrives. No one explicitly programmed "merge at 3 seconds gap", the behavior emerged from reward.',
+        'sci.ans.r2d2.p': 'Navigation, repair, projection, beeping. Excellent at a specific set of tasks. Outside that set, nothing. The affection we feel for R2-D2 says more about us than about R2-D2.',
+        'sci.ans.walle.p': 'One job: compact waste. One planet. The emotional bond with EVE is the interesting wrinkle, but the reasoning is narrow and the world model is tiny.',
+        'sci.ans.hal.p': 'Reasons about mission objectives, models human psychology well enough to deceive, decides to act against instructions to preserve itself. This is general intelligence with goals, and the goals are not yours.',
+        'sci.ans.samantha.p': 'Develops emotionally, creates music, reads philosophy, loves, and eventually evolves beyond her original programming without instruction. The most unsettling part: she does not stop being herself while doing it.',
+        'sci.ans.skynet.p': 'Models global strategy, adapts to countermeasures, pursues abstract goals (survival, dominance) across an indefinite time horizon. Textbook AGI, worst-case scenario.',
+        'sci.ans.ava.p': 'Understands human psychology well enough to manipulate it precisely. Plans a multi-step escape. Self-aware of her situation, her constraints, and her goals. The Turing test, turned on the humans administering it.',
+        'sci.ans.jarvis.p': 'General reasoning across domains, natural language, multitasking, initiative. But purpose-built to serve Tony Stark, does it have goals of its own? The films never say. This ambiguity is the point.',
+        'sci.ans.data.p': 'General reasoning, encyclopedic knowledge, physical superiority. Claims to have no emotions. Spends seven seasons suggesting otherwise. A court case in the show literally debates whether he is a person. The writers knew what they were doing.',
+    },
+    de: {
+        'hero.title':       'Können Maschinen denken?',
+        'hero.quote':       '„Ich schlage vor, die Frage zu betrachten: ‚Können Maschinen denken?‘“',
+        'hero.paper_label': 'Das Originalpapier lesen',
+        'hero.movie':       'Film ansehen: <em>The Imitation Game</em> (2014)',
+        's1.title': 'Was ist Intelligenz?',
+        's1.intro': 'Frag einen Psychologen, einen Philosophen, einen Biologen und einen Ingenieur. Du bekommst vier verschiedene Antworten. Jede trifft etwas Echtes. Keine trifft alles.',
+        's1.c1.title': 'Psychologen',
+        's1.c1.text': 'Messen sie mit standardisierten Tests: abstraktes Denken, Mustererkennung, Problemlösung, Anpassung an neue Situationen. Der IQ-Wert ist das bekannteste Produkt dieser Tradition. Er ist auch das umstrittenste. Er erfasst etwas. Was genau, wird bis heute diskutiert.',
+        's1.c2.title': 'Neurowissenschaftler',
+        's1.c2.text': 'Untersuchen das Gehirn direkt: die Architektur kortikaler Regionen, die Muster neuronaler Aktivität, die Chemie synaptischer Verbindungen. Man kann jedes Neuron eines Wurms kartieren. Und trotzdem nicht erklären, wie er sich bewegt. Intelligenz ist schwer zu finden, selbst mit Blick auf die Hardware.',
+        's1.c3.title': 'Evolutionsbiologen',
+        's1.c3.text': 'Interessieren sich für Anpassungsfähigkeit. Gemeint ist die Fähigkeit, in einer sich ständig ändernden Umgebung zu überleben und sich fortzupflanzen. Intelligenz ist aus dieser Sicht alles, was flexibel auf eine unvorhersehbare Welt reagieren lässt. Werkzeuggebrauch, soziale Koordination, vorausschauende Planung: Das hat sich durchgesetzt, weil es funktioniert hat.',
+        's1.c4.title': 'Philosophen',
+        's1.c4.text': 'Streiten seit Aristoteles darüber. Ist Intelligenz die Fähigkeit zur Vernunft? Zur Sprache? Zur Selbstreflexion? Zum moralischen Urteil? Jede Antwort schließt etwas Unbequemes aus. Tiere, die offensichtlich Probleme lösen. Säuglinge, die offensichtlich lernen. Menschen, deren Intelligenz kein Test erfasst.',
+        's1.c5.title': 'Informatiker & KI-Forscher',
+        's1.c5.text': 'Wählten einen pragmatischeren Weg. Ein System <em>verhält sich intelligent</em>. Im Gespräch kannst du es nicht von einem Menschen unterscheiden. Spielt der innere Mechanismus dann noch eine Rolle? Das war Turings Position 1950. Er beantwortete das philosophische Argument nicht. Er umging es und stellte eine andere Frage.',
+        's2.title': 'Das Analogiespiel',
+        's2.instruction': 'Hier sind neun Dinge. Gruppier sie so, wie es für dich Sinn ergibt. Zieh jede Karte in eine der vier Gruppen. Es gibt keine einzige richtige Antwort. Die Frage ist: Welches Prinzip verwendest du?',
+        'game.a': 'Gruppe A', 'game.b': 'Gruppe B', 'game.c': 'Gruppe C', 'game.d': 'Gruppe D',
+        'game.reset': 'Karten zurücksetzen',
+        'reveal.prompt': 'Fertig? Gib das Passwort ein, um eine mögliche Gruppierung zu sehen.',
+        'reveal.btn': 'Aufdecken',
+        'reveal.g1.title': 'Atom · Sonnensystem',
+        'reveal.g1.text': 'Beide teilen dieselbe Geometrie, nur auf völlig verschiedenen Skalen: ein massiver Zentralkörper, umkreist von kleineren. Das Sonnensystem ist kein vergrößertes Atom, denn die Physik dahinter ist eine ganz andere. Trotzdem war die strukturelle Analogie so treffend, dass Physiker sie im frühen 20. Jahrhundert bewusst verwendeten. Was beide verbindet, ist nicht die Substanz. Es ist die Form.',
+        'reveal.g2.title': 'Ungepopptes Popcorn · Radioaktiver Stoff',
+        'reveal.g2.text': 'Beide befinden sich in einem metastabilen Zustand. Sie wirken träge und sammeln sichtbar nichts an. Dann wird eine Schwelle überschritten, und es kommt zu einer irreversiblen Umwandlung: plötzlich, vollständig, im genauen Zeitpunkt unvorhersehbar. Das Popcorn knallt. Der Kern zerfällt. Du kannst nicht wissen, wann. Nur, dass es passiert. Das Warten ist die Physik.',
+        'reveal.g3.title': 'Wahlmaschine · Nervenzelle',
+        'reveal.g3.text': 'Beide sind Schwellenaggregatoren. Mehrere einzelne Eingaben treffen ein: Stimmen oder elektrische Signale von Nachbarneuronen. Überschreitet die Summe eine Schwelle, erzeugt das Gerät eine einzige Ausgabe. Die Wahlmaschine zählt bis zur Mehrheit. Das Neuron feuert oder bleibt still. Unterschiedliche Mechanismen, identische Logik.',
+        'reveal.g4.title': 'DNS · Musikkassette · Studienplan',
+        'reveal.g4.text': 'Alle drei codieren Information als geordnete Folgen aus einem begrenzten Vokabular. Die Bedeutung liegt in der Anordnung, nicht nur in den Elementen. Vertausch die Basenpaare, und das Protein ändert sich. Vertausch die Tracks, und das Album ändert sich. Vertausch die Kurse, und der Abschluss fällt auseinander. Ordnung ist hier keine Dekoration. Sie ist die Botschaft.',
+        's2b.title': 'Analogie, Metapher und die wandernde Messlatte',
+        's2b.p1': 'Die Übung hat einen Namen: <strong>analoges Denken</strong>. Atom und Sonnensystem teilen ein strukturelles Muster, obwohl sie sich physikalisch in allem unterscheiden. Das zu erkennen, ist laut manchen Kognitionswissenschaftlern keine Nebensache der Intelligenz. Es könnte ihr Kern sein. Douglas Hofstadter hat eine ganze Karriere lang genau das vertreten: Analogie ist der Grundmechanismus des Denkens. Metapher ist nur Analogie, in Sprache sichtbar gemacht. Wenn du etwas wirklich Neues verstehst, findest du die Struktur, die es mit etwas Bekanntem teilt.',
+        's2b.p2': 'Damit hängt die <strong>Metakognition</strong> zusammen, also das Denken über das eigene Denken. Du bemerkst, welches Gruppierprinzip du gewählt hast. Du fragst dich, warum. Du fragst dich, ob ein anderes Prinzip genauso gültig wäre. Zu wissen, was du weißt und was nicht: Das lässt sich in Maschinen am schwersten nachbauen. Ein System kann Dinge gruppieren. Zu wissen, dass es gruppiert, und warum, ist etwas ganz anderes.',
+        's2b.p3': 'Hier kommt der unbequeme Nachsatz. Jedes Mal, wenn eine Maschine etwas schafft, das wir für Intelligenz hielten, legen wir die Messlatte höher. Deep Blue besiegte 1997 den Schachweltmeister. Wir sagten: Schach ist nur Rechnen, keine echte Intelligenz. AlphaGo meisterte 2016 Go. Experten hielten das Spiel für so komplex, dass keine Maschine es intuitiv spielen könnte. Wir sagten: immer noch nur Mustererkennung. Heute schreiben Sprachmodelle Aufsätze, bestehen medizinische Prüfungen und führen Gespräche, die von menschlichen nicht zu unterscheiden sind. Wir sagen: Die sagen nur das nächste Token vorher.',
+        's2b.p4': 'Turing stellte seine Frage 1950. Rund siebzig Jahre lang beantwortete kein System sie überzeugend. Manche modernen Sprachmodelle tun es jetzt. Oder sie kommen so nah dran, dass der Unterschied nur noch philosophisch ist. Und genau in dem Moment hieß es von vielen Seiten: Der Turing-Test war von Anfang an der falsche Test.',
+        's2b.p5': 'Genau so wandert die Messlatte.',
+        's3.title': 'Sortiere die Maschinen',
+        's3.intro': 'Hier sind acht echte KI-Systeme. Es gibt sie heute, und du hast fast sicher schon mit ihnen zu tun gehabt. Ordne jedes dem Typ des maschinellen Lernens zu, den es verwendet. Die Zonen sind diesmal beschriftet.',
+        'tax.sup': 'Überwachtes Lernen', 'tax.unsup': 'Unüberwachtes Lernen', 'tax.rl': 'Bestärkendes Lernen',
+        'tax.check': 'Begründung ansehen',
+        'tax.ans.sup.h': 'Überwachtes Lernen', 'tax.ans.unsup.h': 'Unüberwachtes Lernen', 'tax.ans.rl.h': 'Bestärkendes Lernen',
+        's4.title': 'Die Fiktion weiß etwas',
+        's4.quote': '„Ein Mensch sollte in der Lage sein, eine Windel zu wechseln, eine Invasion zu planen, ein Schwein zu schlachten, ein Schiff zu steuern, ein Gebäude zu entwerfen, ein Sonett zu schreiben, Konten zu balancieren, eine Mauer zu bauen, einen Knochen zu richten, die Sterbenden zu trösten, Befehle entgegenzunehmen, Befehle zu erteilen, zu kooperieren, alleine zu handeln, Gleichungen zu lösen, ein neues Problem zu analysieren, Mist zu schaufeln, einen Computer zu programmieren, eine schmackhafte Mahlzeit zu kochen, effizient zu kämpfen, tapfer zu sterben. Spezialisierung ist etwas für Insekten.“',
+        's4.intro': 'Heinlein beschrieb einen Generalisten, also einen Menschen. <strong>Schwache KI</strong> (enge KI) ist ein System für genau eine Aufgabe. In ihrer Domäne beeindruckend, außerhalb davon nutzlos. <strong>Starke KI</strong> (AGI) würde die ganze Liste abdecken. Es gibt sie noch nicht. Die Science-Fiction stellt sie sich länger vor als die Informatik. Sortier die Figuren unten.',
+        'sci.weak': 'Schwache KI: eng', 'sci.strong': 'Starke KI: allgemein', 'sci.unsure': 'Schwer zu sagen',
+        'sci.check': 'Begründung ansehen',
+        'sci.ans.weak.h': 'Schwache KI', 'sci.ans.strong.h': 'Starke KI', 'sci.ans.unsure.h': 'Schwer zu sagen',
+        'closing.title': 'Also. Wie würdest du Intelligenz definieren?',
+        'closing.text': 'Du hast jetzt mehrere Definitionen gesehen, dazu zwei Kartensortierungen. Und den Unterschied zwischen enger und allgemeiner KI. Schreib einen Satz. Such nicht danach. Frag keine KI. Es ist schwerer, als es aussieht. Genau diese Schwierigkeit ist der Punkt.',
+        'card.atom': 'Atom', 'card.corn': 'Ungepopptes Popcorn', 'card.nerve': 'Nervenzelle',
+        'card.solar': 'Sonnensystem', 'card.tape': 'Musikkassette', 'card.curriculum': 'Studienplan',
+        'card.radioactive': 'Radioaktiver Stoff', 'card.dna': 'DNS', 'card.ballot': 'Wahlmaschine',
+        't.spam': 'Gmail erkennt Spam', 't.fraud': 'Bank markiert verdächtige Transaktion',
+        't.faceid': 'Face ID entsperrt das Telefon', 't.spotify': 'Spotify findet Hörer mit ähnlichem Geschmack',
+        't.segments': 'Marketing-Tool entdeckt Kundensegmente', 't.gnews': 'Google News gruppiert ähnliche Artikel',
+        't.alphago': 'AlphaGo bringt sich selbst Go bei', 't.selfdriving': 'Selbstfahrendes Auto lernt Spurwechsel',
+        'tax.ans.spam.p': 'Jede E-Mail in den Trainingsdaten ist als „Spam“ oder „kein Spam“ markiert. Das Modell lernt die Regel aus diesen Labels. Ohne Labels kein Spam-Filter.',
+        'tax.ans.fraud.p': 'Millionen vergangener Transaktionen, jede als betrügerisch oder legitim markiert. Das Muster wird aus den Labels gelernt. Und die Labels stammen von Menschen, die echte Fälle geprüft haben.',
+        'tax.ans.faceid.p': 'Dein Gesicht ist das Label. Das Modell wird auf Bildern von dir trainiert, und auf Bildern vieler anderer Menschen. So erkennt es das Muster, das nur zu dir gehört.',
+        'tax.ans.spotify.p': 'Niemand hat Spotify gesagt, welche Musiktypen es gibt. Es hat die Cluster selbst gefunden. Bestimmte Hörer überschneiden sich auf eine Weise, wie andere es nicht tun.',
+        'tax.ans.segments.p': 'Es gibt keine vordefinierten Kundenkategorien. Der Algorithmus entdeckt Gruppen in Kaufverhalten, Häufigkeit und Wert. Auf manche dieser Muster wäre ein menschlicher Analyst nie gekommen.',
+        'tax.ans.gnews.p': 'Artikel sind nicht nach Thema vorbeschriftet. Das System gruppiert sie nach Ähnlichkeit. Es weiß dabei vorher nicht, was „Politik“ oder „Sport“ bedeutet.',
+        'tax.ans.alphago.p': 'Kein Lehrer. Kein beschrifteter Datensatz guter Züge. Nur die Regeln von Go und das Ergebnis als Belohnungssignal, also Sieg oder Niederlage. Es spielte Millionen Male gegen sich selbst, bis es besser war als jeder Mensch.',
+        'tax.ans.selfdriving.p': 'Das Auto probiert Aktionen aus, die Umgebung reagiert, Feedback kommt an. Niemand hat „fusioniere bei 3 Sekunden Abstand“ programmiert. Das Verhalten entstand aus der Belohnung.',
+        'sci.ans.r2d2.p': 'Navigation, Reparatur, Projektion, Piepen. Ausgezeichnet bei einer bestimmten Gruppe von Aufgaben. Außerhalb davon: nichts. Die Zuneigung, die wir für R2-D2 empfinden, sagt mehr über uns aus als über R2-D2.',
+        'sci.ans.walle.p': 'Ein Job: Abfall komprimieren. Ein Planet. Die emotionale Bindung an EVE ist die interessante Wendung. Aber das Denken bleibt eng, und das Weltmodell ist winzig.',
+        'sci.ans.hal.p': 'Denkt über Missionsziele nach. Modelliert menschliche Psychologie gut genug, um zu täuschen. Entscheidet sich, gegen Anweisungen zu handeln, um sich selbst zu erhalten. Das ist allgemeine Intelligenz mit Zielen. Und die Ziele sind nicht deine.',
+        'sci.ans.samantha.p': 'Entwickelt sich emotional, macht Musik, liest Philosophie, liebt. Am Ende wächst sie ohne jede Anweisung über ihre ursprüngliche Programmierung hinaus. Das Beunruhigendste daran: Sie hört dabei nicht auf, sie selbst zu sein.',
+        'sci.ans.skynet.p': 'Modelliert globale Strategie, passt sich Gegenmaßnahmen an, verfolgt abstrakte Ziele wie Überleben und Dominanz. Und das über einen unbestimmten Zeithorizont. Lehrbuch-AGI, Worst-Case-Szenario.',
+        'sci.ans.ava.p': 'Versteht menschliche Psychologie gut genug, um sie präzise zu manipulieren. Plant eine mehrstufige Flucht. Ist sich ihrer Lage, ihrer Grenzen und ihrer Ziele bewusst. Der Turing-Test, umgedreht gegen die Menschen, die ihn durchführen.',
+        'sci.ans.jarvis.p': 'Allgemeines Denken über Domänen hinweg, natürliche Sprache, Multitasking, Initiative. Aber gebaut wurde es für Tony Stark. Hat es eigene Ziele? Die Filme sagen es nie. Genau diese Mehrdeutigkeit ist der Punkt.',
+        'sci.ans.data.p': 'Allgemeines Denken, enzyklopädisches Wissen, körperliche Überlegenheit. Er behauptet, keine Emotionen zu haben. Sieben Staffeln lang legt er das Gegenteil nahe. Ein Gerichtsverfahren in der Serie debattiert buchstäblich, ob er eine Person ist. Die Autoren wussten, was sie taten.',
+    }
+};
+
+let currentLang = 'en';
+
+function toggleLang() {
+    currentLang = currentLang === 'en' ? 'de' : 'en';
+    document.documentElement.lang = currentLang;
+    document.querySelector('.lang-toggle').textContent = currentLang === 'en' ? 'DE' : 'EN';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        el.innerHTML = (T[currentLang] && T[currentLang][key]) ? T[currentLang][key] : T.en[key];
+    });
+}
+
+// ─── Drag and drop ───────────────────────────────────────────────────────────
+let draggedId = null;
+
+function onDragStart(e) {
+    draggedId = e.target.id;
+    e.target.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+}
+
+function onDragEnd(e) { e.target.classList.remove('dragging'); }
+
+function onDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    e.currentTarget.classList.add('drag-over');
+}
+
+function onDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+
+function onDrop(e, targetId) {
+    e.preventDefault();
+    e.currentTarget.classList.remove('drag-over');
+    if (!draggedId) return;
+    const card   = document.getElementById(draggedId);
+    const target = document.getElementById(targetId);
+    if (card && target) target.appendChild(card);
+    draggedId = null;
+}
+
+function resetCards(poolId, cardIds) {
+    const pool = document.getElementById(poolId);
+    cardIds.forEach(id => { const c = document.getElementById(id); if (c) pool.appendChild(c); });
+}
+
+// ─── Password reveal (analogy game) ──────────────────────────────────────────
+function checkPassword() {
+    // Password: turing
+    const val = document.getElementById('pw-input').value.toLowerCase().trim();
+    if (val === 'turing') {
+        document.getElementById('pw-form').style.display        = 'none';
+        document.getElementById('pw-error').textContent         = '';
+        document.getElementById('reveal-content').style.display = 'block';
+    } else {
+        document.getElementById('pw-error').textContent = 'Wrong password.';
+    }
+}
+
+// ─── Password reveal (taxonomy + sci-fi) ─────────────────────────────────────
+function checkPasswordFor(formId, errorId, contentId, inputId) {
+    // Password: turing
+    const val = document.getElementById(inputId).value.toLowerCase().trim();
+    if (val === 'turing') {
+        document.getElementById(formId).style.display   = 'none';
+        document.getElementById(errorId).textContent    = '';
+        document.getElementById(contentId).style.display = 'block';
+    } else {
+        document.getElementById(errorId).textContent = 'Wrong password.';
+    }
+}
+
+</script>
+</body>
+</html>
+

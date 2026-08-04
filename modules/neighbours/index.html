@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Birds of a Feather, K-Nearest Neighbours</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #141420; color: #e8e8f0; font-family: Georgia,'Times New Roman',serif; line-height: 1.8; font-size: 18px; }
+.container { max-width: 820px; margin: 0 auto; padding: 0 24px 80px; }
+
+.lang-toggle { position: fixed; top: 16px; right: 16px; background: #2a2a44; border: 1px solid #4a4a70; border-radius: 20px; padding: 6px 14px; cursor: pointer; font-size: 13px; font-family: sans-serif; color: #a0a0d0; z-index: 100; transition: background 0.2s; }
+.lang-toggle:hover { background: #363658; }
+
+/* HERO */
+.hero { text-align: center; padding: 80px 24px 50px; }
+.tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 28px; }
+.tag { background: #1c1c2e; color: #8888b0; border: 1px solid #2a2a40; border-radius: 20px; padding: 4px 12px; font-size: 12px; font-family: sans-serif; letter-spacing: 0.3px; }
+.hero h1 { font-size: 42px; font-weight: 700; color: #fff; line-height: 1.3; max-width: 700px; margin: 0 auto 24px; }
+.hero-sub { color: #a0a0c0; font-style: italic; font-size: 20px; max-width: 600px; margin: 0 auto; }
+
+/* SECTIONS */
+section { padding: 50px 0; border-top: 1px solid #1e1e30; }
+h2 { font-size: 30px; color: #fff; margin-bottom: 24px; line-height: 1.3; }
+h3 { font-size: 20px; color: #ccc; margin: 28px 0 12px; }
+p { margin-bottom: 20px; color: #ccc; }
+a { color: #80b4f0; }
+a:hover { color: #a0c8ff; }
+
+blockquote { border-left: 3px solid #4a4a70; padding: 16px 24px; margin: 28px 0; color: #a0a0c0; font-style: italic; font-size: 17px; line-height: 1.7; }
+blockquote cite { display: block; margin-top: 12px; font-size: 14px; color: #555; font-style: normal; }
+
+/* COMIC */
+.comic-wrap { margin: 24px 0 8px; }
+.comic-wrap img { width: 100%; border-radius: 8px; display: block; border: 1px solid #2a2a40; }
+.comic-credit { font-size: 13px; color: #555; font-family: sans-serif; margin-top: 8px; }
+.comic-credit a { color: #555; }
+
+/* PAPERS PLEASE */
+.papers { background: #1a1008; border: 1px solid #4a3010; border-radius: 10px; overflow: hidden; margin: 32px 0; font-family: 'Courier New', monospace; }
+.papers-top { background: #110a04; padding: 8px 20px; display: flex; justify-content: space-between; border-bottom: 1px solid #4a3010; }
+.papers-top span { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #8a6030; }
+.papers-body { padding: 24px 28px; }
+.papers-body h3 { font-size: 16px; letter-spacing: 3px; text-transform: uppercase; color: #e8c87e; font-family: 'Courier New', monospace; text-align: center; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid #3a2008; }
+.papers-body p { font-size: 13px; line-height: 1.9; color: #c8a96e; margin-bottom: 10px; font-family: 'Courier New', monospace; }
+.papers-body p em { color: #e8d090; font-style: normal; }
+.papers-stamp { display: inline-block; border: 2px solid #7a2020; color: #9a3030; padding: 2px 10px; font-size: 13px; letter-spacing: 3px; transform: rotate(-4deg); margin-top: 8px; font-family: 'Courier New', monospace; }
+
+/* KNN STEPS */
+.knn-steps { display: grid; gap: 12px; margin: 24px 0; }
+.knn-step { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 8px; padding: 18px 20px; display: flex; gap: 16px; align-items: flex-start; }
+.knn-num { width: 30px; height: 30px; border-radius: 50%; background: #4a4a80; color: #e0e0f0; font-family: sans-serif; font-size: 13px; font-weight: bold; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+.knn-step-body { font-size: 15px; line-height: 1.7; color: #ccc; }
+.knn-step-body strong { display: block; font-family: sans-serif; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: #7070b0; margin-bottom: 4px; font-weight: normal; }
+
+/* INTERACTIVE DEMO */
+.demo-box { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px; padding: 20px; margin: 24px 0; }
+.demo-label { font-family: sans-serif; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: #5050a0; margin-bottom: 14px; }
+#demo-canvas { display: block; border: 1px solid #2a2a40; border-radius: 4px; cursor: crosshair; max-width: 100%; }
+.demo-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
+.demo-controls label { font-family: sans-serif; font-size: 13px; color: #7070a0; }
+.demo-controls input[type=range] { width: 90px; accent-color: #6060b0; }
+.demo-controls span { font-family: 'Courier New', monospace; font-size: 13px; color: #a0a0d0; min-width: 16px; }
+.demo-controls select { background: #141420; border: 1px solid #3a3a55; border-radius: 4px; padding: 4px 8px; color: #a0a0d0; font-size: 13px; font-family: sans-serif; }
+.demo-note { font-family: sans-serif; font-size: 12px; color: #444; margin-top: 8px; line-height: 1.6; }
+
+/* DISTANCE CARDS */
+.dist-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 24px 0; }
+.dc { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 8px; padding: 16px; cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+.dc:hover { background: #1e1e32; border-color: #4a4a70; }
+.dc.active { border: 2px solid #6060c0; background: #1e1e34; }
+.dc svg { display: block; margin-bottom: 10px; }
+.dc-name { font-family: sans-serif; font-size: 13px; font-weight: bold; color: #e0e0f0; margin-bottom: 3px; }
+.dc-formula { font-family: 'Courier New', monospace; font-size: 11px; color: #7070c0; margin-bottom: 8px; }
+.dc-body { font-size: 13px; color: #777; line-height: 1.6; }
+
+/* GAME */
+.game-status { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.turn-badge { font-family: sans-serif; font-size: 12px; font-weight: bold; letter-spacing: 1px; padding: 5px 14px; border-radius: 20px; text-transform: uppercase; }
+.move-count { font-family: 'Courier New', monospace; font-size: 13px; color: #555; }
+#gc { display: block; border: 1px solid #2a2a40; border-radius: 4px; cursor: crosshair; max-width: 100%; }
+#msgbar { font-family: 'Courier New', monospace; font-size: 12px; color: #555; min-height: 18px; margin: 8px 0 16px; }
+
+/* WIN */
+#win-banner { display: none; background: #1a1008; border: 1px solid #c8a96e; border-radius: 10px; padding: 28px; text-align: center; margin: 16px 0; font-family: 'Courier New', monospace; }
+#win-banner h3 { font-size: 20px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 10px; }
+#win-banner p { font-size: 13px; color: #c8a96e; line-height: 1.8; }
+
+/* GAME CONTROLS */
+.ctrl-section { margin-bottom: 20px; }
+.ctrl-label { font-family: sans-serif; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: #4a4a70; margin-bottom: 10px; }
+.ctrl-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.score-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.scard { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 6px; padding: 10px 16px; text-align: center; min-width: 110px; }
+.sl { font-family: sans-serif; font-size: 10px; letter-spacing: 0.5px; text-transform: uppercase; color: #4a4a70; margin-bottom: 3px; }
+.sn { font-family: 'Courier New', monospace; font-size: 22px; font-weight: bold; }
+button { font-family: sans-serif; font-size: 13px; letter-spacing: 0.5px; padding: 7px 16px; border: 1px solid #2a2a40; border-radius: 6px; background: transparent; color: #8080b0; cursor: pointer; transition: border-color 0.2s, color 0.2s; }
+button:hover { border-color: #4a4a70; color: #c0c0e0; }
+input[type=range] { accent-color: #6060b0; }
+
+/* FOOTER */
+footer { padding: 40px 0 20px; border-top: 1px solid #1e1e30; font-family: sans-serif; font-size: 13px; color: #3a3a60; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+footer a { color: #3a3a60; }
+
+/* LANG */
+[data-lang] { display: none; }
+body.lang-en [data-lang="en"] { display: block; }
+body.lang-en [data-lang="en"].inl { display: inline; }
+body.lang-de [data-lang="de"] { display: block; }
+body.lang-de [data-lang="de"].inl { display: inline; }
+.en-i { display: inline; } .de-i { display: none; }
+body.lang-de .en-i { display: none; } body.lang-de .de-i { display: inline; }
+
+@media (max-width: 540px) {
+  .hero h1 { font-size: 28px; }
+  .dist-cards { grid-template-columns: 1fr; }
+  .score-row { flex-direction: column; }
+  .drop-zones-3 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body class="lang-en">
+
+<button class="lang-toggle" onclick="toggleLang()">DE</button>
+
+<div class="container">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="tags">
+      <span class="tag">mini-module</span>
+      <span class="tag">no-code</span>
+      <span class="tag">try-without-ai</span>
+      <span class="tag">ml-fundamentals</span>
+      <span class="tag">~30 min</span>
+    </div>
+    <h1>
+      <span class="en-i">Birds of a Feather</span>
+      <span class="de-i">Gleich und Gleich gesellt sich gern</span>
+    </h1>
+    <p class="hero-sub">
+      <span class="en-i">Birds of a feather flock together. K-Nearest Neighbours turns that proverb into an algorithm.</span>
+      <span class="de-i">Gleich und Gleich gesellt sich gern. K-Nächste-Nachbarn macht dieses Sprichwort zum Algorithmus.</span>
+    </p>
+  </div>
+
+  <!-- COMIC + PAPERS PLEASE -->
+  <section>
+    <div class="comic-wrap">
+      <img src="images/usthem.jpg" alt="Tom Gauld: Our Blessed Homeland vs Their Barbarous Wastes">
+      <div class="comic-credit">
+        <span class="en-i">Cartoon by Tom Gauld, </span>
+        <span class="de-i">Cartoon von Tom Gauld:</span>
+        <a href="https://www.reddit.com/r/funny/comments/2xljaz/us_vs_them/" target="_blank">reddit.com/r/funny/comments/2xljaz</a>
+      </div>
+    </div>
+
+    <div class="papers">
+      <div class="papers-top">
+        <span class="en-i">Ministry of Territorial Affairs</span>
+        <span class="de-i">Ministerium für Territorialfragen</span>
+        <span>Year 1 A.K. (After K-NN)</span>
+      </div>
+      <div class="papers-body">
+        <h3>Blobovia <span class="en-i">vs</span><span class="de-i">gegen</span> Splotchia</h3>
+        <p data-lang="en">The ancient and glorious nation of <em>BLOBOVIA</em>, blessed with noble populace, heroic adventurers, and a glorious leader, has long endured the proximity of <em>SPLOTCHIA</em>, a barbarous waste governed by a wicked despot and populated by brutish invaders.</p>
+        <p data-lang="de">Die uralte und ruhmreiche Nation <em>BLOBOVIEN</em> ist gesegnet mit edler Bevölkerung, heldenhaften Abenteurern und einem glorreichen Anführer. Seit jeher erträgt sie die Nachbarschaft von <em>SPLOTSCHIEN</em>, einer barbarischen Wüstenei. Dort herrscht ein ruchloser Despot über rohe Eindringlinge.</p>
+        <p data-lang="en">The contested borderlands shall be decided not by cannon nor sword, but by the sacred algorithm of <em>K-Nearest Neighbours</em>: a village belongs to whichever nation has the most settlements nearby. Place your dots. The land remembers its neighbours.</p>
+        <p data-lang="de">Über die umstrittenen Grenzgebiete entscheiden weder Kanonen noch Schwerter. Es entscheidet der heilige Algorithmus der <em>K-Nächsten-Nachbarn</em>. Ein Dorf gehört der Nation mit den meisten Siedlungen in der Nähe. Setz deine Punkte. Das Land erinnert sich an seine Nachbarn.</p>
+        <p data-lang="en">Each side receives <em>5 founding settlements</em>, placed at random by the cartographers' office. Then <em>10 moves</em> to claim territory. The dot you place will fly the flag of whichever nation the classifier assigns to that location.</p>
+        <p data-lang="de">Jede Seite erhält <em>5 Gründungssiedlungen</em>, zufällig vom Kartenamt platziert. Dann folgen <em>10 Züge</em>, um Gebiet zu beanspruchen. Der Punkt, den du setzt, zeigt die Flagge der Nation, die der Klassifikator für diesen Ort bestimmt.</p>
+        <div class="papers-stamp">CLASSIFIED</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW KNN WORKS -->
+  <section>
+    <h2>
+      <span class="en-i">How K-NN works</span>
+      <span class="de-i">Wie K-NN funktioniert</span>
+    </h2>
+
+    <p data-lang="en">K-Nearest Neighbours is one of the oldest and most intuitive ideas in machine learning. It makes no assumptions about the shape of the world. It stores no trained weights. It simply asks: <em>what are my neighbours doing?</em></p>
+    <p data-lang="de">K-Nächste-Nachbarn ist eine der ältesten und einfachsten Ideen im maschinellen Lernen. Der Algorithmus macht keine Annahmen über die Struktur der Daten. Er fragt nur: <em>Was machen meine Nachbarn?</em></p>
+
+    <blockquote>
+      <span class="en-i">"Tell me who your neighbours are, and I will tell you who you are."</span>
+      <span class="de-i">„Sag mir, wer deine Nachbarn sind, und ich sage dir, wer du bist.“</span>
+      <cite>
+        <span class="en-i">,  folk proverb, adapted for machine learning</span>
+        <span class="de-i">Sprichwort, für das maschinelle Lernen abgewandelt</span>
+      </cite>
+    </blockquote>
+
+    <div class="knn-steps">
+      <div class="knn-step">
+        <div class="knn-num">1</div>
+        <div class="knn-step-body">
+          <strong><span class="en-i">Training data</span><span class="de-i">Trainingsdaten</span></strong>
+          <span data-lang="en">You have a collection of labelled examples, dots on a map, each coloured by its nation. K-NN stores them all. No learning step required. The entire dataset <em>is</em> the model.</span>
+          <span data-lang="de">Du hast eine Sammlung beschrifteter Beispiele: Punkte auf einer Karte, jeder in der Farbe seiner Nation. K-NN speichert sie alle. Ein Lernschritt ist nicht nötig. Der gesamte Datensatz <em>ist</em> das Modell.</span>
+        </div>
+      </div>
+      <div class="knn-step">
+        <div class="knn-num">2</div>
+        <div class="knn-step-body">
+          <strong><span class="en-i">Find the K nearest</span><span class="de-i">K Nächste finden</span></strong>
+          <span data-lang="en">A new unknown point arrives. Measure its distance to every labelled point. Keep the K closest ones. K is the one number you choose, it controls how much neighbourhood context influences the result.</span>
+          <span data-lang="de">Ein neuer, unbekannter Punkt kommt hinzu. Miss seinen Abstand zu jedem beschrifteten Punkt. Behalte die K nächsten. K ist die einzige Zahl, die du wählst. Sie steuert, wie viel Umgebung in das Ergebnis einfließt.</span>
+        </div>
+      </div>
+      <div class="knn-step">
+        <div class="knn-num">3</div>
+        <div class="knn-step-body">
+          <strong><span class="en-i">Majority vote</span><span class="de-i">Mehrheitsvotum</span></strong>
+          <span data-lang="en">Among those K neighbours, count the labels. Whichever class appears most often wins. The new point is assigned that label. That is the entire algorithm. No formulas beyond counting and distance.</span>
+          <span data-lang="de">Unter diesen K Nachbarn werden die Beschriftungen gezählt. Die häufigste Klasse gewinnt. Der neue Punkt bekommt diese Beschriftung. Das ist der ganze Algorithmus.</span>
+        </div>
+      </div>
+      <div class="knn-step">
+        <div class="knn-num">4</div>
+        <div class="knn-step-body">
+          <strong><span class="en-i">The decision boundary</span><span class="de-i">Die Entscheidungsgrenze</span></strong>
+          <span data-lang="en">Apply K-NN to every empty point in the space and you get a territory map, regions where each class dominates. The boundary is not drawn explicitly. It <em>emerges</em> from the data. Change K, and the entire border shifts.</span>
+          <span data-lang="de">Wende K-NN auf jeden leeren Punkt im Raum an, und du bekommst eine Gebietskarte. Sie zeigt, wo welche Klasse dominiert. Niemand zeichnet die Grenze ein, sie <em>entsteht</em> aus den Daten. Änderst du K, verschiebt sich die ganze Grenze.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- INTERACTIVE DEMO -->
+    <div class="demo-box">
+      <div class="demo-label">
+        <span class="en-i">Interactive demo, click to add points, watch the territory update</span>
+        <span class="de-i">Interaktive Demo: klicken, um Punkte hinzuzufügen</span>
+      </div>
+      <canvas id="demo-canvas" width="600" height="260"></canvas>
+      <div class="demo-controls">
+        <label>K =</label>
+        <input type="range" id="demo-k" min="1" max="11" step="2" value="3">
+        <span id="demo-k-out">3</span>
+        <label style="margin-left:12px;">
+          <span class="en-i">Adding:</span>
+          <span class="de-i">Hinzufügen:</span>
+        </label>
+        <select id="demo-player">
+          <option value="1">Blobovia</option>
+          <option value="2">Splotchia</option>
+        </select>
+        <button onclick="demoReset()">
+          <span class="en-i">Clear</span><span class="de-i">Löschen</span>
+        </button>
+      </div>
+      <div class="demo-note">
+        <span class="en-i">Try: place a cluster of Blobovia dots, then surround it with Splotchia. Change K from 1 to 9 and watch the border smooth out.</span>
+        <span class="de-i">Probier es aus: Setz einen Cluster aus Blobovien-Punkten und umgib ihn mit Splotschien. Ändere K von 1 auf 9 und schau zu, wie die Grenze glatter wird.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- DISTANCE GEOMETRY -->
+  <section>
+    <h2>
+      <span class="en-i">Distance geometry</span>
+      <span class="de-i">Abstandsgeometrie</span>
+    </h2>
+    <p data-lang="en">"Nearest" depends on how you measure. Three different rulers produce three different territory maps from the same dots. Click a card to switch, the demo and the game update immediately.</p>
+    <p data-lang="de">„Nächste“ hängt davon ab, wie du misst. Drei verschiedene Maßstäbe erzeugen aus denselben Punkten drei verschiedene Karten. Klick auf eine Karte, um zu wechseln. Demo und Spiel passen sich sofort an.</p>
+
+    <div class="dist-cards">
+      <div class="dc active" id="dc-euclidean" onclick="setDist('euclidean')">
+        <svg width="56" height="56" viewBox="0 0 56 56">
+          <circle cx="28" cy="28" r="20" fill="none" stroke="#5050c0" stroke-width="1.5"/>
+          <line x1="28" y1="28" x2="45" y2="19" stroke="#5050c0" stroke-width="1" stroke-dasharray="3,2"/>
+          <circle cx="28" cy="28" r="2.5" fill="#5050c0"/>
+        </svg>
+        <div class="dc-name">Euclidean</div>
+        <div class="dc-formula">√(Δx² + Δy²)</div>
+        <div class="dc-body" data-lang="en">Straight-line distance, as the crow flies. Produces smooth circular decision boundaries. The natural shape of influence spreading evenly in all directions.</div>
+        <div class="dc-body" data-lang="de">Abstand in Luftlinie. Erzeugt glatte, kreisförmige Entscheidungsgrenzen. Das ist die natürliche Form, wenn sich Einfluss in alle Richtungen gleich ausbreitet.</div>
+      </div>
+      <div class="dc" id="dc-manhattan" onclick="setDist('manhattan')">
+        <svg width="56" height="56" viewBox="0 0 56 56">
+          <rect x="8" y="8" width="40" height="40" fill="none" stroke="#a05050" stroke-width="1.5" transform="rotate(45,28,28)"/>
+          <polyline points="28,28 44,28 44,12" fill="none" stroke="#a05050" stroke-width="1" stroke-dasharray="3,2"/>
+          <circle cx="28" cy="28" r="2.5" fill="#a05050"/>
+        </svg>
+        <div class="dc-name">Manhattan</div>
+        <div class="dc-formula">|Δx| + |Δy|</div>
+        <div class="dc-body" data-lang="en">City-block distance, only along axes, no diagonals. Named after the NYC street grid. Equidistant points form a diamond. Borders look angular and grid-aligned.</div>
+        <div class="dc-body" data-lang="de">Häuserblock-Abstand, nur entlang der Achsen und ohne Diagonalen. Benannt nach dem Straßenraster von New York. Gleich weit entfernte Punkte bilden eine Raute. Die Grenzen wirken eckig und am Raster ausgerichtet.</div>
+      </div>
+      <div class="dc" id="dc-chebyshev" onclick="setDist('chebyshev')">
+        <svg width="56" height="56" viewBox="0 0 56 56">
+          <rect x="8" y="8" width="40" height="40" fill="none" stroke="#50a050" stroke-width="1.5"/>
+          <line x1="28" y1="28" x2="48" y2="28" stroke="#50a050" stroke-width="1" stroke-dasharray="3,2"/>
+          <line x1="28" y1="28" x2="48" y2="8" stroke="#50a050" stroke-width="1" stroke-dasharray="3,2"/>
+          <circle cx="28" cy="28" r="2.5" fill="#50a050"/>
+        </svg>
+        <div class="dc-name">Chebyshev</div>
+        <div class="dc-formula">max(|Δx|, |Δy|)</div>
+        <div class="dc-body" data-lang="en">Chess-king distance, diagonal and straight moves cost the same. A king reaches any adjacent square in exactly one move. Produces square decision boundaries.</div>
+        <div class="dc-body" data-lang="de">Schachkönig-Abstand: diagonale und gerade Züge kosten gleich viel. Ein König erreicht jedes Nachbarfeld in genau einem Zug. Das erzeugt quadratische Entscheidungsgrenzen.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- THE GAME -->
+  <section>
+    <h2>
+      <span class="en-i">The game, claim your territory</span>
+      <span class="de-i">Das Spiel: beanspruche dein Gebiet</span>
+    </h2>
+
+    <p data-lang="en">Five founding settlements per side, placed randomly by the cartographers' office. Then ten moves total, five per player. When you place a dot, K-NN immediately classifies it: the dot flies the flag of whichever nation controls that location in the current model. Your goal is to control the most territory when the moves run out.</p>
+    <p data-lang="de">Fünf Gründungssiedlungen pro Seite, zufällig vom Kartenamt platziert. Dann zehn Züge insgesamt, also fünf pro Spielerin. Setzt du einen Punkt, klassifiziert K-NN ihn sofort. Der Punkt zeigt dann die Flagge der Nation, die diesen Ort im aktuellen Modell kontrolliert. Dein Ziel: am Ende das meiste Gebiet kontrollieren.</p>
+
+    <div class="game-status">
+      <div id="turn-badge" class="turn-badge" style="background:#1a1a40;color:#8080d0;">
+        <span class="en-i">Blobovia's turn</span><span class="de-i">Bloboviens Zug</span>
+      </div>
+      <div id="moves-left" class="move-count"></div>
+    </div>
+
+    <canvas id="gc"></canvas>
+    <div id="msgbar"></div>
+    <div id="win-banner"><h3 id="win-title"></h3><p id="win-body"></p></div>
+
+    <div style="margin-top:24px;">
+      <div class="ctrl-section">
+        <div class="ctrl-label">
+          <span class="en-i">Territory scores</span><span class="de-i">Gebietsstand</span>
+        </div>
+        <div class="score-row">
+          <div class="scard"><div class="sl">Blobovia</div><div class="sn" id="t1" style="color:#6080e0;">0</div></div>
+          <div class="scard"><div class="sl">Splotchia</div><div class="sn" id="t2" style="color:#e06060;">0</div></div>
+          <div class="scard"><div class="sl"><span class="en-i">Moves left</span><span class="de-i">Züge übrig</span></div><div class="sn" id="ml" style="color:#8080a0;">10</div></div>
+        </div>
+      </div>
+      <div class="ctrl-section">
+        <div class="ctrl-label">K</div>
+        <div class="ctrl-row">
+          <input type="range" id="kslider" min="1" max="11" step="2" value="3">
+          <span id="kout" style="font-family:'Courier New',monospace;font-size:15px;color:#a0a0d0;min-width:20px;">3</span>
+          <span style="font-size:13px;color:#3a3a60;font-family:sans-serif;">
+            <span class="en-i">(odd = no ties)</span><span class="de-i">(ungerade = keine Gleichstände)</span>
+          </span>
+          <button onclick="resetGame()">
+            <span class="en-i">New game</span><span class="de-i">Neues Spiel</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>
+      <span class="en-i">Part of</span><span class="de-i">Teil von</span>
+      <a href="../../">Passt</a>
+      · Class 04, Local Models &amp; Geometry
+    </span>
+    <a href="https://github.com/i-yam/passt/tree/main/modules/neighbours" target="_blank">github.com/i-yam/passt</a>
+  </footer>
+
+</div><!-- .container -->
+
+<script>
+/* ── LANG ── */
+var currentLang = 'en';
+function toggleLang() {
+  currentLang = currentLang === 'en' ? 'de' : 'en';
+  document.body.className = 'lang-' + currentLang;
+  document.querySelector('.lang-toggle').textContent = currentLang === 'en' ? 'DE' : 'EN';
+  if (gameInitialized) updateTurnBadge();
+}
+
+/* ── SHARED DIST FN ── */
+var distType = 'euclidean';
+function distFn(r1,c1,r2,c2) {
+  var dx=Math.abs(c1-c2), dy=Math.abs(r1-r2);
+  if (distType==='euclidean') return Math.sqrt(dx*dx+dy*dy);
+  if (distType==='manhattan') return dx+dy;
+  return Math.max(dx,dy);
+}
+function setDist(d) {
+  distType = d;
+  ['euclidean','manhattan','chebyshev'].forEach(function(x) {
+    var el = document.getElementById('dc-'+x);
+    el.classList.toggle('active', x===d);
+    el.style.borderWidth = x===d ? '2px' : '1px';
+  });
+  demoRender();
+  if (gameInitialized) render(lastPlaced?lastPlaced[0]:null, lastPlaced?lastPlaced[1]:null);
+}
+
+/* ── DEMO ── */
+var demoCV = document.getElementById('demo-canvas');
+var demoCtx = demoCV.getContext('2d');
+var demoPts = [];
+
+function demoRender() {
+  var W=demoCV.width, H=demoCV.height;
+  var k = parseInt(document.getElementById('demo-k').value);
+  demoCtx.clearRect(0,0,W,H);
+  demoCtx.fillStyle='#141420'; demoCtx.fillRect(0,0,W,H);
+  var RES=5;
+  if (demoPts.length >= 2) {
+    for (var y=0; y<H; y+=RES) for (var x=0; x<W; x+=RES) {
+      var o = demoKNN(x,y,k);
+      if (o===1) demoCtx.fillStyle='rgba(60,80,200,0.18)';
+      else if (o===2) demoCtx.fillStyle='rgba(200,60,60,0.18)';
+      else continue;
+      demoCtx.fillRect(x,y,RES,RES);
+    }
+  }
+  demoCtx.strokeStyle='rgba(255,255,255,0.04)'; demoCtx.lineWidth=0.5;
+  for (var x=0;x<W;x+=30){demoCtx.beginPath();demoCtx.moveTo(x,0);demoCtx.lineTo(x,H);demoCtx.stroke();}
+  for (var y=0;y<H;y+=30){demoCtx.beginPath();demoCtx.moveTo(0,y);demoCtx.lineTo(W,y);demoCtx.stroke();}
+  demoPts.forEach(function(p) {
+    demoCtx.beginPath(); demoCtx.arc(p.x,p.y,5,0,Math.PI*2);
+    demoCtx.fillStyle = p.p===1?'#6080e0':'#e06060';
+    demoCtx.fill();
+    demoCtx.strokeStyle='rgba(255,255,255,0.5)'; demoCtx.lineWidth=1.5; demoCtx.stroke();
+  });
+}
+function demoKNN(x,y,k) {
+  var pts = demoPts.map(function(p){return {p:p.p,d:Math.sqrt(Math.pow(x-p.x,2)+Math.pow(y-p.y,2))};});
+  if (distType==='manhattan') pts = demoPts.map(function(p){return {p:p.p,d:Math.abs(x-p.x)+Math.abs(y-p.y)};});
+  if (distType==='chebyshev') pts = demoPts.map(function(p){return {p:p.p,d:Math.max(Math.abs(x-p.x),Math.abs(y-p.y))};});
+  pts.sort(function(a,b){return a.d-b.d;}); pts=pts.slice(0,k);
+  var v={1:0,2:0}; pts.forEach(function(p){v[p.p]++;});
+  if(v[1]>v[2])return 1; if(v[2]>v[1])return 2; return 0;
+}
+function demoReset(){ demoPts=[]; demoRender(); }
+demoCV.addEventListener('click',function(e){
+  var r=demoCV.getBoundingClientRect();
+  var x=(e.clientX-r.left)*(demoCV.width/r.width);
+  var y=(e.clientY-r.top)*(demoCV.height/r.height);
+  var p=parseInt(document.getElementById('demo-player').value);
+  demoPts.push({x:x,y:y,p:p}); demoRender();
+});
+document.getElementById('demo-k').addEventListener('input',function(e){
+  document.getElementById('demo-k-out').textContent=e.target.value; demoRender();
+});
+
+/* ── MAIN GAME ── */
+var GRID=30, CELL=17, TOTAL_MOVES=10, SETUP=5;
+var cv=document.getElementById('gc'), ctx=cv.getContext('2d');
+cv.width=GRID*CELL; cv.height=GRID*CELL;
+var P1=1,P2=2;
+var COL={1:'#6080e0',2:'#e06060'};
+var TERR={1:'rgba(60,80,200,0.15)',2:'rgba(200,60,60,0.15)'};
+var TBG={1:'rgba(60,80,200,0.2)',2:'rgba(200,60,60,0.2)'};
+var TCOL={1:'#8090e0',2:'#e08080'};
+var grid=[], turn=P1, movesLeft=TOTAL_MOVES, gameOver=false, lastPlaced=null, gameInitialized=false;
+
+function getK(){return parseInt(document.getElementById('kslider').value);}
+function kNearest(row,col,k){
+  var pts=[];
+  for(var r=0;r<GRID;r++) for(var c=0;c<GRID;c++){
+    if(!grid[r][c]) continue;
+    pts.push({r:r,c:c,p:grid[r][c],d:distFn(row,col,r,c)});
+  }
+  pts.sort(function(a,b){return a.d-b.d;}); return pts.slice(0,k);
+}
+function majorityOf(nb){
+  var v={1:0,2:0}; nb.forEach(function(n){v[n.p]++;}); if(v[1]>v[2])return 1; if(v[2]>v[1])return 2; return 0;
+}
+function knnClassify(row,col,k){
+  var nb=kNearest(row,col,k); if(!nb.length)return 0; return majorityOf(nb);
+}
+function countTerritories(){
+  var k=getK(),t1=0,t2=0;
+  for(var r=0;r<GRID;r++) for(var c=0;c<GRID;c++){var o=grid[r][c]||knnClassify(r,c,k); if(o===1)t1++; else if(o===2)t2++;}
+  return {t1:t1,t2:t2};
+}
+function render(hlR,hlC){
+  var k=getK();
+  ctx.fillStyle='#141420'; ctx.fillRect(0,0,cv.width,cv.height);
+  for(var r=0;r<GRID;r++) for(var c=0;c<GRID;c++){
+    if(grid[r][c]) continue;
+    var o=knnClassify(r,c,k); if(o){ctx.fillStyle=TERR[o]; ctx.fillRect(c*CELL,r*CELL,CELL,CELL);}
+  }
+  for(var r=0;r<GRID;r++) for(var c=0;c<GRID;c++){
+    ctx.strokeStyle='rgba(255,255,255,0.05)'; ctx.lineWidth=0.5; ctx.strokeRect(c*CELL,r*CELL,CELL,CELL);
+  }
+  for(var r=0;r<GRID;r++) for(var c=0;c<GRID;c++){
+    if(!grid[r][c]) continue;
+    var p=grid[r][c], isLast=(r===hlR&&c===hlC);
+    var x=c*CELL+CELL/2, y=r*CELL+CELL/2;
+    ctx.beginPath(); ctx.arc(x,y,isLast?CELL*0.44:CELL*0.36,0,Math.PI*2);
+    ctx.fillStyle=COL[p]; ctx.globalAlpha=isLast?1:0.9; ctx.fill(); ctx.globalAlpha=1;
+    if(isLast){ctx.beginPath();ctx.arc(x,y,CELL*0.44,0,Math.PI*2);ctx.strokeStyle='rgba(255,255,255,0.6)';ctx.lineWidth=1.5;ctx.stroke();}
+  }
+  var scores=countTerritories();
+  document.getElementById('t1').textContent=scores.t1;
+  document.getElementById('t2').textContent=scores.t2;
+}
+function isDE(){return currentLang==='de';}
+function updateTurnBadge(){
+  var tb=document.getElementById('turn-badge'), ml=document.getElementById('moves-left');
+  if(gameOver){tb.textContent=isDE()?'Spiel vorbei':'Game over';tb.style.background='#1c1c2e';tb.style.color='#4a4a70';ml.textContent='';return;}
+  if(turn===P1){tb.textContent=isDE()?'Bloboviens Zug':'Blobovia\'s turn';}
+  else{tb.textContent=isDE()?'Splotschiens Zug':'Splotchia\'s turn';}
+  tb.style.background=TBG[turn]; tb.style.color=TCOL[turn];
+  ml.textContent=isDE()?movesLeft+' Züge verbleibend':movesLeft+' move'+(movesLeft!==1?'s':'')+' remaining';
+}
+function showWinner(){
+  var s=countTerritories(), wb=document.getElementById('win-banner'), wt=document.getElementById('win-title'), wp=document.getElementById('win-body');
+  wb.style.display='block';
+  var de=isDE();
+  if(s.t1>s.t2){
+    wt.textContent=de?'Blobovien triumphiert!':'Blobovia prevails!'; wt.style.color='#8090e0';
+    wp.textContent=de?'Die edle Bevölkerung Bloboviens beansprucht '+s.t1+' Felder, Splotschien nur '+s.t2+'. Der glorreiche Anführer erklärt einen Nationalfeiertag.':'The noble populace of Blobovia claims '+s.t1+' cells to Splotchia\'s '+s.t2+'. The glorious leader declares a national holiday.';
+  } else if(s.t2>s.t1){
+    wt.textContent=de?'Splotschien siegt!':'Splotchia conquers!'; wt.style.color='#e08080';
+    wp.textContent=de?'Die rohen Eindringlinge Splotschiens nehmen '+s.t2+' Felder, Blobovien nur '+s.t1+'. Der Despot errichtet ein Denkmal zu seinen eigenen Ehren.':'The brutish invaders of Splotchia seize '+s.t2+' cells to Blobovia\'s '+s.t1+'. The wicked despot erects a monument to himself.';
+  } else {
+    wt.textContent=de?'Pattsituation!':'A stalemate!'; wt.style.color='#c8a060';
+    wp.textContent=de?'Beide Nationen kontrollieren je '+s.t1+' Felder. Die Grenze bleibt umstritten. Diplomaten reisen an. Zufrieden ist niemand.':'Both nations control '+s.t1+' cells each. The border remains disputed. Diplomats are dispatched. Nobody is happy.';
+  }
+}
+function placeRandomDots(){
+  var placed=0, att=0;
+  while(placed<SETUP*2&&att<3000){var r=Math.floor(Math.random()*GRID),c=Math.floor(Math.random()*GRID); if(!grid[r][c]){grid[r][c]=placed%2===0?P1:P2;placed++;} att++;}
+}
+function resetGame(){
+  grid=Array.from({length:GRID},function(){return Array(GRID).fill(0);});
+  turn=P1; movesLeft=TOTAL_MOVES; gameOver=false; lastPlaced=null;
+  document.getElementById('win-banner').style.display='none';
+  document.getElementById('ml').textContent=TOTAL_MOVES;
+  document.getElementById('msgbar').textContent='';
+  placeRandomDots(); gameInitialized=true; updateTurnBadge(); render();
+}
+cv.addEventListener('click',function(e){
+  if(gameOver) return;
+  var rect=cv.getBoundingClientRect(), sx=cv.width/rect.width, sy=cv.height/rect.height;
+  var c=Math.floor(((e.clientX-rect.left)*sx)/CELL), r=Math.floor(((e.clientY-rect.top)*sy)/CELL);
+  if(r<0||r>=GRID||c<0||c>=GRID||grid[r][c]) return;
+  var k=getK(), assigned=knnClassify(r,c,k)||turn;
+  grid[r][c]=assigned; lastPlaced=[r,c]; movesLeft--;
+  document.getElementById('ml').textContent=movesLeft;
+  var de=isDE(), pname=turn===P1?(de?'Blobovien':'Blobovia'):(de?'Splotschien':'Splotchia'), aname=assigned===P1?(de?'Blobovien':'Blobovia'):(de?'Splotschien':'Splotchia');
+  document.getElementById('msgbar').textContent = assigned!==turn
+    ? (de?pname+' setzt einen Punkt, und K-NN weist ihn '+aname+' zu. Geographie ist Schicksal.':pname+' placed a dot, K-NN reassigns it to '+aname+'. Geography is fate.')
+    : (de?pname+' pflanzt eine Siedlung im eigenen Gebiet.':pname+' plants a settlement in friendly territory.');
+  if(movesLeft<=0){gameOver=true; render(r,c); updateTurnBadge(); showWinner(); return;}
+  turn=turn===P1?P2:P1; updateTurnBadge(); render(r,c);
+});
+document.getElementById('kslider').addEventListener('input',function(e){
+  document.getElementById('kout').textContent=e.target.value;
+  render(lastPlaced?lastPlaced[0]:null, lastPlaced?lastPlaced[1]:null);
+});
+
+/* init */
+resetGame();
+demoRender();
+</script>
+</body>
+</html>

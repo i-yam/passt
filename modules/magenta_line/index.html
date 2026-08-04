@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Children of the Magenta Line</title>
+
+    <!-- KaTeX (kept for consistency; no formulas in this module) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #141420;
+            color: #e8e8f0;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            line-height: 1.8;
+            font-size: 18px;
+        }
+
+        .container { max-width: 820px; margin: 0 auto; padding: 0 24px; }
+
+        /* === Language toggle === */
+        .lang-toggle {
+            position: fixed;
+            top: 16px; right: 16px;
+            background: #2a2a44;
+            border: 1px solid #4a4a70;
+            border-radius: 20px;
+            padding: 6px 14px;
+            cursor: pointer;
+            font-size: 13px;
+            font-family: sans-serif;
+            color: #a0a0d0;
+            z-index: 100;
+            transition: background 0.2s;
+        }
+        .lang-toggle:hover { background: #363658; }
+
+        /* Hero */
+        .hero { text-align: center; padding: 80px 24px 40px; }
+        .hero h1 { font-size: 42px; font-weight: 700; color: #fff; line-height: 1.3; max-width: 700px; margin: 0 auto; }
+        .hero .subtitle { margin-top: 16px; color: #888; font-size: 16px; font-style: italic; }
+
+        /* Sections */
+        section { padding: 50px 0; }
+        h2 { font-size: 30px; color: #fff; margin-bottom: 24px; line-height: 1.3; }
+        h3 { font-size: 20px; color: #ccc; margin: 28px 0 12px; }
+        p { margin-bottom: 20px; color: #ccc; }
+        em { color: #e0e0f0; font-style: italic; }
+
+        /* Figure + caption */
+        .figure { margin: 28px 0; text-align: center; }
+        .figure svg { max-width: 100%; height: auto; }
+        .caption { margin-top: 8px; font-size: 14px; color: #777; font-style: italic; }
+
+        /* Quiz */
+        .quiz { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px; padding: 28px; margin: 36px 0; }
+        .quiz-question { font-size: 18px; color: #e0e0f0; margin-bottom: 18px; font-style: italic; }
+        .quiz-options { display: flex; gap: 12px; flex-wrap: wrap; }
+        .quiz-btn {
+            background: #2a2a44; color: #e0e0f0; border: 1px solid #3a3a55;
+            border-radius: 8px; padding: 12px 24px; font-size: 16px; font-family: inherit;
+            cursor: pointer; transition: background 0.2s, border-color 0.2s;
+            flex: 1; min-width: 160px; text-align: center;
+        }
+        .quiz-btn:hover { background: #363658; border-color: #5a5a80; }
+        .quiz-btn.correct { background: #1a4a2a; border-color: #50b878; color: #70e898; }
+        .quiz-btn.wrong   { background: #2a2248; border-color: #8264dc; color: #a88ef0; }
+        .quiz-btn.disabled { pointer-events: none; opacity: 0.6; }
+        .quiz-feedback { margin-top: 14px; font-size: 16px; min-height: 24px; line-height: 1.5; }
+        .quiz-feedback.success { color: #70e898; }
+        .quiz-feedback.fail    { color: #a88ef0; }
+
+        /* Predict-before-you-see */
+        .predict { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px; padding: 28px; margin: 36px 0; }
+        .predict-q { font-size: 18px; color: #e0e0f0; margin-bottom: 18px; font-style: italic; }
+        .predict-options { display: flex; gap: 12px; flex-wrap: wrap; }
+        .predict-btn {
+            background: #2a2a44; color: #e0e0f0; border: 1px solid #3a3a55;
+            border-radius: 8px; padding: 12px 24px; font-size: 16px; font-family: inherit;
+            cursor: pointer; transition: background 0.2s, border-color 0.2s;
+            flex: 1; min-width: 140px; text-align: center;
+        }
+        .predict-btn:hover { background: #363658; border-color: #5a5a80; }
+        .predict-btn.correct { background: #1a4a2a; border-color: #50b878; color: #70e898; }
+        .predict-btn.chosen  { background: #363658; border-color: #5a5a80; color: #e8e8f0; }
+        .predict-btn.disabled { pointer-events: none; opacity: 0.6; }
+        .predict-reveal { display: none; margin-top: 22px; padding-top: 22px; border-top: 1px solid #2a2a40; }
+        .predict-reveal.show { display: block; }
+        .predict-reveal h3 { margin-top: 0; }
+        .predict-reveal p:last-child { margin-bottom: 0; }
+
+        /* Self-audit */
+        .audit { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px; padding: 28px; margin: 36px 0; }
+        .audit-row { padding: 14px 0; border-bottom: 1px solid #2a2a40; }
+        .audit-row:first-child { padding-top: 0; }
+        .audit-label { color: #e0e0f0; margin-bottom: 10px; }
+        .audit-opts { display: flex; gap: 10px; flex-wrap: wrap; }
+        .audit-btn {
+            background: #2a2a44; color: #cccada; border: 1px solid #3a3a55;
+            border-radius: 8px; padding: 8px 14px; font-size: 14px;
+            font-family: sans-serif; cursor: pointer;
+            transition: background 0.2s, border-color 0.2s, color 0.2s;
+            flex: 1; min-width: 120px; text-align: center;
+        }
+        .audit-btn:hover { background: #363658; border-color: #5a5a80; }
+        .audit-btn.sel { background: #2a2248; border-color: #8264dc; color: #a88ef0; }
+        .audit-progress { margin-top: 22px; font-size: 14px; font-family: sans-serif; color: #888; }
+        .audit-readout { margin-top: 10px; color: #ccc; min-height: 24px; }
+        .audit-readout.show { color: #a88ef0; }
+
+        /* Deep-dive */
+        details {
+            background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px;
+            padding: 0 28px; margin: 36px 0;
+        }
+        details[open] { padding-bottom: 20px; }
+        summary {
+            cursor: pointer; padding: 22px 0; color: #80b4f0;
+            font-family: sans-serif; font-size: 15px; list-style: none;
+        }
+        summary::-webkit-details-marker { display: none; }
+        summary::before { content: "\203A  "; color: #80b4f0; }
+        details[open] summary::before { content: "\2304  "; }
+        details h3:first-of-type { margin-top: 0; }
+
+        /* Sources */
+        .sources { margin-top: 8px; }
+        .sources li { list-style: none; font-size: 14px; color: #777; margin-bottom: 8px; line-height: 1.5; }
+        .sources li::before { content: "\2013  "; color: #555; }
+
+        /* Divider, links, footer */
+        .section-rule { border: none; border-top: 1px solid #2a2a40; margin: 0; }
+        a { color: #80b4f0; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        footer { text-align: center; padding: 40px 24px; color: #444; font-size: 14px; }
+
+        /* Responsive */
+        @media (max-width: 680px) {
+            .hero h1 { font-size: 28px; }
+            h2 { font-size: 24px; }
+            body { font-size: 16px; }
+            .quiz-options, .predict-options { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<button class="lang-toggle" onclick="toggleLang()">DE</button>
+
+<!-- Hero -->
+<div class="hero">
+    <h1 data-i18n="hero.title">Children of the Magenta Line</h1>
+    <p class="subtitle" data-i18n="hero.subtitle">The autopilot never forgets how to fly. The pilot does.</p>
+</div>
+
+<div class="container">
+
+<!-- ── Section 1 ─────────────────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s1.h2">The Line on the Screen</h2>
+
+    <p data-i18n="s1.p1">On the night of June 1, 2009, an Airbus A330 was somewhere over the Atlantic, halfway from Rio to Paris. A small pressure probe on the outside of the aircraft iced over. The computer lost its airspeed reading and did the sensible thing: it switched off the autopilot and handed the airplane back to the two men in the cockpit. They had a working aircraft, full engines, clean systems. Four and a half minutes later it was in the ocean. All 228 people aboard died.</p>
+
+    <p data-i18n="s1.p2">The pilots pulled back on the stick and held a perfectly recoverable airplane in a stall the whole way down. A synthetic voice called out "stall" more than seventy times. They did not believe it, or did not know what to do with it. Nothing was wrong with the airplane that a few hundred hours of hand-flying would not have caught in a second.</p>
+
+    <p data-i18n="s1.p3">Twelve years earlier, an American Airlines training captain named Warren VanderBurgh had stood in a room in Dallas and described this exact accident before it happened. He had gone through the company's incidents and found that most of them traced back to the same thing. Pilots had learned to manage the automation instead of fly the plane. They followed the magenta course line the flight computer drew across the display, and the following became the skill. He called them children of the magenta line.</p>
+
+    <p data-i18n="s1.p4">Autopilots made flying far safer. The real danger is quieter, and it sits underneath the safety. A tool built to lower your workload will, if you let it, lower your competence, and you will not notice, because everything works. The bill comes due in one specific moment: when the tool quits and hands the job back, and the job is now the hardest version of itself.</p>
+
+    <!-- Quiz 1 -->
+    <div class="quiz" id="quiz1">
+        <div class="quiz-question" data-i18n="quiz1.q">VanderBurgh's warning was about a specific risk. Which one?</div>
+        <div class="quiz-options">
+            <button class="quiz-btn" onclick="answerQuiz('quiz1', this, true)"  data-i18n="quiz1.a1">Pilots lose the skill and judgment to take over when the automation quits</button>
+            <button class="quiz-btn" onclick="answerQuiz('quiz1', this, false)" data-i18n="quiz1.a2">Autopilots are less safe than hand-flying</button>
+        </div>
+        <div class="quiz-feedback" id="quiz1-feedback"></div>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Section 2 ─────────────────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s2.h2">The Automation Paradox</h2>
+
+    <p data-i18n="s2.p1">In 1983 the psychologist Lisanne Bainbridge wrote a short paper called "Ironies of Automation" that explained the crash before Airbus built the plane. Her argument runs in two steps and closes like a trap.</p>
+
+    <p data-i18n="s2.p2">Step one. We automate the parts of a job a machine can do, and we leave the human the parts it cannot. So the human is left with the rare cases, the strange ones, the genuinely hard ones. Step two. A skill you do not practice fades. The more reliable the automation, the less the human practices, and the rustier they get.</p>
+
+    <p data-i18n="s2.p3">Put the two together. The system calls the human in only when it fails, which is the worst possible moment, and by then the human is the least prepared they have ever been. The better the tool, the sharper this trap. William Langewiesche, writing after the crash, put the loop plainly: automation erodes skill, and eroded skill is used to argue for more automation.</p>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Predict-before-you-see ────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="predict.h2">Predict, Then Look</h2>
+
+    <p data-i18n="predict.setup">The brain keeps its maps in a small seahorse-shaped structure called the hippocampus. That is where spatial memory lives. Now consider a London cab driver. To get licensed, they spend three to four years on a moped memorizing every one of roughly 25,000 streets inside a six-mile circle around Charing Cross, plus thousands of landmarks. It is called the Knowledge. About half wash out.</p>
+
+    <div class="predict" id="predict-taxi">
+        <div class="predict-q" data-i18n="predict.q">Before you scroll: what happens to the hippocampus of someone who does this?</div>
+        <div class="predict-options">
+            <button class="predict-btn" onclick="revealPredict(this,'grow')"   data-i18n="predict.o1">It grows</button>
+            <button class="predict-btn" onclick="revealPredict(this,'shrink')" data-i18n="predict.o2">It shrinks</button>
+            <button class="predict-btn" onclick="revealPredict(this,'same')"   data-i18n="predict.o3">Nothing measurable</button>
+        </div>
+        <div class="predict-reveal" id="predict-taxi-reveal">
+            <h3 data-i18n="predict.revealH">What actually happened</h3>
+            <p data-i18n="predict.revealP">In 2000, Eleanor Maguire scanned London taxi drivers and a comparison group. The drivers' posterior hippocampus, the part that stores spatial maps, was measurably larger. The longer someone had driven, the larger it was. A later study followed 79 trainees over four years. The ones who passed the Knowledge grew that region. The ones who studied and failed did not. The map was building the brain that held it.</p>
+        </div>
+    </div>
+
+    <p data-i18n="predict.flip">Now run it backwards. In 2020, Louisa Dahmani and Véronique Bohbot measured lifetime GPS use in fifty regular drivers, then tested how well they found their way with the arrow switched off. The people who had leaned on GPS the most did worst without it. Three years later they retested some of them. Heavier GPS use in between tracked a steeper decline. Same organ, opposite direction. The cabbie builds the map by hand and grows the muscle. The rest of us follow the arrow and let it soften.</p>
+
+    <div class="figure">
+        <svg viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="One brain region growing with practice, thinning with offloading">
+            <line x1="350" y1="20" x2="350" y2="200" stroke="#2a2a40" stroke-width="1"/>
+            <!-- practice side -->
+            <ellipse cx="185" cy="110" rx="92" ry="62" fill="#1a4a2a" stroke="#50b878" stroke-width="2"/>
+            <text x="185" y="50" text-anchor="middle" fill="#70e898" font-family="sans-serif" font-size="15" data-i18n="svg.grow">practice → grows</text>
+            <text x="185" y="205" text-anchor="middle" fill="#888" font-family="sans-serif" font-size="13" data-i18n="svg.taxi">the cabbie</text>
+            <!-- offload side -->
+            <ellipse cx="515" cy="110" rx="52" ry="34" fill="#2a2248" stroke="#8264dc" stroke-width="2"/>
+            <text x="515" y="50" text-anchor="middle" fill="#a88ef0" font-family="sans-serif" font-size="15" data-i18n="svg.thin">offload → thins</text>
+            <text x="515" y="205" text-anchor="middle" fill="#888" font-family="sans-serif" font-size="13" data-i18n="svg.gps">the GPS driver</text>
+        </svg>
+        <div class="caption" data-i18n="predict.caption">The same brain region: practice makes it grow, offloading makes it thin.</div>
+    </div>
+
+    <!-- Quiz 2 -->
+    <div class="quiz" id="quiz2">
+        <div class="quiz-question" data-i18n="quiz2.q">The taxi and GPS studies point the same lesson in opposite directions. What is it?</div>
+        <div class="quiz-options">
+            <button class="quiz-btn" onclick="answerQuiz('quiz2', this, true)"  data-i18n="quiz2.a1">Spatial skill is physical: practice builds the brain region, offloading lets it fade</button>
+            <button class="quiz-btn" onclick="answerQuiz('quiz2', this, false)" data-i18n="quiz2.a2">GPS damages general memory and intelligence</button>
+        </div>
+        <div class="quiz-feedback" id="quiz2-feedback"></div>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Self-audit ────────────────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="audit.h2">Your Own Audit</h2>
+
+    <p data-i18n="audit.intro">The same trade runs through your ordinary day, one skill at a time. Every skill you hand to a tool, you also hand over the ability to tell when the tool is wrong, and this is where you find out which ones you have already given away.</p>
+
+    <p data-i18n="audit.p">Eight everyday skills. For each, be honest about where you stand. Not what you should do. What is true right now.</p>
+
+    <div class="audit" id="audit">
+        <div class="audit-row" data-item="0">
+            <div class="audit-label" data-i18n="audit.i0">Arithmetic in your head</div>
+            <div class="audit-opts">
+                <button class="audit-btn" onclick="auditSelect(0,1,this)" data-i18n="audit.self">I do it myself</button>
+                <button class="audit-btn" onclick="auditSelect(0,2,this)" data-i18n="audit.could">Tool, but I could</button>
+                <button class="audit-btn" onclick="auditSelect(0,3,this)" data-i18n="audit.couldnt">Couldn't without it</button>
+            </div>
+        </div>
+        <div class="audit-row" data-item="1">
+            <div class="audit-label" data-i18n="audit.i1">Finding your way in a new city</div>
+            <div class="audit-opts">
+                <button class="audit-btn" onclick="auditSelect(1,1,this)" data-i18n="audit.self">I do it myself</button>
+                <button class="audit-btn" onclick="auditSelect(1,2,this)" data-i18n="audit.could">Tool, but I could</button>
+                <button class="audit-btn" onclick="auditSelect(1,3,this)" data-i18n="audit.couldnt">Couldn't without it</button>
+            </div>
+        </div>
+        <div class="audit-row" data-item="2">
+            <div class="audit-label" data-i18n="audit.i2">Spelling and grammar</div>
+            <div class="audit-opts">
+                <button class="audit-btn" onclick="auditSelect(2,1,this)" data-i18n="audit.self">I do it myself</button>
+                <button class="audit-btn" onclick="auditSelect(2,2,this)" data-i18n="audit.could">Tool, but I could</button>
+                <button class="audit-btn" onclick="auditSelect(2,3,this)" data-i18n="audit.couldnt">Couldn't without it</button>
+            </div>
+        </div>
+        <div class="audit-row" data-item="3">
+            <div class="audit-label" data-i18n="audit.i3">Keeping numbers and dates in your head</div>
+            <div class="audit-opts">
+                <button class="audit-btn" onclick="auditSelect(3,1,this)" data-i18n="audit.self">I do it myself</button>
+                <button class="audit-btn" onclick="auditSelect(3,2,this)" data-i18n="audit.could">Tool, but I could</button>
+                <button class="audit-btn" onclick="auditSelect(3,3,this)" data-i18n="audit.couldnt">Couldn't without it</button>
+            </div>
+        </div>
+        <div class="audit-row" data-item="4">
+            <div class="audit-label" data-i18n="audit.i4">Writing a first draft</div>
+            <div class="audit-opts">
+                <button class="audit-btn" onclick="auditSelect(4,1,this)" data-i18n="audit.self">I do it myself</button>
+                <button class="audit-btn" onclick="auditSelect(4,2,this)" data-i18n="audit.could">Tool, but I could</button>
+                <button class="audit-btn" onclick="auditSelect(4,3,this)" data-i18n="audit.couldnt">Couldn't without it</button>
+            </div>
+        </div>
+        <div class="audit-row" data-item="5">
+            <div class="audit-label" data-i18n="audit.i5">Summarizing a long document</div>
+            <div class="audit-opts">
+                <button class="audit-btn" onclick="auditSelect(5,1,this)" data-i18n="audit.self">I do it myself</button>
+                <button class="audit-btn" onclick="auditSelect(5,2,this)" data-i18n="audit.could">Tool, but I could</button>
+                <button class="audit-btn" onclick="auditSelect(5,3,this)" data-i18n="audit.couldnt">Couldn't without it</button>
+            </div>
+        </div>
+        <div class="audit-row" data-item="6">
+            <div class="audit-label" data-i18n="audit.i6">Recalling a fact from memory</div>
+            <div class="audit-opts">
+                <button class="audit-btn" onclick="auditSelect(6,1,this)" data-i18n="audit.self">I do it myself</button>
+                <button class="audit-btn" onclick="auditSelect(6,2,this)" data-i18n="audit.could">Tool, but I could</button>
+                <button class="audit-btn" onclick="auditSelect(6,3,this)" data-i18n="audit.couldnt">Couldn't without it</button>
+            </div>
+        </div>
+        <div class="audit-row" data-item="7">
+            <div class="audit-label" data-i18n="audit.i7">Writing a working function</div>
+            <div class="audit-opts">
+                <button class="audit-btn" onclick="auditSelect(7,1,this)" data-i18n="audit.self">I do it myself</button>
+                <button class="audit-btn" onclick="auditSelect(7,2,this)" data-i18n="audit.could">Tool, but I could</button>
+                <button class="audit-btn" onclick="auditSelect(7,3,this)" data-i18n="audit.couldnt">Couldn't without it</button>
+            </div>
+        </div>
+
+        <div class="audit-progress" id="audit-progress">0 of 8 sorted.</div>
+        <div class="audit-readout" id="audit-readout">Sort all eight to see where you stand.</div>
+    </div>
+
+    <p data-i18n="audit.policy">This is why some exercises in this course say TRY WITHOUT AI before they say anything else. Not because the tool is the enemy. Because the only way to keep the yardstick is to use it now and then, on purpose, while the stakes are a homework problem and not four minutes over the Atlantic.</p>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Deep-dive ─────────────────────────────────────────────────────────────── -->
+<details>
+    <summary data-i18n="dd.summary">For the curious: the older story, and the price the cabbie paid</summary>
+
+    <h3 data-i18n="dd.h1">The cabbie's bill</h3>
+    <p data-i18n="dd.p1">The larger posterior hippocampus in taxi drivers came with a smaller anterior one, and they were measurably worse at some other kinds of spatial memory. Building one map that well cost them flexibility elsewhere. Even the person who keeps the skill pays for it. There is no free version of any of this.</p>
+
+    <h3 data-i18n="dd.h2">Deskilling is older than software</h3>
+    <p data-i18n="dd.p2">In 1974 Harry Braverman wrote "Labor and Monopoly Capital", about what factory automation did to craft workers. A skilled machinist held knowledge in his hands and his judgment. Break the job into steps a machine can run, and the knowledge moves into the machine. The worker who remains does not need the skill and slowly does not have it. Braverman called it the degradation of work. The magenta line is the same story with a nicer screen.</p>
+
+    <h3 data-i18n="dd.h3">Bainbridge's last irony</h3>
+    <p data-i18n="dd.p3">Bainbridge noted one more turn. To keep a human able to take over, you have to let them practice on the real system, which means occasionally turning the reliable automation off and accepting the small risk that comes with a rusty human at the controls. Safety and skill-retention pull against each other. There is no setting that gives you both for free.</p>
+</details>
+
+<!-- ── Exercise ──────────────────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="ex.h2">One Thing to Try</h2>
+    <p data-i18n="ex.p">Pick one skill from your list that landed in "couldn't do it without the tool." Some time this week, do that one thing once with the tool switched off. Split the bill in your head. Find the address from memory. Write the paragraph before you ask the model. You are not proving anything to anyone. You are checking whether the yardstick is still there.</p>
+</section>
+
+<!-- ── Sources ───────────────────────────────────────────────────────────────── -->
+<section>
+    <h3 data-i18n="sources.h">Sources</h3>
+    <ul class="sources">
+        <li>VanderBurgh, W. (1997). "Children of the Magenta Line." American Airlines Flight Training, Dallas.</li>
+        <li>BEA (2012). Final Report, Air France Flight 447 (1 June 2009).</li>
+        <li>Bainbridge, L. (1983). Ironies of Automation. Automatica 19(6), 775-779.</li>
+        <li>Maguire, E. A. et al. (2000). Navigation-related structural change in the hippocampi of taxi drivers. PNAS 97(8), 4398-4403.</li>
+        <li>Woollett, K. &amp; Maguire, E. A. (2011). Acquiring "the Knowledge" of London's layout drives structural brain changes. Current Biology 21(24), 2109-2114.</li>
+        <li>Dahmani, L. &amp; Bohbot, V. D. (2020). Habitual use of GPS negatively impacts spatial memory during self-guided navigation. Scientific Reports 10, 6310.</li>
+        <li>Braverman, H. (1974). Labor and Monopoly Capital. Monthly Review Press.</li>
+    </ul>
+</section>
+
+</div>
+
+<footer>
+    <span data-i18n="footer.title">Children of the Magenta Line</span>
+    <br>&copy; All rights reserved
+</footer>
+
+<!-- ── Scripts ───────────────────────────────────────────────────────────────── -->
+<script>
+
+const T = {
+    en: {
+        'hero.title':    'Children of the Magenta Line',
+        'hero.subtitle': 'The autopilot never forgets how to fly. The pilot does.',
+
+        's1.h2': 'The Line on the Screen',
+        's1.p1': 'On the night of June 1, 2009, an Airbus A330 was somewhere over the Atlantic, halfway from Rio to Paris. A small pressure probe on the outside of the aircraft iced over. The computer lost its airspeed reading and did the sensible thing: it switched off the autopilot and handed the airplane back to the two men in the cockpit. They had a working aircraft, full engines, clean systems. Four and a half minutes later it was in the ocean. All 228 people aboard died.',
+        's1.p2': 'The pilots pulled back on the stick and held a perfectly recoverable airplane in a stall the whole way down. A synthetic voice called out "stall" more than seventy times. They did not believe it, or did not know what to do with it. Nothing was wrong with the airplane that a few hundred hours of hand-flying would not have caught in a second.',
+        's1.p3': 'Twelve years earlier, an American Airlines training captain named Warren VanderBurgh had stood in a room in Dallas and described this exact accident before it happened. He had gone through the company\'s incidents and found that most of them traced back to the same thing. Pilots had learned to manage the automation instead of fly the plane. They followed the magenta course line the flight computer drew across the display, and the following became the skill. He called them children of the magenta line.',
+        's1.p4': 'Autopilots made flying far safer. The real danger is quieter, and it sits underneath the safety. A tool built to lower your workload will, if you let it, lower your competence, and you will not notice, because everything works. The bill comes due in one specific moment: when the tool quits and hands the job back, and the job is now the hardest version of itself.',
+
+        'quiz1.q':  'VanderBurgh\'s warning was about a specific risk. Which one?',
+        'quiz1.a1': 'Pilots lose the skill and judgment to take over when the automation quits',
+        'quiz1.a2': 'Autopilots are less safe than hand-flying',
+        'quiz1.ok': 'Right. The automation was safer on average. The danger was the atrophied skill underneath it, invisible until the moment it was needed.',
+        'quiz1.no': 'Not the point. On average the autopilot made flying safer. The risk was the skill quietly rotting underneath, unnoticed until the automation switched off.',
+
+        's2.h2': 'The Automation Paradox',
+        's2.p1': 'In 1983 the psychologist Lisanne Bainbridge wrote a short paper called "Ironies of Automation" that explained the crash before Airbus built the plane. Her argument runs in two steps and closes like a trap.',
+        's2.p2': 'Step one. We automate the parts of a job a machine can do, and we leave the human the parts it cannot. So the human is left with the rare cases, the strange ones, the genuinely hard ones. Step two. A skill you do not practice fades. The more reliable the automation, the less the human practices, and the rustier they get.',
+        's2.p3': 'Put the two together. The system calls the human in only when it fails, which is the worst possible moment, and by then the human is the least prepared they have ever been. The better the tool, the sharper this trap. William Langewiesche, writing after the crash, put the loop plainly: automation erodes skill, and eroded skill is used to argue for more automation.',
+
+        'predict.h2':      'Predict, Then Look',
+        'predict.setup':   'The brain keeps its maps in a small seahorse-shaped structure called the hippocampus. That is where spatial memory lives. Now consider a London cab driver. To get licensed, they spend three to four years on a moped memorizing every one of roughly 25,000 streets inside a six-mile circle around Charing Cross, plus thousands of landmarks. It is called the Knowledge. About half wash out.',
+        'predict.q':       'Before you scroll: what happens to the hippocampus of someone who does this?',
+        'predict.o1':      'It grows',
+        'predict.o2':      'It shrinks',
+        'predict.o3':      'Nothing measurable',
+        'predict.revealH': 'What actually happened',
+        'predict.revealP': 'In 2000, Eleanor Maguire scanned London taxi drivers and a comparison group. The drivers\' posterior hippocampus, the part that stores spatial maps, was measurably larger. The longer someone had driven, the larger it was. A later study followed 79 trainees over four years. The ones who passed the Knowledge grew that region. The ones who studied and failed did not. The map was building the brain that held it.',
+        'predict.flip':    'Now run it backwards. In 2020, Louisa Dahmani and Véronique Bohbot measured lifetime GPS use in fifty regular drivers, then tested how well they found their way with the arrow switched off. The people who had leaned on GPS the most did worst without it. Three years later they retested some of them. Heavier GPS use in between tracked a steeper decline. Same organ, opposite direction. The cabbie builds the map by hand and grows the muscle. The rest of us follow the arrow and let it soften.',
+        'predict.caption': 'The same brain region: practice makes it grow, offloading makes it thin.',
+        'svg.grow': 'practice \u2192 grows',
+        'svg.thin': 'offload \u2192 thins',
+        'svg.taxi': 'the cabbie',
+        'svg.gps':  'the GPS driver',
+
+        'quiz2.q':  'The taxi and GPS studies point the same lesson in opposite directions. What is it?',
+        'quiz2.a1': 'Spatial skill is physical: practice builds the brain region, offloading lets it fade',
+        'quiz2.a2': 'GPS damages general memory and intelligence',
+        'quiz2.ok': 'Yes. The effect is specific and structural. Use the skill and the tissue that holds it grows; hand it to a tool and it thins. The London cabbie and the GPS driver are the same experiment run forwards and backwards.',
+        'quiz2.no': 'Careful. The effect is narrow, not general. GPS use tracked worse spatial memory specifically, not worse memory for everything. The point is that the particular skill you stop using is the one that fades.',
+
+        'audit.h2': 'Your Own Audit',
+        'audit.intro': 'The same trade runs through your ordinary day, one skill at a time. Every skill you hand to a tool, you also hand over the ability to tell when the tool is wrong, and this is where you find out which ones you have already given away.',
+        'audit.p':  'Eight everyday skills. For each, be honest about where you stand. Not what you should do. What is true right now.',
+        'audit.i0': 'Arithmetic in your head',
+        'audit.i1': 'Finding your way in a new city',
+        'audit.i2': 'Spelling and grammar',
+        'audit.i3': 'Keeping numbers and dates in your head',
+        'audit.i4': 'Writing a first draft',
+        'audit.i5': 'Summarizing a long document',
+        'audit.i6': 'Recalling a fact from memory',
+        'audit.i7': 'Writing a working function',
+        'audit.self':    'I do it myself',
+        'audit.could':   'Tool, but I could',
+        'audit.couldnt': 'Couldn\'t without it',
+        'audit.progress': '{n} of 8 sorted.',
+        'audit.prompt':   'Sort all eight to see where you stand.',
+        'audit.read0': 'Nothing in the bottom row. Either you are unusually stubborn, or you have not been honest with yourself. Come back to this list in a year.',
+        'audit.read1': 'One or two skills you can no longer do without the tool. Small, for now. Worth knowing which two they are.',
+        'audit.read2': 'A handful of skills you have fully handed off. This is normal, and it is the interesting part. These are the ones where you can no longer tell when the tool is wrong.',
+        'audit.read3': 'Most of the list sits in the bottom row. No scandal there; it is where the whole culture is heading. Just remember the tool holds your yardstick now, not you.',
+        'audit.policy': 'This is why some exercises in this course say TRY WITHOUT AI before they say anything else. Not because the tool is the enemy. Because the only way to keep the yardstick is to use it now and then, on purpose, while the stakes are a homework problem and not four minutes over the Atlantic.',
+
+        'dd.summary': 'For the curious: the older story, and the price the cabbie paid',
+        'dd.h1': 'The cabbie\'s bill',
+        'dd.p1': 'The larger posterior hippocampus in taxi drivers came with a smaller anterior one, and they were measurably worse at some other kinds of spatial memory. Building one map that well cost them flexibility elsewhere. Even the person who keeps the skill pays for it. There is no free version of any of this.',
+        'dd.h2': 'Deskilling is older than software',
+        'dd.p2': 'In 1974 Harry Braverman wrote "Labor and Monopoly Capital", about what factory automation did to craft workers. A skilled machinist held knowledge in his hands and his judgment. Break the job into steps a machine can run, and the knowledge moves into the machine. The worker who remains does not need the skill and slowly does not have it. Braverman called it the degradation of work. The magenta line is the same story with a nicer screen.',
+        'dd.h3': 'Bainbridge\'s last irony',
+        'dd.p3': 'Bainbridge noted one more turn. To keep a human able to take over, you have to let them practice on the real system, which means occasionally turning the reliable automation off and accepting the small risk that comes with a rusty human at the controls. Safety and skill-retention pull against each other. There is no setting that gives you both for free.',
+
+        'ex.h2': 'One Thing to Try',
+        'ex.p':  'Pick one skill from your list that landed in "couldn\'t do it without the tool." Some time this week, do that one thing once with the tool switched off. Split the bill in your head. Find the address from memory. Write the paragraph before you ask the model. You are not proving anything to anyone. You are checking whether the yardstick is still there.',
+
+        'sources.h': 'Sources',
+        'footer.title': 'Children of the Magenta Line',
+    },
+
+    de: {
+        'hero.title':    'Kinder der Magenta-Linie',
+        'hero.subtitle': 'Der Autopilot verlernt das Fliegen nie. Der Pilot schon.',
+
+        's1.h2': 'Die Linie auf dem Bildschirm',
+        's1.p1': 'In der Nacht des 1. Juni 2009 war ein Airbus A330 irgendwo über dem Atlantik, auf halber Strecke von Rio nach Paris. Eine kleine Drucksonde an der Außenseite vereiste. Der Computer verlor die Geschwindigkeitsanzeige. Er tat das Vernünftige: Er schaltete den Autopiloten ab und gab das Flugzeug an die beiden Männer im Cockpit zurück. Die beiden hatten eine funktionierende Maschine, volle Triebwerke, saubere Systeme. Viereinhalb Minuten später lag sie im Ozean. Alle 228 Menschen an Bord starben.',
+        's1.p2': 'Die Piloten zogen am Steuer und hielten ein völlig beherrschbares Flugzeug den ganzen Weg nach unten im Strömungsabriss. Eine synthetische Stimme rief mehr als siebzigmal „Stall“. Die Piloten glaubten ihr nicht, oder sie wussten nichts damit anzufangen. Mit dem Flugzeug war nichts, was ein paar hundert Stunden Handfliegen nicht sofort erkannt hätten.',
+        's1.p3': 'Zwölf Jahre zuvor stand ein Ausbildungskapitän von American Airlines in einem Raum in Dallas. Er hieß Warren VanderBurgh, und er beschrieb genau diesen Unfall, bevor er geschah. Er hatte die Zwischenfälle der Fluggesellschaft durchgesehen. Die meisten gingen auf dieselbe Ursache zurück. Piloten hatten gelernt, die Automatik zu verwalten, statt das Flugzeug zu fliegen. Stattdessen folgten sie der magentafarbenen Kurslinie, die der Flugcomputer über das Display zog. Das Folgen wurde zur eigentlichen Fähigkeit. Er nannte sie Kinder der Magenta-Linie.',
+        's1.p4': 'Autopiloten machten das Fliegen deutlich sicherer. Die eigentliche Gefahr ist leiser und liegt unter der Sicherheit. Ein Werkzeug senkt deine Arbeitslast. Wenn du es lässt, senkt es auch deine Kompetenz. Merken wirst du das nicht, denn alles funktioniert. Die Rechnung kommt in einem bestimmten Moment: wenn das Werkzeug aufgibt und dir die Aufgabe zurückgibt. Und die Aufgabe ist dann ihre schwerste Fassung.',
+
+        'quiz1.q':  'VanderBurghs Warnung betraf ein bestimmtes Risiko. Welches?',
+        'quiz1.a1': 'Piloten verlieren die Fähigkeit und das Urteil, zu übernehmen, wenn die Automatik aussteigt',
+        'quiz1.a2': 'Autopiloten sind weniger sicher als Handfliegen',
+        'quiz1.ok': 'Richtig. Die Automatik war im Schnitt sicherer. Die Gefahr war die verkümmerte Fähigkeit darunter. Unsichtbar blieb sie bis zu dem Moment, in dem man sie brauchte.',
+        'quiz1.no': 'Nicht der Punkt. Im Schnitt machte der Autopilot das Fliegen sicherer. Das Risiko war die Fähigkeit darunter. Die verkümmerte still und unbemerkt, bis die Automatik abschaltete.',
+
+        's2.h2': 'Das Automatisierungsparadox',
+        's2.p1': '1983 schrieb die Psychologin Lisanne Bainbridge einen kurzen Aufsatz mit dem Titel „Ironies of Automation“. Er erklärte den Absturz, bevor Airbus das Flugzeug baute. Ihr Argument läuft in zwei Schritten. Am Ende schnappt es zu wie eine Falle.',
+        's2.p2': 'Schritt eins. Wir automatisieren die Teile einer Aufgabe, die eine Maschine übernehmen kann. Dem Menschen bleibt der Rest. Das sind die seltenen Fälle, die seltsamen, die wirklich schweren. Schritt zwei. Eine Fähigkeit, die du nicht übst, verblasst. Je zuverlässiger die Automatik, desto weniger übt der Mensch. Und desto eingerosteter wird er.',
+        's2.p3': 'Beides zusammen. Das System ruft den Menschen nur, wenn es versagt. Das ist der denkbar schlechteste Moment. Bis dahin ist der Mensch so unvorbereitet wie nie. Je besser das Werkzeug, desto schärfer diese Falle. William Langewiesche brachte die Schleife nach dem Absturz auf den Punkt: Automatisierung höhlt Fähigkeit aus, und ausgehöhlte Fähigkeit dient als Argument für mehr Automatisierung.',
+
+        'predict.h2':      'Erst vorhersagen, dann nachsehen',
+        'predict.setup':   'Das Gehirn bewahrt seine Karten in einer kleinen, seepferdchenförmigen Struktur auf, dem Hippocampus. Dort sitzt das räumliche Gedächtnis. Nimm nun einen Londoner Taxifahrer. Für die Lizenz verbringt er drei bis vier Jahre auf einem Moped. In dieser Zeit lernt er jede der rund 25.000 Straßen in einem Umkreis von sechs Meilen um Charing Cross auswendig. Dazu kommen Tausende von Sehenswürdigkeiten. Man nennt es „das Wissen“. Etwa die Hälfte scheitert.',
+        'predict.q':       'Bevor du weiterscrollst: Was passiert mit dem Hippocampus von jemandem, der das tut?',
+        'predict.o1':      'Er wächst',
+        'predict.o2':      'Er schrumpft',
+        'predict.o3':      'Nichts Messbares',
+        'predict.revealH': 'Was tatsächlich geschah',
+        'predict.revealP': 'Im Jahr 2000 scannte Eleanor Maguire Londoner Taxifahrer und eine Vergleichsgruppe. Der hintere Hippocampus speichert räumliche Karten. Bei den Fahrern war er messbar größer. Je länger jemand gefahren war, desto größer war er. Eine spätere Studie begleitete 79 Auszubildende über vier Jahre. Bei denen, die das Wissen bestanden, wuchs diese Region. Bei denen, die lernten und durchfielen, nicht. Die Karte baute das Gehirn, das sie hielt.',
+        'predict.flip':    'Nun rückwärts. 2020 maßen Louisa Dahmani und Véronique Bohbot die lebenslange GPS-Nutzung von fünfzig regelmäßigen Fahrern. Danach testeten sie, wie gut diese ohne den Pfeil ihren Weg fanden. Wer sich am stärksten auf GPS verlassen hatte, schnitt ohne GPS am schlechtesten ab. Drei Jahre später testeten sie einige erneut. Stärkere GPS-Nutzung in der Zwischenzeit ging mit einem steileren Abfall einher. Dasselbe Organ, entgegengesetzte Richtung. Der Taxifahrer baut die Karte von Hand und stärkt den Muskel. Der Rest von uns folgt dem Pfeil und lässt ihn weich werden.',
+        'predict.caption': 'Dieselbe Hirnregion: Übung lässt sie wachsen, Auslagern lässt sie dünner werden.',
+        'svg.grow': 'Übung → wächst',
+        'svg.thin': 'Auslagern → dünner',
+        'svg.taxi': 'der Taxifahrer',
+        'svg.gps':  'der GPS-Fahrer',
+
+        'quiz2.q':  'Die Taxi- und die GPS-Studie zeigen dieselbe Lehre in entgegengesetzte Richtungen. Welche?',
+        'quiz2.a1': 'Räumliche Fähigkeit ist körperlich: Übung baut die Hirnregion auf, Auslagern lässt sie verblassen',
+        'quiz2.a2': 'GPS schädigt das allgemeine Gedächtnis und die Intelligenz',
+        'quiz2.ok': 'Ja. Der Effekt ist spezifisch und strukturell. Nutzt du die Fähigkeit, wächst das Gewebe, das sie trägt. Gibst du sie an ein Werkzeug ab, wird es dünner. Der Londoner Fahrer und der GPS-Fahrer sind dasselbe Experiment, vorwärts und rückwärts gespielt.',
+        'quiz2.no': 'Vorsicht. Der Effekt ist eng, nicht allgemein. Stärkere GPS-Nutzung ging speziell mit schlechterem räumlichem Gedächtnis einher, nicht mit schlechterem Gedächtnis für alles. Der Punkt ist: Gerade die Fähigkeit, die du nicht mehr nutzt, verblasst.',
+
+        'audit.h2': 'Dein eigener Kassensturz',
+        'audit.intro': 'Derselbe Tausch läuft durch deinen ganz normalen Tag, eine Fähigkeit nach der anderen. Mit jeder Fähigkeit, die du einem Werkzeug übergibst, gibst du noch etwas anderes ab: die Fähigkeit zu erkennen, wann das Werkzeug irrt. Hier findest du heraus, welche du schon abgegeben hast.',
+        'audit.p':  'Acht alltägliche Fähigkeiten. Sei bei jeder ehrlich. Nicht, was du tun solltest. Was gerade wahr ist.',
+        'audit.i0': 'Im Kopf rechnen',
+        'audit.i1': 'Sich in einer neuen Stadt zurechtfinden',
+        'audit.i2': 'Rechtschreibung und Grammatik',
+        'audit.i3': 'Nummern und Termine im Kopf behalten',
+        'audit.i4': 'Einen ersten Entwurf schreiben',
+        'audit.i5': 'Ein langes Dokument zusammenfassen',
+        'audit.i6': 'Eine Tatsache aus dem Gedächtnis abrufen',
+        'audit.i7': 'Eine funktionierende Funktion programmieren',
+        'audit.self':    'Mache ich selbst',
+        'audit.could':   'Werkzeug, könnte aber selbst',
+        'audit.couldnt': 'Ohne das Werkzeug nicht',
+        'audit.progress': '{n} von 8 einsortiert.',
+        'audit.prompt':   'Sortier alle acht ein, um zu sehen, wo du stehst.',
+        'audit.read0': 'Nichts in der unteren Reihe. Entweder bist du ungewöhnlich stur, oder du warst nicht ehrlich zu dir. Komm in einem Jahr auf diese Liste zurück.',
+        'audit.read1': 'Ein oder zwei Fähigkeiten, die du ohne das Werkzeug nicht mehr kannst. Vorerst wenig. Es lohnt sich zu wissen, welche zwei.',
+        'audit.read2': 'Eine Handvoll Fähigkeiten hast du vollständig abgegeben. Das ist normal, und es ist der interessante Teil. Bei diesen kannst du nicht mehr erkennen, wann das Werkzeug irrt.',
+        'audit.read3': 'Der Großteil der Liste sitzt in der unteren Reihe. Kein Skandal, dorthin bewegt sich die ganze Kultur. Denk nur daran: Den Maßstab hält jetzt das Werkzeug, nicht du.',
+        'audit.policy': 'Deshalb sagen manche Übungen in diesem Kurs zuerst OHNE KI. Nicht, weil das Werkzeug der Feind wäre. Sondern weil du den Maßstab nur behältst, wenn du ihn hin und wieder bewusst benutzt. Solange es um eine Hausaufgabe geht und nicht um vier Minuten über dem Atlantik.',
+
+        'dd.summary': 'Für Neugierige: die ältere Geschichte und der Preis, den der Fahrer zahlte',
+        'dd.h1': 'Die Rechnung des Fahrers',
+        'dd.p1': 'Der größere hintere Hippocampus der Taxifahrer kam mit einem kleineren vorderen. Bei einigen anderen Formen des räumlichen Gedächtnisses waren die Fahrer messbar schlechter. Eine Karte so gut zu bauen, kostete sie anderswo Flexibilität. Selbst wer die Fähigkeit behält, zahlt dafür. Eine kostenlose Version gibt es hier nicht.',
+        'dd.h2': 'Deskilling ist älter als Software',
+        'dd.p2': '1974 schrieb Harry Braverman „Labor and Monopoly Capital“. Darin geht es darum, was die Fabrikautomatisierung mit den Facharbeitern machte. Ein gelernter Maschinist trug sein Wissen in den Händen und im Urteil. Zerleg die Arbeit in Schritte, die eine Maschine ausführen kann. Dann wandert das Wissen in die Maschine. Der verbleibende Arbeiter braucht die Fähigkeit nicht. Mit der Zeit hat er sie nicht mehr. Braverman nannte es die Degradierung der Arbeit. Die Magenta-Linie ist dieselbe Geschichte mit einem schöneren Bildschirm.',
+        'dd.h3': 'Bainbridges letzte Ironie',
+        'dd.p3': 'Bainbridge bemerkte noch eine Wendung. Ein Mensch soll übernehmen können, also muss er am echten System üben. Das heißt: die zuverlässige Automatik gelegentlich abschalten. Und das kleine Risiko in Kauf nehmen, das ein eingerosteter Mensch am Steuer mit sich bringt. Sicherheit und Kompetenzerhalt ziehen gegeneinander. Es gibt keine Einstellung, die dir beides umsonst gibt.',
+
+        'ex.h2': 'Eine Sache zum Ausprobieren',
+        'ex.p':  'Wähl eine Fähigkeit aus deiner Liste, die in „Ohne das Werkzeug nicht“ gelandet ist. Tu diese eine Sache irgendwann in dieser Woche einmal mit ausgeschaltetem Werkzeug. Teil die Rechnung im Kopf. Finde die Adresse aus dem Gedächtnis. Schreib den Absatz, bevor du das Modell fragst. Du beweist niemandem etwas. Du prüfst, ob der Maßstab noch da ist.',
+
+        'sources.h': 'Quellen',
+        'footer.title': 'Kinder der Magenta-Linie',
+    }
+};
+
+let currentLang = 'en';
+
+function toggleLang() {
+    currentLang = currentLang === 'en' ? 'de' : 'en';
+    document.documentElement.lang = currentLang;
+    document.querySelector('.lang-toggle').textContent = currentLang === 'en' ? 'DE' : 'EN';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (T[currentLang] && T[currentLang][key]) el.innerHTML = T[currentLang][key];
+    });
+    renderAudit();
+    if (typeof renderMathInElement !== 'undefined') {
+        renderMathInElement(document.body, {
+            delimiters: [
+                { left: '$$', right: '$$', display: true  },
+                { left: '\\(', right: '\\)', display: false }
+            ],
+            throwOnError: false
+        });
+    }
+}
+
+// ─── Quiz ─────────────────────────────────────────────────────────────────────
+function answerQuiz(quizId, btn, isCorrect) {
+    const quiz     = document.getElementById(quizId);
+    const feedback = document.getElementById(quizId + '-feedback');
+    quiz.querySelectorAll('.quiz-btn').forEach(b => b.classList.add('disabled'));
+    btn.classList.add(isCorrect ? 'correct' : 'wrong');
+    feedback.className = 'quiz-feedback ' + (isCorrect ? 'success' : 'fail');
+    const key = quizId + (isCorrect ? '.ok' : '.no');
+    feedback.innerHTML = (T[currentLang] && T[currentLang][key]) ? T[currentLang][key] : T.en[key];
+}
+
+// ─── Predict-before-you-see ───────────────────────────────────────────────────
+function revealPredict(btn, choice) {
+    const box = btn.closest('.predict');
+    box.querySelectorAll('.predict-btn').forEach(b => b.classList.add('disabled'));
+    btn.classList.add(choice === 'grow' ? 'correct' : 'chosen');
+    box.querySelector('.predict-reveal').classList.add('show');
+}
+
+// ─── Self-audit ───────────────────────────────────────────────────────────────
+const AUDIT_N = 8;
+const auditState = {};
+
+function auditSelect(item, level, btn) {
+    const row = btn.closest('.audit-row');
+    row.querySelectorAll('.audit-btn').forEach(b => b.classList.remove('sel'));
+    btn.classList.add('sel');
+    auditState[item] = level;
+    renderAudit();
+}
+
+function renderAudit() {
+    const L = T[currentLang] || T.en;
+    const answered = Object.keys(auditState).length;
+    let outsourced = 0;
+    for (const k in auditState) if (auditState[k] === 3) outsourced++;
+
+    const prog = document.getElementById('audit-progress');
+    if (prog) prog.textContent = (L['audit.progress'] || T.en['audit.progress']).replace('{n}', answered);
+
+    const out = document.getElementById('audit-readout');
+    if (!out) return;
+
+    if (answered < AUDIT_N) {
+        out.className = 'audit-readout';
+        out.innerHTML = L['audit.prompt'] || T.en['audit.prompt'];
+    } else {
+        let tier = 0;
+        if (outsourced >= 6) tier = 3;
+        else if (outsourced >= 3) tier = 2;
+        else if (outsourced >= 1) tier = 1;
+        out.className = 'audit-readout show';
+        out.innerHTML = L['audit.read' + tier] || T.en['audit.read' + tier];
+    }
+}
+
+// ─── KaTeX ────────────────────────────────────────────────────────────────────
+window.addEventListener('load', function () {
+    renderAudit();
+    if (typeof renderMathInElement !== 'undefined') {
+        renderMathInElement(document.body, {
+            delimiters: [
+                { left: '$$', right: '$$', display: true  },
+                { left: '\\(', right: '\\)', display: false }
+            ],
+            throwOnError: false
+        });
+    }
+});
+</script>
+</body>
+</html>

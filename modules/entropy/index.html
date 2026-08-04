@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Entropy, Gini, Information Gain</title>
+
+<!-- KaTeX -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+<style>
+  :root{
+    --bg:#141420;
+    --surface:#1c1c2e;
+    --border:#2a2a40;
+    --control:#2a2a44;
+    --control-bd:#3a3a55;
+    --control-bd2:#4a4a70;
+    --hover-bg:#363658;
+    --hover-bd:#5a5a80;
+    --text:#e8e8f0;
+    --muted:#cccccc;
+    --faint:#888888;
+    --head:#ffffff;
+    --link:#80b4f0;
+    --ok-bg:#1a4a2a; --ok-bd:#50b878; --ok-fg:#70e898;
+    --no-bg:#2a2248; --no-bd:#8264dc; --no-fg:#a88ef0;
+    --lived:#70e898;
+    --lost:#888888;
+    --footer:#444444;
+    --serif:Georgia,'Times New Roman',serif;
+    --ui:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--muted);font-family:var(--serif);font-size:18px;line-height:1.8}
+  .wrap{max-width:820px;margin:0 auto;padding:0 24px}
+
+  /* language toggle: single fixed pill, shows the OTHER language */
+  .langpill{position:fixed;top:16px;right:16px;z-index:60;background:var(--control);border:1px solid var(--control-bd2);border-radius:20px;color:#a0a0d0;font-family:var(--ui);font-size:13px;padding:7px 16px;cursor:pointer}
+  .langpill:hover{background:var(--hover-bg);border-color:var(--hover-bd)}
+
+  /* hero (centered) */
+  header.hero{padding:64px 0 30px;text-align:center}
+  .kicker{font-family:var(--ui);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:0 0 20px}
+  h1{color:var(--head);font-weight:bold;font-size:clamp(28px,7vw,42px);line-height:1.15;margin:0 0 .4em}
+  .hook{font-size:20px;color:var(--faint);font-style:italic;max-width:34ch;margin:0 auto;line-height:1.5}
+
+  /* prose */
+  section{padding:50px 0}
+  h2{color:var(--head);font-weight:bold;font-size:30px;line-height:1.2;margin:0 0 .55em}
+  h3{color:var(--muted);font-weight:bold;font-size:20px;margin:1.9em 0 .4em}
+  p{margin:0 0 1.15em}
+  .lede{font-size:21px;color:var(--text);line-height:1.6}
+  a{color:var(--link);text-decoration:none}
+  a:hover{text-decoration:underline;text-underline-offset:3px}
+  strong{color:var(--text);font-weight:bold}
+  em{font-style:italic}
+  .num{font-variant-numeric:tabular-nums;color:var(--text)}
+  hr.rule{border:0;border-top:1px solid var(--border);margin:0}
+  .pull{font-size:24px;line-height:1.4;color:var(--head);border-left:3px solid var(--link);padding:4px 0 4px 22px;margin:1.5em 0}
+
+  /* interactive */
+  .toy{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:28px}
+  .toy .toytitle{font-family:var(--ui);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--link);margin:0 0 6px}
+  .toy .toysub{font-size:16px;color:var(--faint);font-style:italic;margin:0 0 22px;line-height:1.55}
+  .jarwrap{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start}
+  .jar{flex:1;min-width:240px}
+  .jarhead{display:flex;justify-content:space-between;align-items:baseline;margin:0 0 8px;gap:10px}
+  .jarname{color:var(--head);font-size:18px}
+  .jarpct{font-family:var(--ui);font-size:12px;color:var(--faint);white-space:nowrap}
+  .field{display:flex;flex-wrap:wrap;gap:3px;padding:12px;border:1px solid var(--border);border-radius:8px;background:var(--control);min-height:76px;align-content:flex-start}
+  .dot{width:7px;height:7px;border-radius:50%;flex:0 0 auto}
+  .dot.l{background:var(--lived)}
+  .dot.d{background:var(--lost)}
+  .legend{display:flex;gap:18px;font-family:var(--ui);font-size:12px;color:var(--faint);margin:14px 0 4px;flex-wrap:wrap}
+  .legend span{display:inline-flex;align-items:center;gap:7px}
+  .swatch{width:10px;height:10px;border-radius:50%;display:inline-block}
+
+  .meters{margin:20px 0 6px}
+  .meters-cap{font-family:var(--ui);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin:0 0 12px}
+  .meter{margin:0 0 12px}
+  .meter .mlabel{display:flex;justify-content:space-between;font-family:var(--ui);font-size:13px;color:var(--faint);margin-bottom:5px;gap:10px}
+  .meter .mlabel b{color:var(--text);font-weight:bold}
+  .meter .mlabel .hint{color:var(--faint)}
+  .track{height:13px;border-radius:7px;background:var(--control);border:1px solid var(--border);overflow:hidden}
+  .fill{height:100%;width:0;border-radius:7px;background:var(--link);transition:width .6s cubic-bezier(.2,.7,.2,1)}
+
+  .chips{display:flex;flex-wrap:wrap;gap:9px;margin:24px 0 4px}
+  .chip{font-family:var(--serif);font-size:16px;background:var(--control);color:#e0e0f0;border:1px solid var(--control-bd);padding:9px 14px;border-radius:8px;cursor:pointer;transition:all .15s}
+  .chip:hover{background:var(--hover-bg);border-color:var(--hover-bd)}
+  .chip.active{border-color:var(--link);color:var(--link);background:var(--hover-bg)}
+  .chip.tried::after{content:" ¹3";color:var(--lived)}
+  .chip.active.tried::after{color:var(--link)}
+
+  .verdict{margin:18px 0 0;padding:16px 18px;border-radius:8px;background:var(--control);border:1px solid var(--border);min-height:54px}
+  .verdict .gain{font-family:var(--ui);font-size:24px;color:var(--link);display:block;margin-bottom:4px;font-weight:bold;font-variant-numeric:tabular-nums}
+  .verdict .gain small{font-family:var(--ui);font-size:12px;color:var(--faint);font-weight:normal;letter-spacing:.03em}
+  .verdict p{margin:0;font-size:16px;color:var(--muted);font-style:italic;line-height:1.55}
+  .verdict.empty p{font-style:normal}
+
+  .board{margin:24px 0 0}
+  .board h4{font-family:var(--ui);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:0 0 8px}
+  table.lead{width:100%;border-collapse:collapse;font-size:15px}
+  table.lead th,table.lead td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--border)}
+  table.lead th{font-family:var(--ui);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);font-weight:normal}
+  table.lead td{color:var(--muted)}
+  table.lead td.g{font-family:var(--ui);text-align:right;color:var(--link);font-variant-numeric:tabular-nums}
+  table.lead td.gbar{width:36%}
+  .gbar .gb{height:9px;border-radius:5px;background:var(--link);opacity:.85}
+  table.lead tr.win td{color:var(--lived)}
+  table.lead tr.lose td{color:var(--faint)}
+  .resetbtn{font-family:var(--ui);font-size:13px;background:var(--control);border:1px solid var(--control-bd);border-radius:8px;padding:7px 13px;cursor:pointer;color:var(--muted);margin-top:16px}
+  .resetbtn:hover{background:var(--hover-bg);border-color:var(--hover-bd)}
+
+  /* formula + worked */
+  .formula{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:4px 22px;margin:1.4em 0;overflow-x:auto;color:var(--text)}
+  .worked{font-family:ui-monospace,'Courier New',monospace;font-size:15px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin:1.3em 0;line-height:1.95;overflow-x:auto;color:var(--muted)}
+  .worked .hi{color:var(--link);font-weight:bold}
+
+  /* quiz */
+  .quiz{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:28px;margin:1.9em 0}
+  .quiz .q{color:var(--head);font-size:20px;margin:0 0 14px;line-height:1.5}
+  .quiz .opts{display:flex;flex-direction:column;gap:9px}
+  .quiz button.opt{text-align:left;font-family:var(--serif);font-size:17px;background:var(--control);border:1px solid var(--control-bd);border-radius:8px;padding:11px 15px;cursor:pointer;transition:all .15s;color:#e0e0f0;line-height:1.45}
+  .quiz button.opt:hover:not(:disabled){background:var(--hover-bg);border-color:var(--hover-bd)}
+  .quiz button.opt:disabled{cursor:default}
+  .quiz button.opt.correct{background:var(--ok-bg);border-color:var(--ok-bd);color:var(--ok-fg)}
+  .quiz button.opt.wrong{background:var(--no-bg);border-color:var(--no-bd);color:var(--no-fg)}
+  .quiz .fb{margin-top:0;font-size:16px;color:var(--muted);line-height:1.55}
+  .quiz .fb.show{margin-top:13px}
+
+  /* data table */
+  table.data{width:100%;border-collapse:collapse;font-family:var(--ui);font-size:14px;margin:1.3em 0}
+  table.data th,table.data td{padding:8px 10px;border:1px solid var(--border);text-align:center}
+  table.data th{background:var(--control);font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);font-weight:normal}
+  table.data td{color:var(--muted)}
+  table.data td.yes{color:var(--no-fg)}
+  table.data td.no{color:var(--lived)}
+
+  /* deep dive */
+  details.deep{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin:2em 0;overflow:hidden}
+  details.deep summary{cursor:pointer;list-style:none;padding:22px 28px;color:var(--head);font-size:20px;display:flex;align-items:center;gap:12px;font-weight:bold}
+  details.deep summary::-webkit-details-marker{display:none}
+  details.deep summary .badge{font-family:var(--ui);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--link);border:1px solid var(--control-bd2);border-radius:20px;padding:3px 10px;font-weight:normal}
+  details.deep summary .chev{margin-left:auto;transition:transform .25s;color:var(--link);font-weight:normal}
+  details.deep[open] summary .chev{transform:rotate(90deg)}
+  details.deep .deepbody{padding:0 28px 24px}
+  details.deep .deepbody p{font-size:17px}
+
+  /* exercise (standard box) */
+  .exercise{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:28px}
+  .exercise .extag{font-family:var(--ui);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--link);margin:0 0 10px}
+  .exercise h2{margin-top:0}
+
+  /* footer (centered, dim) */
+  footer{border-top:1px solid var(--border);padding:40px 0 80px;font-size:16px;color:var(--footer);text-align:center}
+  footer .related{display:flex;flex-wrap:wrap;gap:14px;margin:18px 0 0;text-align:left}
+  footer .related a{display:block;flex:1;min-width:220px;border:1px solid var(--border);border-radius:10px;padding:14px 16px;color:var(--muted);background:var(--surface)}
+  footer .related a:hover{border-color:var(--hover-bd);text-decoration:none}
+  footer .related a span{display:block;font-family:var(--ui);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-bottom:5px}
+  footer .related a b{color:var(--head)}
+  footer .meta{font-family:var(--ui);font-size:12px;color:var(--footer);margin-top:26px}
+
+  @media(max-width:680px){
+    body{font-size:16px}
+    .jarwrap{flex-direction:column}
+  }
+</style>
+</head>
+<body>
+
+<button class="langpill" id="langbtn" onclick="toggleLang()">DE</button>
+
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="wrap">
+    <p class="kicker" data-i18n="kicker">Class 7 · Decision Trees · Mini-module</p>
+    <h1 data-i18n="title">Entropy, Gini,<br>Information Gain</h1>
+    <p class="hook" data-i18n="hook">A decision tree is a game of twenty questions. The only skill that matters is knowing which question to ask first.</p>
+  </div>
+</header>
+
+<!-- ============ 1. THE JAR ============ -->
+<section>
+  <div class="wrap">
+    <p class="lede" data-i18n="s1lede">Seven hundred and twelve people boarded the Titanic with a recorded age. Two hundred and eighty-eight of them lived. You don't get to see who.</p>
+    <p data-i18n="s1p1">Here is the game. You may ask one yes-or-no question about every passenger. Sex, age, ticket price, where they boarded, anything in the manifest. Each answer sends the passenger onto one of two decks. Then you bet on each deck: everyone on this deck lived, everyone on that deck died. Pick the question that makes those bets easy.</p>
+    <p data-i18n="s1p2">A decision tree plays exactly this game, over and over. It asks a question, splits the people into two groups, then asks another question inside each group, until each group is almost entirely one kind of person. The whole tree is built one question at a time, and it is greedy: at every step it grabs the single best question available right now.</p>
+    <p data-i18n="s1p3">So you need a way to score a question. You need a number that says how mixed a deck is, and a number that says how much a question cleaned up the mix. Play first. The numbers will make sense afterward.</p>
+  </div>
+
+  <div class="wrap wide">
+    <div class="toy" id="toy">
+      <p class="toytitle" data-i18n="toytitle">Try it</p>
+      <p class="toysub" data-i18n="toysub">Before you click anything: which question do you think sorts survivors from the rest most cleanly? Make a private guess. Then test every question and watch the two meters.</p>
+
+      <div class="jar" id="parentjar">
+        <div class="jarhead">
+          <span class="jarname" id="parentname">The whole jar</span>
+          <span class="jarpct" id="parentpct"></span>
+        </div>
+        <div class="field" id="parentfield"></div>
+      </div>
+
+      <div class="legend">
+        <span><i class="swatch" style="background:var(--lived)"></i> <span id="lg-lived">survived</span></span>
+        <span><i class="swatch" style="background:var(--lost)"></i> <span id="lg-lost">did not survive</span></span>
+        <span style="color:var(--faint)" id="lg-dot">each dot = one passenger</span>
+      </div>
+
+      <div class="meters">
+        <p class="meters-cap" id="meters-cap">Two measures of chaos</p>
+        <div class="meter">
+          <div class="mlabel"><span id="ent-label">Entropy</span> <span class="hint" id="ent-hint">(lower = less chaos)</span><b id="ent-val"></b></div>
+          <div class="track"><div class="fill entropy" id="ent-fill"></div></div>
+        </div>
+        <div class="meter">
+          <div class="mlabel"><span id="gini-label">Gini</span> <span class="hint" id="gini-hint">(lower = less chaos)</span><b id="gini-val"></b></div>
+          <div class="track"><div class="fill gini" id="gini-fill"></div></div>
+        </div>
+      </div>
+
+      <div class="chips" id="chips"></div>
+
+      <div class="jarwrap" id="childwrap" style="margin-top:20px;display:none"></div>
+
+      <div class="verdict empty" id="verdict"></div>
+
+      <div class="board" id="board" style="display:none">
+        <h4 id="board-h">Your ranking so far</h4>
+        <table class="lead">
+          <thead><tr><th id="th-q">Question</th><th id="th-g">Info gain</th><th class="gbar"></th></tr></thead>
+          <tbody id="leadbody"></tbody>
+        </table>
+        <button class="resetbtn" id="resetbtn" onclick="resetToy()">Reset</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- ============ 2. CHAOS ============ -->
+<section>
+  <div class="wrap">
+    <h2 data-i18n="s2h">Two rulers for a mixed deck</h2>
+    <p data-i18n="s2p">Both meters measure the same thing, chaos, and they almost always agree. A deck where everyone shares the same fate has zero chaos. A deck split exactly in half is as chaotic as it gets. The two rulers just disagree slightly on how to count what happens in between.</p>
+
+    <h3 data-i18n="s2h1">Entropy: how much surprise is left</h3>
+    <p data-i18n="s2p1">Entropy comes from information theory. It measures surprise, counted in bits. A pure deck holds no surprise. You already know the answer before you look, so it costs zero bits to describe. A deck split fifty-fifty is a coin you cannot call: maximum surprise, one full bit.</p>
+    <div class="formula">$$H = -\sum_i p_i \log_2 p_i \qquad\Longrightarrow\qquad H = -p\log_2 p \;-\; (1-p)\log_2(1-p)$$</div>
+    <p data-i18n="s2p2">The right-hand form is the only one you need here, because every deck has two kinds of people: those who lived with probability <span class="num">p</span>, and the rest. Plug in <span class="num">p = 0.5</span> and you get exactly one bit. Plug in <span class="num">p = 1</span> and you get zero.</p>
+
+    <h3 data-i18n="s2h2">Gini: the odds two strangers disagree</h3>
+    <p data-i18n="s2p3">Gini asks a blunter question. Pull two people off the deck at random. What are the chances they had different fates? On a pure deck, zero. On a fifty-fifty deck, one in two.</p>
+    <div class="formula">$$G = 1 - \sum_i p_i^2 \qquad\Longrightarrow\qquad G = 1 - p^2 - (1-p)^2 = 2p(1-p)$$</div>
+    <p data-i18n="s2p4">Gini tops out at <span class="num">0.5</span>, entropy at <span class="num">1.0</span>, so the meters live on different scales. The shape is the same: both peak when the deck is evenly split, both fall to zero when it is pure. Drag your eye back to the toy and you will see them rise and fall together.</p>
+
+    <div class="quiz" id="quiz1">
+      <p class="q" data-i18n="q1q">Two decks. Deck A holds 50 survivors and 50 who died. Deck B holds 90 survivors and 10 who died. Which deck is purer?</p>
+      <div class="opts">
+        <button class="opt" data-i18n="q1a" onclick="answerQuiz('quiz1',this,false)">Deck A, it has more people</button>
+        <button class="opt" data-i18n="q1b" onclick="answerQuiz('quiz1',this,true)">Deck B</button>
+        <button class="opt" data-i18n="q1c" onclick="answerQuiz('quiz1',this,false)">They are equally pure</button>
+      </div>
+      <div class="fb" id="fb-quiz1"></div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- ============ 3. INFORMATION GAIN ============ -->
+<section>
+  <div class="wrap">
+    <h2 data-i18n="s3h">Scoring the question itself</h2>
+    <p data-i18n="s3p">A mixed deck is not a problem yet. A question is good or bad depending on whether it leaves the decks purer than it found them. That difference is information gain.</p>
+    <div class="formula">$$\text{Gain} \;=\; H(\text{parent}) \;-\; \sum_k \frac{n_k}{n}\,H(\text{child}_k)$$</div>
+    <p data-i18n="s3p1">Take the chaos you started with. Subtract the chaos you end up with. The catch is in that fraction <span class="num">n<sub>k</sub>/n</span>. The children are weighted by how many people land in each. A question that perfectly purifies a closet of ten people while leaving the ballroom of seven hundred untouched has barely moved the average. The weighting is the whole point.</p>
+
+    <p class="pull" data-i18n="s3pull">This is why "women and children first" splits unevenly on the meter. Both halves of that phrase are true. Only one is a good first question.</p>
+
+    <p data-i18n="s3p2">Watch what happens with sex, the strongest question on the ship.</p>
+    <div class="worked" data-i18n="s3worked">
+parent: 288 lived / 424 died &nbsp;&rarr;&nbsp; H = <span class="hi">0.974 bits</span><br>
+&nbsp;<br>
+female deck:&nbsp; 195 / 64 &nbsp; (p = 0.753) &nbsp;&rarr;&nbsp; H = 0.807<br>
+male deck: &nbsp;&nbsp; 93 / 360 &nbsp; (p = 0.205) &nbsp;&rarr;&nbsp; H = 0.732<br>
+&nbsp;<br>
+weighted: &nbsp;(259/712)(0.807) + (453/712)(0.732) = 0.759<br>
+&nbsp;<br>
+gain = 0.974 &minus; 0.759 = <span class="hi">0.214 bits</span>
+    </div>
+    <p data-i18n="s3p3">Now run the same arithmetic on age. Children did live more often, 57 percent against 39. But there were only 68 of them in a jar of 712. Their pure little deck cannot outvote the enormous, still-mixed deck of everyone else. The gain comes out near <span class="num">0.009</span> bits. Almost nothing. The "obvious" feature loses, and it loses for a reason you can read straight off the formula.</p>
+
+    <div class="quiz" id="quiz2">
+      <p class="q" data-i18n="q2q">A question splits 712 people. One child has 10 people, all survivors, perfectly pure. The other child has 702 people, still badly mixed. Is this a strong first question?</p>
+      <div class="opts">
+        <button class="opt" data-i18n="q2a" onclick="answerQuiz('quiz2',this,false)">Yes, it created a perfectly pure group</button>
+        <button class="opt" data-i18n="q2b" onclick="answerQuiz('quiz2',this,true)">No, it barely touched the 702 people who are weighted heaviest</button>
+        <button class="opt" data-i18n="q2c" onclick="answerQuiz('quiz2',this,false)">There is no way to tell without the entropy values</button>
+      </div>
+      <div class="fb" id="fb-quiz2"></div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- ============ 4. USELESS QUESTION ============ -->
+<section>
+  <div class="wrap">
+    <h2 data-i18n="s4h">The question that tells you nothing</h2>
+    <p data-i18n="s4p1">Try the coin flip in the toy. It sorts 712 people onto two decks in under a second. Both decks come out as mixed as the jar you started with: roughly 40 percent survivors on each side, same as before. Entropy after the split equals entropy before. Information gain: essentially zero.</p>
+    <p data-i18n="s4p2">This is the lesson that makes "information" concrete. A question can be elaborate, expensive, clever-sounding, and still separate nothing. If the two decks have the same mix as the deck they came from, the question taught you nothing about who lived.</p>
+    <p data-i18n="s4p3">The coin flip does not land at a perfect zero. It scores about <span class="num">0.001</span> bits, a hair above nothing, purely by luck of the shuffle. Hold onto that hair. A greedy tree will chase it. Given enough useless questions, one of them will look slightly better than zero by chance, and a tree with no restraint will split on it and call the noise a pattern. That is overfitting, and you meet it properly in the next class.</p>
+
+    <div class="quiz" id="quiz3">
+      <p class="q" data-i18n="q3q">Which question has an information gain of about zero?</p>
+      <div class="opts">
+        <button class="opt" data-i18n="q3a" onclick="answerQuiz('quiz3',this,false)">One that sends survivors to the left deck and the rest to the right</button>
+        <button class="opt" data-i18n="q3b" onclick="answerQuiz('quiz3',this,true)">One that splits the group in two, each deck as mixed as the original</button>
+        <button class="opt" data-i18n="q3c" onclick="answerQuiz('quiz3',this,false)">One that produces a single perfectly pure deck</button>
+      </div>
+      <div class="fb" id="fb-quiz3"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DEEP DIVE ============ -->
+<section>
+  <div class="wrap">
+    <details class="deep">
+      <summary><span class="badge" data-i18n="ddbadge">Deep dive</span> <span data-i18n="ddtitle">Where entropy and Gini fall out</span> <span class="chev">&rsaquo;</span></summary>
+      <div class="deepbody">
+        <p data-i18n="ddp0">For the curious. Not required, and it will not be on the exam in this form. But if you have ever wondered why two measures of chaos exist when they mostly agree, here is the seam.</p>
+
+        <h3 data-i18n="ddh1">Why log base two</h3>
+        <p data-i18n="ddp1">Entropy borrows directly from Claude Shannon's work on communication. The surprise of an event of probability <span class="num">p</span> is <span class="num">log<sub>2</sub>(1/p)</span> bits. Rare events are surprising, certain events are not. Entropy is just the average surprise across the deck. The base-two choice is why the unit is bits: one bit is the surprise of a fair coin. Use a natural log instead and the unit becomes nats. The tree does not care which base you pick, because every gain is a difference and the base cancels out.</p>
+
+        <h3 data-i18n="ddh2">Gini as expected mistakes</h3>
+        <p data-i18n="ddp2">Gini has a second reading that decision-tree libraries quietly rely on. Suppose you label each person by guessing randomly in proportion to the deck's mix. The probability you guess wrong is exactly <span class="num">1 &minus; &Sigma; p<sub>i</sub>&sup2;</span>, which is Gini. So Gini is your expected error rate from a lazy guess. It needs no logarithm, which is part of why CART, the algorithm behind most tree libraries, uses it by default. It is cheaper to compute, and it almost never changes the answer.</p>
+
+        <h3 data-i18n="ddh3">Almost never. Here is a case where it does</h3>
+        <p data-i18n="ddp3">Take a parent of 20 survivors and 36 who died, and two candidate questions that split it differently.</p>
+        <div class="worked" data-i18n="ddworked">
+parent: 20 lived / 36 died<br>
+&nbsp;<br>
+split A:&nbsp; deck1 = 6/27 &nbsp; deck2 = 14/9<br>
+&nbsp; &nbsp; &nbsp; &nbsp; entropy = 0.800 &nbsp; gini = <span class="hi">0.371</span><br>
+&nbsp;<br>
+split B:&nbsp; deck1 = 0/14 (pure) &nbsp; deck2 = 20/22<br>
+&nbsp; &nbsp; &nbsp; &nbsp; entropy = <span class="hi">0.749</span> &nbsp; gini = 0.374<br>
+&nbsp;<br>
+entropy prefers B &nbsp; &middot; &nbsp; gini prefers A
+        </div>
+        <p data-i18n="ddp4">Split B carves off a perfectly pure deck of fourteen. Entropy is thrilled by purity and rewards that deck heavily, so it ranks B first. Gini looks at split B's other deck, an almost even 20 against 22, shrugs, and prefers split A's two moderately clean decks instead. They disagree, but by a sliver: Gini's two scores are <span class="num">0.371</span> and <span class="num">0.374</span>. In a real tree this rarely changes the final shape, and when it does, the tree that follows usually fixes it on the next split. That is why nobody argues much about which to use.</p>
+
+        <h3 data-i18n="ddh4">One trap worth knowing</h3>
+        <p data-i18n="ddp5">Plain information gain has a bias. It loves questions with many possible answers. Split passengers by their exact ticket number and every deck holds one person, perfectly pure, enormous apparent gain, and a model that has memorized the manifest. The fix is gain ratio, which divides the gain by how much the question fragments the data. It is the reason a tree should be suspicious of any feature that is almost a unique identifier.</p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<!-- ============ EXERCISE ============ -->
+<section>
+  <div class="wrap">
+    <div class="exercise">
+      <p class="extag" data-i18n="extag">Try without AI · reflection</p>
+      <h2 data-i18n="exh">Your turn, no code</h2>
+      <p data-i18n="exp1">A subscription business wants to predict churn. Here are eight customers. Four churned, four stayed. You may ask one question first.</p>
+
+      <table class="data">
+        <thead><tr>
+          <th data-i18n="exc1">Customer</th>
+          <th data-i18n="exc2">Opened the app last week</th>
+          <th data-i18n="exc3">On premium plan</th>
+          <th data-i18n="exc4">Churned</th>
+        </tr></thead>
+        <tbody id="extbody"></tbody>
+      </table>
+
+      <p data-i18n="exp2"><strong>Without computing anything,</strong> decide which question you would ask first to predict churn: "opened the app last week" or "on premium plan". Write one sentence saying why, using the word purity.</p>
+      <p data-i18n="exp3">Then, if you want the satisfaction: split the eight customers by each question, count survivors and churners on each deck, and work out the information gain by hand. One question should come out near a full bit. The other should come out at zero, a premium-plan coin flip. You have already seen this exact shape on the Titanic.</p>
+      <p style="color:var(--faint);font-size:.95rem;margin-bottom:0" data-i18n="exnote">Bring your one sentence to class. The point is the reasoning, not the arithmetic.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap">
+    <p data-i18n="footp">Numbers on this page come from the 712 Titanic passengers with a recorded age, the standard teaching subset. Real datasets have some missing values. That is a lesson for another day.</p>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   DATA. real numbers from the 712-passenger jar.
+   parent: 288 lived / 424 died, H = 0.9735 bits, Gini = 0.4818
+   ============================================================ */
+const PARENT = { surv:288, died:424, H:0.9735, G:0.4818 };
+const ENT_MAX = 1.0, GINI_MAX = 0.5;
+
+const SPLITS = {
+  sex:{ ig:0.2141, dg:0.1388, H:0.7594, G:0.3430,
+    label:{en:"Sex",de:"Geschlecht"},
+    children:[
+      {name:{en:"women",de:"Frauen"}, surv:195, died:64, pct:75.3},
+      {name:{en:"men",de:"Männer"},   surv:93,  died:360,pct:20.5}],
+    verdict:{en:"The strongest question on the ship. Three out of four women lived, one in five men. Ask this first.",
+             de:"Die stärkste Frage an Bord. Drei von vier Frauen überlebten, einer von fünf Männern. Stell diese zuerst."} },
+
+  class1:{ ig:0.0634, dg:0.0428, H:0.9101, G:0.4390,
+    label:{en:"1st class vs rest",de:"1. Klasse vs. Rest"},
+    children:[
+      {name:{en:"1st class",de:"1. Klasse"}, surv:120, died:64,  pct:65.2},
+      {name:{en:"2nd or 3rd",de:"2. oder 3."},surv:168, died:360, pct:31.8}],
+    verdict:{en:"Money bought a better chance. Less than you would guess, and far less than being a woman.",
+             de:"Geld kaufte bessere Chancen. Weniger, als du denkst. Und viel weniger, als eine Frau zu sein."} },
+
+  fare:{ ig:0.0637, dg:0.0429, H:0.9098, G:0.4389,
+    label:{en:"Paid £50 or more",de:"Zahlte £50 oder mehr"},
+    children:[
+      {name:{en:"under £50",de:"unter £50"}, surv:192, died:384, pct:33.3},
+      {name:{en:"£50+",de:"£50+"},           surv:96,  died:40,  pct:70.6}],
+    verdict:{en:"The ticket price says almost exactly what the class says. Two questions wearing different clothes.",
+             de:"Der Ticketpreis sagt fast genau dasselbe wie die Klasse. Zwei Fragen in unterschiedlicher Kleidung."} },
+
+  age:{ ig:0.0088, dg:0.0060, H:0.9647, G:0.4757,
+    label:{en:"Child under 12",de:"Kind unter 12"},
+    children:[
+      {name:{en:"under 12",de:"unter 12"},      surv:39,  died:29,  pct:57.4},
+      {name:{en:"12 or older",de:"12 oder älter"},surv:249, died:395, pct:38.7}],
+    verdict:{en:"Children did live more often, 57 percent against 39. But 68 of them in a jar of 712. The meter barely twitched. 'Children first' is true and nearly useless as a first question.",
+             de:"Kinder überlebten tatsächlich öfter, 57 Prozent gegen 39. Aber 68 von ihnen in einem Glas mit 712. Die Anzeige zuckte kaum. „Kinder zuerst“ stimmt und ist als erste Frage fast nutzlos."} },
+
+  embarked:{ ig:0.0279, dg:0.0189, H:0.9457, G:0.4629,
+    label:{en:"Where they boarded",de:"Einschiffungshafen"},
+    children:[
+      {name:{en:"Cherbourg",de:"Cherbourg"},     surv:79,  died:51,  pct:60.8},
+      {name:{en:"Queenstown",de:"Queenstown"},   surv:8,   died:20,  pct:28.6},
+      {name:{en:"Southampton",de:"Southampton"}, surv:201, died:353, pct:36.3}],
+    verdict:{en:"The port tells you a little, mostly because of who could afford to leave from where.",
+             de:"Der Hafen verrät dir ein wenig. Das liegt vor allem daran, wer sich welchen Abfahrtshafen leisten konnte."} },
+
+  alone:{ ig:0.0288, dg:0.0192, H:0.9447, G:0.4625,
+    label:{en:"Travelling alone",de:"Allein gereist"},
+    children:[
+      {name:{en:"alone",de:"allein"},          surv:128, died:274, pct:31.8},
+      {name:{en:"with family",de:"mit Familie"},surv:160, died:150, pct:51.6}],
+    verdict:{en:"Family helped. About a coin's worth of information, no more.",
+             de:"Familie half. Etwa eine Münze an Information, mehr nicht."} },
+
+  coin:{ ig:0.0009, dg:0.0006, H:0.9726, G:0.4811,
+    label:{en:"Coin flip",de:"Münzwurf"},
+    children:[
+      {name:{en:"heads",de:"Kopf"}, surv:143, died:195, pct:42.3},
+      {name:{en:"tails",de:"Zahl"}, surv:145, died:229, pct:38.8}],
+    verdict:{en:"A random question. It sorted 712 people onto two decks and learned nothing. Both decks came out as mixed as the jar. This is what zero looks like.",
+             de:"Eine zufällige Frage. Sie sortierte 712 Menschen auf zwei Decks und lernte nichts. Beide Decks kamen so gemischt heraus wie das Glas. So sieht null aus."} }
+};
+const ORDER = ["sex","class1","fare","age","embarked","alone","coin"];
+
+/* ---- UI strings (toy + dynamic bits) ---- */
+const UI = {
+  en:{ parentname:"The whole Titanic", parentpct:"712 passengers · 288 lived (40.4%)",
+       lived:"survived", lost:"did not survive", dotnote:"each dot = one passenger",
+       metersCap:"Two measures of chaos",
+       ent:"Entropy", gini:"Gini", hint:"(lower = less chaos)", bits:"bits",
+       verdictDefault:"Pick a question above. The meters show how much chaos is left on the decks once the question splits them. Lower is calmer. The big number is how many bits of uncertainty the question removed.",
+       gainUnit:"bits gained", giniDrop:"Gini dropped", boardH:"Your ranking so far",
+       thQ:"Question", thG:"Info gain", reset:"Reset", childPct:"% lived" },
+  de:{ parentname:"Die ganze Titanic", parentpct:"712 Passagiere · 288 überlebten (40,4 %)",
+       lived:"überlebte", lost:"überlebte nicht", dotnote:"ein Punkt = ein Passagier",
+       metersCap:"Zwei Maße für das Chaos",
+       ent:"Entropie", gini:"Gini", hint:"(niedriger = weniger Chaos)", bits:"Bit",
+       verdictDefault:"Wähle oben eine Frage. Die Anzeigen zeigen, wie viel Chaos nach der Aufteilung auf den Decks übrig ist. Niedriger ist ruhiger. Die große Zahl sagt, wie viele Bit an Unsicherheit die Frage entfernt hat.",
+       gainUnit:"Bit gewonnen", giniDrop:"Gini sank um", boardH:"Deine Rangliste bisher",
+       thQ:"Frage", thG:"Infogewinn", reset:"Zurücksetzen", childPct:"% überlebten" }
+};
+
+/* ---- exercise rows: [appLastWeek, premium, churned] as keys ---- */
+const EXROWS = [
+  [1,"no","yes","yes"],[2,"no","no","yes"],[3,"no","yes","yes"],[4,"no","no","yes"],
+  [5,"yes","yes","no"],[6,"yes","no","no"],[7,"yes","yes","no"],[8,"yes","no","no"]
+];
+const EXWORD = { en:{yes:"yes",no:"no"}, de:{yes:"ja",no:"nein"} };
+
+/* ---- German overrides for data-i18n prose ---- */
+const DE = {
+  kicker:"Klasse 7 · Entscheidungsbäume · Mini-Modul",
+  title:"Entropie, Gini,<br>Informationsgewinn",
+  hook:"Ein Entscheidungsbaum ist ein Spiel mit zwanzig Fragen. Das Einzige, was zählt, ist zu wissen, welche Frage zuerst kommt.",
+  s1lede:"Siebenhundertzwölf Menschen gingen mit einem dokumentierten Alter an Bord der Titanic. Zweihundertachtundachtzig von ihnen überlebten. Wer, das siehst du nicht.",
+  s1p1:"So geht das Spiel. Du darfst eine Ja-oder-Nein-Frage über jeden Passagier stellen. Geschlecht, Alter, Ticketpreis, Einschiffungshafen, alles, was im Manifest steht. Jede Antwort schickt den Passagier auf eines von zwei Decks. Dann wettest du auf jedes Deck: Auf diesem Deck haben alle überlebt, auf jenem sind alle gestorben. Wähle die Frage, die diese Wetten leicht macht.",
+  s1p2:"Ein Entscheidungsbaum spielt genau dieses Spiel, immer wieder. Er stellt eine Frage und teilt die Menschen in zwei Gruppen. Innerhalb jeder Gruppe stellt er die nächste Frage. Das geht weiter, bis jede Gruppe fast nur noch aus einer Sorte Mensch besteht. Der ganze Baum wird Frage für Frage gebaut. Und er ist gierig: In jedem Schritt greift er nach der einen besten Frage, die gerade verfügbar ist.",
+  s1p3:"Du brauchst also eine Möglichkeit, eine Frage zu bewerten. Du brauchst eine Zahl für die Mischung auf einem Deck. Und eine Zahl dafür, wie sehr eine Frage diese Mischung aufgeräumt hat. Spiel zuerst. Die Zahlen ergeben danach Sinn.",
+  toytitle:"Ausprobieren",
+  toysub:"Bevor du irgendwas anklickst: Welche Frage trennt deiner Meinung nach Überlebende und Gestorbene am saubersten? Rate still für dich. Dann teste jede Frage und beobachte die zwei Anzeigen.",
+  s2h:"Zwei Maßstäbe für ein gemischtes Deck",
+  s2p:"Beide Anzeigen messen dasselbe, das Chaos, und sie sind sich fast immer einig. Ein Deck, auf dem alle dasselbe Schicksal teilen, hat null Chaos. Ein Deck, das exakt in zwei Hälften geteilt ist, ist so chaotisch wie möglich. Die zwei Maßstäbe sind sich nur leicht uneinig, wie sie das dazwischen zählen.",
+  s2h1:"Entropie: wie viel Überraschung übrig bleibt",
+  s2p1:"Entropie kommt aus der Informationstheorie. Sie misst Überraschung, gezählt in Bit. Ein reines Deck birgt keine Überraschung. Du kennst die Antwort schon, bevor du hinschaust, also kostet es null Bit, es zu beschreiben. Ein Deck, das fünfzig zu fünfzig geteilt ist, ist eine Münze, die du nicht vorhersagen kannst: maximale Überraschung, ein volles Bit.",
+  s2p2:'Die rechte Form ist die einzige, die du hier brauchst. Denn jedes Deck hat zwei Sorten Menschen: die Überlebenden mit Wahrscheinlichkeit <span class="num">p</span> und den Rest. Setz <span class="num">p = 0,5</span> ein und du bekommst genau ein Bit. Setz <span class="num">p = 1</span> ein und du bekommst null.',
+  s2h2:"Gini: die Chance, dass zwei Fremde sich unterscheiden",
+  s2p3:"Gini stellt eine direktere Frage. Zieh zwei Menschen zufällig vom Deck. Wie hoch ist die Chance, dass sie ein unterschiedliches Schicksal hatten? Auf einem reinen Deck null. Auf einem Deck mit fünfzig zu fünfzig eins zu zwei.",
+  s2p4:'Gini erreicht höchstens <span class="num">0,5</span>, die Entropie höchstens <span class="num">1,0</span>. Die Anzeigen leben also auf verschiedenen Skalen. Die Form ist gleich. Beide erreichen ihr Maximum bei einem gleichmäßig geteilten Deck. Beide fallen auf null, sobald das Deck rein ist. Schau zurück zum Spiel. Du siehst sie gemeinsam steigen und fallen.',
+  q1q:"Zwei Decks. Deck A enthält 50 Überlebende und 50 Gestorbene. Deck B enthält 90 Überlebende und 10 Gestorbene. Welches Deck ist reiner?",
+  q1a:"Deck A, es hat mehr Menschen", q1b:"Deck B", q1c:"Sie sind gleich rein",
+  s3h:"Die Frage selbst bewerten",
+  s3p:"Ein gemischtes Deck ist noch kein Problem. Eine Frage ist gut, wenn sie die Decks reiner zurücklässt, als sie sie vorfand. Sonst ist sie schlecht. Diese Differenz ist der Informationsgewinn.",
+  s3p1:'Nimm das Chaos, mit dem du gestartet bist. Zieh das Chaos ab, mit dem du endest. Der Haken steckt in diesem Bruch <span class="num">n<sub>k</sub>/n</span>. Die Kinder werden danach gewichtet, wie viele Menschen in jedem landen. Stell dir eine Frage vor, die eine Abstellkammer mit zehn Menschen perfekt reinigt. Den Ballsaal mit siebenhundert lässt sie unberührt. Damit hat sie den Durchschnitt kaum bewegt. Die Gewichtung ist der ganze Punkt.',
+  s3pull:"Darum teilt „Frauen und Kinder zuerst“ die Anzeige so ungleich. Beide Hälften des Satzes stimmen. Nur eine ist eine gute erste Frage.",
+  s3p2:"Schau, was bei Geschlecht passiert, der stärksten Frage an Bord.",
+  s3worked:'Start: 288 überlebten / 424 starben &nbsp;&rarr;&nbsp; H = <span class="hi">0,974 Bit</span><br>&nbsp;<br>Frauen-Deck:&nbsp; 195 / 64 &nbsp; (p = 0,753) &nbsp;&rarr;&nbsp; H = 0,807<br>Männer-Deck: &nbsp;93 / 360 &nbsp; (p = 0,205) &nbsp;&rarr;&nbsp; H = 0,732<br>&nbsp;<br>gewichtet: &nbsp;(259/712)(0,807) + (453/712)(0,732) = 0,759<br>&nbsp;<br>Gewinn = 0,974 &minus; 0,759 = <span class="hi">0,214 Bit</span>',
+  s3p3:'Jetzt rechne dasselbe für das Alter. Kinder überlebten tatsächlich öfter, 57 Prozent gegen 39. Aber es waren nur 68 von ihnen in einem Glas mit 712. Ihr reines kleines Deck kann das riesige Deck aller anderen nicht überstimmen. Dieses ist immer noch gemischt. Der Gewinn liegt bei etwa <span class="num">0,009</span> Bit. Fast nichts. Das „offensichtliche“ Merkmal verliert. Und den Grund dafür liest du direkt an der Formel ab.',
+  q2q:"Eine Frage teilt 712 Menschen. Ein Kind hat 10 Menschen, alle Überlebende, vollkommen rein. Das andere Kind hat 702 Menschen, immer noch stark gemischt. Ist das eine starke erste Frage?",
+  q2a:"Ja, sie hat eine vollkommen reine Gruppe geschaffen",
+  q2b:"Nein, sie hat die 702 Menschen kaum berührt, die am schwersten wiegen",
+  q2c:"Ohne die Entropiewerte lässt sich das nicht sagen",
+  s4h:"Die Frage, die dir nichts verrät",
+  s4p1:"Probier den Münzwurf im Spiel. Er sortiert 712 Menschen in unter einer Sekunde auf zwei Decks. Beide Decks kommen so gemischt heraus wie das Glas, mit dem du gestartet bist: ungefähr 40 Prozent Überlebende auf jeder Seite, wie zuvor. Die Entropie nach der Aufteilung ist gleich der Entropie davor. Informationsgewinn: praktisch null.",
+  s4p2:"Das ist die Lektion, die „Information“ greifbar macht. Eine Frage kann aufwendig, teuer und clever klingen und trotzdem nichts trennen. Die zwei Decks haben dieselbe Mischung wie das Deck, aus dem sie kamen. Dann hat dich die Frage nichts darüber gelehrt, wer überlebte.",
+  s4p3:'Der Münzwurf landet nicht bei einer perfekten Null. Er erreicht etwa <span class="num">0,001</span> Bit, ein Haar über nichts, rein durch das Glück der Mischung. Behalt dieses Haar im Kopf. Ein gieriger Baum wird ihm nachjagen. Bei genug nutzlosen Fragen sieht eine davon zufällig etwas besser aus als null. Ein Baum ohne Zurückhaltung teilt dann danach auf und nennt das Rauschen ein Muster. Das ist Überanpassung. Du begegnest ihr richtig in der nächsten Klasse.',
+  q3q:"Welche Frage hat einen Informationsgewinn von etwa null?",
+  q3a:"Eine, die Überlebende auf das linke Deck schickt und den Rest auf das rechte",
+  q3b:"Eine, die die Gruppe in zwei teilt, jedes Deck so gemischt wie das Original",
+  q3c:"Eine, die ein einziges vollkommen reines Deck erzeugt",
+  ddbadge:"Vertiefung", ddtitle:"Wo Entropie und Gini sich verkrachen",
+  ddp0:"Für die Neugierigen. Nicht verpflichtend, und in dieser Form nicht in der Prüfung. Vielleicht hast du dich schon gefragt, warum es zwei Maße für das Chaos gibt. Meistens sind sie sich ja einig. Hier ist die Naht.",
+  ddh1:"Warum Logarithmus zur Basis zwei",
+  ddp1:'Die Entropie entlehnt direkt aus Claude Shannons Arbeit über Kommunikation. Die Überraschung eines Ereignisses mit Wahrscheinlichkeit <span class="num">p</span> ist <span class="num">log<sub>2</sub>(1/p)</span> Bit. Seltene Ereignisse überraschen, sichere nicht. Entropie ist nur die durchschnittliche Überraschung auf dem Deck. Die Wahl der Basis zwei ist der Grund, warum die Einheit Bit heißt: Ein Bit ist die Überraschung einer fairen Münze. Nimm stattdessen den natürlichen Logarithmus, und die Einheit wird Nat. Dem Baum ist die Basis egal. Jeder Gewinn ist eine Differenz, und die Basis kürzt sich heraus.',
+  ddh2:"Gini als erwartete Fehler",
+  ddp2:'Gini hat eine zweite Lesart, auf die sich Entscheidungsbaum-Bibliotheken still verlassen. Angenommen, du etikettierst jeden Menschen und rätst dabei zufällig im Verhältnis der Deckmischung. Die Wahrscheinlichkeit, dass du falsch rätst, ist genau <span class="num">1 &minus; &Sigma; p<sub>i</sub>&sup2;</span>, also Gini. Gini ist also deine erwartete Fehlerrate aus einer faulen Schätzung. Gini braucht keinen Logarithmus. Auch deshalb verwendet CART es standardmäßig, der Algorithmus hinter den meisten Baum-Bibliotheken. Es ist billiger zu berechnen und ändert die Antwort fast nie.',
+  ddh3:"Fast nie. Hier ein Fall, in dem es doch passiert",
+  ddp3:"Nimm einen Startknoten mit 20 Überlebenden und 36 Gestorbenen. Dazu zwei mögliche Fragen, die ihn unterschiedlich aufteilen.",
+  ddworked:'Start: 20 überlebten / 36 starben<br>&nbsp;<br>Aufteilung A:&nbsp; Deck1 = 6/27 &nbsp; Deck2 = 14/9<br>&nbsp; &nbsp; &nbsp; &nbsp; Entropie = 0,800 &nbsp; Gini = <span class="hi">0,371</span><br>&nbsp;<br>Aufteilung B:&nbsp; Deck1 = 0/14 (rein) &nbsp; Deck2 = 20/22<br>&nbsp; &nbsp; &nbsp; &nbsp; Entropie = <span class="hi">0,749</span> &nbsp; Gini = 0,374<br>&nbsp;<br>Entropie bevorzugt B &nbsp; &middot; &nbsp; Gini bevorzugt A',
+  ddp4:'Aufteilung B schält ein vollkommen reines Deck von vierzehn ab. Entropie ist von Reinheit begeistert und belohnt dieses Deck stark. Also setzt sie B an die erste Stelle. Gini schaut auf das andere Deck von Aufteilung B, ein fast gleiches 20 gegen 22. Gini zuckt mit den Schultern und bevorzugt die zwei mäßig sauberen Decks von Aufteilung A. Sie sind sich uneinig, aber um Haaresbreite: Ginis zwei Werte sind <span class="num">0,371</span> und <span class="num">0,374</span>. In einem echten Baum ändert das selten die endgültige Form. Und wenn doch, repariert die nächste Aufteilung es meist. Darum streitet kaum jemand darüber, welches man nimmt.',
+  ddh4:"Eine Falle, die man kennen sollte",
+  ddp5:"Der schlichte Informationsgewinn hat eine Verzerrung. Er liebt Fragen mit vielen möglichen Antworten. Teile die Passagiere nach ihrer genauen Ticketnummer auf. Dann enthält jedes Deck einen Menschen, vollkommen rein. Riesiger scheinbarer Gewinn. Und ein Modell, das das Manifest auswendig gelernt hat. Die Lösung heißt Gewinnverhältnis. Es teilt den Gewinn dadurch, wie stark die Frage die Daten zersplittert. Darum sollte ein Baum jedem Merkmal misstrauen, das fast ein eindeutiger Bezeichner ist.",
+  extag:"Ohne KI versuchen · Reflexion",
+  exh:"Du bist dran, ohne Code",
+  exp1:"Ein Abo-Geschäft will Abwanderung vorhersagen. Hier sind acht Kunden. Vier sind abgewandert, vier geblieben. Du darfst eine Frage zuerst stellen.",
+  exc1:"Kunde", exc2:"App letzte Woche geöffnet", exc3:"Premium-Tarif", exc4:"Abgewandert",
+  exp2:'<strong>Entscheide ohne zu rechnen,</strong> welche Frage du zuerst stellen würdest, um Abwanderung vorherzusagen: „App letzte Woche geöffnet“ oder „Premium-Tarif“. Schreib einen Satz, warum, und benutze das Wort Reinheit.',
+  exp3:"Dann, wenn du die Befriedigung willst: Teile die acht Kunden nach jeder Frage auf. Zähl Geblieben und Abgewandert auf jedem Deck. Rechne den Informationsgewinn von Hand aus. Eine Frage sollte nahe an einem vollen Bit herauskommen. Die andere bei null, ein Premium-Tarif-Münzwurf. Genau diese Form hast du auf der Titanic schon gesehen.",
+  exnote:"Bring deinen einen Satz mit in die Klasse. Es geht um die Begründung, nicht um die Rechnung.",
+  footp:"Die Zahlen auf dieser Seite stammen von den 712 Titanic-Passagieren mit dokumentiertem Alter, der üblichen Lehr-Teilmenge. Echte Datensätze haben einige fehlende Werte. Das ist eine Lektion für einen anderen Tag."
+};
+
+/* ============================================================
+   STATE + HELPERS
+   ============================================================ */
+let LANG = "en";
+const ORIG = {};          // cached English innerHTML, keyed by data-i18n
+const tried = {};
+let active = null;
+
+function dec(x, dp){ let s = (dp==null? x.toString() : Number(x).toFixed(dp)); return LANG==="de" ? s.replace(".",",") : s; }
+function u(k){ return UI[LANG][k]; }
+
+/* ---- dots ---- */
+function dotField(surv, died){
+  const f = document.createDocumentFragment();
+  let s=surv, d=died; const total=surv+died;
+  for(let i=0;i<total;i++){
+    const takeSurv = (s/((s+d)||1)) >= Math.random();
+    const dot=document.createElement('span');
+    if((takeSurv && s>0) || d===0){ dot.className='dot l'; s--; } else { dot.className='dot d'; d--; }
+    f.appendChild(dot);
+  }
+  return f;
+}
+function fillField(el, surv, died){ el.innerHTML=''; el.appendChild(dotField(surv,died)); }
+
+/* ---- meters ---- */
+function setMeters(H,G){
+  document.getElementById('ent-fill').style.width  = (H/ENT_MAX*100).toFixed(1)+'%';
+  document.getElementById('gini-fill').style.width = (G/GINI_MAX*100).toFixed(1)+'%';
+  document.getElementById('ent-val').textContent  = dec(H,2)+' '+u('bits');
+  document.getElementById('gini-val').textContent = dec(G,2);
+}
+
+/* ---- toy chrome text (depends on LANG) ---- */
+function paintToyChrome(){
+  document.getElementById('parentname').textContent = u('parentname');
+  document.getElementById('parentpct').textContent  = u('parentpct');
+  document.getElementById('meters-cap').textContent = u('metersCap');
+  document.getElementById('lg-lived').textContent   = u('lived');
+  document.getElementById('lg-lost').textContent    = u('lost');
+  document.getElementById('lg-dot').textContent     = u('dotnote');
+  document.getElementById('ent-label').textContent  = u('ent');
+  document.getElementById('gini-label').textContent = u('gini');
+  document.getElementById('ent-hint').textContent   = u('hint');
+  document.getElementById('gini-hint').textContent  = u('hint');
+  document.getElementById('board-h').textContent    = u('boardH');
+  document.getElementById('th-q').textContent       = u('thQ');
+  document.getElementById('th-g').textContent       = u('thG');
+  document.getElementById('resetbtn').textContent   = u('reset');
+}
+
+/* ---- chips ---- */
+function buildChips(){
+  const chips=document.getElementById('chips'); chips.innerHTML='';
+  ORDER.forEach(k=>{
+    const b=document.createElement('button');
+    b.className='chip'+(tried[k]?' tried':'')+(active===k?' active':'');
+    b.dataset.key=k; b.textContent=SPLITS[k].label[LANG];
+    b.onclick=()=>selectSplit(k);
+    chips.appendChild(b);
+  });
+}
+
+/* ---- default verdict ---- */
+function defaultVerdict(){
+  const v=document.getElementById('verdict');
+  v.classList.add('empty');
+  v.innerHTML='<p>'+u('verdictDefault')+'</p>';
+}
+
+/* ---- select a split ---- */
+function selectSplit(key){
+  active=key; tried[key]=true;
+  const s=SPLITS[key];
+  document.querySelectorAll('.chip').forEach(c=>{
+    c.classList.toggle('active', c.dataset.key===key);
+    if(tried[c.dataset.key]) c.classList.add('tried');
+  });
+  setMeters(s.H, s.G);
+
+  const wrap=document.getElementById('childwrap');
+  wrap.style.display='flex'; wrap.innerHTML='';
+  s.children.forEach(ch=>{
+    const tot=ch.surv+ch.died;
+    const div=document.createElement('div'); div.className='jar';
+    div.innerHTML='<div class="jarhead"><span class="jarname">'+ch.name[LANG]+'</span>'+
+      '<span class="jarpct">'+tot+' · '+dec(Math.round(ch.pct))+u('childPct')+'</span></div>'+
+      '<div class="field"></div>';
+    wrap.appendChild(div);
+    fillField(div.querySelector('.field'), ch.surv, ch.died);
+  });
+
+  const v=document.getElementById('verdict'); v.classList.remove('empty');
+  v.innerHTML='<span class="gain">'+dec(s.ig,3)+' '+u('gainUnit')+
+    ' <small>· '+u('giniDrop')+' '+dec(s.dg,3)+'</small></span>'+
+    '<p>'+s.verdict[LANG]+'</p>';
+
+  renderBoard();
+}
+
+function renderBoard(){
+  document.getElementById('board').style.display='block';
+  const body=document.getElementById('leadbody'); body.innerHTML='';
+  const keys=ORDER.filter(k=>tried[k]).sort((a,b)=>SPLITS[b].ig-SPLITS[a].ig);
+  const maxIg=Math.max(...keys.map(k=>SPLITS[k].ig),0.0001);
+  keys.forEach((k,i)=>{
+    const s=SPLITS[k]; const tr=document.createElement('tr');
+    if(keys.length>1 && i===0) tr.className='win';
+    if(keys.length>1 && i===keys.length-1 && s.ig<0.01) tr.className='lose';
+    if(k===active) tr.style.fontWeight='bold';
+    tr.innerHTML='<td>'+s.label[LANG]+'</td><td class="g">'+dec(s.ig,3)+'</td>'+
+      '<td class="gbar"><div class="gb" style="width:'+Math.max(2,(s.ig/maxIg*100)).toFixed(0)+'%"></div></td>';
+    body.appendChild(tr);
+  });
+}
+
+function resetToy(){
+  for(const k in tried) delete tried[k]; active=null;
+  setMeters(PARENT.H, PARENT.G);
+  document.getElementById('childwrap').style.display='none';
+  document.getElementById('board').style.display='none';
+  buildChips(); defaultVerdict();
+}
+
+/* ---- exercise table ---- */
+function buildExercise(){
+  const tb=document.getElementById('extbody'); tb.innerHTML='';
+  EXROWS.forEach(r=>{
+    const app=EXWORD[LANG][r[1]], prem=EXWORD[LANG][r[2]], ch=EXWORD[LANG][r[3]];
+    const appCls=r[1]==="no"?"yes":"no";   // not opening app == churn-ish, color as risk
+    const chCls=r[3]==="yes"?"yes":"no";
+    const tr=document.createElement('tr');
+    tr.innerHTML='<td>'+r[0]+'</td><td class="'+appCls+'">'+app+'</td><td>'+prem+'</td><td class="'+chCls+'">'+ch+'</td>';
+    tb.appendChild(tr);
+  });
+}
+
+/* ---- quizzes ---- */
+const QFB={
+  quiz1:{ en:{c:"Right. Ninety to ten is far less mixed than fifty-fifty. More people does not mean more mixed. Deck A is a coin you cannot call.",
+              w:"Not quite. Purity is about the mix, not the headcount. Deck A is an even split, the most mixed a deck can be. Deck B is ninety percent one kind. Deck B wins."},
+          de:{c:"Richtig. Neunzig zu zehn ist weit weniger gemischt als fünfzig zu fünfzig. Mehr Menschen heißt nicht mehr gemischt. Deck A ist eine Münze, die du nicht vorhersagen kannst.",
+              w:"Nicht ganz. Reinheit dreht sich um die Mischung, nicht um die Anzahl. Deck A ist eine gleichmäßige Teilung, das Gemischteste, was ein Deck sein kann. Deck B ist zu neunzig Prozent eine Sorte. Deck B gewinnt."} },
+  quiz2:{ en:{c:"Exactly. The pure group of ten is real, but it weighs almost nothing against the 702 still sitting on a mixed deck. Information gain weights children by size, so the average barely moves.",
+              w:"Look at the weighting in the formula. Ten pure people are lovely, but they are weighted 10/712. The 702 mixed people dominate the average, and they barely changed. The gain is tiny."},
+          de:{c:"Genau. Die reine Gruppe von zehn ist echt, aber sie wiegt fast nichts gegen die 702, die noch auf einem gemischten Deck sitzen. Der Informationsgewinn gewichtet die Kinder nach Größe, also bewegt sich der Durchschnitt kaum.",
+              w:"Schau auf die Gewichtung in der Formel. Zehn reine Menschen sind schön, aber sie werden mit 10/712 gewichtet. Die 702 gemischten Menschen dominieren den Durchschnitt, und sie haben sich kaum verändert. Der Gewinn ist winzig."} },
+  quiz3:{ en:{c:"Yes. If both decks keep the same mix as the original, nothing was separated and nothing was learned. That is the coin flip: gain zero.",
+              w:"That one actually separates the outcomes, so it has high gain. The zero-gain question is the one whose two decks are still as mixed as the deck they came from."},
+          de:{c:"Ja. Wenn beide Decks dieselbe Mischung wie das Original behalten, wurde nichts getrennt und nichts gelernt. Das ist der Münzwurf: Gewinn null.",
+              w:"Diese trennt die Ergebnisse tatsächlich, also hat sie hohen Gewinn. Die Frage mit Gewinn null ist die, deren zwei Decks noch so gemischt sind wie das Deck, aus dem sie kamen."} }
+};
+const answered={};
+function answerQuiz(quizId, btn, isCorrect){
+  const box=document.getElementById(quizId);
+  box.querySelectorAll('button.opt').forEach(b=>b.disabled=true);
+  btn.classList.add(isCorrect?'correct':'wrong');
+  if(!isCorrect){
+    box.querySelectorAll('button.opt').forEach(b=>{ if(b.getAttribute('onclick').includes('true')) b.classList.add('correct'); });
+  }
+  answered[quizId]=isCorrect;
+  const fb=document.getElementById('fb-'+quizId);
+  fb.textContent=QFB[quizId][LANG][isCorrect?'c':'w'];
+  fb.classList.add('show');
+}
+function repaintAnsweredFeedback(){
+  for(const q in answered){
+    const fb=document.getElementById('fb-'+q);
+    if(fb && fb.classList.contains('show')) fb.textContent=QFB[q][LANG][answered[q]?'c':'w'];
+  }
+}
+
+/* ---- KaTeX ---- */
+function renderMath(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.body,{
+      delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}],
+      throwOnError:false
+    });
+  }
+}
+
+/* ============================================================
+   LANGUAGE
+   ============================================================ */
+function applyI18n(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const k=el.getAttribute('data-i18n');
+    if(LANG==='de') el.innerHTML = (DE[k] != null ? DE[k] : ORIG[k]);
+    else el.innerHTML = ORIG[k];
+  });
+}
+function toggleLang(){ setLang(LANG==="en" ? "de" : "en"); }
+function setLang(lang){
+  LANG=lang;
+  document.documentElement.lang=lang;
+  document.getElementById('langbtn').textContent = (lang==='en' ? 'DE' : 'EN');
+
+  applyI18n();          // swap prose
+  paintToyChrome();     // swap toy chrome
+  buildChips();         // chip labels
+  setMeters(active?SPLITS[active].H:PARENT.H, active?SPLITS[active].G:PARENT.G); // re-units
+  if(active) selectSplit(active); else defaultVerdict();
+  buildExercise();
+  repaintAnsweredFeedback();
+  renderMath();         // KaTeX after toggle
+}
+
+/* ---- init ---- */
+window.addEventListener('load', ()=>{
+  document.querySelectorAll('[data-i18n]').forEach(el=>{ ORIG[el.getAttribute('data-i18n')] = el.innerHTML; });
+  fillField(document.getElementById('parentfield'), PARENT.surv, PARENT.died);
+  paintToyChrome();
+  setMeters(PARENT.H, PARENT.G);
+  buildChips();
+  defaultVerdict();
+  buildExercise();
+  renderMath();
+});
+</script>
+</body>
+</html>

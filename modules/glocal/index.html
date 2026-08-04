@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Global vs Local Models, Passt</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #141420; color: #e8e8f0; font-family: Georgia,'Times New Roman',serif; line-height: 1.8; font-size: 18px; }
+.container { max-width: 820px; margin: 0 auto; padding: 0 24px 80px; }
+
+.lang-toggle { position: fixed; top: 16px; right: 16px; background: #2a2a44; border: 1px solid #4a4a70; border-radius: 20px; padding: 6px 14px; cursor: pointer; font-size: 13px; font-family: sans-serif; color: #a0a0d0; z-index: 100; transition: background 0.2s; }
+.lang-toggle:hover { background: #363658; }
+
+.hero { text-align: center; padding: 80px 24px 50px; }
+.tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 28px; }
+.tag { background: #1c1c2e; color: #8888b0; border: 1px solid #2a2a40; border-radius: 20px; padding: 4px 12px; font-size: 12px; font-family: sans-serif; letter-spacing: 0.3px; }
+.hero h1 { font-size: 42px; font-weight: 700; color: #fff; line-height: 1.3; max-width: 700px; margin: 0 auto 24px; }
+.hero-sub { color: #a0a0c0; font-style: italic; font-size: 20px; max-width: 620px; margin: 0 auto; }
+
+section { padding: 50px 0; border-top: 1px solid #1e1e30; }
+h2 { font-size: 30px; color: #fff; margin-bottom: 24px; line-height: 1.3; }
+h3 { font-size: 20px; color: #ccc; margin: 32px 0 12px; }
+p { margin-bottom: 20px; color: #ccc; }
+a { color: #80b4f0; } a:hover { color: #a0c8ff; }
+em { color: #e0e0f0; font-style: italic; }
+strong { color: #e0e0f0; font-weight: normal; }
+
+blockquote { border-left: 3px solid #4a4a70; padding: 16px 24px; margin: 28px 0; color: #a0a0c0; font-style: italic; font-size: 17px; line-height: 1.7; }
+blockquote cite { display: block; margin-top: 12px; font-size: 14px; color: #555; font-style: normal; }
+
+/* TWO-COLUMN COMPARE */
+.compare { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin: 28px 0; border: 1px solid #2a2a40; border-radius: 10px; overflow: hidden; }
+.compare-col { padding: 24px 26px; }
+.compare-col:first-child { border-right: 1px solid #2a2a40; background: #181828; }
+.compare-col:last-child { background: #1a1818; }
+.compare-col h4 { font-family: sans-serif; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px; font-weight: normal; }
+.compare-col:first-child h4 { color: #6080c0; }
+.compare-col:last-child h4 { color: #c07060; }
+.compare-col p { font-size: 15px; color: #999; margin-bottom: 12px; line-height: 1.7; }
+.compare-col p:last-child { margin-bottom: 0; }
+
+/* MAP PAIR */
+.map-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 28px 0; }
+.map-card { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 8px; overflow: hidden; }
+.map-card img { width: 100%; display: block; opacity: 0.88; }
+.map-card-label { padding: 12px 16px; }
+.map-card-label strong { display: block; font-family: sans-serif; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: normal; margin-bottom: 4px; }
+.map-card:first-child .map-card-label strong { color: #c07060; }
+.map-card:last-child .map-card-label strong { color: #6080c0; }
+.map-card-label span { font-size: 13px; color: #666; font-family: sans-serif; line-height: 1.5; }
+.map-card-label [data-lang] { display: none; }
+body.lang-en .map-card-label [data-lang="en"] { display: block; }
+body.lang-de .map-card-label [data-lang="de"] { display: block; }
+
+/* CONCEPT CARDS */
+.concept-cards { display: grid; gap: 12px; margin: 24px 0; }
+.cc { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 8px; padding: 18px 20px; display: flex; gap: 16px; align-items: flex-start; }
+.cc-icon { width: 34px; height: 34px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 16px; margin-top: 2px; }
+.cc-global .cc-icon { background: rgba(60,80,180,0.2); }
+.cc-local .cc-icon { background: rgba(180,80,60,0.2); }
+.cc-body { font-size: 15px; line-height: 1.7; color: #ccc; }
+.cc-body strong { display: block; font-family: sans-serif; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: normal; margin-bottom: 4px; color: #5a5a90; }
+.cc-global .cc-body strong { color: #5060a0; }
+.cc-local .cc-body strong { color: #a05050; }
+
+/* INTERACTIVE DEMO */
+.demo-wrap { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px; padding: 20px; margin: 28px 0; }
+.demo-label { font-family: sans-serif; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: #5050a0; margin-bottom: 14px; }
+canvas { display: block; border: 1px solid #2a2a40; border-radius: 4px; cursor: crosshair; max-width: 100%; }
+.demo-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
+.demo-controls label { font-family: sans-serif; font-size: 13px; color: #7070a0; }
+.demo-controls input[type=range] { width: 90px; accent-color: #6060b0; }
+.demo-controls span.val { font-family: 'Courier New', monospace; font-size: 13px; color: #a0a0d0; min-width: 24px; }
+.demo-controls select, .demo-controls button { background: #141420; border: 1px solid #3a3a55; border-radius: 4px; padding: 5px 10px; color: #a0a0d0; font-size: 13px; font-family: sans-serif; cursor: pointer; }
+.demo-controls button { transition: border-color 0.2s; } .demo-controls button:hover { border-color: #6060a0; color: #c0c0e0; }
+.demo-note { font-family: sans-serif; font-size: 12px; color: #444; margin-top: 10px; line-height: 1.6; }
+.mode-btns { display: flex; gap: 8px; margin-bottom: 12px; }
+.mode-btn { font-family: sans-serif; font-size: 12px; letter-spacing: 0.5px; padding: 5px 14px; border: 1px solid #2a2a40; border-radius: 20px; background: transparent; color: #666; cursor: pointer; transition: all 0.2s; }
+.mode-btn.active { border-color: #6060b0; color: #a0a0d0; background: rgba(60,60,120,0.2); }
+
+/* WHEN TABLE */
+.when-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 24px 0; }
+.when-card { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 8px; padding: 18px 20px; }
+.when-card h4 { font-family: sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; font-weight: normal; margin-bottom: 14px; }
+.when-card:first-child h4 { color: #5060a0; }
+.when-card:last-child h4 { color: #a05050; }
+.when-card ul { list-style: none; padding: 0; }
+.when-card li { font-size: 14px; color: #888; line-height: 1.7; padding: 5px 0; border-bottom: 1px solid #1e1e2e; font-family: sans-serif; }
+.when-card li:last-child { border-bottom: none; }
+.when-card li::before { content: "→ "; color: #4a4a70; }
+
+/* TRADEOFF */
+.tradeoff { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px; padding: 24px 28px; margin: 28px 0; }
+.tradeoff-row { display: flex; align-items: flex-start; gap: 20px; padding: 14px 0; border-bottom: 1px solid #1e1e2e; }
+.tradeoff-row:last-child { border-bottom: none; }
+.tradeoff-label { font-family: sans-serif; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: #5050a0; min-width: 100px; padding-top: 2px; }
+.tradeoff-global { flex: 1; font-size: 14px; color: #7080c0; font-family: sans-serif; line-height: 1.6; }
+.tradeoff-local { flex: 1; font-size: 14px; color: #c07060; font-family: sans-serif; line-height: 1.6; }
+.tradeoff-head { display: flex; gap: 20px; padding-bottom: 10px; border-bottom: 1px solid #2a2a40; margin-bottom: 4px; }
+.tradeoff-head span { font-family: sans-serif; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; min-width: 100px; }
+.tradeoff-head .th-g { flex: 1; color: #5060a0; }
+.tradeoff-head .th-l { flex: 1; color: #a05050; }
+
+/* CLOSING */
+.closing { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px; padding: 40px; text-align: center; }
+.closing h3 { font-size: 24px; color: #fff; margin-bottom: 16px; }
+.closing p { font-size: 16px; color: #666; max-width: 520px; margin: 0 auto; font-family: sans-serif; line-height: 1.7; }
+
+footer { padding: 40px 0 20px; border-top: 1px solid #1e1e30; font-family: sans-serif; font-size: 13px; color: #3a3a60; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+footer a { color: #3a3a60; }
+
+/* LANG */
+[data-lang] { display: none; }
+body.lang-en [data-lang="en"] { display: block; }
+body.lang-en [data-lang="en"].inl { display: inline; }
+body.lang-de [data-lang="de"] { display: block; }
+body.lang-de [data-lang="de"].inl { display: inline; }
+.en-i { display: inline; } .de-i { display: none; }
+body.lang-de .en-i { display: none; } body.lang-de .de-i { display: inline; }
+
+@media (max-width: 560px) {
+  .hero h1 { font-size: 28px; }
+  .compare, .map-pair, .when-grid { grid-template-columns: 1fr; }
+  .compare-col:first-child { border-right: none; border-bottom: 1px solid #2a2a40; }
+  .tradeoff-row { flex-wrap: wrap; }
+  .tradeoff-label { min-width: unset; width: 100%; }
+}
+</style>
+</head>
+<body class="lang-en">
+
+<button class="lang-toggle" onclick="toggleLang()">DE</button>
+
+<div class="container">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="tags">
+      <span class="tag">mini-module</span>
+      <span class="tag">no-code</span>
+      <span class="tag">try-without-ai</span>
+      <span class="tag">regression</span>
+      <span class="tag">ml-fundamentals</span>
+      <span class="tag">~20 min</span>
+    </div>
+    <h1>
+      <span class="en-i">Global vs Local Models</span>
+      <span class="de-i">Globale vs lokale Modelle</span>
+    </h1>
+    <p class="hero-sub">
+      <span class="en-i">One equation for everything, or a different rule for every neighbourhood. The split that runs through all of machine learning.</span>
+      <span class="de-i">Eine Gleichung für alles, oder eine eigene Regel für jede Nachbarschaft. Diese Unterscheidung zieht sich durch das gesamte maschinelle Lernen.</span>
+    </p>
+  </div>
+
+  <!-- PATHS SECTION -->
+  <section>
+    <h2>
+      <span class="en-i">Two parks. Two philosophies.</span>
+      <span class="de-i">Zwei Parks. Zwei Philosophien.</span>
+    </h2>
+
+    <p data-lang="en">Somewhere in Moscow, the physicist Igor Kurchatov looked out at the grounds of his research institute and noticed that people were ignoring the paved paths. They cut across grass, wore tracks through gardens, found their own way. So he did something unusual: he waited. He let the paths form first, the ones people actually wanted, and only then paved them.</p>
+    <p data-lang="de">Irgendwo in Moskau blickte der Physiker Igor Kurtschatow auf das Gelände seines Forschungsinstituts. Er bemerkte, dass die Menschen die gepflasterten Wege ignorierten. Sie schnitten quer über den Rasen, trampelten Pfade durch Gärten und fanden ihren eigenen Weg. Also tat er etwas Ungewöhnliches: Er wartete. Er ließ die Pfade erst entstehen, also die, die die Menschen wirklich wollten. Und erst danach pflasterte er sie.</p>
+    <p data-lang="en">Sanssouci, a few hours west, was designed differently. Frederick the Great gave his gardeners a plan. Symmetry first. The paths exist where the geometry demands them, regardless of whether anyone's feet agreed.</p>
+    <p data-lang="de">Sanssouci, einige Stunden westlich, wurde anders entworfen. Friedrich der Große gab seinen Gärtnern einen Plan. Zuerst die Symmetrie. Die Wege liegen dort, wo die Geometrie es verlangt. Ob irgendwelche Füße dem zugestimmt haben, spielt keine Rolle.</p>
+
+    <div class="map-pair">
+      <div class="map-card">
+        <img src="images/local.jpg" alt="Kurchatov Institute, Moscow, paths shaped by use">
+        <div class="map-card-label">
+          <strong><span class="en-i">Local model</span><span class="de-i">Lokales Modell</span></strong>
+          <span data-lang="en" class="inl" style="display:block;">Kurchatov Institute, Moscow. The paths emerged from the data, from actual human behaviour. No equation was imposed in advance.</span>
+          <span data-lang="de" class="inl" style="display:block;">Kurtschatow-Institut, Moskau. Die Wege entstanden aus den Daten, also aus echtem menschlichem Verhalten. Keine Gleichung wurde vorher auferlegt.</span>
+        </div>
+      </div>
+      <div class="map-card">
+        <img src="images/global.jpg" alt="Schloss Sanssouci, Potsdam, geometric planned paths">
+        <div class="map-card-label">
+          <strong><span class="en-i">Global model</span><span class="de-i">Globales Modell</span></strong>
+          <span data-lang="en" class="inl" style="display:block;">Schloss Sanssouci, Potsdam. The paths follow a single geometric plan. One rule governs the whole space, top-down, before anyone walked a step.</span>
+          <span data-lang="de" class="inl" style="display:block;">Schloss Sanssouci, Potsdam. Die Wege folgen einem einzigen geometrischen Plan. Eine Regel beherrscht den gesamten Raum. Sie stand fest, bevor jemand einen Schritt gegangen ist.</span>
+        </div>
+      </div>
+    </div>
+
+    <p data-lang="en">This is not a metaphor for which approach is better. Both parks are beautiful. Both serve their purpose. The question is what that purpose is, and what you lose when you choose one over the other.</p>
+    <p data-lang="de">Das ist keine Metapher dafür, welcher Ansatz besser ist. Beide Parks sind schön. Beide erfüllen ihren Zweck. Die Frage ist, was dieser Zweck ist. Und was du verlierst, wenn du dich für eine Seite entscheidest.</p>
+  </section>
+
+  <!-- THE SPLIT -->
+  <section>
+    <h2>
+      <span class="en-i">The split</span>
+      <span class="de-i">Die Unterscheidung</span>
+    </h2>
+
+    <p data-lang="en">Every model you build makes an implicit claim about the world: <em>is the same rule true everywhere, or does the rule itself depend on where you are?</em> This is the global vs local distinction. It is not about accuracy. It is about the shape of your assumptions.</p>
+    <p data-lang="de">Jedes Modell, das du baust, behauptet etwas über die Welt: <em>Gilt dieselbe Regel überall, oder hängt die Regel davon ab, wo du gerade bist?</em> Das ist der Unterschied zwischen global und lokal. Es geht dabei nicht um die Trefferquote. Es geht um die Form deiner Annahmen.</p>
+
+    <div class="compare">
+      <div class="compare-col">
+        <h4><span class="en-i">Global model</span><span class="de-i">Globales Modell</span></h4>
+        <p data-lang="en">One function fits the entire dataset. The same equation applies whether you are at the edge or the centre, in a dense cluster or an empty region. Linear regression is the archetype: one line for all the points.</p>
+        <p data-lang="de">Eine Funktion passt auf den gesamten Datensatz. Dieselbe Gleichung gilt am Rand wie in der Mitte, im dichten Cluster wie im leeren Bereich. Die lineare Regression ist das Urbeispiel: eine Gerade für alle Punkte.</p>
+        <p data-lang="en">The assumption is that the world has a single underlying logic. You are trying to find it.</p>
+        <p data-lang="de">Die Annahme dahinter: Die Welt hat eine einzige zugrundeliegende Logik. Du versuchst, sie zu finden.</p>
+      </div>
+      <div class="compare-col">
+        <h4><span class="en-i">Local model</span><span class="de-i">Lokales Modell</span></h4>
+        <p data-lang="en">Different rules for different regions. The model adapts to local structure rather than imposing a single form. K-NN is the archetype: your classification depends entirely on who your neighbours are right here, not on a global fit.</p>
+        <p data-lang="de">Verschiedene Regeln für verschiedene Regionen. Das Modell passt sich der lokalen Struktur an, statt eine einzige Form aufzuzwingen. K-NN ist das Urbeispiel: Deine Klassifizierung hängt allein davon ab, wer genau hier deine Nachbarn sind.</p>
+        <p data-lang="en">The assumption is that the world is patchwork. You are trying to map it.</p>
+        <p data-lang="de">Die Annahme dahinter: Die Welt ist ein Flickenteppich. Du versuchst, ihn zu kartieren.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- INTERACTIVE DEMO -->
+  <section>
+    <h2>
+      <span class="en-i">Same data, two models</span>
+      <span class="de-i">Dieselben Daten, zwei Modelle</span>
+    </h2>
+
+    <p data-lang="en">Place some points by clicking on the canvas. Each point has an x value (horizontal position) and a y value (vertical position), think of x as an input and y as the thing you are trying to predict. Then switch between a global fit (linear regression, one straight line for all the data) and a local fit (K-NN regression, each prediction is the average of K nearby points). Same data, very different curves.</p>
+    <p data-lang="de">Klick auf die Leinwand, um Punkte zu setzen. Jeder Punkt hat einen x-Wert (horizontale Position) und einen y-Wert (vertikale Position). Dabei ist x die Eingabe, und y ist das, was du vorhersagen willst. Wechsle dann zwischen zwei Anpassungen. Global heißt lineare Regression, also eine Gerade für alle Daten. Lokal heißt K-NN-Regression, also der Durchschnitt der K nächsten Punkte. Dieselben Daten, sehr verschiedene Kurven.</p>
+
+    <div class="demo-wrap">
+      <div class="demo-label">
+        <span class="en-i">Interactive demo, click to add points</span>
+        <span class="de-i">Interaktive Demo: klicken zum Hinzufügen</span>
+      </div>
+      <div class="mode-btns">
+        <button class="mode-btn" id="btn-knn" onclick="setMode('knn')">
+          <span class="en-i">Local (K-NN)</span><span class="de-i">Lokal (K-NN)</span>
+        </button>
+        <button class="mode-btn" id="btn-linear" onclick="setMode('linear')">
+          <span class="en-i">Global (linear)</span><span class="de-i">Global (linear)</span>
+        </button>
+        <button class="mode-btn active" id="btn-both" onclick="setMode('both')">
+          <span class="en-i">Both</span><span class="de-i">Beide</span>
+        </button>
+      </div>
+      <canvas id="demo-cv" width="680" height="300"></canvas>
+      <div class="demo-controls">
+        <label>K =</label>
+        <input type="range" id="dk" min="1" max="13" step="2" value="5">
+        <span class="val" id="dk-out">5</span>
+        <span style="font-family:sans-serif;font-size:12px;color:#444;margin-left:4px;">
+          <span class="en-i">(affects K-NN only)</span><span class="de-i">(nur K-NN)</span>
+        </span>
+        <button onclick="demoClear()" style="margin-left:10px;"><span class="en-i">Clear</span><span class="de-i">Löschen</span></button>
+        <button onclick="demoLoadExample()"><span class="en-i">Load example</span><span class="de-i">Beispiel laden</span></button>
+      </div>
+      <div class="demo-note" id="demo-note-text"></div>
+    </div>
+  </section>
+
+  <!-- CONCEPTS -->
+  <section>
+    <h2>
+      <span class="en-i">What you give up</span>
+      <span class="de-i">Was du aufgibst</span>
+    </h2>
+
+    <p data-lang="en">Neither approach is free. Every choice along the global–local axis carries a cost on the other side.</p>
+    <p data-lang="de">Keiner der Ansätze ist kostenlos. Jede Wahl auf der Achse zwischen global und lokal hat einen Preis auf der anderen Seite.</p>
+
+    <div class="concept-cards">
+      <div class="cc cc-global">
+        <div class="cc-icon">
+          <svg width="18" height="18" viewBox="0 0 18 18"><line x1="2" y1="14" x2="16" y2="4" stroke="#6080c0" stroke-width="2" stroke-linecap="round"/><circle cx="4" cy="13" r="2" fill="#6080c0"/><circle cx="9" cy="10" r="2" fill="#6080c0"/><circle cx="14" cy="6" r="2" fill="#6080c0"/></svg>
+        </div>
+        <div class="cc-body">
+          <strong><span class="en-i">Global: interpretability</span><span class="de-i">Global: Interpretierbarkeit</span></strong>
+          <span data-lang="en">A global model has one set of parameters you can read and explain. "For every extra year of experience, salary increases by €3,400." That sentence is the model. You can audit it, challenge it, put it in a report. A local model has no such sentence.</span>
+          <span data-lang="de">Ein globales Modell hat einen Satz von Gewichten, den du lesen und erklären kannst. „Für jedes weitere Jahr Erfahrung steigt das Gehalt um 3.400 €.“ Dieser Satz ist das Modell. Du kannst ihn prüfen, bestreiten oder in einen Bericht schreiben. Ein lokales Modell hat keinen solchen Satz.</span>
+        </div>
+      </div>
+      <div class="cc cc-local">
+        <div class="cc-icon">
+          <svg width="18" height="18" viewBox="0 0 18 18"><circle cx="4" cy="4" r="2.5" fill="#c07060"/><circle cx="14" cy="4" r="2.5" fill="#c07060"/><circle cx="4" cy="14" r="2.5" fill="#c07060"/><circle cx="14" cy="14" r="2.5" fill="#c07060"/><circle cx="9" cy="9" r="2.5" fill="#c07060" opacity="0.5"/></svg>
+        </div>
+        <div class="cc-body">
+          <strong><span class="en-i">Local: flexibility</span><span class="de-i">Lokal: Flexibilität</span></strong>
+          <span data-lang="en">A local model can follow data into any shape. A crescent, a spiral, a cluster with a hole in the middle, no problem. A linear model cannot do any of those. It will draw the best straight line it can and stop there.</span>
+          <span data-lang="de">Ein lokales Modell folgt den Daten in jede Form. Eine Mondsichel, eine Spirale, ein Cluster mit einem Loch in der Mitte: kein Problem. Ein lineares Modell kann das nicht. Es zieht die beste Gerade, die es hinbekommt, und hört dort auf.</span>
+        </div>
+      </div>
+      <div class="cc cc-global">
+        <div class="cc-icon">
+          <svg width="18" height="18" viewBox="0 0 18 18"><rect x="2" y="12" width="4" height="4" fill="#6080c0" opacity="0.5"/><rect x="7" y="8" width="4" height="8" fill="#6080c0" opacity="0.7"/><rect x="12" y="4" width="4" height="12" fill="#6080c0"/></svg>
+        </div>
+        <div class="cc-body">
+          <strong><span class="en-i">Global: generalisation from little data</span><span class="de-i">Global: Generalisierung aus wenig Daten</span></strong>
+          <span data-lang="en">A global model can make reasonable predictions far from the training data, because it assumes the same rule holds everywhere. A local model in a sparse region has no neighbours to consult. It doesn't know what to do.</span>
+          <span data-lang="de">Ein globales Modell macht auch weit weg von den Trainingsdaten vernünftige Vorhersagen. Es nimmt ja an, dass dieselbe Regel überall gilt. Ein lokales Modell hat in einer dünn besetzten Region keine Nachbarn. Es weiß dann nicht, was es tun soll.</span>
+        </div>
+      </div>
+      <div class="cc cc-local">
+        <div class="cc-icon">
+          <svg width="18" height="18" viewBox="0 0 18 18"><path d="M2 15 Q5 4 9 8 Q13 12 16 3" fill="none" stroke="#c07060" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <div class="cc-body">
+          <strong><span class="en-i">Local: no bad global assumptions</span><span class="de-i">Lokal: keine schlechten globalen Annahmen</span></strong>
+          <span data-lang="en">A global model that assumes linearity is wrong everywhere if the real relationship is curved. A local model makes no such assumption. It can be wrong locally, but those errors don't propagate globally. Each region fails on its own terms.</span>
+          <span data-lang="de">Ein globales Modell nimmt Linearität an. Ist die echte Beziehung gekrümmt, liegt es überall daneben. Ein lokales Modell macht diese Annahme nicht. Es kann lokal falsch liegen, aber der Fehler pflanzt sich nicht über die ganze Fläche fort.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHEN TO USE -->
+  <section>
+    <h2>
+      <span class="en-i">When each wins</span>
+      <span class="de-i">Wann jedes gewinnt</span>
+    </h2>
+
+    <div class="tradeoff">
+      <div class="tradeoff-head">
+        <span style="min-width:120px;color:#3a3a60;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;font-family:sans-serif;"></span>
+        <span class="th-g"><span class="en-i">Global</span><span class="de-i">Global</span></span>
+        <span class="th-l"><span class="en-i">Local</span><span class="de-i">Lokal</span></span>
+      </div>
+      <div class="tradeoff-row">
+        <div class="tradeoff-label"><span class="en-i">Data size</span><span class="de-i">Datengröße</span></div>
+        <div class="tradeoff-global"><span data-lang="en">Works with little data, the global assumption fills the gaps.</span><span data-lang="de">Funktioniert mit wenig Daten. Die globale Annahme füllt die Lücken.</span></div>
+        <div class="tradeoff-local"><span data-lang="en">Needs enough data to have meaningful local neighbourhoods.</span><span data-lang="de">Braucht genug Daten, damit lokale Nachbarschaften überhaupt etwas bedeuten.</span></div>
+      </div>
+      <div class="tradeoff-row">
+        <div class="tradeoff-label"><span class="en-i">Boundary shape</span><span class="de-i">Grenzform</span></div>
+        <div class="tradeoff-global"><span data-lang="en">Simple, smooth. Good when the true boundary is actually simple.</span><span data-lang="de">Einfach und glatt. Gut, wenn die echte Grenze auch einfach ist.</span></div>
+        <div class="tradeoff-local"><span data-lang="en">Arbitrary complexity. Follows the data wherever it goes.</span><span data-lang="de">Beliebig komplex. Folgt den Daten, wohin sie auch gehen.</span></div>
+      </div>
+      <div class="tradeoff-row">
+        <div class="tradeoff-label"><span class="en-i">Explanation</span><span class="de-i">Erklärung</span></div>
+        <div class="tradeoff-global"><span data-lang="en">One set of coefficients you can show to a stakeholder.</span><span data-lang="de">Ein Satz von Gewichten, den du jemandem zeigen kannst.</span></div>
+        <div class="tradeoff-local"><span data-lang="en">"It depends on the neighbourhood", hard to summarise.</span><span data-lang="de">„Es hängt von der Nachbarschaft ab.“ Schwer zusammenzufassen.</span></div>
+      </div>
+      <div class="tradeoff-row">
+        <div class="tradeoff-label"><span class="en-i">Extrapolation</span><span class="de-i">Extrapolation</span></div>
+        <div class="tradeoff-global"><span data-lang="en">Predicts in new regions by extending the global rule.</span><span data-lang="de">Sagt auch in neuen Regionen vorher, indem es die globale Regel verlängert.</span></div>
+        <div class="tradeoff-local"><span data-lang="en">Struggles or fails where no training points exist nearby.</span><span data-lang="de">Hat Mühe oder versagt, wo in der Nähe keine Trainingsdaten liegen.</span></div>
+      </div>
+      <div class="tradeoff-row">
+        <div class="tradeoff-label"><span class="en-i">Overfitting</span><span class="de-i">Überanpassung</span></div>
+        <div class="tradeoff-global"><span data-lang="en">Underfits if the real relationship is complex.</span><span data-lang="de">Unteranpassung, wenn die echte Beziehung komplex ist.</span></div>
+        <div class="tradeoff-local"><span data-lang="en">Overfits if K is too small, memorises noise as structure.</span><span data-lang="de">Überanpassung, wenn K zu klein ist. Dann lernt es Rauschen als Struktur.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CLOSING -->
+  <section>
+    <div class="closing">
+      <h3>
+        <span class="en-i">The real question</span>
+        <span class="de-i">Die eigentliche Frage</span>
+      </h3>
+      <p data-lang="en">Before you choose a model, ask: do I believe the world has one rule here, or many? If you believe in one rule, a global model is not a compromise, it is the honest choice. If you believe the world is patchy and local, imposing a global form is the dishonest one. Most real problems live somewhere in between. That is why ensemble methods exist, and why that is a different module.</p>
+      <p data-lang="de">Bevor du ein Modell wählst, frag dich: Hat die Welt hier eine Regel oder viele? Glaubst du an eine Regel, dann ist ein globales Modell kein Kompromiss. Es ist die ehrliche Wahl. Hältst du die Welt für fleckig und lokal, dann ist ein globales Modell die unehrliche Wahl. Die meisten echten Probleme liegen dazwischen. Genau dafür gibt es Ensemble-Methoden, und die sind ein anderes Modul.</p>
+    </div>
+  </section>
+
+  <footer>
+    <span>
+      <span class="en-i">Part of</span><span class="de-i">Teil von</span>
+      <a href="../../">Passt</a>
+      · Class 04, Local Models &amp; Geometry
+    </span>
+    <span><a href="https://github.com/i-yam/passt/tree/main/modules/glocal" target="_blank">github.com/i-yam/passt</a></span>
+  </footer>
+
+</div>
+
+<script>
+var currentLang = 'en';
+function toggleLang() {
+  currentLang = currentLang === 'en' ? 'de' : 'en';
+  document.body.className = 'lang-' + currentLang;
+  document.querySelector('.lang-toggle').textContent = currentLang === 'en' ? 'DE' : 'EN';
+  updateDemoNote();
+}
+
+/* ── DEMO, regression version ── */
+var dcv = document.getElementById('demo-cv');
+var dctx = dcv.getContext('2d');
+var pts = [];
+var demoMode = 'both';
+
+// Canvas logical dimensions
+var CW = 680, CH = 300;
+// Axis padding
+var PAD = { l:50, r:20, t:20, b:40 };
+
+var NOTES = {
+  linear: {
+    en: 'Global (linear regression): one straight line fits all the data by minimising total squared error. It captures the overall trend but ignores local bumps and curves.',
+    de: 'Global (lineare Regression): eine Gerade passt auf alle Daten und macht den quadratischen Gesamtfehler so klein wie möglich. Sie erfasst den Gesamttrend. Lokale Buckel und Kurven ignoriert sie.'
+  },
+  knn: {
+    en: 'Local (K-NN regression): each prediction is the average y of the K nearest points by x distance. Small K follows every wiggle in the data. Large K smooths out to a gentle curve.',
+    de: 'Lokal (K-NN-Regression): jede Vorhersage ist der y-Durchschnitt der K nächsten Punkte, gemessen im Abstand auf x. Kleines K folgt jedem Zittern in den Daten. Großes K glättet alles zu einer sanften Kurve.'
+  },
+  both: {
+    en: 'Both overlaid. The straight line is the global model. The curve is the local K-NN model. Where they agree, the data is roughly linear. Where they diverge, there is local structure the global model misses.',
+    de: 'Beide überlagert. Die Gerade ist das globale Modell. Die Kurve ist das lokale K-NN-Modell. Wo sie übereinstimmen, sind die Daten grob linear. Wo sie auseinandergehen, gibt es lokale Struktur, die das globale Modell verpasst.'
+  }
+};
+
+function updateDemoNote() {
+  var n = NOTES[demoMode];
+  document.getElementById('demo-note-text').textContent = n ? n[currentLang] : '';
+}
+
+function setMode(m) {
+  demoMode = m;
+  ['knn','linear','both'].forEach(function(x) {
+    document.getElementById('btn-'+x).classList.toggle('active', x===m);
+  });
+  demoRender();
+  updateDemoNote();
+}
+
+function getK() { return parseInt(document.getElementById('dk').value); }
+
+// Convert canvas pixel -> data coords
+function px2data(px, py) {
+  return {
+    x: (px - PAD.l) / (CW - PAD.l - PAD.r),
+    y: 1 - (py - PAD.t) / (CH - PAD.t - PAD.b)
+  };
+}
+// Convert data -> canvas pixel
+function data2px(dx, dy) {
+  return {
+    x: PAD.l + dx * (CW - PAD.l - PAD.r),
+    y: PAD.t + (1 - dy) * (CH - PAD.t - PAD.b)
+  };
+}
+
+// Linear regression: returns {slope, intercept} in data space
+function linReg() {
+  if (pts.length < 2) return null;
+  var n = pts.length, sx=0, sy=0, sxy=0, sxx=0;
+  pts.forEach(function(p){ sx+=p.dx; sy+=p.dy; sxy+=p.dx*p.dy; sxx+=p.dx*p.dx; });
+  var denom = n*sxx - sx*sx;
+  if (Math.abs(denom) < 1e-10) return null;
+  var slope = (n*sxy - sx*sy) / denom;
+  var intercept = (sy - slope*sx) / n;
+  return { slope: slope, intercept: intercept };
+}
+
+// K-NN regression: predict y at data-x dx using K nearest by x distance
+function knnRegAt(dx, k) {
+  if (pts.length < 1) return null;
+  var sorted = pts.map(function(p){ return {dy:p.dy, dist:Math.abs(p.dx-dx)}; });
+  sorted.sort(function(a,b){ return a.dist-b.dist; });
+  var nb = sorted.slice(0, Math.min(k, sorted.length));
+  var sum = 0; nb.forEach(function(n){ sum+=n.dy; });
+  return sum / nb.length;
+}
+
+function demoRender() {
+  dctx.fillStyle='#141420'; dctx.fillRect(0,0,CW,CH);
+
+  // Draw axes
+  dctx.strokeStyle='rgba(255,255,255,0.15)'; dctx.lineWidth=1;
+  // x axis
+  var origin = data2px(0,0);
+  dctx.beginPath(); dctx.moveTo(PAD.l, CH-PAD.b); dctx.lineTo(CW-PAD.r, CH-PAD.b); dctx.stroke();
+  // y axis
+  dctx.beginPath(); dctx.moveTo(PAD.l, PAD.t); dctx.lineTo(PAD.l, CH-PAD.b); dctx.stroke();
+
+  // Axis tick lines
+  dctx.strokeStyle='rgba(255,255,255,0.06)'; dctx.lineWidth=0.5;
+  for (var i=1;i<=9;i++) {
+    var tx = PAD.l + i/10*(CW-PAD.l-PAD.r);
+    dctx.beginPath(); dctx.moveTo(tx,PAD.t); dctx.lineTo(tx,CH-PAD.b); dctx.stroke();
+  }
+  for (var j=1;j<=9;j++) {
+    var ty = PAD.t + j/10*(CH-PAD.t-PAD.b);
+    dctx.beginPath(); dctx.moveTo(PAD.l,ty); dctx.lineTo(CW-PAD.r,ty); dctx.stroke();
+  }
+
+  // Axis labels
+  dctx.fillStyle='rgba(255,255,255,0.25)'; dctx.font='12px sans-serif'; dctx.textAlign='center';
+  dctx.fillText('x  →', CW-PAD.r-12, CH-PAD.b+20);
+  dctx.save(); dctx.translate(14, PAD.t+10); dctx.rotate(-Math.PI/2);
+  dctx.fillText('y  ↑', 0, 0); dctx.restore();
+
+  if (pts.length >= 2) {
+    var k = getK();
+    var lr = linReg();
+    var STEPS = CW - PAD.l - PAD.r;
+
+    // Draw linear regression line
+    if ((demoMode==='linear' || demoMode==='both') && lr) {
+      dctx.beginPath();
+      var p0 = data2px(0, lr.intercept);
+      var p1 = data2px(1, lr.slope + lr.intercept);
+      dctx.moveTo(p0.x, p0.y); dctx.lineTo(p1.x, p1.y);
+      dctx.strokeStyle = demoMode==='both' ? 'rgba(120,160,240,0.85)' : 'rgba(120,160,240,0.7)';
+      dctx.lineWidth = 2;
+      dctx.setLineDash([]);
+      dctx.stroke();
+
+      // residuals for linear
+      if (demoMode === 'linear') {
+        pts.forEach(function(p){
+          var pred = lr.slope*p.dx + lr.intercept;
+          var pc = data2px(p.dx, p.dy);
+          var pp = data2px(p.dx, pred);
+          dctx.beginPath(); dctx.moveTo(pc.x,pc.y); dctx.lineTo(pp.x,pp.y);
+          dctx.strokeStyle='rgba(120,160,240,0.25)'; dctx.lineWidth=1; dctx.setLineDash([3,3]);
+          dctx.stroke(); dctx.setLineDash([]);
+        });
+      }
+    }
+
+    // Draw K-NN regression curve
+    if (demoMode==='knn' || demoMode==='both') {
+      dctx.beginPath();
+      var started = false;
+      for (var s=0; s<=STEPS; s++) {
+        var dx = s / STEPS;
+        var dy = knnRegAt(dx, k);
+        if (dy === null) continue;
+        var cp = data2px(dx, dy);
+        if (!started) { dctx.moveTo(cp.x, cp.y); started=true; }
+        else dctx.lineTo(cp.x, cp.y);
+      }
+      dctx.strokeStyle = demoMode==='both' ? 'rgba(220,100,80,0.85)' : 'rgba(220,100,80,0.7)';
+      dctx.lineWidth = 2;
+      dctx.setLineDash([]);
+      dctx.stroke();
+
+      // residuals for knn
+      if (demoMode === 'knn') {
+        pts.forEach(function(p){
+          var pred = knnRegAt(p.dx, k);
+          var pc = data2px(p.dx, p.dy);
+          var pp = data2px(p.dx, pred);
+          dctx.beginPath(); dctx.moveTo(pc.x,pc.y); dctx.lineTo(pp.x,pp.y);
+          dctx.strokeStyle='rgba(220,100,80,0.25)'; dctx.lineWidth=1; dctx.setLineDash([3,3]);
+          dctx.stroke(); dctx.setLineDash([]);
+        });
+      }
+    }
+
+    // Legend when both
+    if (demoMode==='both') {
+      dctx.font='12px sans-serif'; dctx.textAlign='left';
+      dctx.fillStyle='rgba(120,160,240,0.85)';
+      dctx.fillRect(CW-PAD.r-130, PAD.t+6, 24, 3);
+      dctx.fillText('linear (global)', CW-PAD.r-102, PAD.t+12);
+      dctx.fillStyle='rgba(220,100,80,0.85)';
+      dctx.fillRect(CW-PAD.r-130, PAD.t+20, 24, 3);
+      dctx.fillText('K-NN (local)', CW-PAD.r-102, PAD.t+26);
+    }
+  }
+
+  // Draw points
+  pts.forEach(function(p) {
+    var cp = data2px(p.dx, p.dy);
+    dctx.beginPath(); dctx.arc(cp.x, cp.y, 5, 0, Math.PI*2);
+    dctx.fillStyle='rgba(200,200,220,0.9)'; dctx.fill();
+    dctx.strokeStyle='rgba(255,255,255,0.3)'; dctx.lineWidth=1; dctx.stroke();
+  });
+
+  // Hint when empty
+  if (pts.length === 0) {
+    dctx.fillStyle='rgba(255,255,255,0.12)'; dctx.font='14px sans-serif'; dctx.textAlign='center';
+    dctx.fillText(currentLang==='de'?'Klicken Sie, um Punkte hinzuzufügen':'Click to add data points', CW/2, CH/2);
+  }
+}
+
+function demoClear() { pts=[]; demoRender(); }
+
+function demoLoadExample() {
+  // Nonlinear pattern: rises, plateaus, dips, makes linear fail obviously
+  var raw = [
+    [0.05,0.15],[0.10,0.25],[0.12,0.35],[0.18,0.50],[0.22,0.60],[0.28,0.65],
+    [0.33,0.68],[0.38,0.66],[0.42,0.62],[0.47,0.58],[0.50,0.55],[0.53,0.52],
+    [0.58,0.55],[0.62,0.62],[0.67,0.72],[0.72,0.80],[0.76,0.82],[0.80,0.78],
+    [0.85,0.65],[0.90,0.50],[0.94,0.35]
+  ];
+  pts = raw.map(function(r){
+    var noise = (Math.random()-0.5)*0.06;
+    return { dx: r[0], dy: Math.min(0.95,Math.max(0.05,r[1]+noise)) };
+  });
+  demoRender();
+}
+
+dcv.addEventListener('click',function(e){
+  var r=dcv.getBoundingClientRect();
+  var px=(e.clientX-r.left)*(CW/r.width);
+  var py=(e.clientY-r.top)*(CH/r.height);
+  // Only allow clicks within the plot area
+  if (px<PAD.l||px>CW-PAD.r||py<PAD.t||py>CH-PAD.b) return;
+  var d=px2data(px,py);
+  pts.push({dx:d.x, dy:d.y});
+  demoRender();
+});
+
+document.getElementById('dk').addEventListener('input',function(e){
+  document.getElementById('dk-out').textContent=e.target.value; demoRender();
+});
+
+demoRender();
+updateDemoNote();
+</script>
+</body>
+</html>

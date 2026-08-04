@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Method of Holmes</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: #141420; color: #e8e8f0; font-family: 'Georgia','Times New Roman',serif; line-height: 1.8; font-size: 18px; }
+        .container { max-width: 820px; margin: 0 auto; padding: 0 24px; }
+        .lang-toggle { position: fixed; top: 16px; right: 16px; background: #2a2a44; border: 1px solid #4a4a70; border-radius: 20px; padding: 6px 14px; cursor: pointer; font-size: 13px; font-family: sans-serif; color: #a0a0d0; z-index: 100; transition: background 0.2s; }
+        .lang-toggle:hover { background: #363658; }
+        .hero { text-align: center; padding: 80px 24px 40px; }
+        .hero-tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 24px; }
+        .tag { background: #1c1c2e; color: #5a5a88; border: 1px solid #2a2a44; border-radius: 20px; padding: 4px 12px; font-size: 12px; font-family: sans-serif; }
+        .hero h1 { font-size: 42px; font-weight: 700; color: #fff; line-height: 1.3; max-width: 700px; margin: 0 auto; }
+        .hero .subtitle { margin-top: 16px; color: #888; font-size: 16px; font-style: italic; }
+        section { padding: 50px 0; }
+        h2 { font-size: 30px; color: #fff; margin-bottom: 24px; line-height: 1.3; }
+        p { margin-bottom: 20px; color: #ccc; }
+        p:last-child { margin-bottom: 0; }
+        a { color: #80b4f0; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .section-rule { border: none; border-top: 1px solid #2a2a40; margin: 0; }
+        .bq { margin: 28px 0; padding: 18px 22px; background: #1a1a2a; border-left: 3px solid #5050a0; border-radius: 0 8px 8px 0; }
+        .bq p { font-style: italic; color: #b0b0d0; margin-bottom: 8px; font-size: 17px; }
+        .bq cite { display: block; font-family: sans-serif; font-size: 12px; letter-spacing: 0.06em; color: #444460; font-style: normal; margin-top: 4px; }
+        .def-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 28px 0; }
+        @media (max-width: 580px) { .def-pair { grid-template-columns: 1fr; } }
+        .def-box { background: #1a1a2a; border: 1px solid #2a2a40; border-radius: 10px; padding: 20px 22px; }
+        .def-box.deduction { border-top: 3px solid #c04040; }
+        .def-box.induction { border-top: 3px solid #4070c0; }
+        .def-label { font-family: sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #444460; margin-bottom: 8px; }
+        .def-box h3 { font-size: 18px; color: #d0d0e8; margin-bottom: 8px; }
+        .def-box p { font-size: 15px; color: #7070a0; margin-bottom: 10px; }
+        .def-box .example { font-style: italic; color: #505070; font-size: 13px; margin: 0; }
+        .verdict { display: inline-block; font-family: sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; margin-bottom: 12px; }
+        .verdict.induction { background: rgba(64,112,192,0.15); color: #6090d8; border: 1px solid #2a4080; }
+        .data-table-wrap { overflow-x: auto; margin: 28px 0; }
+        .data-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+        .data-table thead tr { border-bottom: 2px solid #2a2a40; }
+        .data-table th { padding: 8px 16px 8px 0; font-family: sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #444460; font-weight: 400; text-align: left; }
+        .data-table td { padding: 9px 16px 9px 0; color: #7070a0; border-bottom: 1px solid #1e1e30; vertical-align: top; }
+        .data-table tr:nth-child(even) td { background: rgba(255,255,255,0.015); }
+        .data-table td.mono { font-family: 'Courier New',monospace; font-style: italic; color: #a0a0c8; }
+        .data-table td.center { text-align: center; }
+        .puzzle-input { margin: 20px 0; background: #1a1a2a; border: 1px solid #2a2a40; border-radius: 10px; padding: 16px 18px; }
+        .puzzle-input label { display: block; font-family: sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #444460; margin-bottom: 8px; }
+        .puzzle-textarea { width: 100%; font-family: 'Georgia',serif; font-size: 15px; background: #12121e; border: 1px solid #2a2a40; border-radius: 6px; color: #a0a0c0; padding: 10px 14px; resize: vertical; min-height: 64px; outline: none; line-height: 1.6; transition: border-color 0.15s; }
+        .puzzle-textarea:focus { border-color: #4a4a70; }
+        .puzzle-textarea::placeholder { color: #2a2a40; font-style: italic; }
+        .task-prompt { margin: 28px 0; background: #1a1a2a; border: 1px solid #2a2a40; border-left: 3px solid #5050a0; border-radius: 0 8px 8px 0; padding: 18px 22px; font-size: 15px; font-family: sans-serif; color: #6868a0; line-height: 1.7; }
+        .locked-gate { margin: 32px 0; background: #1a1a2a; border: 1px solid #2a2a40; border-radius: 10px; padding: 36px 28px; text-align: center; }
+        .lock-icon { font-size: 26px; margin-bottom: 12px; opacity: 0.35; }
+        .locked-gate > p { color: #444460; font-size: 15px; font-family: sans-serif; margin-bottom: 18px; }
+        .hint-text { font-style: italic; font-family: 'Georgia',serif; color: #404058; font-size: 15px; margin-bottom: 18px; }
+        .pw-row { display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .pw-input { background: #12121e; border: 1px solid #2a2a40; border-radius: 8px; color: #a0a0d0; font-size: 15px; font-family: 'Courier New',monospace; padding: 10px 18px; letter-spacing: 4px; text-align: center; width: 200px; outline: none; }
+        .pw-input:focus { border-color: #4a4a70; }
+        .pw-btn { background: #2a2a44; border: 1px solid #3a3a58; border-radius: 8px; color: #a0a0d0; font-size: 14px; font-family: sans-serif; padding: 10px 20px; cursor: pointer; transition: background 0.2s; }
+        .pw-btn:hover { background: #363658; }
+        .pw-error { color: #a88ef0; font-size: 13px; font-family: sans-serif; margin-top: 12px; min-height: 18px; }
+        .revealed { display: none; margin-top: 24px; padding-top: 24px; border-top: 1px solid #2a2a40; }
+        .revealed.visible { display: block; }
+        .revealed h4 { font-size: 17px; color: #d0d0e8; margin-bottom: 14px; }
+        .revealed p { color: #ccc; margin-bottom: 14px; font-size: 16px; }
+        .revealed p:last-child { margin-bottom: 0; }
+        .mono-block { font-family: 'Courier New',monospace; font-size: 13px; line-height: 2; color: #7070a0; margin: 8px 0; }
+        .module-image { width: 100%; border-radius: 10px; border: 1px solid #2a2a40; display: block; margin: 0 0 10px; }
+        .image-caption { font-family: sans-serif; font-size: 12px; letter-spacing: 1px; color: #333348; text-align: center; margin-bottom: 28px; text-transform: uppercase; }
+        .progress-bar-wrap { display: flex; gap: 5px; margin-bottom: 24px; align-items: center; }
+        .prog-dot { width: 8px; height: 8px; border-radius: 50%; background: #2a2a40; transition: background 0.2s; flex-shrink: 0; }
+        .prog-dot.active { background: #e8e8f0; }
+        .prog-dot.done { background: #4070c0; }
+        .prog-label { font-family: sans-serif; font-size: 11px; letter-spacing: 1.5px; color: #444460; margin-left: auto; text-transform: uppercase; }
+        .bongard-card { background: #1a1a2a; border: 1px solid #2a2a40; border-radius: 10px; padding: 28px 28px 22px; display: none; animation: fadeIn 0.25s ease; }
+        .bongard-card.active { display: block; }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
+        .card-number { font-family: sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #444460; margin-bottom: 20px; }
+        .diff-badge { display: inline-block; font-family: sans-serif; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; padding: 2px 8px; border-radius: 10px; margin-left: 6px; vertical-align: middle; }
+        .diff-1 { background: rgba(77,186,128,0.12); color: #4dba80; border: 1px solid rgba(77,186,128,0.2); }
+        .diff-2 { background: rgba(64,112,192,0.12); color: #6090d8; border: 1px solid rgba(64,112,192,0.2); }
+        .diff-3 { background: rgba(208,160,80,0.12); color: #d0a050; border: 1px solid rgba(208,160,80,0.2); }
+        .diff-4 { background: rgba(192,64,64,0.12); color: #c04040; border: 1px solid rgba(192,64,64,0.2); }
+        .bongard-grid { display: grid; grid-template-columns: 1fr 32px 1fr; margin-bottom: 20px; align-items: stretch; }
+        .bg-side { display: flex; flex-direction: column; gap: 5px; }
+        .bg-side-label { font-family: sans-serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: #333348; margin-bottom: 3px; text-align: center; }
+        .bg-divider { display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        .bg-divider::before { content: ''; position: absolute; top: 0; bottom: 0; left: 50%; width: 1px; background: #1e1e30; }
+        .bg-divider span { background: #1a1a2a; padding: 4px 0; position: relative; z-index: 1; font-family: sans-serif; font-size: 11px; color: #333348; }
+        .bg-cell { background: #12121e; border: 1px solid #1e1e30; border-radius: 5px; display: flex; align-items: center; justify-content: center; aspect-ratio: 1.15; min-height: 68px; overflow: hidden; }
+        .bg-cell svg { width: 80%; height: 80%; display: block; }
+        .bg-cell svg [fill="#1a1714"] { fill: #c8c8e0 !important; }
+        .bg-cell svg [stroke="#1a1714"] { stroke: #c8c8e0 !important; }
+        .bg-cell svg [fill="#f5f1eb"] { fill: #12121e !important; }
+        .nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; }
+        .nav-btn { font-family: sans-serif; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; background: none; border: 1px solid #2a2a40; border-radius: 8px; padding: 8px 16px; cursor: pointer; color: #6060a0; transition: all 0.15s; }
+        .nav-btn:hover:not(:disabled) { border-color: #4a4a70; color: #a0a0d0; background: #1c1c2e; }
+        .nav-btn:disabled { opacity: 0.25; cursor: default; }
+        .nav-btn.primary { background: #2a2a44; color: #a0a0d0; border-color: #3a3a58; }
+        .nav-btn.primary:hover { background: #363658; border-color: #5a5a80; }
+        .rules-list { list-style: none; margin: 0; padding: 0; }
+        .rules-list li { display: grid; grid-template-columns: 2.5rem 1fr; gap: 14px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #1e1e30; align-items: start; }
+        .rules-list li:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .rnum { font-family: sans-serif; font-size: 11px; color: #444460; background: #12121e; border: 1px solid #1e1e30; border-radius: 4px; width: 2.2rem; height: 1.6rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 3px; }
+        .rbody strong { display: block; color: #d0d0e8; font-size: 16px; margin-bottom: 4px; }
+        .rbody p { font-size: 14px; color: #5a5a80; line-height: 1.6; margin: 0; }
+        .stat-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin: 28px 0; }
+        @media (max-width: 500px) { .stat-row { grid-template-columns: 1fr; } }
+        .stat-box { background: #1a1a2a; border: 1px solid #2a2a40; border-top: 3px solid #4070c0; border-radius: 10px; padding: 18px 16px; text-align: center; }
+        .stat-num { font-size: 32px; font-weight: 700; color: #d0d0e8; line-height: 1; margin-bottom: 6px; }
+        .stat-label { font-family: sans-serif; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: #444460; line-height: 1.5; }
+        .link-card { display: block; background: #1a1a2a; border: 1px solid #2a2a40; border-radius: 10px; padding: 16px 20px; margin-bottom: 10px; text-decoration: none; color: inherit; transition: border-color 0.15s, background 0.15s; }
+        .link-card:hover { border-color: #4070c0; background: #1c1c2e; }
+        .lc-label { font-family: sans-serif; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: #444460; margin-bottom: 5px; }
+        .lc-title { font-size: 17px; font-weight: 700; color: #d0d0e8; margin-bottom: 4px; }
+        .lc-desc { font-size: 14px; color: #5a5a80; margin: 0; }
+        .curriculum-steps { list-style: none; margin: 20px 0; padding: 0; counter-reset: step; }
+        .curriculum-steps li { counter-increment: step; display: grid; grid-template-columns: 2.2rem 1fr; gap: 14px; margin-bottom: 18px; align-items: start; }
+        .curriculum-steps li::before { content: counter(step); font-family: sans-serif; font-size: 12px; background: #2a2a44; color: #a0a0d0; width: 2rem; height: 2rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 3px; }
+        .curriculum-steps li strong { display: block; color: #d0d0e8; font-size: 16px; }
+        .curriculum-steps li em { font-size: 14px; color: #5a5a80; }
+        .homework-box { background: #1a1a2a; border: 1px solid #2a2a40; border-left: 3px solid #c04040; border-radius: 0 10px 10px 0; padding: 20px 24px; margin: 28px 0; }
+        .homework-label { font-family: sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #444460; margin-bottom: 12px; }
+        .hw-list { list-style: none; padding: 0; margin: 0 0 14px; }
+        .hw-list li { display: grid; grid-template-columns: 1.2rem 1fr; gap: 8px; margin-bottom: 8px; font-size: 14px; color: #6868a0; line-height: 1.6; }
+        .hw-list li::before { content: "—"; color: #333348; font-family: sans-serif; }
+        footer { text-align: center; padding: 40px 24px; color: #333; font-size: 14px; font-family: sans-serif; }
+        footer a { color: #444; }
+        footer a:hover { color: #888; }
+        @media (max-width: 620px) { .hero h1 { font-size: 28px; } h2 { font-size: 24px; } body { font-size: 16px; } .bongard-card { padding: 18px 14px 16px; } }
+    </style>
+</head>
+<body>
+
+<button class="lang-toggle" onclick="toggleLang()">DE</button>
+
+<div class="hero">
+    <div class="hero-tags">
+        <span class="tag" data-i18n="tag.type">mini-module</span>
+        <span class="tag">~90 min</span>
+        <span class="tag" data-i18n="tag.code">no-code</span>
+        <span class="tag" data-i18n="tag.ai">try-without-ai</span>
+        <span class="tag" data-i18n="tag.topic">reasoning</span>
+    </div>
+    <h1 data-i18n="hero.title">The Method of Holmes</h1>
+    <p class="subtitle" data-i18n="hero.sub">What detectives, scientists, and machines have in common, and where they differ.</p>
+</div>
+
+<div class="container">
+
+<!-- ── Intro ── -->
+<section>
+    <p style="font-style:italic;color:#888;margin-bottom:24px;" data-i18n="s1.lede">There is a famous line people quote when they want to sound precise: "Elementary, my dear Watson." Sherlock Holmes, the great logician, working from pure deduction. Except, almost nothing in that sentence is true.</p>
+    <p data-i18n="s1.p1">The phrase never appears in Conan Doyle's original stories. And Holmes, far from being a pure deductionist, is mostly doing something else entirely. Before we can catch the error, we need the two concepts.</p>
+
+    <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAkACQAAD/4QCeRXhpZgAATU0AKgAAAAgABQESAAMAAAABAAEAAAEaAAUAAAABAAAASgEbAAUAAAABAAAAUgEoAAMAAAABAAIAAIdpAAQAAAABAAAAWgAAAAAAAACQAAAAAQAAAJAAAAABAAOShgAHAAAAEgAAAISgAgAEAAAAAQAAAxKgAwAEAAAAAQAAAxYAAAAAQVNDSUkAAABTY3JlZW5zaG90/+EJIWh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8APD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNi4wLjAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIi8+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPD94cGFja2V0IGVuZD0idyI/PgD/7QA4UGhvdG9zaG9wIDMuMAA4QklNBAQAAAAAAAA4QklNBCUAAAAAABDUHYzZjwCyBOmACZjs+EJ+/+INIElDQ19QUk9GSUxFAAEBAAANEGFwcGwCEAAAbW50clJHQiBYWVogB+oAAQAHABcADAA3YWNzcEFQUEwAAAAAQVBQTAAAAAAAAAAAAAAAAAAAAAAAAPbWAAEAAAAA0y1hcHBsAAAAAAAAAAAAAAAAAAAAAAAAAAAA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" alt="Sixteen portrayals of Sherlock Holmes across film and television" class="module-image">
+    <p class="image-caption" data-i18n="img.caption">Sixteen portrayals of Sherlock Holmes, film, television, animation, 1916–2009</p>
+
+    <hr class="section-rule" style="margin:36px 0;">
+    <h2 data-i18n="s1.h2">Two Ways of Reasoning</h2>
+    <div class="def-pair">
+        <div class="def-box deduction">
+            <div class="def-label" data-i18n="def.method1">Method I</div>
+            <h3 data-i18n="def.ded">Deduction</h3>
+            <p data-i18n="def.ded.body">Reasoning from <strong>general principles</strong> to a <strong>specific, certain conclusion</strong>. If the premises are true and the logic holds, the conclusion cannot be false.</p>
+            <p class="example" data-i18n="def.ded.ex">All humans are mortal. Socrates is human. Therefore, Socrates is mortal.</p>
+        </div>
+        <div class="def-box induction">
+            <div class="def-label" data-i18n="def.method2">Method II</div>
+            <h3 data-i18n="def.ind">Induction</h3>
+            <p data-i18n="def.ind.body">Reasoning from <strong>specific observations</strong> to a <strong>general principle</strong>. The conclusion is probable, not guaranteed, but grows stronger with more evidence.</p>
+            <p class="example" data-i18n="def.ind.ex">Every raven I saw was black. Therefore, all ravens are probably black.</p>
+        </div>
+    </div>
+    <p data-i18n="s1.p2">The direction is what matters. Deduction goes <em>downward</em>, from the general to the specific. Induction goes <em>upward</em>, from specific cases, searching for the rule that would explain them.</p>
+    <p data-i18n="s1.p3">Scientists mostly induce. Mathematicians mostly deduce. Most humans do both without noticing which they are doing.</p>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Linguistic puzzles intro ── -->
+<section>
+    <h2 data-i18n="s2.h2">Deduction in Language</h2>
+    <p data-i18n="s2.p1">The puzzles below shift the terrain. Instead of visual patterns, you are given data from three invented languages, languages that do not exist and cannot be searched for. Each encodes something real that natural languages do: quantity, time and agency, the source of knowledge.</p>
+    <p data-i18n="s2.p2">This is what linguists actually do when they encounter an undocumented language. They induce the grammar from utterances. Then they use the induced rules to make precise, testable predictions.</p>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Puzzle I: Moku ── -->
+<section>
+    <h2 data-i18n="s3.h2">Puzzle I, The Language of Moku</h2>
+    <p data-i18n="s3.p1">The Moku people live on a small island. Their language has three words for quantity: <strong>baí</strong>, <strong>tiró</strong>, and <strong>poná</strong>. These are not translations of English number words. They carve up quantity differently.</p>
+    <p data-i18n="s3.p2">Below are ten observations. A Moku speaker is looking at a group of objects and uses one of the three words.</p>
+    <div class="data-table-wrap">
+        <table class="data-table">
+            <thead><tr><th data-i18n="t.objects">Objects</th><th style="text-align:center;" data-i18n="t.count">Count</th><th data-i18n="t.moku">Moku word</th></tr></thead>
+            <tbody>
+                <tr><td data-i18n="moku.r1">fish in a net</td><td class="mono center">1</td><td class="mono">baí</td></tr>
+                <tr><td data-i18n="moku.r2">coconuts on the ground</td><td class="mono center">3</td><td class="mono">tiró</td></tr>
+                <tr><td data-i18n="moku.r3">children in the water</td><td class="mono center">9</td><td class="mono">poná</td></tr>
+                <tr><td data-i18n="moku.r4">birds on the roof</td><td class="mono center">2</td><td class="mono">baí</td></tr>
+                <tr><td data-i18n="moku.r5">stones on the path</td><td class="mono center">7</td><td class="mono">tiró</td></tr>
+                <tr><td data-i18n="moku.r6">baskets in the hut</td><td class="mono center">15</td><td class="mono">poná</td></tr>
+                <tr><td data-i18n="moku.r7">canoes at the shore</td><td class="mono center">4</td><td class="mono">tiró</td></tr>
+                <tr><td data-i18n="moku.r8">stars visible tonight</td><td class="mono center">100</td><td class="mono">poná</td></tr>
+                <tr><td data-i18n="moku.r9">fires burning</td><td class="mono center">5</td><td class="mono">tiró</td></tr>
+                <tr><td data-i18n="moku.r10">men returning from fishing</td><td class="mono center">8</td><td class="mono">poná</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="puzzle-input"><label data-i18n="moku.q1">Question 1, What numerical range does each word cover?</label><textarea class="puzzle-textarea" placeholder="baí = …, tiró = …, poná = …"></textarea></div>
+    <div class="puzzle-input"><label data-i18n="moku.q2">Question 2, A speaker uses tiró. What can you conclude? What can you NOT conclude?</label><textarea class="puzzle-textarea" placeholder="You can conclude… You cannot conclude…"></textarea></div>
+    <div class="puzzle-input"><label data-i18n="moku.q3">Question 3, There are 6 fish in the water. Which word does the speaker use?</label><textarea class="puzzle-textarea" placeholder="The word is…"></textarea></div>
+    <div class="puzzle-input"><label data-i18n="moku.q4">Question 4, A speaker uses tiró about objects in a bag. Later there were 8. Was the speaker wrong?</label><textarea class="puzzle-textarea" placeholder="The speaker was / was not wrong because…"></textarea></div>
+    <div class="puzzle-input"><label data-i18n="moku.q5">Question 5, The English word "several" is closest to which Moku term? What would a translation lose?</label><textarea class="puzzle-textarea" placeholder="The closest term is… but they differ because…"></textarea></div>
+    <div class="locked-gate" id="gate-moku">
+        <div class="lock-icon">&#128274;</div>
+        <p data-i18n="gate.prompt">Enter the password to reveal the answers</p>
+        <div class="pw-row"><input class="pw-input" type="password" id="pw-moku" placeholder="· · · · · · · ·" onkeydown="if(event.key==='Enter')checkPw('pw-moku','gate-moku','rev-moku','err-moku')"><button class="pw-btn" onclick="checkPw('pw-moku','gate-moku','rev-moku','err-moku')" data-i18n="gate.btn">Reveal</button></div>
+        <div class="pw-error" id="err-moku"></div>
+    </div>
+    <div class="revealed" id="rev-moku">
+        <h4 data-i18n="ans.title">Answers</h4>
+        <p><strong>Q1.</strong> <em>baí</em> = 1–2. <em>tiró</em> = 3–7. <em>poná</em> = 8 and above.</p>
+        <p><strong>Q2.</strong> You can conclude there are between 3 and 7 objects. You cannot conclude the exact number, nor anything about what the objects are.</p>
+        <p><strong>Q3.</strong> 6 falls within 3–7, so the speaker uses <em>tiró</em>.</p>
+        <p><strong>Q4.</strong> The speaker was not wrong. At the moment of speaking, if they believed there were 3–7 objects, <em>tiró</em> was correct. Moku quantity words describe the speaker's assessment at time of utterance, not an objective count.</p>
+        <p><strong>Q5.</strong> <em>tiró</em> is closest to "several." They differ because <em>tiró</em> has precise categorical boundaries (3–7) while "several" is vague and context-dependent.</p>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Puzzle II: Voranu ── -->
+<section>
+    <h2 data-i18n="s4.h2">Puzzle II, The Verbs of Voranu</h2>
+    <p data-i18n="s4.p1">Voranu is a synthetic language with a strict verb structure. Every Voranu verb is built from pieces in a fixed order. Deduce what each piece means, then translate sentences you have never seen.</p>
+    <p data-i18n="s4.p2">Eight Voranu sentences with their English translations. Study them carefully.</p>
+    <div class="data-table-wrap">
+        <table class="data-table">
+            <thead><tr><th data-i18n="t.voranu">Voranu</th><th data-i18n="t.english">English</th></tr></thead>
+            <tbody>
+                <tr><td class="mono">ka-en-vora</td><td data-i18n="vor.r1">I am speaking</td></tr>
+                <tr><td class="mono">mo-en-vora</td><td data-i18n="vor.r2">you are speaking</td></tr>
+                <tr><td class="mono">ti-en-vora</td><td data-i18n="vor.r3">she is speaking</td></tr>
+                <tr><td class="mono">ka-ol-vora</td><td data-i18n="vor.r4">I spoke</td></tr>
+                <tr><td class="mono">mo-avu-vora</td><td data-i18n="vor.r5">you will speak</td></tr>
+                <tr><td class="mono">ka-en-lenu</td><td data-i18n="vor.r6">I am seeing</td></tr>
+                <tr><td class="mono">ti-ol-lenu-ko</td><td data-i18n="vor.r7">she saw you</td></tr>
+                <tr><td class="mono">ka-avu-lenu-ri</td><td data-i18n="vor.r8">I will see her</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="puzzle-input"><label data-i18n="vor.q1">Question 1, What does each morpheme mean?</label><textarea class="puzzle-textarea" style="min-height:130px;" placeholder="ka- = …&#10;mo- = …&#10;ti- = …&#10;-en- = …&#10;-ol- = …&#10;-avu- = …&#10;vora = …&#10;lenu = …&#10;-ko = …&#10;-ri = …"></textarea></div>
+    <div class="puzzle-input"><label data-i18n="vor.q2">Question 2, Translate into English: mo-ol-lenu-na</label><textarea class="puzzle-textarea" placeholder="Translation: …"></textarea></div>
+    <div class="puzzle-input"><label data-i18n="vor.q3">Question 3, Translate into Voranu: "she will speak"</label><textarea class="puzzle-textarea" placeholder="Voranu: …"></textarea></div>
+    <div class="puzzle-input"><label data-i18n="vor.q4">Question 4, Translate into Voranu: "I saw you"</label><textarea class="puzzle-textarea" placeholder="Voranu: …"></textarea></div>
+    <div class="puzzle-input"><label data-i18n="vor.q5">Question 5, New verb damu = "to give." How do you say "you will give to her"? What assumption are you making?</label><textarea class="puzzle-textarea" placeholder="Voranu: … Assumption: …"></textarea></div>
+    <div class="locked-gate" id="gate-voranu">
+        <div class="lock-icon">&#128274;</div>
+        <p data-i18n="gate.prompt">Enter the password to reveal the answers</p>
+        <div class="pw-row"><input class="pw-input" type="password" id="pw-voranu" placeholder="· · · · · · · ·" onkeydown="if(event.key==='Enter')checkPw('pw-voranu','gate-voranu','rev-voranu','err-voranu')"><button class="pw-btn" onclick="checkPw('pw-voranu','gate-voranu','rev-voranu','err-voranu')" data-i18n="gate.btn">Reveal</button></div>
+        <div class="pw-error" id="err-voranu"></div>
+    </div>
+    <div class="revealed" id="rev-voranu">
+        <h4 data-i18n="ans.title">Answers</h4>
+        <p><strong>Q1:</strong></p>
+        <div class="mono-block">ka- = I (subject) · mo- = you (subject) · ti- = she/he (subject)<br>-en- = present · -ol- = past · -avu- = future<br>vora = speak · lenu = see<br>-ko = you (object) · -ri = her/him (object) · -na = me (object)</div>
+        <p><strong>Q2.</strong> <em>mo-ol-lenu-na</em> → "you saw me"</p>
+        <p><strong>Q3.</strong> "she will speak" → <strong>ti-avu-vora</strong></p>
+        <p><strong>Q4.</strong> "I saw you" → <strong>ka-ol-lenu-ko</strong></p>
+        <p><strong>Q5.</strong> "you will give to her" → <strong>mo-avu-damu-ri</strong>. The assumption is that <em>damu</em> follows the same SUBJECT-TENSE-ROOT-OBJECT template. Reasonable, but still a hypothesis.</p>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Puzzle III: Velanic ── -->
+<section>
+    <h2 data-i18n="s5.h2">Puzzle III, What Velanic Speakers Know</h2>
+    <p data-i18n="s5.p1">In Velanic, every statement must include a suffix indicating <em>how the speaker knows</em> what they are saying. This is called <strong>evidentiality</strong>, found in many world languages, though not in English.</p>
+    <p data-i18n="s5.p2">Three Velanic evidential suffixes. Their names are not given. Study the nine sentences below.</p>
+    <div class="data-table-wrap">
+        <table class="data-table">
+            <thead><tr><th data-i18n="t.velanic" style="width:28%;">Velanic sentence</th><th data-i18n="t.meaning" style="width:26%;">English meaning</th><th data-i18n="t.situation">Speaker's situation</th></tr></thead>
+            <tbody>
+                <tr><td class="mono">Nara velu-<strong>om</strong></td><td data-i18n="vel.r1m">The river is rising</td><td data-i18n="vel.r1s" style="font-size:14px;color:#5a5a80;">Standing at the riverbank, watching the water level climb.</td></tr>
+                <tr><td class="mono">Nara velu-<strong>ef</strong></td><td data-i18n="vel.r2m">The river is rising</td><td data-i18n="vel.r2s" style="font-size:14px;color:#5a5a80;">Inland, sky darkening, distant thunder. Has not seen the river.</td></tr>
+                <tr><td class="mono">Nara velu-<strong>alu</strong></td><td data-i18n="vel.r3m">The river is rising</td><td data-i18n="vel.r3s" style="font-size:14px;color:#5a5a80;">Just told by a neighbour who came running from the riverbank.</td></tr>
+                <tr><td class="mono">Miko dara-<strong>om</strong></td><td data-i18n="vel.r4m">Miko is sick</td><td data-i18n="vel.r4s" style="font-size:14px;color:#5a5a80;">Visited Miko this morning and saw her lying in bed, pale and feverish.</td></tr>
+                <tr><td class="mono">Miko dara-<strong>ef</strong></td><td data-i18n="vel.r5m">Miko is sick</td><td data-i18n="vel.r5s" style="font-size:14px;color:#5a5a80;">Has not seen Miko, but notices her untouched food bowl and her absence.</td></tr>
+                <tr><td class="mono">Miko dara-<strong>alu</strong></td><td data-i18n="vel.r6m">Miko is sick</td><td data-i18n="vel.r6s" style="font-size:14px;color:#5a5a80;">Heard it from Miko's sister at the market.</td></tr>
+                <tr><td class="mono">Tovo pari-<strong>om</strong></td><td data-i18n="vel.r7m">Tovo left the village</td><td data-i18n="vel.r7s" style="font-size:14px;color:#5a5a80;">Watched Tovo walk away down the path with a bag.</td></tr>
+                <tr><td class="mono">Tovo pari-<strong>ef</strong></td><td data-i18n="vel.r8m">Tovo left the village</td><td data-i18n="vel.r8s" style="font-size:14px;color:#5a5a80;">Found Tovo's house empty, his fire cold, his boat gone from the shore.</td></tr>
+                <tr><td class="mono">Tovo pari-<strong>alu</strong></td><td data-i18n="vel.r9m">Tovo left the village</td><td data-i18n="vel.r9s" style="font-size:14px;color:#5a5a80;">The speaker's child said Tovo had said goodbye before leaving.</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="puzzle-input"><label data-i18n="vel.q1">Question 1, What does each suffix encode? Describe -om, -ef, and -alu in your own words.</label><textarea class="puzzle-textarea" style="min-height:100px;" placeholder="-om = …&#10;-ef = …&#10;-alu = …"></textarea></div>
+    <div class="puzzle-input"><label data-i18n="vel.q2">Question 2, What does Velanic force speakers to do that English does not?</label><textarea class="puzzle-textarea" placeholder="Velanic forces speakers to…"></textarea></div>
+    <div class="puzzle-input"><label data-i18n="vel.q3">Question 3, Which suffix does the doctor use? The journalist? The child who hears the wolf?</label><textarea class="puzzle-textarea" style="min-height:100px;" placeholder="Doctor: …&#10;Journalist: …&#10;Child: …"></textarea></div>
+    <div class="puzzle-input"><label data-i18n="vel.q4">Question 4, Which suffix would Holmes use when declaring "Afghanistan"? Which would Watson use recounting the scene to Lestrade?</label><textarea class="puzzle-textarea" style="min-height:100px;" placeholder="Holmes would use … because …&#10;Watson would use … because …"></textarea></div>
+    <div class="puzzle-input"><label data-i18n="vel.q5">Question 5, A speaker uses -alu but what they were told was false. Were they lying?</label><textarea class="puzzle-textarea" placeholder="The speaker was / was not lying because…"></textarea></div>
+    <div class="locked-gate" id="gate-velanic">
+        <div class="lock-icon">&#128274;</div>
+        <p data-i18n="gate.prompt">Enter the password to reveal the answers</p>
+        <div class="pw-row"><input class="pw-input" type="password" id="pw-velanic" placeholder="· · · · · · · ·" onkeydown="if(event.key==='Enter')checkPw('pw-velanic','gate-velanic','rev-velanic','err-velanic')"><button class="pw-btn" onclick="checkPw('pw-velanic','gate-velanic','rev-velanic','err-velanic')" data-i18n="gate.btn">Reveal</button></div>
+        <div class="pw-error" id="err-velanic"></div>
+    </div>
+    <div class="revealed" id="rev-velanic">
+        <h4 data-i18n="ans.title">Answers</h4>
+        <p><strong>Q1.</strong> <em>-om</em> = direct evidence: personally witnessed or perceived. <em>-ef</em> = inferential: reasoning from observable evidence. <em>-alu</em> = reportative: received from another person.</p>
+        <p><strong>Q2.</strong> Velanic forces speakers to grammatically commit to their <em>source of knowledge</em> every time they make a statement. You cannot simply say something is true, you must also say how you know.</p>
+        <p><strong>Q3.</strong> Doctor directly examined the patient, <em>-om</em>. Journalist read a report, <em>-alu</em>. Child heard the wolf, <em>-om</em>, since hearing is direct sensory experience.</p>
+        <p><strong>Q4.</strong> Holmes would use <em>-ef</em> (inferential), he reasoned to Afghanistan from physical clues, did not witness it. Watson, retelling as a direct witness, would use <em>-om</em> for what he personally saw.</p>
+        <p><strong>Q5.</strong> The speaker was not lying. They accurately reported their source: they were told. Evidential suffixes encode the <em>source and mode of knowledge</em>, not the truth of the proposition.</p>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── The Detective's Method ── -->
+<section>
+    <h2 data-i18n="s6.h2">The Detective's Method</h2>
+    <p data-i18n="s6.p1">Now read how Holmes actually explains his own thinking, from <em>A Study in Scarlet</em>, when Watson asks how Holmes could deduce he had been in Afghanistan:</p>
+    <div class="bq">
+        <p data-i18n="s6.quote">"Here is a gentleman of a medical type, but with the air of a military man. Clearly an army doctor, then. He has just come from the tropics, for his face is dark, and that is not the natural tint of his skin, for his wrists are fair. He has undergone hardship and sickness, as his haggard face says clearly. His left arm has been injured. He holds it in a stiff and unnatural manner. Where in the tropics could an English army doctor have seen much hardship and got his arm wounded? Clearly in Afghanistan."</p>
+        <cite data-i18n="s6.cite">,  Arthur Conan Doyle, A Study in Scarlet (1887)</cite>
+    </div>
+    <p data-i18n="s6.p2">Holmes calls this "deduction." Doyle calls it deduction. It has been called deduction for over a hundred years. There is a catch.</p>
+    <div class="locked-gate" id="gate-holmes">
+        <div class="lock-icon">&#128274;</div>
+        <p data-i18n="s6.gate.prompt">Think first, then enter the password to reveal the analysis</p>
+        <p class="hint-text" data-i18n="s6.gate.hint">Is Holmes actually using deduction or induction? What direction does his reasoning move, from a general rule toward a conclusion, or from specific clues toward a general explanation?</p>
+        <div class="pw-row"><input class="pw-input" type="password" id="pw-holmes" placeholder="· · · · · · · ·" onkeydown="if(event.key==='Enter')checkPw('pw-holmes','gate-holmes','rev-holmes','err-holmes')"><button class="pw-btn" onclick="checkPw('pw-holmes','gate-holmes','rev-holmes','err-holmes')" data-i18n="gate.btn">Reveal</button></div>
+        <div class="pw-error" id="err-holmes"></div>
+    </div>
+    <div class="revealed" id="rev-holmes">
+        <span class="verdict induction" data-i18n="s6.verdict">Induction, mostly</span>
+        <h4 data-i18n="s6.rev.h">Doyle got it wrong.</h4>
+        <p data-i18n="s6.rev.p1">Holmes is not applying a known general rule to reach a certain conclusion. He is working in the <em>opposite direction</em>: observing specific clues and inferring the most probable general explanation. That is induction. Or more precisely, <strong>abductive reasoning</strong>: inference to the best explanation.</p>
+        <p data-i18n="s6.rev.p2">True deduction would look like this: <em>"All army doctors returning from Afghanistan hold their arm stiffly. This man holds his arm stiffly. Therefore he is an army doctor from Afghanistan."</em> That is deduction, and also bad logic. Holmes reasons from evidence <em>toward</em> the hypothesis, not from the hypothesis <em>toward</em> the evidence.</p>
+        <p data-i18n="s6.rev.p3">His conclusions are not <em>certain</em>, they are the most probable explanation given the data. He is a scientist, not a logician. He can be wrong. Occasionally, he is.</p>
+    </div>
+    <div class="task-prompt" style="margin-top:28px;">
+        <strong data-i18n="s6.link.label">Want to see the method in action?</strong>
+        <span data-i18n="s6.link.body"> The BBC series dramatises Holmes's inductive leaps better than most adaptations, the reasoning process is almost visible in slow motion.</span><br>
+        <a href="https://www.imdb.com/title/tt1475582/" target="_blank" data-i18n="s6.link.a">▶ Sherlock (BBC, 2010–2017) on IMDb</a>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Bongard intro ── -->
+<section>
+    <h2 data-i18n="s7.h2">Seeing the Rule</h2>
+    <p data-i18n="s7.p1">In 1967, Russian computer scientist Mikhail Bongard published a book containing 100 visual problems. Each problem consists of two groups of six images. Every image on the left satisfies a hidden rule. Every image on the right violates it. The task: <strong>find the rule</strong>.</p>
+    <p data-i18n="s7.p2">Bongard problems are pure induction. No formula, no rulebook. You observe. You hypothesise. You check. You revise.</p>
+    <p data-i18n="s7.p3">The ten puzzles below progress from transparent to subtle. For each one, write down the rule you think separates left from right.</p>
+</section>
+
+<section id="carousel">
+    <div class="progress-bar-wrap" id="progress-bar">
+        <span class="prog-label" id="prog-label">Puzzle 1 of 10</span>
+    </div>
+    <!-- P1 -->
+    <div class="bongard-card active" data-idx="0">
+        <div class="card-number">Puzzle 01 <span class="diff-badge diff-1" data-i18n="diff.warmup">Warm-up</span></div>
+        <div class="bongard-grid">
+            <div class="bg-side"><div class="bg-side-label" data-i18n="bg.yes">Left, YES</div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="8" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><rect x="22" y="22" width="16" height="16" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="30,20 38,40 22,40" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="10" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><rect x="20" y="20" width="20" height="20" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="30,16 42,44 18,44" fill="#1a1714"/></svg></div>
+            </div>
+            <div class="bg-divider"><span>vs</span></div>
+            <div class="bg-side"><div class="bg-side-label" data-i18n="bg.no">Right, NO</div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="22" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><rect x="8" y="8" width="44" height="44" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="30,4 56,56 4,56" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="25" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><rect x="5" y="5" width="50" height="50" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="30,6 54,54 6,54" fill="#1a1714"/></svg></div>
+            </div>
+        </div>
+        <div class="puzzle-input"><label data-i18n="bp.rule">Your rule, what separates left from right?</label><textarea class="puzzle-textarea" placeholder="Write your hypothesis here…"></textarea></div>
+        <div class="nav-row"><button class="nav-btn" disabled data-i18n="nav.prev">← Previous</button><button class="nav-btn primary" onclick="showCard(1)" data-i18n="nav.next">Next →</button></div>
+    </div>
+    <!-- P2 -->
+    <div class="bongard-card" data-idx="1">
+        <div class="card-number">Puzzle 02 <span class="diff-badge diff-1" data-i18n="diff.warmup">Warm-up</span></div>
+        <div class="bongard-grid">
+            <div class="bg-side"><div class="bg-side-label" data-i18n="bg.yes">Left, YES</div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><rect x="10" y="10" width="40" height="40" fill="none" stroke="#1a1714" stroke-width="2"/><circle cx="30" cy="30" r="6" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="22" fill="none" stroke="#1a1714" stroke-width="2"/><rect x="24" y="24" width="12" height="12" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="30,6 54,54 6,54" fill="none" stroke="#1a1714" stroke-width="2"/><circle cx="30" cy="36" r="5" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><rect x="8" y="8" width="44" height="44" fill="none" stroke="#1a1714" stroke-width="2"/><polygon points="30,20 38,40 22,40" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="24" fill="none" stroke="#1a1714" stroke-width="2"/><polygon points="30,18 42,42 18,42" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="30,6 54,54 6,54" fill="none" stroke="#1a1714" stroke-width="2"/><rect x="24" y="30" width="12" height="12" fill="#1a1714"/></svg></div>
+            </div>
+            <div class="bg-divider"><span>vs</span></div>
+            <div class="bg-side"><div class="bg-side-label" data-i18n="bg.no">Right, NO</div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><rect x="10" y="10" width="40" height="40" fill="none" stroke="#1a1714" stroke-width="2"/><circle cx="8" cy="8" r="5" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="22" fill="none" stroke="#1a1714" stroke-width="2"/><rect x="4" y="4" width="10" height="10" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="30,6 54,54 6,54" fill="none" stroke="#1a1714" stroke-width="2"/><circle cx="8" cy="8" r="4" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><rect x="8" y="8" width="44" height="44" fill="none" stroke="#1a1714" stroke-width="2"/><circle cx="56" cy="30" r="4" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="22" fill="none" stroke="#1a1714" stroke-width="2"/><rect x="52" y="20" width="8" height="8" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="30,6 54,54 6,54" fill="none" stroke="#1a1714" stroke-width="2"/><circle cx="54" cy="54" r="4" fill="#1a1714"/></svg></div>
+            </div>
+        </div>
+        <div class="puzzle-input"><label data-i18n="bp.rule">Your rule, what separates left from right?</label><textarea class="puzzle-textarea" placeholder="Write your hypothesis here…"></textarea></div>
+        <div class="nav-row"><button class="nav-btn" onclick="showCard(0)" data-i18n="nav.prev">← Previous</button><button class="nav-btn primary" onclick="showCard(2)" data-i18n="nav.next">Next →</button></div>
+    </div>
+    <!-- P3 -->
+    <div class="bongard-card" data-idx="2">
+        <div class="card-number">Puzzle 03 <span class="diff-badge diff-1" data-i18n="diff.warmup">Warm-up</span></div>
+        <div class="bongard-grid">
+            <div class="bg-side"><div class="bg-side-label" data-i18n="bg.yes">Left, YES</div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><circle cx="20" cy="30" r="5" fill="#1a1714"/><circle cx="40" cy="30" r="5" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><rect x="12" y="24" width="12" height="12" fill="#1a1714"/><rect x="36" y="24" width="12" height="12" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="20,22 28,38 12,38" fill="#1a1714"/><polygon points="40,22 48,38 32,38" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><circle cx="20" cy="30" r="7" fill="#1a1714"/><circle cx="40" cy="30" r="7" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><rect x="10" y="22" width="14" height="14" fill="#1a1714"/><rect x="36" y="22" width="14" height="14" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><circle cx="18" cy="30" r="6" fill="#1a1714"/><circle cx="42" cy="30" r="6" fill="#1a1714"/></svg></div>
+            </div>
+            <div class="bg-divider"><span>vs</span></div>
+            <div class="bg-side"><div class="bg-side-label" data-i18n="bg.no">Right, NO</div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><circle cx="15" cy="30" r="5" fill="#1a1714"/><circle cx="30" cy="30" r="5" fill="#1a1714"/><circle cx="45" cy="30" r="5" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><rect x="8" y="25" width="10" height="10" fill="#1a1714"/><rect x="25" y="25" width="10" height="10" fill="#1a1714"/><rect x="42" y="25" width="10" height="10" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><circle cx="15" cy="30" r="4" fill="#1a1714"/><circle cx="30" cy="30" r="4" fill="#1a1714"/><circle cx="45" cy="30" r="4" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="15,22 21,34 9,34" fill="#1a1714"/><polygon points="30,22 36,34 24,34" fill="#1a1714"/><polygon points="45,22 51,34 39,34" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><rect x="6" y="24" width="12" height="12" fill="#1a1714"/><rect x="24" y="24" width="12" height="12" fill="#1a1714"/><rect x="42" y="24" width="12" height="12" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><circle cx="14" cy="30" r="5" fill="#1a1714"/><circle cx="30" cy="30" r="5" fill="#1a1714"/><circle cx="46" cy="30" r="5" fill="#1a1714"/></svg></div>
+            </div>
+        </div>
+        <div class="puzzle-input"><label data-i18n="bp.rule">Your rule, what separates left from right?</label><textarea class="puzzle-textarea" placeholder="Write your hypothesis here…"></textarea></div>
+        <div class="nav-row"><button class="nav-btn" onclick="showCard(1)" data-i18n="nav.prev">← Previous</button><button class="nav-btn primary" onclick="showCard(3)" data-i18n="nav.next">Next →</button></div>
+    </div>
+    <!-- P4 -->
+    <div class="bongard-card" data-idx="3">
+        <div class="card-number">Puzzle 04 <span class="diff-badge diff-2" data-i18n="diff.harder">Harder</span></div>
+        <div class="bongard-grid">
+            <div class="bg-side"><div class="bg-side-label" data-i18n="bg.yes">Left, YES</div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="8,20 38,20 38,10 52,30 38,50 38,40 8,40" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><path d="M30,8 L52,50 Q30,38 8,50 Z" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="30,6 36,24 54,24 40,36 46,54 30,42 14,54 20,36 6,24 24,24" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="22,8 38,8 38,22 52,22 52,38 38,38 38,52 22,52 22,38 8,38 8,22 22,22" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><path d="M30,6 A24,24 0 1,1 30,54 A14,18 0 1,0 30,6 Z" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="10,10 26,10 26,42 50,42 50,52 10,52" fill="#1a1714"/></svg></div>
+            </div>
+            <div class="bg-divider"><span>vs</span></div>
+            <div class="bg-side"><div class="bg-side-label" data-i18n="bg.no">Right, NO</div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="22" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="30,6 54,52 6,52" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><rect x="8" y="8" width="44" height="44" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="30,6 54,22 46,50 14,50 6,22" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><ellipse cx="30" cy="30" rx="26" ry="18" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="30,6 52,18 52,42 30,54 8,42 8,18" fill="#1a1714"/></svg></div>
+            </div>
+        </div>
+        <div class="puzzle-input"><label data-i18n="bp.rule">Your rule, what separates left from right?</label><textarea class="puzzle-textarea" placeholder="Write your hypothesis here…"></textarea></div>
+        <div class="nav-row"><button class="nav-btn" onclick="showCard(2)" data-i18n="nav.prev">← Previous</button><button class="nav-btn primary" onclick="showCard(4)" data-i18n="nav.next">Next →</button></div>
+    </div>
+    <!-- P5 -->
+    <div class="bongard-card" data-idx="4">
+        <div class="card-number">Puzzle 05 <span class="diff-badge diff-2" data-i18n="diff.harder">Harder</span></div>
+        <div class="bongard-grid">
+            <div class="bg-side"><div class="bg-side-label" data-i18n="bg.yes">Left, YES</div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="22" fill="#1a1714"/><circle cx="30" cy="30" r="12" fill="#f5f1eb"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><rect x="6" y="6" width="48" height="48" fill="#1a1714"/><rect x="16" y="16" width="28" height="28" fill="#f5f1eb"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="30,4 56,52 4,52" fill="#1a1714"/><polygon points="30,18 44,44 16,44" fill="#f5f1eb"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><ellipse cx="30" cy="30" rx="24" ry="16" fill="#1a1714"/><ellipse cx="30" cy="30" rx="14" ry="7" fill="#f5f1eb"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="30,4 54,17 54,43 30,56 6,43 6,17" fill="#1a1714"/><polygon points="30,16 44,24 44,36 30,44 16,36 16,24" fill="#f5f1eb"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><rect x="6" y="12" width="48" height="36" rx="8" fill="#1a1714"/><rect x="16" y="20" width="28" height="20" rx="4" fill="#f5f1eb"/></svg></div>
+            </div>
+            <div class="bg-divider"><span>vs</span></div>
+            <div class="bg-side"><div class="bg-side-label" data-i18n="bg.no">Right, NO</div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="22" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><rect x="8" y="8" width="44" height="44" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="30,6 54,52 6,52" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><ellipse cx="30" cy="30" rx="26" ry="16" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="30,6 52,18 52,42 30,54 8,42 8,18" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><rect x="6" y="12" width="48" height="36" rx="8" fill="#1a1714"/></svg></div>
+            </div>
+        </div>
+        <div class="puzzle-input"><label data-i18n="bp.rule">Your rule, what separates left from right?</label><textarea class="puzzle-textarea" placeholder="Write your hypothesis here…"></textarea></div>
+        <div class="nav-row"><button class="nav-btn" onclick="showCard(3)" data-i18n="nav.prev">← Previous</button><button class="nav-btn primary" onclick="showCard(5)" data-i18n="nav.next">Next →</button></div>
+    </div>
+    <!-- P6 -->
+    <div class="bongard-card" data-idx="5">
+        <div class="card-number">Puzzle 06 <span class="diff-badge diff-2" data-i18n="diff.harder">Harder</span></div>
+        <div class="bongard-grid">
+            <div class="bg-side"><div class="bg-side-label" data-i18n="bg.yes">Left, YES</div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="30,8 54,52 6,52" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="30,6 50,28 38,28 38,54 22,54 22,28 10,28" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><path d="M30,48 C10,34 4,20 14,12 C20,8 28,12 30,18 C32,12 40,8 46,12 C56,20 50,34 30,48 Z" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="30,6 54,30 30,54 6,30" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="8,10 52,30 8,50" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="30,6 52,18 52,42 30,54 8,42 8,18" fill="#1a1714"/></svg></div>
+            </div>
+            <div class="bg-divider"><span>vs</span></div>
+            <div class="bg-side"><div class="bg-side-label" data-i18n="bg.no">Right, NO</div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="10,50 20,8 54,50" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="8,8 8,52 52,52" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="10,10 26,10 26,42 50,42 50,52 10,52" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="12,10 50,16 44,52 8,46" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="6,6 32,14 22,24 50,52 40,54 12,26 4,36" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="12,8 50,12 54,38 30,54 6,42" fill="#1a1714"/></svg></div>
+            </div>
+        </div>
+        <div class="puzzle-input"><label data-i18n="bp.rule">Your rule, what separates left from right?</label><textarea class="puzzle-textarea" placeholder="Write your hypothesis here…"></textarea></div>
+        <div class="nav-row"><button class="nav-btn" onclick="showCard(4)" data-i18n="nav.prev">← Previous</button><button class="nav-btn primary" onclick="showCard(6)" data-i18n="nav.next">Next →</button></div>
+    </div>
+    <!-- P7 -->
+    <div class="bongard-card" data-idx="6">
+        <div class="card-number">Puzzle 07 <span class="diff-badge diff-3" data-i18n="diff.hard">Hard</span></div>
+        <div class="bongard-grid">
+            <div class="bg-side"><div class="bg-side-label" data-i18n="bg.yes">Left, YES</div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="10,48 20,28 30,48" fill="#1a1714"/><polygon points="24,48 34,28 44,48" fill="#1a1714"/><polygon points="38,48 48,28 58,48" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><rect x="4" y="4" width="24" height="24" fill="#1a1714"/><rect x="32" y="4" width="24" height="24" fill="#1a1714"/><rect x="4" y="32" width="24" height="24" fill="#1a1714"/><rect x="32" y="32" width="24" height="24" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="30,6 42,28 18,28" fill="#1a1714"/><polygon points="14,52 26,32 2,32" fill="#1a1714"/><polygon points="46,52 58,32 34,32" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="30,4 46,16 40,36 20,36 14,16" fill="none" stroke="#1a1714" stroke-width="2"/><circle cx="14" cy="46" r="4" fill="#1a1714"/><circle cx="24" cy="52" r="4" fill="#1a1714"/><circle cx="36" cy="52" r="4" fill="#1a1714"/><circle cx="46" cy="46" r="4" fill="#1a1714"/><circle cx="30" cy="42" r="4" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><rect x="14" y="14" width="32" height="32" fill="none" stroke="#1a1714" stroke-width="2"/><circle cx="14" cy="46" r="5" fill="#1a1714"/><circle cx="46" cy="46" r="5" fill="#1a1714"/><circle cx="14" cy="14" r="5" fill="#1a1714"/><circle cx="46" cy="14" r="5" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="30,6 54,50 6,50" fill="none" stroke="#1a1714" stroke-width="2"/><circle cx="30" cy="22" r="6" fill="#1a1714"/><circle cx="16" cy="44" r="6" fill="#1a1714"/><circle cx="44" cy="44" r="6" fill="#1a1714"/></svg></div>
+            </div>
+            <div class="bg-divider"><span>vs</span></div>
+            <div class="bg-side"><div class="bg-side-label" data-i18n="bg.no">Right, NO</div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="8,52 18,32 28,52" fill="#1a1714"/><polygon points="22,52 32,32 42,52" fill="#1a1714"/><polygon points="36,52 46,32 56,52" fill="#1a1714"/><polygon points="15,28 25,8 35,28" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><rect x="4" y="18" width="16" height="16" fill="#1a1714"/><rect x="22" y="18" width="16" height="16" fill="#1a1714"/><rect x="40" y="18" width="16" height="16" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="16,52 28,20 40,52" fill="#1a1714"/><polygon points="22,16 34,16 28,4" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><rect x="2" y="20" width="12" height="12" fill="#1a1714"/><rect x="16" y="20" width="12" height="12" fill="#1a1714"/><rect x="30" y="20" width="12" height="12" fill="#1a1714"/><rect x="44" y="20" width="12" height="12" fill="#1a1714"/><rect x="23" y="36" width="12" height="12" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="18,8 30,4 38,14 34,28 10,28" fill="#1a1714"/><polygon points="26,36 42,32 50,42 44,54 22,54" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="14,30 22,14 30,30" fill="#1a1714"/><polygon points="30,30 38,14 46,30" fill="#1a1714"/><polygon points="8,54 16,38 24,54" fill="#1a1714"/><polygon points="36,54 44,38 52,54" fill="#1a1714"/></svg></div>
+            </div>
+        </div>
+        <div class="puzzle-input"><label data-i18n="bp.rule">Your rule, what separates left from right?</label><textarea class="puzzle-textarea" placeholder="Write your hypothesis here…"></textarea></div>
+        <div class="nav-row"><button class="nav-btn" onclick="showCard(5)" data-i18n="nav.prev">← Previous</button><button class="nav-btn primary" onclick="showCard(7)" data-i18n="nav.next">Next →</button></div>
+    </div>
+    <!-- P8 -->
+    <div class="bongard-card" data-idx="7">
+        <div class="card-number">Puzzle 08 <span class="diff-badge diff-3" data-i18n="diff.hard">Hard</span></div>
+        <div class="bongard-grid">
+            <div class="bg-side"><div class="bg-side-label" data-i18n="bg.yes">Left, YES</div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><circle cx="12" cy="30" r="5" fill="#1a1714"/><circle cx="30" cy="30" r="9" fill="#1a1714"/><circle cx="50" cy="30" r="13" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><rect x="6" y="24" width="10" height="10" fill="#1a1714"/><rect x="22" y="18" width="16" height="16" fill="#1a1714"/><rect x="40" y="10" width="22" height="22" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="10,44 16,32 22,44" fill="#1a1714"/><polygon points="24,48 34,28 44,48" fill="#1a1714"/><polygon points="38,52 52,24 66,52" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><circle cx="10" cy="30" r="5" fill="#1a1714"/><rect x="20" y="22" width="14" height="14" fill="#1a1714"/><polygon points="38,10 56,50 20,50" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><circle cx="10" cy="34" r="4" fill="#1a1714"/><circle cx="28" cy="32" r="8" fill="#1a1714"/><circle cx="50" cy="28" r="14" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><rect x="4" y="26" width="8" height="8" fill="#1a1714"/><rect x="16" y="20" width="14" height="14" fill="#1a1714"/><rect x="34" y="10" width="24" height="24" fill="#1a1714"/></svg></div>
+            </div>
+            <div class="bg-divider"><span>vs</span></div>
+            <div class="bg-side"><div class="bg-side-label" data-i18n="bg.no">Right, NO</div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><circle cx="12" cy="30" r="8" fill="#1a1714"/><circle cx="30" cy="30" r="8" fill="#1a1714"/><circle cx="48" cy="30" r="8" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><circle cx="12" cy="28" r="13" fill="#1a1714"/><circle cx="32" cy="30" r="9" fill="#1a1714"/><circle cx="50" cy="32" r="5" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><rect x="2" y="12" width="20" height="20" fill="#1a1714"/><rect x="24" y="24" width="10" height="10" fill="#1a1714"/><rect x="38" y="12" width="20" height="20" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><rect x="4" y="20" width="14" height="14" fill="#1a1714"/><rect x="22" y="20" width="14" height="14" fill="#1a1714"/><rect x="40" y="20" width="14" height="14" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><circle cx="10" cy="32" r="4" fill="#1a1714"/><circle cx="30" cy="28" r="14" fill="#1a1714"/><circle cx="50" cy="31" r="8" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><rect x="2" y="10" width="22" height="22" fill="#1a1714"/><rect x="26" y="18" width="16" height="16" fill="#1a1714"/><rect x="44" y="24" width="10" height="10" fill="#1a1714"/></svg></div>
+            </div>
+        </div>
+        <div class="puzzle-input"><label data-i18n="bp.rule">Your rule, what separates left from right?</label><textarea class="puzzle-textarea" placeholder="Write your hypothesis here…"></textarea></div>
+        <div class="nav-row"><button class="nav-btn" onclick="showCard(6)" data-i18n="nav.prev">← Previous</button><button class="nav-btn primary" onclick="showCard(8)" data-i18n="nav.next">Next →</button></div>
+    </div>
+    <!-- P9 -->
+    <div class="bongard-card" data-idx="8">
+        <div class="card-number">Puzzle 09 <span class="diff-badge diff-4" data-i18n="diff.vhard">Very hard</span></div>
+        <div class="bongard-grid">
+            <div class="bg-side"><div class="bg-side-label" data-i18n="bg.yes">Left, YES</div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="26" fill="none" stroke="#1a1714" stroke-width="2"/><circle cx="30" cy="30" r="17" fill="none" stroke="#1a1714" stroke-width="2"/><circle cx="30" cy="30" r="8" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><rect x="3" y="3" width="54" height="54" fill="none" stroke="#1a1714" stroke-width="2"/><rect x="14" y="14" width="32" height="32" fill="none" stroke="#1a1714" stroke-width="2"/><rect x="24" y="24" width="12" height="12" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="26" fill="none" stroke="#1a1714" stroke-width="2"/><polygon points="30,14 44,40 16,40" fill="none" stroke="#1a1714" stroke-width="2"/><circle cx="30" cy="32" r="5" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><rect x="2" y="2" width="56" height="56" fill="none" stroke="#1a1714" stroke-width="2"/><circle cx="30" cy="30" r="18" fill="none" stroke="#1a1714" stroke-width="2"/><rect x="23" y="23" width="14" height="14" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="30,2 58,54 2,54" fill="none" stroke="#1a1714" stroke-width="2"/><polygon points="30,16 50,46 10,46" fill="none" stroke="#1a1714" stroke-width="2"/><polygon points="30,28 40,44 20,44" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="30,2 56,16 56,44 30,58 4,44 4,16" fill="none" stroke="#1a1714" stroke-width="2"/><circle cx="30" cy="30" r="16" fill="none" stroke="#1a1714" stroke-width="2"/><rect x="24" y="24" width="12" height="12" fill="#1a1714"/></svg></div>
+            </div>
+            <div class="bg-divider"><span>vs</span></div>
+            <div class="bg-side"><div class="bg-side-label" data-i18n="bg.no">Right, NO</div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="26" fill="none" stroke="#1a1714" stroke-width="2"/><circle cx="30" cy="30" r="14" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><rect x="4" y="4" width="52" height="52" fill="none" stroke="#1a1714" stroke-width="2"/><rect x="18" y="18" width="24" height="24" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="22" fill="none" stroke="#1a1714" stroke-width="2"/><circle cx="22" cy="30" r="8" fill="#1a1714"/><circle cx="44" cy="14" r="6" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="24" fill="none" stroke="#1a1714" stroke-width="2"/><circle cx="30" cy="30" r="10" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><rect x="6" y="6" width="36" height="36" fill="none" stroke="#1a1714" stroke-width="2"/><rect x="14" y="14" width="20" height="20" fill="none" stroke="#1a1714" stroke-width="2"/><circle cx="50" cy="50" r="7" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="30,4 56,52 4,52" fill="none" stroke="#1a1714" stroke-width="2"/><polygon points="30,20 48,46 12,46" fill="#1a1714"/></svg></div>
+            </div>
+        </div>
+        <div class="puzzle-input"><label data-i18n="bp.rule">Your rule, what separates left from right?</label><textarea class="puzzle-textarea" placeholder="Write your hypothesis here…"></textarea></div>
+        <div class="nav-row"><button class="nav-btn" onclick="showCard(7)" data-i18n="nav.prev">← Previous</button><button class="nav-btn primary" onclick="showCard(9)" data-i18n="nav.next">Next →</button></div>
+    </div>
+    <!-- P10 -->
+    <div class="bongard-card" data-idx="9">
+        <div class="card-number">Puzzle 10 <span class="diff-badge diff-4" data-i18n="diff.vhard">Very hard</span></div>
+        <div class="bongard-grid">
+            <div class="bg-side"><div class="bg-side-label" data-i18n="bg.yes">Left, YES</div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="14,48 26,18 38,48" fill="#1a1714"/><polygon points="28,48 40,18 52,48" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><rect x="6" y="16" width="20" height="20" fill="#1a1714"/><rect x="34" y="16" width="20" height="20" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="12,48 22,20 32,48" fill="#1a1714"/><polygon points="42,12 54,22 50,38 34,38 30,22" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="30,6 42,12 42,28 30,34 18,28 18,12" fill="#1a1714"/><polygon points="6,50 14,36 22,50" fill="#1a1714"/><polygon points="38,50 46,36 54,50" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><rect x="4" y="16" width="22" height="22" fill="#1a1714"/><polygon points="44,10 54,16 54,30 44,36 34,30 34,16" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="18,8 32,4 42,14 38,30 10,30" fill="#1a1714"/><polygon points="36,52 48,34 56,52" fill="#1a1714"/></svg></div>
+            </div>
+            <div class="bg-divider"><span>vs</span></div>
+            <div class="bg-side"><div class="bg-side-label" data-i18n="bg.no">Right, NO</div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="10,48 22,18 34,48" fill="#1a1714"/><rect x="36" y="18" width="18" height="18" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="14,10 28,6 38,16 34,32 8,32" fill="#1a1714"/><rect x="36" y="18" width="18" height="18" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="30,8 52,50 8,50" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="30,6 52,22 44,48 16,48 8,22" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><rect x="6" y="14" width="20" height="20" fill="#1a1714"/><polygon points="36,48 48,22 60,48" fill="#1a1714"/></svg></div>
+                <div class="bg-cell"><svg viewBox="0 0 60 60"><polygon points="20,6 36,6 46,20 40,38 14,38 8,20" fill="#1a1714"/><polygon points="42,54 50,40 58,54" fill="#1a1714"/></svg></div>
+            </div>
+        </div>
+        <div class="puzzle-input"><label data-i18n="bp.rule">Your rule, what separates left from right?</label><textarea class="puzzle-textarea" placeholder="Write your hypothesis here…"></textarea></div>
+        <div class="nav-row"><button class="nav-btn" onclick="showCard(8)" data-i18n="nav.prev">← Previous</button><button class="nav-btn" disabled data-i18n="nav.done">Complete ✓</button></div>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Rules reveal ── -->
+<section>
+    <h2 data-i18n="s8.h2">Check Your Rules</h2>
+    <p data-i18n="s8.p1">You have worked through all ten puzzles. Below are the intended rules. A close paraphrase counts as correct. The exact wording does not matter; the concept does.</p>
+    <div class="locked-gate" id="gate-rules">
+        <div class="lock-icon">&#128274;</div>
+        <p data-i18n="gate.prompt">Enter the password to reveal all ten rules</p>
+        <div class="pw-row"><input class="pw-input" type="password" id="pw-rules" placeholder="· · · · · · · ·" onkeydown="if(event.key==='Enter')checkPw('pw-rules','gate-rules','rev-rules','err-rules')"><button class="pw-btn" onclick="checkPw('pw-rules','gate-rules','rev-rules','err-rules')" data-i18n="gate.btn">Reveal</button></div>
+        <div class="pw-error" id="err-rules"></div>
+    </div>
+    <div class="revealed" id="rev-rules">
+        <ul class="rules-list">
+            <li><div class="rnum">01</div><div class="rbody"><strong data-i18n="rule1.t">Size</strong><p data-i18n="rule1.b">Left images contain small shapes. Right images contain large shapes that nearly fill the frame. Shape type varies freely.</p></div></li>
+            <li><div class="rnum">02</div><div class="rbody"><strong data-i18n="rule2.t">Containment</strong><p data-i18n="rule2.b">On the left, the small solid shape sits <em>inside</em> the outlined large shape. On the right, the small shape is outside the boundary.</p></div></li>
+            <li><div class="rnum">03</div><div class="rbody"><strong data-i18n="rule3.t">Quantity</strong><p data-i18n="rule3.b">Each left image contains exactly two shapes. Each right image contains exactly three. Shape type is irrelevant.</p></div></li>
+            <li><div class="rnum">04</div><div class="rbody"><strong data-i18n="rule4.t">Concavity</strong><p data-i18n="rule4.b">Every left-side shape is <em>concave</em>, at least one inward dent. Every right-side shape is <em>convex</em>. Arrows, stars, crescents, crosses, and L-shapes are concave.</p></div></li>
+            <li><div class="rnum">05</div><div class="rbody"><strong data-i18n="rule5.t">Topological hole</strong><p data-i18n="rule5.b">Every left-side shape has a <em>hole</em> through it, a fully enclosed empty region. Every right-side shape is solid.</p></div></li>
+            <li><div class="rnum">06</div><div class="rbody"><strong data-i18n="rule6.t">Bilateral symmetry</strong><p data-i18n="rule6.b">Every left-side shape has at least one axis of reflective symmetry. Every right-side shape is asymmetric.</p></div></li>
+            <li><div class="rnum">07</div><div class="rbody"><strong data-i18n="rule7.t">Count equals side-number</strong><p data-i18n="rule7.b">The number of shapes equals the number of sides of each shape. Three triangles. Four squares. The right side always mismatches.</p></div></li>
+            <li><div class="rnum">08</div><div class="rbody"><strong data-i18n="rule8.t">Strictly increasing size</strong><p data-i18n="rule8.b">Three shapes whose sizes increase strictly left to right. On the right, the sizes do not increase monotonically.</p></div></li>
+            <li><div class="rnum">09</div><div class="rbody"><strong data-i18n="rule9.t">Triple nesting</strong><p data-i18n="rule9.b">Three shapes nested in a complete chain: smallest inside medium, medium inside largest. On the right, the nesting is incomplete.</p></div></li>
+            <li><div class="rnum">10</div><div class="rbody"><strong data-i18n="rule10.t">Even total sides</strong><p data-i18n="rule10.b">Count all straight edges across <em>all</em> shapes. On the left, this total is always even. On the right, always odd. Circles contribute 0.</p></div></li>
+        </ul>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Reflection ── -->
+<section>
+    <h2 data-i18n="s9.h2">What You Just Did</h2>
+    <p data-i18n="s9.p1">Each puzzle forced the same cognitive operation: observe examples, form a hypothesis, test it against counter-examples, revise, converge. That is induction.</p>
+    <p data-i18n="s9.p2">The process felt more like sudden recognition than deliberate reasoning. That feeling of <em>snap</em>, of the rule becoming obvious, is what psychologists call the <strong>Aha moment</strong>.</p>
+    <p data-i18n="s9.p3">The hardest abstractions demand that you operate on the <em>relationships between relationships</em>. In puzzle 9, you had to track three shapes and verify a complete containment chain. In puzzle 10, the rule required identifying every shape's type, counting its sides, summing, and checking parity.</p>
+    <hr class="section-rule" style="margin:36px 0;">
+    <h2 data-i18n="s9.h2b">From Bongard to Curriculum</h2>
+    <div class="bq">
+        <p data-i18n="s9.quote">You cannot teach someone to see a concept by explaining it. You teach them by showing enough examples that the pattern becomes undeniable, then withholding the last step so they must cross it themselves.</p>
+        <cite data-i18n="s9.cite">,  paraphrasing Jerome Bruner, The Process of Education (1960)</cite>
+    </div>
+    <ol class="curriculum-steps">
+        <li><span><strong data-i18n="cur1.t">Start with transparent rules.</strong><em data-i18n="cur1.b"> The first puzzles snap into place immediately. The student learns what it feels like to have the right rule.</em></span></li>
+        <li><span><strong data-i18n="cur2.t">Introduce relational properties.</strong><em data-i18n="cur2.b"> Later puzzles cannot be solved by looking at any single shape in isolation. The rule lives in the relationship between elements.</em></span></li>
+        <li><span><strong data-i18n="cur3.t">Add irrelevant variation.</strong><em data-i18n="cur3.b"> Surface features change freely while the underlying rule stays constant. The student must learn to suppress attention to what varies.</em></span></li>
+        <li><span><strong data-i18n="cur4.t">Move from geometric to topological.</strong><em data-i18n="cur4.b"> The hardest rules are about spatial arrangement, configurations that cannot be read off any individual element.</em></span></li>
+        <li><span><strong data-i18n="cur5.t">Ask the student to generate, not just recognise.</strong><em data-i18n="cur5.b"> Design your own Bongard problem. This demands a theory of induction itself.</em></span></li>
+    </ol>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── ARC-AGI ── -->
+<section>
+    <h2 data-i18n="s10.h2">The Machine's Turn</h2>
+    <p data-i18n="s10.p1">In 2019, AI researcher François Chollet posed a question: if Bongard problems are trivially easy for humans and hard for computers, can we turn that gap into a benchmark? The result was <strong>ARC-AGI</strong>, Abstraction and Reasoning Corpus for Artificial General Intelligence.</p>
+    <p data-i18n="s10.p2">The premise is almost identical to what you just did: observe input-output pairs, induce the rule, apply it to a new input. No instructions. No formula. Just examples.</p>
+    <div class="bq">
+        <p data-i18n="s10.quote">"ARC can be used to measure a human-like form of general fluid intelligence, the ability to efficiently acquire new skills outside your training data."</p>
+        <cite data-i18n="s10.cite">,  François Chollet, On the Measure of Intelligence (2019)</cite>
+    </div>
+    <div class="stat-row">
+        <div class="stat-box"><div class="stat-num">0%</div><div class="stat-label" data-i18n="stat1">Pure LLM score on ARC-AGI-2</div></div>
+        <div class="stat-box"><div class="stat-num">~60%</div><div class="stat-label" data-i18n="stat2">Average human score</div></div>
+        <div class="stat-box"><div class="stat-num">100%</div><div class="stat-label" data-i18n="stat3">Tasks solvable by at least 2 humans</div></div>
+    </div>
+    <p data-i18n="s10.p3">Every ARC task has been verified to be solvable by at least two ordinary humans. State-of-the-art AI systems score in the single digits on ARC-AGI-2. The gap is not about knowledge, it is about forming and testing hypotheses from a handful of examples.</p>
+    <p data-i18n="s10.p4">ARC-AGI-2, released in 2025, introduced challenges requiring <strong>compositional reasoning</strong> and <strong>contextual rule application</strong>, exactly the relational abstractions that Bongard problems begin to train.</p>
+    <h2 style="margin-top:36px;" data-i18n="s10.h2b">Try It</h2>
+    <a class="link-card" href="https://arcprize.org/play" target="_blank">
+        <div class="lc-label" data-i18n="arc.l1">Interactive · Browser-based · No account needed</div>
+        <div class="lc-title" data-i18n="arc.t1">▶ Play ARC-AGI tasks</div>
+        <div class="lc-desc" data-i18n="arc.d1">Solve the same grid puzzles that AI systems struggle with. Study the input-output examples and figure out the rule.</div>
+    </a>
+    <a class="link-card" href="https://arcprize.org/arc-agi/2" target="_blank">
+        <div class="lc-label" data-i18n="arc.l2">Technical overview</div>
+        <div class="lc-title" data-i18n="arc.t2">ARC-AGI-2: the benchmark explained</div>
+        <div class="lc-desc" data-i18n="arc.d2">What makes the 2025 version harder. Symbolic interpretation, compositional reasoning, contextual rules, and why log-linear scaling is not enough.</div>
+    </a>
+    <a class="link-card" href="https://arcprize.org/leaderboard" target="_blank">
+        <div class="lc-label" data-i18n="arc.l3">Live results</div>
+        <div class="lc-title" data-i18n="arc.t3">ARC Prize Leaderboard</div>
+        <div class="lc-desc" data-i18n="arc.d3">See where current AI systems stand relative to human performance. The gap between them is the current frontier of intelligence research.</div>
+    </a>
+    <p style="margin-top:28px;" data-i18n="s10.p5">After you have tried a few tasks, return to the question you started with. Holmes looks at a tanned wrist and a stiff arm and concludes: Afghanistan. You look at three coloured grids and conclude: the rule is to rotate by 90 degrees. The cognitive operation is the same. The question ARC-AGI is asking is whether a machine can do what Holmes does, not store and retrieve, but <em>reason</em>.</p>
+    <p data-i18n="s10.p6">That question does not yet have a satisfying answer.</p>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── Homework ── -->
+<section>
+    <h2 data-i18n="s11.h2">Your Turn to Make the Puzzle</h2>
+    <p data-i18n="s11.p1">Solving a Bongard problem is one thing. Designing one is harder, and more instructive.</p>
+    <p data-i18n="s11.p2">When you design one, you must think from the other direction: choose a rule, construct six images that satisfy it without giving it away too easily, and six more that violate it plausibly.</p>
+    <div class="homework-box">
+        <div class="homework-label" data-i18n="hw.label">For next time</div>
+        <p style="font-size:15px;margin-bottom:14px;" data-i18n="hw.intro"><strong>Design your own Bongard problem.</strong> Draw it on paper, or use any tool you like. The constraints:</p>
+        <ul class="hw-list">
+            <li data-i18n="hw.1">Six images on the left that satisfy a hidden rule.</li>
+            <li data-i18n="hw.2">Six images on the right that violate it, but plausibly.</li>
+            <li data-i18n="hw.3">The rule must be stateable in one short sentence.</li>
+            <li data-i18n="hw.4">Test it on someone who does not know the rule. If they cannot find it, your positive examples are not consistent enough. If they find it immediately, your counter-examples are not misleading enough.</li>
+        </ul>
+        <p style="font-size:14px;color:#5a5a80;" data-i18n="hw.link">For inspiration, and nearly 300 more problems, visit <a href="http://www.foundalis.com/res/bps/bpidx.htm" target="_blank">Harry Foundalis's Bongard Problem Index</a>.</p>
+    </div>
+</section>
+
+</div>
+
+<footer>
+    <a href="https://github.com/i-yam/passt/tree/main/modules/duction" target="_blank">github.com/i-yam/passt</a>
+    &nbsp;·&nbsp;
+    <a href="../../" target="_blank">overfit &amp; chill</a>
+</footer>
+
+<script>
+const PASS = 'holmes';
+const TOTAL = 10;
+
+function checkPw(inputId, gateId, revId, errId) {
+    const val = document.getElementById(inputId).value.trim().toLowerCase();
+    const err = document.getElementById(errId);
+    if (val === PASS) {
+        document.getElementById(gateId).style.display = 'none';
+        document.getElementById(revId).classList.add('visible');
+        err.textContent = '';
+    } else {
+        err.textContent = currentLang === 'de' ? 'Falsches Passwort.' : 'Wrong password.';
+        document.getElementById(inputId).value = '';
+        document.getElementById(inputId).focus();
+    }
+}
+
+const bar = document.getElementById('progress-bar');
+for (let i = 0; i < TOTAL; i++) {
+    const d = document.createElement('div');
+    d.className = 'prog-dot' + (i === 0 ? ' active' : '');
+    d.id = 'dot-' + i;
+    bar.insertBefore(d, bar.lastElementChild);
+}
+
+function showCard(idx) {
+    document.querySelectorAll('.bongard-card').forEach(c => c.classList.remove('active'));
+    document.querySelector('[data-idx="' + idx + '"]').classList.add('active');
+    for (let i = 0; i < TOTAL; i++) {
+        const d = document.getElementById('dot-' + i);
+        d.className = 'prog-dot';
+        if (i < idx) d.classList.add('done');
+        else if (i === idx) d.classList.add('active');
+    }
+    document.getElementById('prog-label').textContent =
+        currentLang === 'de' ? 'Aufgabe ' + (idx+1) + ' von ' + TOTAL : 'Puzzle ' + (idx+1) + ' of ' + TOTAL;
+    window.scrollTo({ top: document.getElementById('carousel').offsetTop - 24, behavior: 'smooth' });
+}
+
+const T = {
+    en: {
+        'tag.type':'mini-module','tag.code':'no-code','tag.ai':'try-without-ai','tag.topic':'reasoning',
+        'hero.title':'The Method of Holmes',
+        'hero.sub':'What detectives, scientists, and machines have in common, and where they differ.',
+        'img.caption':'Sixteen portrayals of Sherlock Holmes, film, television, animation, 1916–2009',
+        's1.lede':'There is a famous line people quote when they want to sound precise: "Elementary, my dear Watson." Sherlock Holmes, the great logician, working from pure deduction. Except, almost nothing in that sentence is true.',
+        's1.p1':"The phrase never appears in Conan Doyle's original stories. And Holmes, far from being a pure deductionist, is mostly doing something else entirely. Before we can catch the error, we need the two concepts.",
+        's1.h2':'Two Ways of Reasoning',
+        'def.method1':'Method I','def.ded':'Deduction',
+        'def.ded.body':'Reasoning from <strong>general principles</strong> to a <strong>specific, certain conclusion</strong>. If the premises are true and the logic holds, the conclusion cannot be false.',
+        'def.ded.ex':'All humans are mortal. Socrates is human. Therefore, Socrates is mortal.',
+        'def.method2':'Method II','def.ind':'Induction',
+        'def.ind.body':'Reasoning from <strong>specific observations</strong> to a <strong>general principle</strong>. The conclusion is probable, not guaranteed, but grows stronger with more evidence.',
+        'def.ind.ex':'Every raven I saw was black. Therefore, all ravens are probably black.',
+        's1.p2':'The direction is what matters. Deduction goes <em>downward</em>, from the general to the specific. Induction goes <em>upward</em>, from specific cases, searching for the rule that would explain them.',
+        's1.p3':'Scientists mostly induce. Mathematicians mostly deduce. Most humans do both without noticing which they are doing.',
+        's2.h2':'Deduction in Language',
+        's2.p1':'The puzzles below shift the terrain. Instead of visual patterns, you are given data from three invented languages. Each encodes something real: quantity, time and agency, the source of knowledge.',
+        's2.p2':'This is what linguists actually do when they encounter an undocumented language. They induce the grammar from utterances. Then they use the induced rules to make precise, testable predictions.',
+        's3.h2':'Puzzle I, The Language of Moku',
+        's3.p1':'The Moku people live on a small island. Their language has three words for quantity: <strong>baí</strong>, <strong>tiró</strong>, and <strong>poná</strong>. These are not translations of English number words.',
+        's3.p2':'Below are ten observations. A Moku speaker looks at a group of objects and uses one of the three words.',
+        't.objects':'Objects','t.count':'Count','t.moku':'Moku word',
+        'moku.r1':'fish in a net','moku.r2':'coconuts on the ground','moku.r3':'children in the water',
+        'moku.r4':'birds on the roof','moku.r5':'stones on the path','moku.r6':'baskets in the hut',
+        'moku.r7':'canoes at the shore','moku.r8':'stars visible tonight','moku.r9':'fires burning','moku.r10':'men returning from fishing',
+        'moku.q1':'Question 1, What numerical range does each word cover?',
+        'moku.q2':'Question 2, A speaker uses tiró. What can you conclude? What can you NOT conclude?',
+        'moku.q3':'Question 3, There are 6 fish in the water. Which word does the speaker use?',
+        'moku.q4':'Question 4, A speaker uses tiró about objects in a bag. Later there were 8. Was the speaker wrong?',
+        'moku.q5':'Question 5, "Several" is closest to which Moku term? What would a translation lose?',
+        's4.h2':'Puzzle II, The Verbs of Voranu',
+        's4.p1':'Voranu is a synthetic language with a strict verb structure. Every verb is built from pieces in a fixed order. Deduce what each piece means.',
+        's4.p2':'Eight Voranu sentences with their English translations.',
+        't.voranu':'Voranu','t.english':'English',
+        'vor.r1':'I am speaking','vor.r2':'you are speaking','vor.r3':'she is speaking',
+        'vor.r4':'I spoke','vor.r5':'you will speak','vor.r6':'I am seeing',
+        'vor.r7':'she saw you','vor.r8':'I will see her',
+        'vor.q1':'Question 1, What does each morpheme mean?',
+        'vor.q2':'Question 2, Translate into English: mo-ol-lenu-na',
+        'vor.q3':'Question 3, Translate into Voranu: "she will speak"',
+        'vor.q4':'Question 4, Translate into Voranu: "I saw you"',
+        'vor.q5':'Question 5, New verb damu = "to give." How do you say "you will give to her"?',
+        's5.h2':'Puzzle III, What Velanic Speakers Know',
+        's5.p1':'In Velanic, every statement must include a suffix indicating <em>how the speaker knows</em> what they are saying. This is called <strong>evidentiality</strong>.',
+        's5.p2':'Three Velanic evidential suffixes. Names not given. Study the nine sentences below.',
+        't.velanic':'Velanic sentence','t.meaning':'English meaning','t.situation':"Speaker's situation",
+        'vel.r1m':'The river is rising','vel.r2m':'The river is rising','vel.r3m':'The river is rising',
+        'vel.r4m':'Miko is sick','vel.r5m':'Miko is sick','vel.r6m':'Miko is sick',
+        'vel.r7m':'Tovo left the village','vel.r8m':'Tovo left the village','vel.r9m':'Tovo left the village',
+        'vel.r1s':'Standing at the riverbank, watching the water level climb.',
+        'vel.r2s':'Inland, sky darkening, distant thunder. Has not seen the river.',
+        'vel.r3s':'Just told by a neighbour who came running from the riverbank.',
+        'vel.r4s':'Visited Miko this morning and saw her lying in bed, pale and feverish.',
+        'vel.r5s':"Has not seen Miko, but notices her untouched food bowl and her absence.",
+        'vel.r6s':"Heard it from Miko's sister at the market.",
+        'vel.r7s':'Watched Tovo walk away down the path with a bag.',
+        'vel.r8s':"Found Tovo's house empty, his fire cold, his boat gone.",
+        'vel.r9s':"The speaker's child said Tovo had said goodbye before leaving.",
+        'vel.q1':'Question 1, What does each suffix encode? Describe -om, -ef, and -alu.',
+        'vel.q2':'Question 2, What does Velanic force speakers to do that English does not?',
+        'vel.q3':'Question 3, Which suffix: the doctor? the journalist? the child who hears the wolf?',
+        'vel.q4':'Question 4, Which suffix would Holmes use? Which would Watson use with Lestrade?',
+        'vel.q5':'Question 5, A speaker uses -alu but what they were told was false. Were they lying?',
+        'gate.prompt':'Enter the password to reveal the answers','gate.btn':'Reveal','ans.title':'Answers',
+        's6.h2':"The Detective's Method",
+        's6.p1':'Now read how Holmes actually explains his own thinking, from <em>A Study in Scarlet</em>:',
+        's6.quote':'"Here is a gentleman of a medical type, but with the air of a military man. Clearly an army doctor, then. He has just come from the tropics, for his face is dark, and that is not the natural tint of his skin, for his wrists are fair. He has undergone hardship and sickness, as his haggard face says clearly. His left arm has been injured. He holds it in a stiff and unnatural manner. Where in the tropics could an English army doctor have seen much hardship and got his arm wounded? Clearly in Afghanistan."',
+        's6.cite':',  Arthur Conan Doyle, A Study in Scarlet (1887)',
+        's6.p2':'Holmes calls this "deduction." Doyle calls it deduction. It has been called deduction for over a hundred years. There is a catch.',
+        's6.gate.prompt':'Think first, then enter the password to reveal the analysis',
+        's6.gate.hint':'Is Holmes actually using deduction or induction? What direction does his reasoning move?',
+        's6.verdict':'Induction, mostly',
+        's6.rev.h':'Doyle got it wrong.',
+        's6.rev.p1':'Holmes is not applying a known general rule to reach a certain conclusion. He is working in the <em>opposite direction</em>: observing specific clues and inferring the most probable general explanation. That is induction. Or more precisely, <strong>abductive reasoning</strong>: inference to the best explanation.',
+        's6.rev.p2':'True deduction would look like this: <em>"All army doctors returning from Afghanistan hold their arm stiffly. This man holds his arm stiffly. Therefore he is an army doctor from Afghanistan."</em> Holmes reasons from evidence <em>toward</em> the hypothesis.',
+        's6.rev.p3':'His conclusions are not <em>certain</em>, they are the most probable explanation given the data. He is a scientist, not a logician. He can be wrong.',
+        's6.link.label':'Want to see the method in action?',
+        's6.link.body':" The BBC series dramatises Holmes's inductive leaps better than most adaptations.",
+        's6.link.a':'▶ Sherlock (BBC, 2010–2017) on IMDb',
+        's7.h2':'Seeing the Rule',
+        's7.p1':'In 1967, Russian computer scientist Mikhail Bongard published a book containing 100 visual problems. Every image on the left satisfies a hidden rule. Every image on the right violates it. The task: <strong>find the rule</strong>.',
+        's7.p2':'Bongard problems are pure induction. No formula, no rulebook. You observe. You hypothesise. You check. You revise.',
+        's7.p3':'The ten puzzles below progress from transparent to subtle.',
+        'diff.warmup':'Warm-up','diff.harder':'Harder','diff.hard':'Hard','diff.vhard':'Very hard',
+        'bg.yes':'Left, YES','bg.no':'Right, NO',
+        'bp.rule':'Your rule, what separates left from right?',
+        'nav.prev':'← Previous','nav.next':'Next →','nav.done':'Complete ✓',
+        's8.h2':'Check Your Rules',
+        's8.p1':'You have worked through all ten puzzles. Below are the intended rules. A close paraphrase counts as correct.',
+        'rule1.t':'Size','rule1.b':'Left images contain small shapes. Right images contain large shapes that nearly fill the frame.',
+        'rule2.t':'Containment','rule2.b':'On the left, the small solid shape sits <em>inside</em> the outlined large shape. On the right, it is outside.',
+        'rule3.t':'Quantity','rule3.b':'Each left image contains exactly two shapes. Each right image contains exactly three.',
+        'rule4.t':'Concavity','rule4.b':'Every left-side shape is <em>concave</em>. Every right-side shape is <em>convex</em>. Arrows, stars, crescents, crosses, and L-shapes are concave.',
+        'rule5.t':'Topological hole','rule5.b':'Every left-side shape has a <em>hole</em> through it. Every right-side shape is solid.',
+        'rule6.t':'Bilateral symmetry','rule6.b':'Every left-side shape has at least one axis of reflective symmetry. Every right-side shape is asymmetric.',
+        'rule7.t':'Count equals side-number','rule7.b':'The number of shapes equals the number of sides of each shape. Three triangles. Four squares.',
+        'rule8.t':'Strictly increasing size','rule8.b':'Three shapes whose sizes increase strictly left to right. On the right, they do not increase monotonically.',
+        'rule9.t':'Triple nesting','rule9.b':'Three shapes nested in a complete chain. On the right, the nesting is incomplete.',
+        'rule10.t':'Even total sides','rule10.b':'Count all straight edges across <em>all</em> shapes. Left = always even. Right = always odd.',
+        's9.h2':'What You Just Did',
+        's9.p1':'Each puzzle forced the same cognitive operation: observe, hypothesise, test, revise, converge. That is induction.',
+        's9.p2':'The process felt more like sudden recognition than deliberate reasoning. That feeling of <em>snap</em> is what psychologists call the <strong>Aha moment</strong>.',
+        's9.p3':'The hardest abstractions demand that you operate on the <em>relationships between relationships</em>.',
+        's9.h2b':'From Bongard to Curriculum',
+        's9.quote':'You cannot teach someone to see a concept by explaining it. You teach them by showing enough examples that the pattern becomes undeniable, then withholding the last step so they must cross it themselves.',
+        's9.cite':',  paraphrasing Jerome Bruner, The Process of Education (1960)',
+        'cur1.t':'Start with transparent rules.','cur1.b':' The first puzzles snap into place immediately.',
+        'cur2.t':'Introduce relational properties.','cur2.b':' Later puzzles cannot be solved by looking at any single shape in isolation.',
+        'cur3.t':'Add irrelevant variation.','cur3.b':' Surface features change freely while the underlying rule stays constant.',
+        'cur4.t':'Move from geometric to topological.','cur4.b':' The hardest rules are about spatial arrangement.',
+        'cur5.t':'Ask the student to generate, not just recognise.','cur5.b':' Design your own Bongard problem.',
+        's10.h2':"The Machine's Turn",
+        's10.p1':'In 2019, AI researcher François Chollet posed a question: if Bongard problems are trivially easy for humans and hard for computers, can we turn that gap into a benchmark? The result was <strong>ARC-AGI</strong>.',
+        's10.p2':'The premise is almost identical to what you just did: observe input-output pairs, induce the rule, apply it to a new input.',
+        's10.quote':'"ARC can be used to measure a human-like form of general fluid intelligence, the ability to efficiently acquire new skills outside your training data."',
+        's10.cite':',  François Chollet, On the Measure of Intelligence (2019)',
+        'stat1':'Pure LLM score on ARC-AGI-2','stat2':'Average human score','stat3':'Tasks solvable by at least 2 humans',
+        's10.p3':'Every ARC task has been verified solvable by at least two ordinary humans. State-of-the-art AI scores in the single digits on ARC-AGI-2.',
+        's10.p4':'ARC-AGI-2 introduced challenges requiring <strong>compositional reasoning</strong> and <strong>contextual rule application</strong>, exactly the relational abstractions Bongard problems begin to train.',
+        's10.h2b':'Try It',
+        'arc.l1':'Interactive · Browser-based · No account needed','arc.t1':'▶ Play ARC-AGI tasks',
+        'arc.d1':'Solve the same grid puzzles that AI systems struggle with.',
+        'arc.l2':'Technical overview','arc.t2':'ARC-AGI-2: the benchmark explained',
+        'arc.d2':'What makes the 2025 version harder. Symbolic interpretation, compositional reasoning, contextual rules.',
+        'arc.l3':'Live results','arc.t3':'ARC Prize Leaderboard',
+        'arc.d3':'See where current AI systems stand relative to human performance.',
+        's10.p5':'After you have tried a few tasks, return to the question you started with. Holmes concludes: Afghanistan. You conclude: rotate by 90 degrees. The cognitive operation is the same.',
+        's10.p6':'That question does not yet have a satisfying answer.',
+        's11.h2':'Your Turn to Make the Puzzle',
+        's11.p1':'Solving a Bongard problem is one thing. Designing one is harder, and more instructive.',
+        's11.p2':'When you design one, you must think from the other direction: choose a rule, construct six images that satisfy it, and six more that violate it, plausibly.',
+        'hw.label':'For next time',
+        'hw.intro':'<strong>Design your own Bongard problem.</strong> The constraints:',
+        'hw.1':'Six images on the left that satisfy a hidden rule.',
+        'hw.2':'Six images on the right that violate it, but plausibly.',
+        'hw.3':'The rule must be stateable in one short sentence.',
+        'hw.4':'Test it on someone who does not know the rule. If they cannot find it, your positive examples are not consistent enough. If they find it immediately, your counter-examples are not misleading enough.',
+        'hw.link':"For inspiration, and nearly 300 more problems, visit <a href='http://www.foundalis.com/res/bps/bpidx.htm' target='_blank'>Harry Foundalis's Bongard Problem Index</a>.",
+    },
+    de: {
+        'tag.type':'Mini-Modul','tag.code':'kein Code','tag.ai':'ohne KI versuchen','tag.topic':'Logik',
+        'hero.title':'Die Methode von Holmes',
+        'hero.sub':'Was Detektive, Wissenschaftler und Maschinen gemeinsam haben. Und wo sie sich unterscheiden.',
+        'img.caption':'Sechzehn Darstellungen von Sherlock Holmes: Film, Fernsehen, Animation, 1916–2009',
+        's1.lede':'Es gibt einen berühmten Satz. Man zitiert ihn, wenn man präzise klingen will: „Elementar, mein lieber Watson.“ Sherlock Holmes, der große Logiker, der mit reiner Deduktion arbeitet. Nur stimmt fast nichts daran.',
+        's1.p1':'Der Satz taucht in Conan Doyles Originalgeschichten nie auf. Und Holmes ist alles andere als ein reiner Deduktiker. Er macht etwas ganz anderes. Bevor wir den Fehler aufdecken, brauchen wir die beiden Begriffe.',
+        's1.h2':'Zwei Wege des Denkens',
+        'def.method1':'Methode I','def.ded':'Deduktion',
+        'def.ded.body':'Schlussfolgern von <strong>allgemeinen Prinzipien</strong> zu einer <strong>spezifischen, sicheren Schlussfolgerung</strong>. Sind die Prämissen wahr und die Logik stimmt, kann die Schlussfolgerung nicht falsch sein.',
+        'def.ded.ex':'Alle Menschen sind sterblich. Sokrates ist ein Mensch. Also ist Sokrates sterblich.',
+        'def.method2':'Methode II','def.ind':'Induktion',
+        'def.ind.body':'Schlussfolgern von <strong>spezifischen Beobachtungen</strong> zu einem <strong>allgemeinen Prinzip</strong>. Die Schlussfolgerung ist wahrscheinlich, nicht garantiert. Mit mehr Belegen wird sie stärker.',
+        'def.ind.ex':'Jeder Rabe, den ich sah, war schwarz. Also sind vermutlich alle Raben schwarz.',
+        's1.p2':'Entscheidend ist die Richtung. Deduktion geht <em>abwärts</em>, vom Allgemeinen zum Besonderen. Induktion geht <em>aufwärts</em>: Sie startet bei Einzelfällen und sucht die Regel, die sie erklärt.',
+        's1.p3':'Wissenschaftler induzieren meistens. Mathematiker deduzieren meistens. Die meisten Menschen tun beides, ohne zu merken, was gerade dran ist.',
+        's2.h2':'Deduktion in der Sprache',
+        's2.p1':'Die folgenden Aufgaben verlagern das Terrain. Statt visueller Muster bekommst du Daten aus drei erfundenen Sprachen. Jede kodiert etwas Echtes: Menge, Zeit und Handelnde, die Quelle des Wissens.',
+        's2.p2':'Genau das tun Linguisten bei einer undokumentierten Sprache. Sie leiten die Grammatik aus Äußerungen ab. Dann nutzen sie diese Regeln für präzise, prüfbare Vorhersagen.',
+        's3.h2':'Aufgabe I: Die Sprache der Moku',
+        's3.p1':'Das Volk der Moku lebt auf einer kleinen Insel. Seine Sprache hat drei Wörter für Mengen: <strong>baí</strong>, <strong>tiró</strong> und <strong>poná</strong>. Das sind keine Übersetzungen englischer Zahlwörter.',
+        's3.p2':'Unten stehen zehn Beobachtungen. Ein Moku-Sprecher schaut auf eine Gruppe von Gegenständen und benutzt eines der drei Wörter.',
+        't.objects':'Gegenstände','t.count':'Anzahl','t.moku':'Moku-Wort',
+        'moku.r1':'Fische im Netz','moku.r2':'Kokosnüsse auf dem Boden','moku.r3':'Kinder im Wasser',
+        'moku.r4':'Vögel auf dem Dach','moku.r5':'Steine auf dem Weg','moku.r6':'Körbe in der Hütte',
+        'moku.r7':'Kanus am Ufer','moku.r8':'Sterne sichtbar heute Nacht','moku.r9':'Brennende Feuer','moku.r10':'Männer, die vom Fischen zurückkehren',
+        'moku.q1':'Frage 1: Welchen Zahlenbereich deckt jedes Wort ab?',
+        'moku.q2':'Frage 2: Ein Sprecher benutzt tiró. Was kannst du schließen? Was NICHT?',
+        'moku.q3':'Frage 3: Es sind 6 Fische im Wasser. Welches Wort benutzt der Sprecher?',
+        'moku.q4':'Frage 4: Ein Sprecher benutzt tiró für Gegenstände in einem Beutel. Später waren es 8. Lag er falsch?',
+        'moku.q5':'Frage 5: Welchem Moku-Begriff ähnelt „several“ am ehesten? Was ginge bei einer Übersetzung verloren?',
+        's4.h2':'Aufgabe II: Die Verben des Voranu',
+        's4.p1':'Voranu ist eine synthetische Sprache mit strenger Verbstruktur. Jedes Verb besteht aus Bausteinen in fester Reihenfolge. Leite ab, was jeder Baustein bedeutet.',
+        's4.p2':'Acht Voranu-Sätze mit englischen Übersetzungen.',
+        't.voranu':'Voranu','t.english':'Englisch',
+        'vor.r1':'Ich spreche gerade','vor.r2':'Du sprichst gerade','vor.r3':'Sie spricht gerade',
+        'vor.r4':'Ich sprach','vor.r5':'Du wirst sprechen','vor.r6':'Ich sehe gerade',
+        'vor.r7':'Sie sah dich','vor.r8':'Ich werde sie sehen',
+        'vor.q1':'Frage 1: Was bedeutet jedes Morphem?',
+        'vor.q2':'Frage 2: Übersetze ins Englische: mo-ol-lenu-na',
+        'vor.q3':'Frage 3: Übersetze ins Voranu: „she will speak“',
+        'vor.q4':'Frage 4: Übersetze ins Voranu: „I saw you“',
+        'vor.q5':'Frage 5: Neue Wurzel damu = „geben“. Wie sagt man „you will give to her“?',
+        's5.h2':'Aufgabe III: Was Velanic-Sprecher wissen',
+        's5.p1':'Im Velanischen braucht jede Aussage ein Suffix. Es zeigt an, <em>wie der Sprecher weiß</em>, was er sagt. Das nennt man <strong>Evidentialität</strong>.',
+        's5.p2':'Drei velanische Evidentialitätssuffixe. Die Namen bekommst du nicht. Schau dir die neun Sätze unten an.',
+        't.velanic':'Velanischer Satz','t.meaning':'Englische Bedeutung','t.situation':'Situation des Sprechers',
+        'vel.r1m':'Der Fluss steigt','vel.r2m':'Der Fluss steigt','vel.r3m':'Der Fluss steigt',
+        'vel.r4m':'Miko ist krank','vel.r5m':'Miko ist krank','vel.r6m':'Miko ist krank',
+        'vel.r7m':'Tovo hat das Dorf verlassen','vel.r8m':'Tovo hat das Dorf verlassen','vel.r9m':'Tovo hat das Dorf verlassen',
+        'vel.r1s':'Steht am Flussufer, beobachtet den steigenden Wasserstand.',
+        'vel.r2s':'Im Inland, Himmel dunkelt sich, entfernter Donner. Hat den Fluss nicht gesehen.',
+        'vel.r3s':'Gerade von einem Nachbarn informiert, der vom Flussufer gerannt kam.',
+        'vel.r4s':'Hat Miko heute Morgen besucht und sie blass und fiebrig gesehen.',
+        'vel.r5s':'Hat Miko nicht gesehen, bemerkt aber ihre unangerührte Schüssel und Abwesenheit.',
+        'vel.r6s':'Hat es von Mikos Schwester auf dem Markt gehört.',
+        'vel.r7s':'Hat zugesehen, wie Tovo mit einem Rucksack wegging.',
+        'vel.r8s':"Fand Tovos Haus leer, sein Feuer kalt, sein Boot weg.",
+        'vel.r9s':"Das Kind des Sprechers sagte, Tovo habe sich vor dem Aufbruch verabschiedet.",
+        'vel.q1':'Frage 1: Was kodiert jedes Suffix? Beschreib -om, -ef und -alu.',
+        'vel.q2':'Frage 2: Wozu zwingt Velanisch seine Sprecher, was Englisch nicht tut?',
+        'vel.q3':'Frage 3: Welches Suffix: die Ärztin? der Journalist? das Kind, das den Wolf hört?',
+        'vel.q4':'Frage 4: Welches Suffix würde Holmes benutzen? Welches Watson bei Lestrade?',
+        'vel.q5':'Frage 5: Ein Sprecher benutzt -alu, aber die Information war falsch. Hat er gelogen?',
+        'gate.prompt':'Gib das Passwort ein, um die Antworten zu sehen','gate.btn':'Enthüllen','ans.title':'Antworten',
+        's6.h2':'Die Methode des Detektivs',
+        's6.p1':'Lies jetzt, wie Holmes sein eigenes Denken erklärt. Aus <em>Eine Studie in Scharlachrot</em>:',
+        's6.quote':'„Hier ist ein Herr vom medizinischen Typ, aber mit dem Auftreten eines Militärs. Eindeutig ein Heeresarzt. Er kam gerade aus den Tropen, denn sein Gesicht ist dunkel, und das ist nicht sein natürlicher Teint, denn seine Handgelenke sind hell. Er hat Entbehrungen und Krankheit erlebt, das sagt sein ausgezehrtes Gesicht deutlich. Sein linker Arm wurde verletzt. Er hält ihn steif und unnatürlich. Wo in den Tropen hätte ein englischer Heeresarzt so viele Entbehrungen erlebt und sich den Arm verletzt? Eindeutig in Afghanistan.“',
+        's6.cite':'Arthur Conan Doyle, Eine Studie in Scharlachrot (1887)',
+        's6.p2':'Holmes nennt das „Deduktion“. Doyle nennt es Deduktion. Seit über hundert Jahren heißt es so. Es gibt nur einen Haken.',
+        's6.gate.prompt':'Denk erst nach. Dann gib das Passwort ein und sieh dir die Analyse an.',
+        's6.gate.hint':'Benutzt Holmes wirklich Deduktion oder Induktion? In welche Richtung bewegt sich sein Denken?',
+        's6.verdict':'Induktion, größtenteils',
+        's6.rev.h':'Doyle hat es falsch beschrieben.',
+        's6.rev.p1':'Holmes wendet keine bekannte allgemeine Regel an. Er arbeitet in der <em>entgegengesetzten Richtung</em>. Er beobachtet einzelne Hinweise und schließt auf die wahrscheinlichste allgemeine Erklärung. Das ist Induktion. Genauer gesagt ist es <strong>abduktives Schlussfolgern</strong>: der Schluss auf die beste Erklärung.',
+        's6.rev.p2':'Echte Deduktion sähe so aus: <em>„Alle Heeresärzte aus Afghanistan halten den Arm steif. Dieser Mann hält den Arm steif. Also ist er ein Heeresarzt aus Afghanistan.“</em> Holmes geht aber den anderen Weg. Er schließt von den Beobachtungen <em>hin zur</em> Hypothese.',
+        's6.rev.p3':'Seine Schlussfolgerungen sind nicht <em>sicher</em>. Sie sind die wahrscheinlichste Erklärung für die Daten. Er ist Wissenschaftler, nicht Logiker. Er kann sich irren.',
+        's6.link.label':'Willst du die Methode in Aktion sehen?',
+        's6.link.body':' Die BBC-Serie inszeniert Holmes und seine induktiven Sprünge besser als die meisten Verfilmungen.',
+        's6.link.a':'▶ Sherlock (BBC, 2010–2017) auf IMDb',
+        's7.h2':'Die Regel erkennen',
+        's7.p1':'1967 veröffentlichte der russische Informatiker Michail Bongard ein Buch mit 100 visuellen Problemen. Alle Bilder links erfüllen eine versteckte Regel. Alle Bilder rechts verletzen sie. Die Aufgabe: <strong>die Regel finden</strong>.',
+        's7.p2':'Bongard-Probleme sind reine Induktion. Keine Formel, kein Regelwerk. Du beobachtest. Du stellst eine Hypothese auf. Du prüfst. Du revidierst.',
+        's7.p3':'Die zehn Aufgaben unten gehen von offensichtlich zu subtil.',
+        'diff.warmup':'Einstieg','diff.harder':'Schwieriger','diff.hard':'Schwer','diff.vhard':'Sehr schwer',
+        'bg.yes':'Links: JA','bg.no':'Rechts: NEIN',
+        'bp.rule':'Deine Regel: Was unterscheidet links von rechts?',
+        'nav.prev':'← Zurück','nav.next':'Weiter →','nav.done':'Fertig ✓',
+        's8.h2':'Regeln überprüfen',
+        's8.p1':'Du hast alle zehn Aufgaben bearbeitet. Unten stehen die vorgesehenen Regeln. Eine nahe Umschreibung zählt als richtig.',
+        'rule1.t':'Größe','rule1.b':'Linke Bilder enthalten kleine Formen. Rechte enthalten große Formen, die den Rahmen fast ausfüllen.',
+        'rule2.t':'Enthaltensein','rule2.b':'Links liegt die kleine gefüllte Form <em>innerhalb</em> der umrissenen großen Form. Rechts liegt sie außerhalb.',
+        'rule3.t':'Anzahl','rule3.b':'Jedes linke Bild enthält genau zwei Formen. Jedes rechte genau drei.',
+        'rule4.t':'Konkavität','rule4.b':'Jede linke Form ist <em>konkav</em>. Jede rechte ist <em>konvex</em>. Pfeile, Sterne, Halbmonde, Kreuze und L-Formen sind konkav.',
+        'rule5.t':'Topologisches Loch','rule5.b':'Jede linke Form hat ein <em>Loch</em>. Jede rechte Form ist massiv.',
+        'rule6.t':'Bilaterale Symmetrie','rule6.b':'Jede linke Form hat mindestens eine Spiegelachse. Jede rechte ist asymmetrisch.',
+        'rule7.t':'Anzahl gleich Seitenzahl','rule7.b':'Die Anzahl der Formen entspricht der Seitenzahl jeder Form. Drei Dreiecke. Vier Quadrate.',
+        'rule8.t':'Streng zunehmende Größe','rule8.b':'Drei Formen, deren Größe von links nach rechts streng zunimmt. Rechts nimmt sie nicht durchgehend zu.',
+        'rule9.t':'Dreifache Verschachtelung','rule9.b':'Drei Formen, vollständig ineinander verschachtelt. Rechts ist die Kette unvollständig.',
+        'rule10.t':'Gerade Gesamtseitenzahl','rule10.b':'Zähl alle geraden Kanten über <em>alle</em> Formen hinweg. Links ist die Summe immer gerade. Rechts immer ungerade.',
+        's9.h2':'Was du gerade getan hast',
+        's9.p1':'Jede Aufgabe erzwang dieselbe kognitive Operation: beobachten, vermuten, testen, revidieren, konvergieren. Das ist Induktion.',
+        's9.p2':'Es fühlte sich weniger nach bewusstem Schließen an, mehr nach plötzlichem Erkennen. Dieses Klicken nennen Psychologen den <strong>Aha-Moment</strong>.',
+        's9.p3':'Die schwersten Abstraktionen verlangen etwas Besonderes von dir. Du musst über <em>Beziehungen zwischen Beziehungen</em> nachdenken.',
+        's9.h2b':'Von Bongard zum Lehrplan',
+        's9.quote':'Man kann niemandem beibringen, ein Konzept zu sehen, indem man es erklärt. Man zeigt so lange Beispiele, bis das Muster unbestreitbar wird. Den letzten Schritt hält man zurück, damit die Lernenden ihn selbst gehen.',
+        's9.cite':'nach Jerome Bruner, The Process of Education (1960)',
+        'cur1.t':'Mit transparenten Regeln beginnen.','cur1.b':' Die ersten Aufgaben rasten sofort ein.',
+        'cur2.t':'Relationale Eigenschaften einführen.','cur2.b':' Spätere Aufgaben lassen sich nicht lösen, wenn du nur einzelne Formen anschaust.',
+        'cur3.t':'Irrelevante Variation hinzufügen.','cur3.b':' Oberflächenmerkmale ändern sich frei, die Grundregel bleibt konstant.',
+        'cur4.t':'Von geometrisch zu topologisch.','cur4.b':' Die schwersten Regeln betreffen die räumliche Anordnung.',
+        'cur5.t':'Die Lernenden sollen selbst erzeugen, nicht nur erkennen.','cur5.b':' Entwirf dein eigenes Bongard-Problem.',
+        's10.h2':'Die Maschine ist dran',
+        's10.p1':'2019 stellte der KI-Forscher François Chollet eine Frage. Bongard-Probleme sind für Menschen leicht und für Computer schwer. Lässt sich diese Lücke zu einem Benchmark machen? Das Ergebnis war <strong>ARC-AGI</strong>.',
+        's10.p2':'Das Prinzip ist fast dasselbe wie eben bei dir: Eingabe-Ausgabe-Paare beobachten, Regel ableiten, auf eine neue Eingabe anwenden.',
+        's10.quote':'„ARC kann genutzt werden, um eine menschenähnliche Form allgemeiner fluider Intelligenz zu messen: die Fähigkeit, neue Fertigkeiten außerhalb der eigenen Trainingsdaten effizient zu erwerben.“',
+        's10.cite':'François Chollet, On the Measure of Intelligence (2019)',
+        'stat1':'Reiner LLM-Wert auf ARC-AGI-2','stat2':'Durchschnittlicher Wert bei Menschen','stat3':'Aufgaben, die mind. 2 Menschen lösen',
+        's10.p3':'Für jede ARC-Aufgabe ist belegt, dass mindestens zwei gewöhnliche Menschen sie lösen. Modernste KI kommt auf ARC-AGI-2 auf einstellige Prozentwerte.',
+        's10.p4':'ARC-AGI-2 brachte Aufgaben, die <strong>komposites Schlussfolgern</strong> und <strong>kontextuelle Regelanwendung</strong> verlangen. Genau diese relationalen Abstraktionen trainieren Bongard-Probleme an.',
+        's10.h2b':'Selbst ausprobieren',
+        'arc.l1':'Interaktiv · Im Browser · Kein Konto nötig','arc.t1':'▶ ARC-AGI-Aufgaben spielen',
+        'arc.d1':'Löse dieselben Gitteraufgaben, mit denen KI-Systeme kämpfen.',
+        'arc.l2':'Technischer Überblick','arc.t2':'ARC-AGI-2: der Benchmark erklärt',
+        'arc.d2':'Was die Version von 2025 schwerer macht: symbolische Deutung, komposites Schlussfolgern, kontextuelle Regeln.',
+        'arc.l3':'Live-Ergebnisse','arc.t3':'ARC Prize Rangliste',
+        'arc.d3':'Schau, wo aktuelle KI-Systeme im Vergleich zur menschlichen Leistung stehen.',
+        's10.p5':'Probier ein paar Aufgaben aus. Dann komm zur Ausgangsfrage zurück. Holmes schließt: Afghanistan. Du schließt: um 90 Grad drehen. Die kognitive Operation ist dieselbe.',
+        's10.p6':'Auf diese Frage gibt es noch keine befriedigende Antwort.',
+        's11.h2':'Jetzt baust du die Aufgabe',
+        's11.p1':'Ein Bongard-Problem zu lösen ist eine Sache. Eines zu entwerfen ist schwerer. Und lehrreicher.',
+        's11.p2':'Beim Entwerfen denkst du aus der anderen Richtung. Wähl eine Regel. Bau sechs Bilder, die sie erfüllen. Und sechs, die sie verletzen, aber plausibel.',
+        'hw.label':'Für nächstes Mal',
+        'hw.intro':'<strong>Entwirf dein eigenes Bongard-Problem.</strong> Die Bedingungen:',
+        'hw.1':'Sechs Bilder links, die eine versteckte Regel erfüllen.',
+        'hw.2':'Sechs Bilder rechts, die sie verletzen, aber plausibel.',
+        'hw.3':'Die Regel muss sich in einem kurzen Satz sagen lassen.',
+        'hw.4':'Teste sie an jemandem, der die Regel nicht kennt. Findet die Person sie nicht, sind deine positiven Beispiele nicht einheitlich genug. Findet sie sie sofort, sind deine Gegenbeispiele nicht irreführend genug.',
+        'hw.link':"Zur Inspiration, und für fast 300 weitere Probleme, besuch <a href='http://www.foundalis.com/res/bps/bpidx.htm' target='_blank'>Harry Foundalis' Bongard Problem Index</a>.",
+    }
+};
+
+let currentLang = 'en';
+
+function toggleLang() {
+    currentLang = currentLang === 'en' ? 'de' : 'en';
+    document.documentElement.lang = currentLang;
+    document.querySelector('.lang-toggle').textContent = currentLang === 'en' ? 'DE' : 'EN';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (T[currentLang][key] !== undefined) el.innerHTML = T[currentLang][key];
+    });
+    const active = document.querySelector('.bongard-card.active');
+    if (active) {
+        const idx = parseInt(active.getAttribute('data-idx'));
+        document.getElementById('prog-label').textContent =
+            currentLang === 'de' ? 'Aufgabe ' + (idx+1) + ' von ' + TOTAL : 'Puzzle ' + (idx+1) + ' of ' + TOTAL;
+    }
+}
+</script>
+
+</body>
+</html>

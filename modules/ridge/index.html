@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ridge: Make Everything Smaller</title>
+
+    <!-- KaTeX -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #141420;
+            color: #e8e8f0;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            line-height: 1.8;
+            font-size: 18px;
+        }
+
+        .container {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* === Language toggle === */
+        .lang-toggle {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            background: #2a2a44;
+            border: 1px solid #4a4a70;
+            border-radius: 20px;
+            padding: 6px 14px;
+            cursor: pointer;
+            font-size: 13px;
+            font-family: sans-serif;
+            color: #a0a0d0;
+            z-index: 100;
+            transition: background 0.2s;
+        }
+        .lang-toggle:hover { background: #363658; }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: 80px 24px 40px;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.3;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .hero .subtitle {
+            margin-top: 16px;
+            color: #888;
+            font-size: 16px;
+            font-style: italic;
+        }
+
+        /* Sections */
+        section { padding: 50px 0; }
+
+        h2 {
+            font-size: 30px;
+            color: #fff;
+            margin-bottom: 24px;
+            line-height: 1.3;
+        }
+
+        h3 {
+            font-size: 20px;
+            color: #ccc;
+            margin: 28px 0 12px;
+        }
+
+        p { margin-bottom: 20px; color: #ccc; }
+
+        /* Images */
+        .figure {
+            margin: 28px 0;
+            text-align: center;
+        }
+
+        .figure img {
+            max-width: 100%;
+            border-radius: 8px;
+        }
+
+        .caption {
+            margin-top: 8px;
+            font-size: 14px;
+            color: #777;
+            font-style: italic;
+        }
+
+        /* Formula blocks */
+        .formula-block {
+            margin: 24px auto;
+            text-align: center;
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+
+        .formula-picture {
+            background: #0e0e1a;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            padding: 26px 20px 18px;
+            margin: 28px 0;
+        }
+
+        /* Definition list */
+        .def-list {
+            margin: 16px 0 20px 20px;
+            color: #ccc;
+        }
+
+        .def-list li {
+            margin-bottom: 8px;
+            list-style: none;
+        }
+
+        .def-list li::before {
+            content: "\2013\00a0";
+            color: #666;
+        }
+
+        /* Ingredient list */
+        .step-list {
+            counter-reset: steps;
+            margin: 16px 0;
+            padding: 0;
+        }
+
+        .step-list li {
+            list-style: none;
+            counter-increment: steps;
+            margin-bottom: 24px;
+            padding-left: 48px;
+            position: relative;
+            color: #ccc;
+        }
+
+        .step-list li::before {
+            content: counter(steps);
+            position: absolute;
+            left: 0;
+            top: 2px;
+            width: 32px;
+            height: 32px;
+            background: #2a2a44;
+            border: 1px solid #4a4a70;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            font-family: sans-serif;
+            color: #a0a0d0;
+        }
+
+        .step-list li strong {
+            display: block;
+            color: #e0e0f0;
+            margin-bottom: 4px;
+        }
+
+        /* Tables */
+        table.tbl {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 26px 0;
+            font-family: sans-serif;
+            font-size: 15px;
+        }
+
+        table.tbl th {
+            text-align: right;
+            color: #6a6aa0;
+            font-weight: normal;
+            font-size: 11px;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            border-bottom: 1px solid #2a2a40;
+            padding: 8px 12px;
+        }
+
+        table.tbl td {
+            text-align: right;
+            padding: 9px 12px;
+            border-bottom: 1px solid #1e1e2e;
+            color: #bbb;
+        }
+
+        table.tbl th:first-child, table.tbl td:first-child { text-align: left; }
+        table.tbl tr.hl td { color: #70e898; }
+        table.tbl tr.dim td { color: #7a6a8a; }
+
+        /* Callout */
+        .callout {
+            border-left: 3px solid #6060b0;
+            background: #1a1a2c;
+            border-radius: 0 8px 8px 0;
+            padding: 18px 24px;
+            margin: 28px 0;
+            color: #d8d8ec;
+            font-size: 19px;
+            line-height: 1.7;
+        }
+
+        /* For the curious */
+        details.curious {
+            background: #1c1c2e;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            padding: 20px 28px;
+            margin: 28px 0;
+        }
+
+        details.curious summary {
+            cursor: pointer;
+            color: #8888c0;
+            font-family: sans-serif;
+            font-size: 12px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            list-style: none;
+        }
+
+        details.curious summary::-webkit-details-marker { display: none; }
+        details.curious summary::before { content: "\25B8\00a0\00a0"; }
+        details.curious[open] summary::before { content: "\25BE\00a0\00a0"; }
+        details.curious[open] summary { margin-bottom: 18px; }
+        details.curious p { font-size: 17px; }
+        details.curious p:last-child { margin-bottom: 0; }
+
+        /* Demo */
+        .demo-wrap {
+            background: #1c1c2e;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            padding: 22px;
+            margin: 32px 0;
+        }
+
+        .demo-label {
+            font-family: sans-serif;
+            font-size: 12px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #5050a0;
+            margin-bottom: 14px;
+        }
+
+        .demo-wrap canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            border: 1px solid #2a2a40;
+            border-radius: 4px;
+            background: #141420;
+            margin-bottom: 12px;
+        }
+
+        .ctrl-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-top: 6px;
+        }
+
+        .ctrl-row label {
+            font-family: sans-serif;
+            font-size: 13px;
+            color: #7070a0;
+        }
+
+        .ctrl-row input[type=range] {
+            flex: 1;
+            min-width: 180px;
+            accent-color: #6060b0;
+        }
+
+        .ctrl-row .val {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: #c0d0a0;
+            min-width: 96px;
+            text-align: right;
+        }
+
+        .ctrl-row button {
+            background: #141420;
+            border: 1px solid #3a3a55;
+            border-radius: 4px;
+            padding: 6px 12px;
+            color: #a0a0d0;
+            font-size: 13px;
+            font-family: sans-serif;
+            cursor: pointer;
+            transition: border-color 0.2s, color 0.2s;
+        }
+
+        .ctrl-row button:hover { border-color: #6060a0; color: #d0d0f0; }
+
+        .stats-bar {
+            display: flex;
+            gap: 10px;
+            margin-top: 14px;
+            flex-wrap: wrap;
+        }
+
+        .stat-pill {
+            background: #141420;
+            border: 1px solid #2a2a40;
+            border-radius: 6px;
+            padding: 7px 14px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .stat-pill .stat-label {
+            color: #5050a0;
+            margin-right: 8px;
+            font-family: sans-serif;
+            font-size: 10px;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+        }
+
+        .stat-pill .stat-val { color: #c0d0a0; }
+        .stat-pill.warn .stat-val { color: #70e898; }
+
+        .demo-note {
+            font-family: sans-serif;
+            font-size: 13px;
+            color: #6a6a88;
+            margin-top: 14px;
+            line-height: 1.7;
+        }
+
+        /* Quiz */
+        .quiz {
+            background: #1c1c2e;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            padding: 28px;
+            margin: 36px 0;
+        }
+
+        .quiz-question {
+            font-size: 18px;
+            color: #e0e0f0;
+            margin-bottom: 18px;
+            font-style: italic;
+        }
+
+        .quiz-options {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .quiz-btn {
+            background: #2a2a44;
+            color: #e0e0f0;
+            border: 1px solid #3a3a55;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+            flex: 1;
+            min-width: 160px;
+            text-align: center;
+        }
+
+        .quiz-btn:hover { background: #363658; border-color: #5a5a80; }
+
+        .quiz-btn.correct {
+            background: #1a4a2a;
+            border-color: #50b878;
+            color: #70e898;
+        }
+
+        .quiz-btn.wrong {
+            background: #2a2248;
+            border-color: #8264dc;
+            color: #a88ef0;
+        }
+
+        .quiz-btn.disabled { pointer-events: none; opacity: 0.6; }
+
+        .quiz-feedback {
+            margin-top: 14px;
+            font-size: 16px;
+            min-height: 24px;
+            line-height: 1.5;
+        }
+
+        .quiz-feedback.success { color: #70e898; }
+        .quiz-feedback.fail    { color: #a88ef0; }
+
+        /* Next steps */
+        .next-grid {
+            display: grid;
+            gap: 12px;
+            margin: 28px 0;
+        }
+
+        .next-card {
+            background: #1c1c2e;
+            border: 1px solid #2a2a40;
+            border-radius: 10px;
+            padding: 18px 22px;
+        }
+
+        .next-card .next-kicker {
+            font-family: sans-serif;
+            font-size: 11px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #5050a0;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .next-card a { font-size: 19px; }
+        .next-card p { margin: 6px 0 0; font-size: 16px; color: #999; }
+
+        /* Divider */
+        .section-rule {
+            border: none;
+            border-top: 1px solid #2a2a40;
+            margin: 0;
+        }
+
+        /* Links */
+        a { color: #80b4f0; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 24px;
+            color: #444;
+            font-size: 14px;
+        }
+
+        /* Responsive */
+        @media (max-width: 680px) {
+            .hero h1 { font-size: 28px; }
+            h2 { font-size: 24px; }
+            body { font-size: 16px; }
+            .quiz-options { flex-direction: column; }
+            table.tbl { font-size: 13px; }
+            table.tbl th, table.tbl td { padding: 7px 6px; }
+        }
+    </style>
+</head>
+<body>
+
+<button class="lang-toggle" onclick="toggleLang()">DE</button>
+
+<!-- Hero -->
+<div class="hero">
+    <h1 data-i18n="hero.h1">Ridge: Make Everything Smaller</h1>
+    <p class="subtitle" data-i18n="hero.subtitle">Class 5, module two of three. One dial, five weights, and a bar that never quite reaches zero.</p>
+</div>
+
+<div class="container">
+
+<!-- ── 1 · Cold open ───────────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s1.h2">Plus a thousand and minus nine hundred and ninety-eight</h2>
+
+    <p data-i18n="s1.p1">Two advertising channels. Google Search and Google Shopping. The same team sets both budgets in the same meeting, on the same day, out of the same pot. Over two years of weekly numbers the two spend columns correlate at about 0.9.</p>
+
+    <p data-i18n="s1.p2">Least squares looks at that and returns plus one thousand on Search and minus nine hundred and ninety-eight on Shopping. Keep both numbers and the predictions are fine. The two monsters cancel and what survives is the two euros of real effect. Take either number out of the room on its own and it is nonsense. Nobody spends one euro on Search and gets a thousand back, and nobody has ever lost money by turning Shopping on.</p>
+
+    <p data-i18n="s1.p3">So what would a reasonable person do, handed a pair like that? Probably say something like: whatever these two channels are doing, they are doing it together, so give them roughly the same number, and make both of those numbers small. That is not a fudge and it is not a compromise. It is the answer. Ridge is that sentence, written down so a computer can follow it.</p>
+
+    <p data-i18n="s1.p4">Two sentences of recall from the <a href="../regularisation/">first module</a> and then we move on. Least squares aims at the truth on average, and pays for it by lurching a long way whenever the data moves a little. Ridge aims slightly off on purpose, and in exchange it stops flinching. A bit more shift bought a lot less spread.</p>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── 2 · The rule ────────────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s2.h2">Charge for the squares</h2>
+
+    <p data-i18n="s2.p1">The rule comes before the formula. From now on the model pays for the weights it uses. Square each weight, add the squares up, and that number goes on the bill. Big weights are expensive. Two medium weights cost less than one enormous one, because squaring punishes the extremes far harder than it punishes the middle. Two weights of one cost two. One weight of two costs four. Same effect on the prediction, twice the price.</p>
+
+    <p data-i18n="s2.p2">Here is the whole argument, and it takes no calculus at all. In this brand Search and Shopping are the same column: five weeks, spend of 1, 2, 3, 4 and 5 in both, revenue of 2, 4, 6, 8 and 10. Any two weights that add up to two predict every week exactly. There are infinitely many such pairs and the data likes them all equally well. Least squares has nothing left to say. So ask the bill instead.</p>
+
+    <table class="tbl">
+        <thead>
+            <tr>
+                <th data-i18n="s2.t.h1">Search</th>
+                <th data-i18n="s2.t.h2">Shopping</th>
+                <th data-i18n="s2.t.h3">Error</th>
+                <th data-i18n="s2.t.h4">Sum of squares</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>2</td><td>0</td><td>0</td><td>4</td></tr>
+            <tr><td>1.5</td><td>0.5</td><td>0</td><td>2.5</td></tr>
+            <tr class="hl"><td>1</td><td>1</td><td>0</td><td>2</td></tr>
+            <tr class="dim"><td>1000</td><td>&minus;998</td><td>0</td><td>996 004</td></tr>
+        </tbody>
+    </table>
+
+    <p data-i18n="s2.p3">Ridge picks one and one. Four numbers in a column, and the question that least squares could not answer is settled. The pair that splits the credit evenly is the cheapest pair on the list, and the pair that made the meeting unbearable costs about half a million.</p>
+
+    <div class="callout" data-i18n="s2.callout">Of all the answers that fit the data, prefer the small one. Everything else in this module is a detail of that sentence.</div>
+
+    <!-- Quiz 1 -->
+    <div class="quiz" id="quiz1">
+        <div class="quiz-question" data-i18n="quiz1.q">All four pairs in the table fit the five weeks perfectly. Which pair does ridge report?</div>
+        <div class="quiz-options">
+            <button class="quiz-btn" onclick="answerQuiz('quiz1', this, true)" data-i18n="quiz1.a1">1 and 1</button>
+            <button class="quiz-btn" onclick="answerQuiz('quiz1', this, false)" data-i18n="quiz1.a2">2 and 0</button>
+        </div>
+        <div class="quiz-feedback" id="quiz1-feedback"></div>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── 3 · Ridge multiplies ────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s3.h2">Ridge multiplies</h2>
+
+    <p data-i18n="s3.p1">When the columns do not overlap at all, the ridge answer has an embarrassing shape. Take the least squares weight. Divide it by one plus lambda. That is the entire calculation.</p>
+
+    <div class="formula-block">$$\hat{\beta}_j^{\,\text{ridge}} \;=\; \frac{\hat{\beta}_j^{\,\text{ols}}}{1+\lambda}$$</div>
+
+    <p data-i18n="s3.p2">Every weight is scaled by the same factor, and that factor is smaller than one. Eight halved is four. Four halved is two. Two halved is one. One halved is a half. Halve it as often as you like and it never arrives.</p>
+
+    <div class="callout" data-i18n="s3.callout">Scaling something by a number smaller than one shrinks it forever and never reaches zero. That is the whole reason ridge keeps every feature.</div>
+
+    <p data-i18n="s3.p3">You can meet this before any geometry, and you should, because the geometry is a second route to the same place rather than the proof. Here are four weights with the dial set at lambda equals two, so everything is divided by three.</p>
+
+    <table class="tbl">
+        <thead>
+            <tr>
+                <th data-i18n="s3.t.h1">Weight before</th>
+                <th data-i18n="s3.t.h2">Divided by 1 + &lambda; = 3</th>
+                <th data-i18n="s3.t.h3">Exactly zero?</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>8</td><td>2.67</td><td data-i18n="s3.t.no1">no</td></tr>
+            <tr><td>3</td><td>1.00</td><td data-i18n="s3.t.no2">no</td></tr>
+            <tr><td>1.5</td><td>0.50</td><td data-i18n="s3.t.no3">no</td></tr>
+            <tr><td>0.4</td><td>0.13</td><td data-i18n="s3.t.no4">no</td></tr>
+        </tbody>
+    </table>
+
+    <p data-i18n="s3.p4">One honest caveat, said once. That exact division holds when the columns do not overlap, and real columns always overlap, which is the entire reason you are reading this. The behaviour survives anyway. The demo below is a real fit on real overlapping columns, and nothing in it ever reaches zero either.</p>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── 4 · The interactive ─────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s4.h2">Turn the dial</h2>
+
+    <p data-i18n="s4.p1">Five channels, two years of weekly revenue. Search and Shopping are near enough the same column: in this dataset they correlate at 0.999, which is what happens when one person sets both budgets. Meta, TikTok and email are ordinary, well behaved columns. At lambda equals zero you get least squares, and least squares does the thing from the cold open.</p>
+
+    <p data-i18n="s4.p2">Drag the dial. Watch the two monsters come screaming in toward each other, watch every bar get shorter, and watch what happens at the far right end.</p>
+
+    <div class="demo-wrap">
+        <div class="demo-label" data-i18n="demo.label">Coefficient shrinkage</div>
+
+        <canvas id="bars" width="760" height="350"></canvas>
+
+        <div class="ctrl-row">
+            <label data-i18n="demo.lambda">&lambda; =</label>
+            <input type="range" id="lam" min="0" max="360" step="1" value="0">
+            <span class="val" id="lam-out">0</span>
+        </div>
+
+        <div class="ctrl-row">
+            <button onclick="setLam(0)" data-i18n="demo.btn.ols">Least squares (&lambda; = 0)</button>
+            <button onclick="setLam(BEST.i)" data-i18n="demo.btn.best">Best test error</button>
+            <button onclick="setLam(360)" data-i18n="demo.btn.max">Crank it to the maximum</button>
+        </div>
+
+        <div class="stats-bar" id="stats"></div>
+
+        <canvas id="curves" width="760" height="180"></canvas>
+
+        <div class="demo-note" id="demo-note"></div>
+    </div>
+
+    <p class="caption" data-i18n="demo.caption">The left panel is drawn to a fixed scale, so you can see how much smaller everything gets. The right panel rescales itself every time you move the dial, so you can always see all five bars no matter how short they are. That right panel is the point of the whole module. Crank lambda to the maximum, look at it, and count the bars.</p>
+
+    <p data-i18n="s4.p3">One thing worth naming, because you will see it happen. Shopping starts below the line at minus fourteen and ends above it. On the way up it passes through zero exactly once. Passing through is not the same as being set to zero and left there. Nudge the dial one step and Shopping is back. In the next module you will meet a penalty that puts a coefficient on zero and keeps it there for every larger lambda, and the difference between passing through and staying is the difference between the two methods.</p>
+
+    <!-- Quiz 2 -->
+    <div class="quiz" id="quiz2">
+        <div class="quiz-question" data-i18n="quiz2.q">You set lambda to ten thousand. Email was the weakest channel in the model. What is its ridge weight?</div>
+        <div class="quiz-options">
+            <button class="quiz-btn" onclick="answerQuiz('quiz2', this, false)" data-i18n="quiz2.a1">Exactly zero. Ridge dropped it.</button>
+            <button class="quiz-btn" onclick="answerQuiz('quiz2', this, true)" data-i18n="quiz2.a2">Tiny, but not zero. It is still in the model.</button>
+        </div>
+        <div class="quiz-feedback" id="quiz2-feedback"></div>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── 5 · Regular means invertible ────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s5.h2">Where the word regularisation comes from</h2>
+
+    <p data-i18n="s5.p1">Least squares has a formula, and inside that formula there is one step that has to be undone. Everything depends on the undoing being possible. The old word for a thing you can undo that way is <em>regular</em>. The word for a thing you cannot is <em>singular</em>.</p>
+
+    <p data-i18n="s5.p2">When two of your columns say the same thing, that step is singular. Notice what least squares does then, because it is not what people expect. It does not return a wrong answer and it does not warn you. It returns infinitely many exactly equal answers, and your software hands you whichever one its algorithm reached first. Run it again with the columns in a different order and you can get a different one.</p>
+
+    <div class="formula-picture">
+        <div class="formula-block">$$\hat{\beta} \;=\; \bigl(X^{\top}X + {\color{#ffd479}\lambda I}\bigr)^{-1} X^{\top} y$$</div>
+        <div class="caption" data-i18n="s5.fig">You do not need to read this. There is one thing to know about it and it is the part in yellow. The lambda sits on the diagonal, and that is what fixes the problem. Everything else in the picture is the ordinary least squares formula you already have.</div>
+    </div>
+
+    <p data-i18n="s5.p3">Here is the repair on four numbers instead of on matrices. Go back to the five weeks. Both columns are 1, 2, 3, 4, 5. Multiply the columns together pairwise and add up: Search with Search is 55, Search with Shopping is 55, Shopping with Search is 55, Shopping with Shopping is 55. That is your whole table.</p>
+
+    <table class="tbl">
+        <thead>
+            <tr><th></th><th data-i18n="s5.t.h1">Search</th><th data-i18n="s5.t.h2">Shopping</th></tr>
+        </thead>
+        <tbody>
+            <tr><td data-i18n="s5.t.r1">Search</td><td>55</td><td>55</td></tr>
+            <tr><td data-i18n="s5.t.r2">Shopping</td><td>55</td><td>55</td></tr>
+        </tbody>
+    </table>
+
+    <p data-i18n="s5.p4">Cross-multiply and subtract: 55 times 55 minus 55 times 55 is zero. Zero is the symptom. Zero is what singular looks like when you write it out as numbers. Now add lambda equals one to the two cells on the diagonal, so the table reads 56, 55, 55, 56. Cross-multiply and subtract again: 3136 minus 3025 is 111. Not zero. And it will never be zero, for any lambda above zero, for any dataset anybody has ever collected.</p>
+
+    <p data-i18n="s5.p5">You made a singular thing regular. That is the job the word regularisation is doing in the name of this class. It is a piece of nineteenth century matrix vocabulary, not a metaphor about a model learning modestly.</p>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── 6 · Correlated predictors ───────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s6.h2">It splits the credit instead of picking a favourite</h2>
+
+    <p data-i18n="s6.p1">Look again at what the demo did to Search and Shopping. It did not choose one. It walked them toward each other until they were carrying roughly the same weight, and then it walked them down together. That is not a side effect. It falls straight out of charging for squares, and you proved it yourself in the four-row table: one and one is cheaper than two and zero.</p>
+
+    <p data-i18n="s6.p2">When two channels really do work together, this is exactly what you want. The budget meeting sets them together, the customer sees them together, and a model that reports them together is telling the truth about how the business runs. Ridge will not hand you a story about Search being the hero and Shopping being dead weight, because it has no way to prefer that story and no reason to.</p>
+
+    <p data-i18n="s6.p3">Now the other side, and it is the reason the next module exists. Ridge gives you every channel back, slightly quieter. Ninety-one columns in, ninety-one columns out, all of them small, none of them gone. If somebody asks which three channels to cut on Monday, ridge has no answer for them, and it never will, for the reason you already know: multiplication cannot produce a zero.</p>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── 7 · The complexity dial ─────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s7.h2">Your model does not have ninety-one parameters</h2>
+
+    <p data-i18n="s7.p1">People call lambda a complexity dial and then never say what is being dialled. There is a real quantity underneath. Take the marketing model with ninety-one columns against a hundred and four weeks. Once the penalty is switched on, that model does not use ninety-one parameters. It uses a decimal number of them, and the number slides.</p>
+
+    <table class="tbl">
+        <thead>
+            <tr><th>&lambda;</th><th data-i18n="s7.t.h2">Parameters actually in use</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>0</td><td>91.0</td></tr>
+            <tr><td>1</td><td>41.7</td></tr>
+            <tr><td>10</td><td>18.4</td></tr>
+            <tr><td>100</td><td>7.2</td></tr>
+            <tr><td>1 000</td><td>2.6</td></tr>
+            <tr><td data-i18n="s7.t.inf">&rarr; infinity</td><td>&rarr; 0</td></tr>
+        </tbody>
+    </table>
+
+    <p data-i18n="s7.p2">Nobody has ever had a tenth of a parameter and there it is anyway. Ninety-one columns and seven point two parameters in use is a model you could almost explain to somebody. Note the bottom row. The count runs down to zero, but it gets there smoothly, and no individual weight is zero anywhere on the way. Those are two different things and this table is where students usually confuse them.</p>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── 8 · The theorem ─────────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s8.h2">There is always a lambda that wins</h2>
+
+    <p data-i18n="s8.p1">Least squares has a famous property. Among all <em>unbiased</em> estimators it has the smallest variance there is. Generations of students learned that and stopped, because it sounds like the end of an argument. Nobody ever asked for unbiased. It is a technical word, not a compliment. Unbiased means that if you repeated the whole study across infinitely many parallel universes your average error would come out at zero, and that is a comfort nobody has ever needed on a Tuesday.</p>
+
+    <p data-i18n="s8.p2">Hoerl and Kennard proved something better in 1970. There always exists a lambda greater than zero whose total error is lower than the total error of least squares. Not usually. Not for well behaved data. Always, for every dataset that has ever been collected and every one that ever will be. They could not tell you which lambda it is, and neither can we. It is there anyway, and finding it is what the test error curve in the demo is for.</p>
+
+    <p data-i18n="s8.p3">If that sounds like something you have already met, it is. It is the regression version of Stein's paradox from the <a href="../regularisation/">first module</a>. Shrinking your estimates toward a common point beats leaving them where they landed, and the theorem does not care whether the things you are estimating have anything to do with each other. Same fact, two languages.</p>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── 9 · For the curious ─────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s9.h2">For the curious</h2>
+
+    <p data-i18n="s9.p1">Two boxes. Skipping both costs you nothing you will be examined on.</p>
+
+    <details class="curious">
+        <summary data-i18n="c1.sum">Lambda is a ratio of two beliefs you already hold</summary>
+
+        <p data-i18n="c1.p1">Write down two things you already think. First, how noisy your data is: call that variance sigma squared. Second, how large you expect the real effects to be: call that variance tau squared. Lambda is the first divided by the second.</p>
+
+        <div class="formula-block">$$\lambda \;=\; \frac{\sigma^{2}}{\tau^{2}}$$</div>
+
+        <p data-i18n="c1.p2">Noisy data and modest expected effects: big lambda, shrink hard. Clean data and one channel you genuinely expect to dominate: small lambda, trust the fit. In plain words, lambda is how much you believe your own two years of history against your prior belief that no single channel is a miracle. Both of those are opinions you already have.</p>
+
+        <p data-i18n="c1.p3">Where it comes from, and here is a correction worth stating out loud, because plenty of courses and at least one table of contents get it wrong. Assume Gaussian noise on the data. Then assume a Gaussian prior on the weights, centred on zero, with variance tau squared. Ask for the most probable set of weights given the data, which is maximum a posteriori estimation. Out comes ridge exactly, with lambda equal to sigma squared over tau squared.</p>
+
+        <p data-i18n="c1.p4">Gaussian noise plus maximum likelihood does <strong>not</strong> give you ridge. Maximum likelihood on its own gives you ordinary least squares and nothing else. The prior is where the shrinkage comes from, and the estimation has to be MAP rather than maximum likelihood. Swap the Gaussian prior for a Laplace prior and the same machinery hands you the penalty from the next module instead.</p>
+    </details>
+
+    <details class="curious">
+        <summary data-i18n="c2.sum">What ridge does direction by direction</summary>
+
+        <p data-i18n="c2.p1">Ridge does not shrink every direction by the same amount. Break the data into its principal directions, with singular values \(d_j\) measuring how much the data varies along each one. Ridge multiplies the direction by</p>
+
+        <div class="formula-block">$$\frac{d_j^{2}}{d_j^{2}+\lambda}$$</div>
+
+        <p data-i18n="c2.p2">Large \(d_j\) and that fraction sits near one, so the direction is barely touched. Small \(d_j\) and the fraction drops toward zero, so the direction is crushed. Which is exactly right. A direction with a tiny singular value is a direction in which your data barely varies, and the direction in which Search and Shopping disagree is precisely that direction. Least squares will happily put an enormous number there, because out there a huge coefficient costs almost nothing in fit. Ridge shrinks hardest exactly where the data knows least.</p>
+
+        <p data-i18n="c2.p3">Add those fractions up over all the directions and you get the effective degrees of freedom, which is the right hand column of the table above:</p>
+
+        <div class="formula-block">$$\mathrm{df}(\lambda) \;=\; \sum_{j} \frac{d_j^{2}}{d_j^{2}+\lambda}$$</div>
+
+        <p data-i18n="c2.p4">At lambda equals zero it equals the number of features. As lambda grows it slides continuously down toward zero. Continuously, with no steps and no gaps, which is what makes lambda a genuine dial rather than a switch. And note again that the count reaching zero and an individual weight reaching zero are different events. The first happens. The second does not.</p>
+    </details>
+</section>
+
+<hr class="section-rule">
+
+<!-- ── 10 · Next ───────────────────────────────────────────────────────────── -->
+<section>
+    <h2 data-i18n="s10.h2">What you have, and what you still do not</h2>
+
+    <p data-i18n="s10.p1">Ridge handed you every channel back, slightly quieter. Nothing was deleted, nothing was accused, and the meeting is survivable. That is worth a lot and it is not everything. Sometimes what you actually need is somebody to tell you which three channels to cut.</p>
+
+    <p data-i18n="s10.p2">That job needs a different penalty, and it behaves nothing like this one. Instead of dividing every weight, it subtracts a fixed amount from every weight and stops at zero. Subtraction can reach zero. Multiplication cannot. Same dial, same data, completely different answer, and a different meeting.</p>
+
+    <div class="next-grid">
+        <div class="next-card">
+            <span class="next-kicker" data-i18n="s10.prev.kicker">Previously</span>
+            <a href="../regularisation/" data-i18n="s10.prev.title">Regularisation: shift, spread and the ridge trace</a>
+            <p data-i18n="s10.prev.desc">Where the bias and variance argument came from, and Stein's paradox.</p>
+        </div>
+        <div class="next-card">
+            <span class="next-kicker" data-i18n="s10.next.kicker">Next</span>
+            <a href="../lasso/" data-i18n="s10.next.title">Lasso: the one that actually deletes things</a>
+            <p data-i18n="s10.next.desc">Subtract instead of divide, and watch coefficients land on zero and stay there.</p>
+        </div>
+    </div>
+</section>
+
+</div>
+
+<footer>
+    <span data-i18n="footer.title">Ridge: Make Everything Smaller</span>
+    <br>&copy; All rights reserved
+</footer>
+
+<!-- ── Scripts ─────────────────────────────────────────────────────────────── -->
+<script>
+
+// ─── Language data ────────────────────────────────────────────────────────────
+const T = {
+    en: {
+        'hero.h1':       'Ridge: Make Everything Smaller',
+        'hero.subtitle': 'Class 5, module two of three. One dial, five weights, and a bar that never quite reaches zero.',
+
+        's1.h2': 'Plus a thousand and minus nine hundred and ninety-eight',
+        's1.p1': 'Two advertising channels. Google Search and Google Shopping. The same team sets both budgets in the same meeting, on the same day, out of the same pot. Over two years of weekly numbers the two spend columns correlate at about 0.9.',
+        's1.p2': 'Least squares looks at that and returns plus one thousand on Search and minus nine hundred and ninety-eight on Shopping. Keep both numbers and the predictions are fine. The two monsters cancel and what survives is the two euros of real effect. Take either number out of the room on its own and it is nonsense. Nobody spends one euro on Search and gets a thousand back, and nobody has ever lost money by turning Shopping on.',
+        's1.p3': 'So what would a reasonable person do, handed a pair like that? Probably say something like: whatever these two channels are doing, they are doing it together, so give them roughly the same number, and make both of those numbers small. That is not a fudge and it is not a compromise. It is the answer. Ridge is that sentence, written down so a computer can follow it.',
+        's1.p4': 'Two sentences of recall from the <a href="../regularisation/">first module</a> and then we move on. Least squares aims at the truth on average, and pays for it by lurching a long way whenever the data moves a little. Ridge aims slightly off on purpose, and in exchange it stops flinching. A bit more shift bought a lot less spread.',
+
+        's2.h2':      'Charge for the squares',
+        's2.p1':      'The rule comes before the formula. From now on the model pays for the weights it uses. Square each weight, add the squares up, and that number goes on the bill. Big weights are expensive. Two medium weights cost less than one enormous one, because squaring punishes the extremes far harder than it punishes the middle. Two weights of one cost two. One weight of two costs four. Same effect on the prediction, twice the price.',
+        's2.p2':      'Here is the whole argument, and it takes no calculus at all. In this brand Search and Shopping are the same column: five weeks, spend of 1, 2, 3, 4 and 5 in both, revenue of 2, 4, 6, 8 and 10. Any two weights that add up to two predict every week exactly. There are infinitely many such pairs and the data likes them all equally well. Least squares has nothing left to say. So ask the bill instead.',
+        's2.t.h1':    'Search',
+        's2.t.h2':    'Shopping',
+        's2.t.h3':    'Error',
+        's2.t.h4':    'Sum of squares',
+        's2.p3':      'Ridge picks one and one. Four numbers in a column, and the question that least squares could not answer is settled. The pair that splits the credit evenly is the cheapest pair on the list, and the pair that made the meeting unbearable costs about half a million.',
+        's2.callout': 'Of all the answers that fit the data, prefer the small one. Everything else in this module is a detail of that sentence.',
+
+        'quiz1.q':  'All four pairs in the table fit the five weeks perfectly. Which pair does ridge report?',
+        'quiz1.a1': '1 and 1',
+        'quiz1.a2': '2 and 0',
+        'quiz1.ok': 'Correct. Sum of squares 2, which is the smallest on the list. Ridge refuses to pick a favourite between two channels that move together, and it refuses for an arithmetic reason rather than a diplomatic one.',
+        'quiz1.no': 'Not this time. 2 and 0 costs 4, while 1 and 1 costs 2. Both fit the data perfectly, so the bill is the only thing left to separate them, and 1 and 1 is cheaper.',
+
+        's3.h2':      'Ridge multiplies',
+        's3.p1':      'When the columns do not overlap at all, the ridge answer has an embarrassing shape. Take the least squares weight. Divide it by one plus lambda. That is the entire calculation.',
+        's3.p2':      'Every weight is scaled by the same factor, and that factor is smaller than one. Eight halved is four. Four halved is two. Two halved is one. One halved is a half. Halve it as often as you like and it never arrives.',
+        's3.callout': 'Scaling something by a number smaller than one shrinks it forever and never reaches zero. That is the whole reason ridge keeps every feature.',
+        's3.p3':      'You can meet this before any geometry, and you should, because the geometry is a second route to the same place rather than the proof. Here are four weights with the dial set at lambda equals two, so everything is divided by three.',
+        's3.t.h1':    'Weight before',
+        's3.t.h2':    'Divided by 1 + &lambda; = 3',
+        's3.t.h3':    'Exactly zero?',
+        's3.t.no1':   'no',
+        's3.t.no2':   'no',
+        's3.t.no3':   'no',
+        's3.t.no4':   'no',
+        's3.p4':      'One honest caveat, said once. That exact division holds when the columns do not overlap, and real columns always overlap, which is the entire reason you are reading this. The behaviour survives anyway. The demo below is a real fit on real overlapping columns, and nothing in it ever reaches zero either.',
+
+        's4.h2': 'Turn the dial',
+        's4.p1': 'Five channels, two years of weekly revenue. Search and Shopping are near enough the same column: in this dataset they correlate at 0.999, which is what happens when one person sets both budgets. Meta, TikTok and email are ordinary, well behaved columns. At lambda equals zero you get least squares, and least squares does the thing from the cold open.',
+        's4.p2': 'Drag the dial. Watch the two monsters come screaming in toward each other, watch every bar get shorter, and watch what happens at the far right end.',
+        's4.p3': 'One thing worth naming, because you will see it happen. Shopping starts below the line at minus fourteen and ends above it. On the way up it passes through zero exactly once. Passing through is not the same as being set to zero and left there. Nudge the dial one step and Shopping is back. In the next module you will meet a penalty that puts a coefficient on zero and keeps it there for every larger lambda, and the difference between passing through and staying is the difference between the two methods.',
+
+        'demo.label':    'Coefficient shrinkage',
+        'demo.lambda':   '&lambda; =',
+        'demo.btn.ols':  'Least squares (&lambda; = 0)',
+        'demo.btn.best': 'Best test error',
+        'demo.btn.max':  'Crank it to the maximum',
+        'demo.caption':  'The left panel is drawn to a fixed scale, so you can see how much smaller everything gets. The right panel rescales itself every time you move the dial, so you can always see all five bars no matter how short they are. That right panel is the point of the whole module. Crank lambda to the maximum, look at it, and count the bars.',
+
+        'demo.panelFixed':  'Actual size',
+        'demo.panelZoom':   'Zoomed to fit',
+        'demo.zeroLine':    'zero',
+        'demo.axisLambda':  'lambda',
+        'demo.legendTrain': 'training error',
+        'demo.legendTest':  'test error',
+        'demo.minMark':     'minimum',
+        'demo.stat.ss':     'Sum of squared weights',
+        'demo.stat.train':  'Training error',
+        'demo.stat.test':   'Test error',
+        'demo.stat.small':  'Smallest weight',
+        'demo.stat.zeros':  'Weights at exactly zero',
+        'demo.of5':         'of 5',
+        'demo.noteHigh':    'Lambda is at the maximum. The sum of squared weights is a rounding error away from nothing, the bars on the left have vanished from the fixed scale, and the panel on the right still has five of them. Not four. Not three. Five.',
+        'demo.noteBest':    'This is the lambda with the lowest test error. Training error has gone up a little to get here, and test error has come down a lot. That trade is the whole point of the dial.',
+        'demo.noteZero':    'Lambda is zero, so this is plain least squares. Search says plus sixteen, Shopping says minus thirteen point nine, and the sum of squared weights is four hundred and fifty. Both channels together predict fine. Either one on its own is a story you cannot tell out loud.',
+        'demo.noteMid':     'Every bar is shorter than it was, and every bar is still there. The two correlated channels are walking toward a shared value instead of fighting.',
+
+        'demo.ch1': 'Search',
+        'demo.ch2': 'Shopping',
+        'demo.ch3': 'Meta',
+        'demo.ch4': 'TikTok',
+        'demo.ch5': 'Email',
+
+        'quiz2.q':  'You set lambda to ten thousand. Email was the weakest channel in the model. What is its ridge weight?',
+        'quiz2.a1': 'Exactly zero. Ridge dropped it.',
+        'quiz2.a2': 'Tiny, but not zero. It is still in the model.',
+        'quiz2.ok': 'Right. Ridge divides, and dividing never lands on zero. At lambda equals ten thousand the email weight is roughly 0.00003. Useless for a decision, still in the model, still costing you a line in the report. Ridge never removes a feature.',
+        'quiz2.no': 'No. Ridge divides every weight by the same factor, and division cannot reach zero however hard you push it. The email weight is tiny, roughly 0.00003, and it is still there. A method that deletes features is coming in the next module, and it subtracts rather than divides.',
+
+        's5.h2':   'Where the word regularisation comes from',
+        's5.p1':   'Least squares has a formula, and inside that formula there is one step that has to be undone. Everything depends on the undoing being possible. The old word for a thing you can undo that way is <em>regular</em>. The word for a thing you cannot is <em>singular</em>.',
+        's5.p2':   'When two of your columns say the same thing, that step is singular. Notice what least squares does then, because it is not what people expect. It does not return a wrong answer and it does not warn you. It returns infinitely many exactly equal answers, and your software hands you whichever one its algorithm reached first. Run it again with the columns in a different order and you can get a different one.',
+        's5.fig':  'You do not need to read this. There is one thing to know about it and it is the part in yellow. The lambda sits on the diagonal, and that is what fixes the problem. Everything else in the picture is the ordinary least squares formula you already have.',
+        's5.p3':   'Here is the repair on four numbers instead of on matrices. Go back to the five weeks. Both columns are 1, 2, 3, 4, 5. Multiply the columns together pairwise and add up: Search with Search is 55, Search with Shopping is 55, Shopping with Search is 55, Shopping with Shopping is 55. That is your whole table.',
+        's5.t.h1': 'Search',
+        's5.t.h2': 'Shopping',
+        's5.t.r1': 'Search',
+        's5.t.r2': 'Shopping',
+        's5.p4':   'Cross-multiply and subtract: 55 times 55 minus 55 times 55 is zero. Zero is the symptom. Zero is what singular looks like when you write it out as numbers. Now add lambda equals one to the two cells on the diagonal, so the table reads 56, 55, 55, 56. Cross-multiply and subtract again: 3136 minus 3025 is 111. Not zero. And it will never be zero, for any lambda above zero, for any dataset anybody has ever collected.',
+        's5.p5':   'You made a singular thing regular. That is the job the word regularisation is doing in the name of this class. It is a piece of nineteenth century matrix vocabulary, not a metaphor about a model learning modestly.',
+
+        's6.h2': 'It splits the credit instead of picking a favourite',
+        's6.p1': 'Look again at what the demo did to Search and Shopping. It did not choose one. It walked them toward each other until they were carrying roughly the same weight, and then it walked them down together. That is not a side effect. It falls straight out of charging for squares, and you proved it yourself in the four-row table: one and one is cheaper than two and zero.',
+        's6.p2': 'When two channels really do work together, this is exactly what you want. The budget meeting sets them together, the customer sees them together, and a model that reports them together is telling the truth about how the business runs. Ridge will not hand you a story about Search being the hero and Shopping being dead weight, because it has no way to prefer that story and no reason to.',
+        's6.p3': 'Now the other side, and it is the reason the next module exists. Ridge gives you every channel back, slightly quieter. Ninety-one columns in, ninety-one columns out, all of them small, none of them gone. If somebody asks which three channels to cut on Monday, ridge has no answer for them, and it never will, for the reason you already know: multiplication cannot produce a zero.',
+
+        's7.h2':    'Your model does not have ninety-one parameters',
+        's7.p1':    'People call lambda a complexity dial and then never say what is being dialled. There is a real quantity underneath. Take the marketing model with ninety-one columns against a hundred and four weeks. Once the penalty is switched on, that model does not use ninety-one parameters. It uses a decimal number of them, and the number slides.',
+        's7.t.h2':  'Parameters actually in use',
+        's7.t.inf': '&rarr; infinity',
+        's7.p2':    'Nobody has ever had a tenth of a parameter and there it is anyway. Ninety-one columns and seven point two parameters in use is a model you could almost explain to somebody. Note the bottom row. The count runs down to zero, but it gets there smoothly, and no individual weight is zero anywhere on the way. Those are two different things and this table is where students usually confuse them.',
+
+        's8.h2': 'There is always a lambda that wins',
+        's8.p1': 'Least squares has a famous property. Among all <em>unbiased</em> estimators it has the smallest variance there is. Generations of students learned that and stopped, because it sounds like the end of an argument. Nobody ever asked for unbiased. It is a technical word, not a compliment. Unbiased means that if you repeated the whole study across infinitely many parallel universes your average error would come out at zero, and that is a comfort nobody has ever needed on a Tuesday.',
+        's8.p2': 'Hoerl and Kennard proved something better in 1970. There always exists a lambda greater than zero whose total error is lower than the total error of least squares. Not usually. Not for well behaved data. Always, for every dataset that has ever been collected and every one that ever will be. They could not tell you which lambda it is, and neither can we. It is there anyway, and finding it is what the test error curve in the demo is for.',
+        's8.p3': 'If that sounds like something you have already met, it is. It is the regression version of Stein’s paradox from the <a href="../regularisation/">first module</a>. Shrinking your estimates toward a common point beats leaving them where they landed, and the theorem does not care whether the things you are estimating have anything to do with each other. Same fact, two languages.',
+
+        's9.h2': 'For the curious',
+        's9.p1': 'Two boxes. Skipping both costs you nothing you will be examined on.',
+
+        'c1.sum': 'Lambda is a ratio of two beliefs you already hold',
+        'c1.p1':  'Write down two things you already think. First, how noisy your data is: call that variance sigma squared. Second, how large you expect the real effects to be: call that variance tau squared. Lambda is the first divided by the second.',
+        'c1.p2':  'Noisy data and modest expected effects: big lambda, shrink hard. Clean data and one channel you genuinely expect to dominate: small lambda, trust the fit. In plain words, lambda is how much you believe your own two years of history against your prior belief that no single channel is a miracle. Both of those are opinions you already have.',
+        'c1.p3':  'Where it comes from, and here is a correction worth stating out loud, because plenty of courses and at least one table of contents get it wrong. Assume Gaussian noise on the data. Then assume a Gaussian prior on the weights, centred on zero, with variance tau squared. Ask for the most probable set of weights given the data, which is maximum a posteriori estimation. Out comes ridge exactly, with lambda equal to sigma squared over tau squared.',
+        'c1.p4':  'Gaussian noise plus maximum likelihood does <strong>not</strong> give you ridge. Maximum likelihood on its own gives you ordinary least squares and nothing else. The prior is where the shrinkage comes from, and the estimation has to be MAP rather than maximum likelihood. Swap the Gaussian prior for a Laplace prior and the same machinery hands you the penalty from the next module instead.',
+
+        'c2.sum': 'What ridge does direction by direction',
+        'c2.p1':  'Ridge does not shrink every direction by the same amount. Break the data into its principal directions, with singular values \\(d_j\\) measuring how much the data varies along each one. Ridge multiplies the direction by',
+        'c2.p2':  'Large \\(d_j\\) and that fraction sits near one, so the direction is barely touched. Small \\(d_j\\) and the fraction drops toward zero, so the direction is crushed. Which is exactly right. A direction with a tiny singular value is a direction in which your data barely varies, and the direction in which Search and Shopping disagree is precisely that direction. Least squares will happily put an enormous number there, because out there a huge coefficient costs almost nothing in fit. Ridge shrinks hardest exactly where the data knows least.',
+        'c2.p3':  'Add those fractions up over all the directions and you get the effective degrees of freedom, which is the right hand column of the table above:',
+        'c2.p4':  'At lambda equals zero it equals the number of features. As lambda grows it slides continuously down toward zero. Continuously, with no steps and no gaps, which is what makes lambda a genuine dial rather than a switch. And note again that the count reaching zero and an individual weight reaching zero are different events. The first happens. The second does not.',
+
+        's10.h2':          'What you have, and what you still do not',
+        's10.p1':          'Ridge handed you every channel back, slightly quieter. Nothing was deleted, nothing was accused, and the meeting is survivable. That is worth a lot and it is not everything. Sometimes what you actually need is somebody to tell you which three channels to cut.',
+        's10.p2':          'That job needs a different penalty, and it behaves nothing like this one. Instead of dividing every weight, it subtracts a fixed amount from every weight and stops at zero. Subtraction can reach zero. Multiplication cannot. Same dial, same data, completely different answer, and a different meeting.',
+        's10.prev.kicker': 'Previously',
+        's10.prev.title':  'Regularisation: shift, spread and the ridge trace',
+        's10.prev.desc':   'Where the bias and variance argument came from, and Stein’s paradox.',
+        's10.next.kicker': 'Next',
+        's10.next.title':  'Lasso: the one that actually deletes things',
+        's10.next.desc':   'Subtract instead of divide, and watch coefficients land on zero and stay there.',
+
+        'footer.title': 'Ridge: Make Everything Smaller'
+    },
+
+    de: {
+        'hero.h1':       'Ridge: Alles ein bisschen kleiner',
+        'hero.subtitle': 'Klasse 5, Modul zwei von drei. Ein Regler, fünf Gewichte und ein Balken, der die Null nie erreicht.',
+
+        's1.h2': 'Plus tausend und minus neunhundertachtundneunzig',
+        's1.p1': 'Zwei Werbekanäle. Google Search und Google Shopping. Dasselbe Team legt beide Budgets fest. In derselben Sitzung, am selben Tag, aus demselben Topf. Über zwei Jahre wöchentlicher Zahlen korrelieren die beiden Ausgabenspalten mit etwa 0,9.',
+        's1.p2': 'Die kleinsten Quadrate schauen sich das an und liefern plus tausend für Search und minus neunhundertachtundneunzig für Shopping. Behältst du beide Zahlen, sind die Vorhersagen in Ordnung. Die beiden Monster heben sich auf. Übrig bleiben zwei Euro echter Effekt. Nimm eine der beiden Zahlen allein und sie ist Unsinn. Niemand gibt einen Euro für Search aus und bekommt tausend zurück. Und niemand hat je Geld verloren, weil er Shopping eingeschaltet hat.',
+        's1.p3': 'Was würde also ein vernünftiger Mensch mit so einem Paar machen? Vermutlich das hier sagen: Was diese beiden Kanäle tun, tun sie gemeinsam. Also gib beiden ungefähr dieselbe Zahl. Und mach beide Zahlen klein. Das ist kein fauler Kompromiss. Das ist die Antwort. Ridge ist genau dieser Satz, aufgeschrieben, damit ein Computer ihm folgen kann.',
+        's1.p4': 'Zwei Sätze zur Erinnerung aus dem <a href="../regularisation/">ersten Modul</a>, dann geht es weiter. Die kleinsten Quadrate zielen im Mittel auf die Wahrheit. Dafür springen sie weit, sobald sich die Daten ein wenig bewegen. Ridge zielt absichtlich etwas daneben und hört dafür auf zu zucken. Etwas mehr Verschiebung kaufte deutlich weniger Streuung.',
+
+        's2.h2':      'Bezahle für die Quadrate',
+        's2.p1':      'Die Regel kommt vor der Formel. Ab jetzt zahlt das Modell für die Gewichte, die es benutzt. Quadriere jedes Gewicht, addiere die Quadrate, und diese Zahl steht auf der Rechnung. Große Gewichte sind teuer. Zwei mittlere Gewichte kosten weniger als ein riesiges. Denn das Quadrieren bestraft die Extreme viel härter als die Mitte. Zwei Gewichte von eins kosten zwei. Ein Gewicht von zwei kostet vier. Gleiche Wirkung auf die Vorhersage, doppelter Preis.',
+        's2.p2':      'Hier ist das ganze Argument. Es braucht keine Analysis. In dieser Firma sind Search und Shopping dieselbe Spalte: fünf Wochen, Ausgaben von 1, 2, 3, 4 und 5 in beiden, Umsatz von 2, 4, 6, 8 und 10. Jedes Paar von Gewichten, das zusammen zwei ergibt, sagt jede Woche exakt vorher. Es gibt unendlich viele solche Paare. Die Daten mögen alle gleich gern. Die kleinsten Quadrate haben nichts mehr zu sagen. Also frag die Rechnung.',
+        's2.t.h1':    'Search',
+        's2.t.h2':    'Shopping',
+        's2.t.h3':    'Fehler',
+        's2.t.h4':    'Quadratsumme',
+        's2.p3':      'Ridge nimmt eins und eins. Vier Zahlen in einer Spalte, und die Frage ist entschieden. Das Paar, das die Wirkung gleichmäßig aufteilt, ist das billigste auf der Liste. Das Paar, das die Sitzung unerträglich gemacht hat, kostet fast eine halbe Million. Passt.',
+        's2.callout': 'Von allen Antworten, die zu den Daten passen, nimm die kleine. Alles andere in diesem Modul ist ein Detail dieses Satzes.',
+
+        'quiz1.q':  'Alle vier Paare in der Tabelle passen perfekt zu den fünf Wochen. Welches Paar meldet Ridge?',
+        'quiz1.a1': '1 und 1',
+        'quiz1.a2': '2 und 0',
+        'quiz1.ok': 'Richtig. Die Quadratsumme ist 2, die kleinste auf der Liste. Ridge weigert sich, zwischen zwei Kanälen zu wählen, die sich gemeinsam bewegen. Der Grund ist Arithmetik, nicht Höflichkeit.',
+        'quiz1.no': 'Diesmal nicht. 2 und 0 kostet 4, 1 und 1 kostet 2. Beide passen perfekt zu den Daten. Also entscheidet nur noch die Rechnung, und 1 und 1 ist billiger.',
+
+        's3.h2':      'Ridge multipliziert',
+        's3.p1':      'Wenn sich die Spalten überhaupt nicht überlappen, hat die Ridge-Antwort eine peinlich einfache Form. Nimm das Gewicht der kleinsten Quadrate. Teile es durch eins plus Lambda. Das ist die ganze Rechnung.',
+        's3.p2':      'Jedes Gewicht wird mit demselben Faktor skaliert, und dieser Faktor ist kleiner als eins. Acht halbiert ist vier. Vier halbiert ist zwei. Zwei halbiert ist eins. Eins halbiert ist ein halb. Halbiere so oft du willst. Es kommt nie an.',
+        's3.callout': 'Etwas mit einer Zahl kleiner als eins zu skalieren, verkleinert es für immer und erreicht nie die Null. Das ist der ganze Grund, warum Ridge jedes Merkmal behält.',
+        's3.p3':      'Du kannst das vor jeder Geometrie verstehen, und das solltest du auch. Die Geometrie ist ein zweiter Weg zum selben Ort, nicht der Beweis. Hier sind vier Gewichte mit dem Regler auf Lambda gleich zwei. Alles wird also durch drei geteilt.',
+        's3.t.h1':    'Gewicht vorher',
+        's3.t.h2':    'Geteilt durch 1 + &lambda; = 3',
+        's3.t.h3':    'Genau null?',
+        's3.t.no1':   'nein',
+        's3.t.no2':   'nein',
+        's3.t.no3':   'nein',
+        's3.t.no4':   'nein',
+        's3.p4':      'Ein ehrlicher Einwand, einmal gesagt. Diese exakte Division gilt, wenn sich die Spalten nicht überlappen. Echte Spalten überlappen sich immer, und genau deshalb liest du das hier. Das Verhalten bleibt trotzdem. Die Demo unten ist eine echte Anpassung auf echten überlappenden Spalten, und auch dort erreicht nichts jemals die Null.',
+
+        's4.h2': 'Dreh am Regler',
+        's4.p1': 'Fünf Kanäle, zwei Jahre wöchentlicher Umsatz. Search und Shopping sind fast dieselbe Spalte: In diesen Daten korrelieren sie bei 0,999. Das passiert, wenn eine Person beide Budgets festlegt. Meta, TikTok und E-Mail sind gewöhnliche, brave Spalten. Bei Lambda gleich null bekommst du die kleinsten Quadrate. Und die machen genau das, was oben im Einstieg passiert ist.',
+        's4.p2': 'Zieh den Regler. Sieh zu, wie die beiden Monster aufeinander zurasen. Sieh zu, wie jeder Balken kürzer wird. Und sieh dir an, was ganz rechts passiert.',
+        's4.p3': 'Eine Sache muss man benennen, weil du sie sehen wirst. Shopping startet unter der Linie bei minus vierzehn und endet darüber. Auf dem Weg nach oben läuft es genau einmal durch die Null. Durchlaufen ist etwas anderes als auf null gesetzt und dort gelassen werden. Schieb den Regler einen Schritt weiter, und Shopping ist wieder da. Im nächsten Modul triffst du einen Strafterm, der ein Gewicht auf null setzt und es für jedes größere Lambda dort lässt. Der Unterschied zwischen Durchlaufen und Bleiben ist der Unterschied zwischen den beiden Verfahren.',
+
+        'demo.label':    'Schrumpfen der Gewichte',
+        'demo.lambda':   '&lambda; =',
+        'demo.btn.ols':  'Kleinste Quadrate (&lambda; = 0)',
+        'demo.btn.best': 'Bester Testfehler',
+        'demo.btn.max':  'Voll aufdrehen',
+        'demo.caption':  'Das linke Feld hat eine feste Skala. So siehst du, wie viel kleiner alles wird. Das rechte Feld skaliert sich bei jeder Reglerbewegung neu. So siehst du immer alle fünf Balken, egal wie kurz sie sind. Dieses rechte Feld ist der Kern des Moduls. Dreh Lambda voll auf, schau hin und zähle die Balken.',
+
+        'demo.panelFixed':  'Echte Größe',
+        'demo.panelZoom':   'Passend gezoomt',
+        'demo.zeroLine':    'null',
+        'demo.axisLambda':  'Lambda',
+        'demo.legendTrain': 'Fehler auf Trainingsdaten',
+        'demo.legendTest':  'Fehler auf Testdaten',
+        'demo.minMark':     'Minimum',
+        'demo.stat.ss':     'Quadratsumme der Gewichte',
+        'demo.stat.train':  'Fehler Trainingsdaten',
+        'demo.stat.test':   'Fehler Testdaten',
+        'demo.stat.small':  'Kleinstes Gewicht',
+        'demo.stat.zeros':  'Gewichte genau auf null',
+        'demo.of5':         'von 5',
+        'demo.noteHigh':    'Lambda steht am Maximum. Die Quadratsumme der Gewichte ist fast nichts mehr. Die Balken links sind auf der festen Skala verschwunden. Und rechts sind immer noch fünf Stück. Nicht vier. Nicht drei. Fünf.',
+        'demo.noteBest':    'Das ist das Lambda mit dem kleinsten Fehler auf den Testdaten. Der Fehler auf den Trainingsdaten ist dafür etwas gestiegen, der Fehler auf den Testdaten stark gefallen. Genau für diesen Tausch gibt es den Regler.',
+        'demo.noteZero':    'Lambda ist null. Das sind also die reinen kleinsten Quadrate. Search sagt plus sechzehn, Shopping sagt minus dreizehn Komma neun, und die Quadratsumme liegt bei vierhundertfünfzig. Zusammen sagen beide Kanäle gut vorher. Jeder einzeln ist eine Geschichte, die du nicht laut erzählen kannst.',
+        'demo.noteMid':     'Jeder Balken ist kürzer als vorher, und jeder Balken ist noch da. Die beiden korrelierten Kanäle laufen auf einen gemeinsamen Wert zu, statt sich zu bekämpfen.',
+
+        'demo.ch1': 'Search',
+        'demo.ch2': 'Shopping',
+        'demo.ch3': 'Meta',
+        'demo.ch4': 'TikTok',
+        'demo.ch5': 'E-Mail',
+
+        'quiz2.q':  'Du stellst Lambda auf zehntausend. E-Mail war der schwächste Kanal im Modell. Wie groß ist sein Ridge-Gewicht?',
+        'quiz2.a1': 'Genau null. Ridge hat ihn entfernt.',
+        'quiz2.a2': 'Winzig, aber nicht null. Er ist noch im Modell.',
+        'quiz2.ok': 'Richtig. Ridge teilt, und Teilen landet nie auf der Null. Bei Lambda gleich zehntausend liegt das E-Mail-Gewicht bei etwa 0,00003. Für eine Entscheidung nutzlos, im Modell trotzdem drin, und im Bericht kostet es weiter eine Zeile. Ridge entfernt nie ein Merkmal.',
+        'quiz2.no': 'Nein. Ridge teilt jedes Gewicht durch denselben Faktor, und Division erreicht die Null nie, egal wie stark du drehst. Das E-Mail-Gewicht ist winzig, ungefähr 0,00003, und es ist immer noch da. Ein Verfahren, das Merkmale wirklich löscht, kommt im nächsten Modul. Es subtrahiert, statt zu teilen.',
+
+        's5.h2':   'Woher das Wort Regularisierung kommt',
+        's5.p1':   'Die kleinsten Quadrate haben eine Formel, und in dieser Formel steckt ein Schritt, der rückgängig gemacht werden muss. Alles hängt daran, dass das überhaupt geht. Das alte Wort für ein Objekt, das man so umkehren kann, ist <em>regulär</em>. Das Wort für eines, bei dem das nicht geht, ist <em>singulär</em>.',
+        's5.p2':   'Wenn zwei deiner Spalten dasselbe sagen, ist dieser Schritt singulär. Achte darauf, was die kleinsten Quadrate dann tun. Es ist nicht das, was die meisten erwarten. Sie liefern keine falsche Antwort, und sie warnen dich nicht. Sie liefern unendlich viele exakt gleich gute Antworten, und deine Software gibt dir die, die ihr Algorithmus zuerst erreicht hat. Lauf das noch einmal mit vertauschten Spalten und du bekommst vielleicht eine andere.',
+        's5.fig':  'Du musst das nicht lesen. Es gibt nur eine Sache, die du wissen musst, und das ist der gelbe Teil. Das Lambda sitzt auf der Diagonale, und genau das repariert das Problem. Alles andere im Bild ist die Formel der kleinsten Quadrate, die du schon kennst.',
+        's5.p3':   'Hier ist die Reparatur an vier Zahlen statt an Matrizen. Zurück zu den fünf Wochen. Beide Spalten sind 1, 2, 3, 4, 5. Multipliziere die Spalten paarweise und addiere: Search mit Search ist 55, Search mit Shopping ist 55, Shopping mit Search ist 55, Shopping mit Shopping ist 55. Das ist deine ganze Tabelle.',
+        's5.t.h1': 'Search',
+        's5.t.h2': 'Shopping',
+        's5.t.r1': 'Search',
+        's5.t.r2': 'Shopping',
+        's5.p4':   'Kreuzweise multiplizieren und abziehen: 55 mal 55 minus 55 mal 55 ist null. Null ist das Symptom. So sieht singulär aus, wenn man es in Zahlen schreibt. Jetzt addiere Lambda gleich eins auf die beiden Zellen der Diagonale. Die Tabelle liest sich dann 56, 55, 55, 56. Wieder kreuzweise multiplizieren und abziehen: 3136 minus 3025 ist 111. Nicht null. Und es wird nie null sein, für jedes Lambda über null, für jeden Datensatz, den jemals jemand gesammelt hat.',
+        's5.p5':   'Du hast ein singuläres Objekt regulär gemacht. Das ist die Arbeit, die das Wort Regularisierung im Namen dieser Klasse leistet. Es ist Matrizen-Vokabular aus dem neunzehnten Jahrhundert, keine Metapher für ein bescheiden lernendes Modell.',
+
+        's6.h2': 'Ridge teilt die Wirkung auf, statt einen Liebling zu wählen',
+        's6.p1': 'Schau noch einmal, was die Demo mit Search und Shopping gemacht hat. Sie hat keinen von beiden gewählt. Sie hat die beiden aufeinander zu bewegt, bis sie ungefähr dasselbe Gewicht trugen, und sie dann gemeinsam nach unten geführt. Das ist kein Nebeneffekt. Das folgt direkt daraus, dass man für Quadrate bezahlt. Du hast es selbst bewiesen, in der Tabelle mit vier Zeilen: eins und eins ist billiger als zwei und null.',
+        's6.p2': 'Wenn zwei Kanäle wirklich zusammen wirken, ist das genau richtig. Die Budgetsitzung setzt sie gemeinsam, der Kunde sieht sie gemeinsam, und ein Modell, das sie gemeinsam meldet, sagt die Wahrheit über die Firma. Ridge erzählt dir keine Geschichte, in der Search der Held ist und Shopping totes Gewicht. Es hat keine Möglichkeit, diese Geschichte vorzuziehen, und keinen Grund dazu.',
+        's6.p3': 'Jetzt die andere Seite, und sie ist der Grund für das nächste Modul. Ridge gibt dir jeden Kanal zurück, nur ein bisschen leiser. Einundneunzig Spalten rein, einundneunzig Spalten raus. Alle klein, keine weg. Wenn dich jemand fragt, welche drei Kanäle am Montag gestrichen werden sollen, hat Ridge keine Antwort. Es wird auch nie eine haben, aus dem Grund, den du schon kennst: Multiplikation kann keine Null erzeugen.',
+
+        's7.h2':    'Dein Modell hat keine einundneunzig Parameter',
+        's7.p1':    'Leute nennen Lambda einen Komplexitätsregler und sagen dann nie, was da geregelt wird. Es gibt eine echte Größe darunter. Nimm das Marketing-Modell mit einundneunzig Spalten gegen hundertvier Wochen. Sobald der Strafterm eingeschaltet ist, benutzt dieses Modell keine einundneunzig Parameter. Es benutzt eine Dezimalzahl davon, und diese Zahl gleitet.',
+        's7.t.h2':  'Tatsächlich genutzte Parameter',
+        's7.t.inf': '&rarr; unendlich',
+        's7.p2':    'Niemand hatte je ein Zehntel Parameter, und da steht es trotzdem. Einundneunzig Spalten und sieben Komma zwei genutzte Parameter, das ist ein Modell, das du fast jemandem erklären könntest. Achte auf die letzte Zeile. Die Anzahl läuft bis null, aber sie kommt glatt dort an, und kein einzelnes Gewicht ist unterwegs jemals null. Das sind zwei verschiedene Dinge, und hier verwechseln Studierende sie meistens.',
+
+        's8.h2': 'Es gibt immer ein Lambda, das gewinnt',
+        's8.p1': 'Die kleinsten Quadrate haben eine berühmte Eigenschaft. Unter allen <em>unverzerrten</em> Schätzern haben sie die kleinste Varianz. Generationen von Studierenden haben das gelernt und dort aufgehört, weil es wie das Ende eines Arguments klingt. Nach unverzerrt hat aber nie jemand gefragt. Das ist ein Fachwort, kein Kompliment. Unverzerrt heißt: Würdest du die ganze Studie in unendlich vielen Paralleluniversen wiederholen, wäre dein mittlerer Fehler null. Diesen Trost hat an einem Dienstag noch nie jemand gebraucht.',
+        's8.p2': 'Hoerl und Kennard haben 1970 etwas Besseres bewiesen. Es existiert immer ein Lambda größer als null, dessen Gesamtfehler kleiner ist als der Gesamtfehler der kleinsten Quadrate. Nicht meistens. Nicht bei braven Daten. Immer, für jeden Datensatz, der je gesammelt wurde, und für jeden, der noch kommt. Welches Lambda es ist, konnten sie nicht sagen, und wir können es auch nicht. Es ist trotzdem da. Genau dafür ist die Testfehler-Kurve in der Demo.',
+        's8.p3': 'Falls dir das bekannt vorkommt: Es ist bekannt. Es ist die Regressionsfassung von Steins Paradox aus dem <a href="../regularisation/">ersten Modul</a>. Schätzungen auf einen gemeinsamen Punkt zusammenzuziehen schlägt es, sie dort zu lassen, wo sie gelandet sind. Und der Satz interessiert sich nicht dafür, ob die geschätzten Dinge überhaupt etwas miteinander zu tun haben. Dieselbe Tatsache in zwei Sprachen.',
+
+        's9.h2': 'Für die Neugierigen',
+        's9.p1': 'Zwei Kästen. Beide zu überspringen kostet dich nichts, was in der Prüfung drankommt.',
+
+        'c1.sum': 'Lambda ist ein Verhältnis aus zwei Überzeugungen, die du schon hast',
+        'c1.p1':  'Schreib zwei Dinge auf, die du ohnehin denkst. Erstens: wie verrauscht deine Daten sind. Nenn diese Varianz Sigma Quadrat. Zweitens: wie groß du die echten Effekte erwartest. Nenn diese Varianz Tau Quadrat. Lambda ist das Erste geteilt durch das Zweite.',
+        'c1.p2':  'Verrauschte Daten und bescheidene erwartete Effekte: großes Lambda, hart schrumpfen. Saubere Daten und ein Kanal, von dem du echt viel erwartest: kleines Lambda, der Anpassung vertrauen. Im Klartext: Lambda ist, wie sehr du deinen eigenen zwei Jahren Geschichte glaubst, gemessen an deiner Vorannahme, dass kein einzelner Kanal ein Wunder ist. Beides sind Meinungen, die du schon hast.',
+        'c1.p3':  'Woher das kommt, und hier ist eine Korrektur, die man laut sagen sollte. Viele Kurse und mindestens ein Inhaltsverzeichnis haben es falsch. Nimm gaußsches Rauschen in den Daten an. Nimm dann eine gaußsche A-priori-Verteilung für die Gewichte an, zentriert auf null, mit Varianz Tau Quadrat. Frage nach den wahrscheinlichsten Gewichten gegeben die Daten. Das heißt Maximum-a-posteriori-Schätzung. Heraus kommt exakt Ridge, mit Lambda gleich Sigma Quadrat durch Tau Quadrat.',
+        'c1.p4':  'Gaußsches Rauschen plus Maximum Likelihood ergibt <strong>nicht</strong> Ridge. Maximum Likelihood allein ergibt die gewöhnlichen kleinsten Quadrate und sonst nichts. Die A-priori-Verteilung ist die Quelle des Schrumpfens, und geschätzt werden muss per MAP, nicht per Maximum Likelihood. Tausche die gaußsche A-priori-Verteilung gegen eine Laplace-Verteilung, und dieselbe Maschinerie liefert dir den Strafterm aus dem nächsten Modul.',
+
+        'c2.sum': 'Was Ridge Richtung für Richtung tut',
+        'c2.p1':  'Ridge schrumpft nicht jede Richtung gleich stark. Zerlege die Daten in ihre Hauptrichtungen. Die Singulärwerte \\(d_j\\) messen, wie stark die Daten entlang jeder Richtung streuen. Ridge multipliziert die Richtung mit',
+        'c2.p2':  'Ist \\(d_j\\) groß, liegt der Bruch nahe eins und die Richtung bleibt fast unberührt. Ist \\(d_j\\) klein, fällt der Bruch Richtung null und die Richtung wird zerquetscht. Genau so soll es sein. Eine Richtung mit winzigem Singulärwert ist eine Richtung, in der deine Daten kaum streuen. Und die Richtung, in der Search und Shopping sich widersprechen, ist genau diese Richtung. Die kleinsten Quadrate setzen dort gern eine riesige Zahl hin, weil eine riesige Zahl dort fast nichts an Anpassung kostet. Ridge schrumpft am härtesten genau dort, wo die Daten am wenigsten wissen.',
+        'c2.p3':  'Addiere diese Brüche über alle Richtungen und du bekommst die effektiven Freiheitsgrade. Das ist die rechte Spalte der Tabelle oben:',
+        'c2.p4':  'Bei Lambda gleich null ist das die Anzahl der Merkmale. Wächst Lambda, gleitet der Wert stetig nach null. Stetig, ohne Stufen und ohne Lücken. Genau das macht Lambda zu einem echten Regler und nicht zu einem Schalter. Und noch einmal: Dass die Anzahl null erreicht und dass ein einzelnes Gewicht null erreicht, sind zwei verschiedene Ereignisse. Das Erste passiert. Das Zweite nicht.',
+
+        's10.h2':          'Was du hast, und was dir noch fehlt',
+        's10.p1':          'Ridge hat dir jeden Kanal zurückgegeben, nur ein bisschen leiser. Nichts wurde gelöscht, niemand wurde beschuldigt, und die Sitzung ist überlebbar. Passt schon. Das ist viel wert und es ist nicht alles. Manchmal brauchst du jemanden, der dir sagt, welche drei Kanäle gestrichen werden.',
+        's10.p2':          'Diese Aufgabe braucht einen anderen Strafterm, und der verhält sich völlig anders. Statt jedes Gewicht zu teilen, zieht er von jedem Gewicht einen festen Betrag ab und stoppt bei null. Subtraktion erreicht die Null. Multiplikation nicht. Gleicher Regler, gleiche Daten, komplett andere Antwort, andere Sitzung.',
+        's10.prev.kicker': 'Vorher',
+        's10.prev.title':  'Regularisierung: Verschiebung, Streuung und die Ridge-Spur',
+        's10.prev.desc':   'Woher das Argument mit Verzerrung und Varianz kommt, und Steins Paradox.',
+        's10.next.kicker': 'Als Nächstes',
+        's10.next.title':  'Lasso: das Verfahren, das wirklich löscht',
+        's10.next.desc':   'Subtrahieren statt teilen, und zusehen, wie Gewichte auf der Null landen und dort bleiben.',
+
+        'footer.title': 'Ridge: Alles ein bisschen kleiner'
+    }
+};
+
+let currentLang = 'en';
+
+function t(key) {
+    return (T[currentLang] && T[currentLang][key]) || (T.en && T.en[key]) || key;
+}
+
+function toggleLang() {
+    currentLang = currentLang === 'en' ? 'de' : 'en';
+    document.documentElement.lang = currentLang;
+    document.querySelector('.lang-toggle').textContent = currentLang === 'en' ? 'DE' : 'EN';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (T[currentLang] && T[currentLang][key]) el.innerHTML = T[currentLang][key];
+    });
+    // Re-render KaTeX after language switch
+    if (typeof renderMathInElement !== 'undefined') {
+        renderMathInElement(document.body, {
+            delimiters: [
+                { left: '$$', right: '$$', display: true  },
+                { left: '\\(', right: '\\)', display: false }
+            ],
+            throwOnError: false
+        });
+    }
+    render();
+}
+
+// ─── Quiz ─────────────────────────────────────────────────────────────────────
+function answerQuiz(quizId, btn, isCorrect) {
+    const quiz     = document.getElementById(quizId);
+    const feedback = document.getElementById(quizId + '-feedback');
+    quiz.querySelectorAll('.quiz-btn').forEach(b => b.classList.add('disabled'));
+    btn.classList.add(isCorrect ? 'correct' : 'wrong');
+    feedback.className = 'quiz-feedback ' + (isCorrect ? 'success' : 'fail');
+    feedback.innerHTML = t(quizId + (isCorrect ? '.ok' : '.no'));
+}
+
+// ─── The shrinkage demo ───────────────────────────────────────────────────────
+//
+// Five channels. Search and Shopping are near-duplicates (correlation 0.999),
+// so the direction in which they disagree carries almost no information and
+// least squares puts an enormous number on it. The other three columns are
+// well behaved. Everything below is an honest ridge fit: we solve
+// (G + lambda*I) b = c for the training correlations, and score the answer
+// against a fresh set of correlations.
+
+const P = 5, RHO = 0.999;
+const BETA_TRUE = [1.05, 1.05, 0.90, 0.50, 0.25];   // what actually generated revenue
+const BETA_OLS  = [16.0, -13.9, 0.95, 0.55, 0.30];  // what least squares reports
+const TRAIN_MIN = 0.55;   // training error at lambda = 0
+const SIGMA2    = 0.60;   // irreducible noise on unseen weeks
+const NSTEP     = 360;
+
+const G = [
+    [1, RHO, 0, 0, 0],
+    [RHO, 1, 0, 0, 0],
+    [0, 0, 1, 0, 0],
+    [0, 0, 0, 1, 0],
+    [0, 0, 0, 0, 1]
+];
+
+function matvec(M, v) { return M.map(r => r.reduce((s, x, j) => s + x * v[j], 0)); }
+function quadForm(d)   { const g = matvec(G, d); return d.reduce((s, x, i) => s + x * g[i], 0); }
+
+const C_TRAIN = matvec(G, BETA_OLS);
+
+function ridgeSolve(lam) {
+    const M = G.map((r, i) => r.slice().concat([C_TRAIN[i]]));
+    for (let i = 0; i < P; i++) M[i][i] += lam;
+    for (let c = 0; c < P; c++) {
+        let p = c;
+        for (let r = c + 1; r < P; r++) if (Math.abs(M[r][c]) > Math.abs(M[p][c])) p = r;
+        const tmp = M[c]; M[c] = M[p]; M[p] = tmp;
+        for (let r = 0; r < P; r++) {
+            if (r === c) continue;
+            const f = M[r][c] / M[c][c];
+            for (let k = c; k <= P; k++) M[r][k] -= f * M[c][k];
+        }
+    }
+    return M.map((r, i) => r[P] / r[i]);
+}
+
+function trainErr(b) { return TRAIN_MIN + quadForm(b.map((v, i) => v - BETA_OLS[i])); }
+function testErr(b)  { return SIGMA2    + quadForm(b.map((v, i) => v - BETA_TRUE[i])); }
+function lambdaAt(i) { return i === 0 ? 0 : Math.pow(10, -5 + 9 * (i - 1) / (NSTEP - 1)); }
+
+// Precompute the whole path once.
+const PATH = [];
+for (let i = 0; i <= NSTEP; i++) {
+    const lam = lambdaAt(i), b = ridgeSolve(lam);
+    PATH.push({ lam: lam, b: b, tr: trainErr(b), te: testErr(b) });
+}
+let BEST = { i: 0, te: Infinity };
+PATH.forEach((p, i) => { if (p.te < BEST.te) BEST = { i: i, te: p.te }; });
+
+const CH_KEYS = ['demo.ch1', 'demo.ch2', 'demo.ch3', 'demo.ch4', 'demo.ch5'];
+const CH_COL  = ['#6fa8ff', '#ff8f6f', '#8fd66f', '#d29fff', '#ffd479'];
+
+function fmt(v, sig) {
+    const a = Math.abs(v);
+    if (a === 0) return '0';
+    if (a >= 100)   return v.toFixed(1);
+    if (a >= 1)     return v.toFixed(3);
+    if (a >= 0.001) return v.toFixed(5);
+    return v.toExponential(sig === undefined ? 3 : sig);
+}
+
+function fmtLambda(l) {
+    if (l === 0) return '0';
+    if (l >= 100)   return l.toFixed(0);
+    if (l >= 1)     return l.toFixed(2);
+    if (l >= 0.001) return l.toFixed(5);
+    return l.toExponential(2);
+}
+
+function drawBars(st) {
+    const cv = document.getElementById('bars');
+    const g  = cv.getContext('2d');
+    const W  = cv.width, H = cv.height;
+    g.clearRect(0, 0, W, H);
+    g.fillStyle = '#141420'; g.fillRect(0, 0, W, H);
+
+    const ZERO = 180, UP = 145, DOWN = 112;
+    const SCALE_POS = 16.0, SCALE_NEG = 14.0;
+    const zoomMax = Math.max.apply(null, st.b.map(Math.abs));
+
+    const panels = [
+        { x0: 24,  w: 344, label: t('demo.panelFixed'), pos: SCALE_POS, neg: SCALE_NEG, zoom: false },
+        { x0: 400, w: 344, label: t('demo.panelZoom'),  pos: zoomMax,   neg: zoomMax,   zoom: true  }
+    ];
+
+    g.font = '11px sans-serif';
+
+    panels.forEach(function (pn) {
+        // panel frame + label
+        g.strokeStyle = '#242438';
+        g.strokeRect(pn.x0 - 6, 28, pn.w + 12, 284);
+        g.fillStyle = '#5050a0';
+        g.fillText(pn.label.toUpperCase(), pn.x0 - 6, 20);
+
+        // zero line
+        g.strokeStyle = '#3a3a5a';
+        g.beginPath(); g.moveTo(pn.x0 - 6, ZERO); g.lineTo(pn.x0 + pn.w + 6, ZERO); g.stroke();
+        g.fillStyle = '#4a4a70';
+        g.fillText(t('demo.zeroLine'), pn.x0 + pn.w - 18, ZERO - 4);
+
+        const slot = pn.w / P, bw = Math.min(38, slot - 18);
+        for (let j = 0; j < P; j++) {
+            const v  = st.b[j];
+            const cx = pn.x0 + slot * (j + 0.5);
+            const lim = v >= 0 ? pn.pos : pn.neg;
+            const px  = v >= 0 ? UP : DOWN;
+            let h = lim > 0 ? Math.abs(v) / lim * px : 0;
+            if (v !== 0 && h < 1.4) h = 1.4;          // a non-zero weight always leaves a mark
+            g.fillStyle = CH_COL[j];
+            if (v >= 0) g.fillRect(cx - bw / 2, ZERO - h, bw, h);
+            else        g.fillRect(cx - bw / 2, ZERO, bw, h);
+
+            // value label
+            g.fillStyle = '#9a9ac0';
+            g.font = '11px "Courier New", monospace';
+            const txt = pn.zoom ? fmt(v) : (Math.abs(v) >= 0.01 ? v.toFixed(2) : fmt(v));
+            const tw = g.measureText(txt).width;
+            if (v >= 0) g.fillText(txt, cx - tw / 2, ZERO - h - 5);
+            else        g.fillText(txt, cx - tw / 2, ZERO + h + 13);
+
+            // channel name
+            g.fillStyle = '#6a6a90';
+            g.font = '11px sans-serif';
+            const nm = t(CH_KEYS[j]);
+            g.fillText(nm, cx - g.measureText(nm).width / 2, H - 12);
+        }
+    });
+}
+
+function drawCurves(idx) {
+    const cv = document.getElementById('curves');
+    const g  = cv.getContext('2d');
+    const W  = cv.width, H = cv.height;
+    g.clearRect(0, 0, W, H);
+    g.fillStyle = '#141420'; g.fillRect(0, 0, W, H);
+
+    const L = 48, R = W - 16, TOP = 26, BOT = H - 30;
+    const yMin = 0.45, yMax = 1.45;
+    const xOf = i => L + (R - L) * i / NSTEP;
+    const yOf = v => BOT - (Math.min(Math.max(v, yMin), yMax) - yMin) / (yMax - yMin) * (BOT - TOP);
+
+    // frame
+    g.strokeStyle = '#242438';
+    g.beginPath(); g.moveTo(L, TOP); g.lineTo(L, BOT); g.lineTo(R, BOT); g.stroke();
+
+    function curve(key, colour) {
+        g.strokeStyle = colour; g.lineWidth = 2; g.beginPath();
+        for (let i = 0; i <= NSTEP; i++) {
+            const v = PATH[i][key];
+            const x = xOf(i), y = yOf(v);
+            if (i === 0) g.moveTo(x, y); else g.lineTo(x, y);
+        }
+        g.stroke(); g.lineWidth = 1;
+    }
+    curve('tr', '#6fa8ff');
+    curve('te', '#ff8f6f');
+
+    // minimum marker
+    const bx = xOf(BEST.i), by = yOf(PATH[BEST.i].te);
+    g.strokeStyle = '#50b878'; g.setLineDash([3, 3]);
+    g.beginPath(); g.moveTo(bx, TOP); g.lineTo(bx, BOT); g.stroke();
+    g.setLineDash([]);
+    g.fillStyle = '#70e898';
+    g.beginPath(); g.arc(bx, by, 4, 0, Math.PI * 2); g.fill();
+    g.font = '10px sans-serif';
+    g.fillText(t('demo.minMark'), bx + 6, TOP + 10);
+
+    // current position
+    const cx = xOf(idx);
+    g.strokeStyle = '#e8e8f0';
+    g.beginPath(); g.moveTo(cx, TOP); g.lineTo(cx, BOT); g.stroke();
+
+    // legend + axis
+    g.font = '11px sans-serif';
+    g.fillStyle = '#6fa8ff'; g.fillText(t('demo.legendTrain'), L + 6, TOP - 10);
+    const w1 = g.measureText(t('demo.legendTrain')).width;
+    g.fillStyle = '#ff8f6f'; g.fillText(t('demo.legendTest'), L + 22 + w1, TOP - 10);
+    g.fillStyle = '#4a4a70';
+    g.fillText(t('demo.axisLambda'), (L + R) / 2 - 16, H - 8);
+    [[0, '0'], [1, '1e-5'], [121, '0.01'], [201, '1'], [281, '100'], [360, '1e4']].forEach(function (tk) {
+        const x = xOf(tk[0]);
+        g.fillStyle = '#3f3f60';
+        g.fillText(tk[1], x - g.measureText(tk[1]).width / 2, BOT + 14);
+    });
+}
+
+function drawStats(st, idx) {
+    const smallest = Math.min.apply(null, st.b.map(Math.abs));
+    const zeros    = st.b.filter(v => v === 0).length;
+    const ss       = st.b.reduce((a, v) => a + v * v, 0);
+    const rows = [
+        ['demo.stat.ss',    fmt(ss)],
+        ['demo.stat.train', st.tr.toFixed(3)],
+        ['demo.stat.test',  st.te.toFixed(3)],
+        ['demo.stat.small', fmt(smallest, 4)],
+        ['demo.stat.zeros', zeros + ' ' + t('demo.of5')]
+    ];
+    document.getElementById('stats').innerHTML = rows.map(function (r, k) {
+        return '<span class="stat-pill' + (k === 4 ? ' warn' : '') + '">' +
+               '<span class="stat-label">' + t(r[0]) + '</span>' +
+               '<span class="stat-val">' + r[1] + '</span></span>';
+    }).join('');
+
+    let note = 'demo.noteMid';
+    if (idx === 0) note = 'demo.noteZero';
+    else if (idx >= NSTEP - 20) note = 'demo.noteHigh';
+    else if (Math.abs(idx - BEST.i) <= 6) note = 'demo.noteBest';
+    document.getElementById('demo-note').textContent = t(note);
+}
+
+function render() {
+    const idx = parseInt(document.getElementById('lam').value, 10);
+    const st  = PATH[idx];
+    document.getElementById('lam-out').textContent = fmtLambda(st.lam);
+    drawBars(st);
+    drawCurves(idx);
+    drawStats(st, idx);
+}
+
+function setLam(i) {
+    document.getElementById('lam').value = i;
+    render();
+}
+
+document.getElementById('lam').addEventListener('input', render);
+render();
+
+// ─── KaTeX ────────────────────────────────────────────────────────────────────
+window.addEventListener('load', function () {
+    if (typeof renderMathInElement !== 'undefined') {
+        renderMathInElement(document.body, {
+            delimiters: [
+                { left: '$$', right: '$$', display: true  },
+                { left: '\\(', right: '\\)', display: false }
+            ],
+            throwOnError: false
+        });
+    }
+});
+</script>
+</body>
+</html>

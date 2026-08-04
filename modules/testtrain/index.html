@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memorize the Answers</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: #141420; color: #e8e8f0; font-family: 'Georgia','Times New Roman',serif; line-height: 1.8; font-size: 18px; }
+        .container { max-width: 820px; margin: 0 auto; padding: 0 24px; }
+
+        .lang-toggle { position: fixed; top: 16px; right: 16px; background: #2a2a44; border: 1px solid #4a4a70; border-radius: 20px; padding: 6px 14px; cursor: pointer; font-size: 13px; font-family: sans-serif; color: #a0a0d0; z-index: 100; transition: background 0.2s; }
+        .lang-toggle:hover { background: #363658; }
+
+        .hero { text-align: center; padding: 80px 24px 40px; }
+        .hero h1 { font-size: 42px; font-weight: 700; color: #fff; line-height: 1.3; max-width: 700px; margin: 0 auto; }
+        .hero .subtitle { margin-top: 16px; color: #888; font-size: 16px; font-style: italic; max-width: 640px; margin-left: auto; margin-right: auto; }
+
+        section { padding: 50px 0; }
+        h2 { font-size: 30px; color: #fff; margin-bottom: 24px; line-height: 1.3; }
+        h3 { font-size: 20px; color: #ccc; margin: 28px 0 12px; }
+        p { margin-bottom: 20px; color: #ccc; }
+        .formula-block { margin: 24px auto; text-align: center; overflow-x: auto; padding: 10px 0; }
+
+        .quiz { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px; padding: 28px; margin: 36px 0; }
+        .quiz-question { font-size: 18px; color: #e0e0f0; margin-bottom: 18px; font-style: italic; }
+        .quiz-options { display: flex; gap: 12px; flex-wrap: wrap; }
+        .quiz-btn { background: #2a2a44; color: #e0e0f0; border: 1px solid #3a3a55; border-radius: 8px; padding: 12px 24px; font-size: 16px; font-family: inherit; cursor: pointer; transition: background 0.2s, border-color 0.2s; flex: 1; min-width: 160px; text-align: center; }
+        .quiz-btn:hover { background: #363658; border-color: #5a5a80; }
+        .quiz-btn.correct { background: #1a4a2a; border-color: #50b878; color: #70e898; }
+        .quiz-btn.wrong { background: #2a2248; border-color: #8264dc; color: #a88ef0; }
+        .quiz-btn.disabled { pointer-events: none; opacity: 0.6; }
+        .quiz-feedback { margin-top: 14px; font-size: 16px; min-height: 24px; line-height: 1.5; }
+        .quiz-feedback.success { color: #70e898; }
+        .quiz-feedback.fail { color: #a88ef0; }
+
+        .section-rule { border: none; border-top: 1px solid #2a2a40; margin: 0; }
+        a { color: #80b4f0; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        details { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px; padding: 0 28px; margin: 36px 0; }
+        details summary { cursor: pointer; padding: 22px 0; color: #80b4f0; font-family: sans-serif; font-size: 15px; list-style: none; }
+        details summary::-webkit-details-marker { display: none; }
+        details summary::before { content: "\25B8  "; color: #80b4f0; }
+        details[open] summary::before { content: "\25BE  "; }
+        details[open] summary { border-bottom: 1px solid #2a2a40; }
+        details .dd-body { padding: 8px 0 24px; }
+        details .dd-body p { color: #ccc; }
+
+        /* Strategy chooser */
+        .strat { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px; padding: 28px; margin: 36px 0; }
+        .strat-options { display: flex; gap: 12px; flex-wrap: wrap; }
+        .strat-btn { background: #2a2a44; color: #e0e0f0; border: 1px solid #3a3a55; border-radius: 8px; padding: 16px 22px; font-size: 16px; font-family: inherit; cursor: pointer; transition: background 0.2s, border-color 0.2s; flex: 1; min-width: 220px; text-align: left; line-height: 1.5; }
+        .strat-btn:hover { background: #363658; border-color: #5a5a80; }
+        .strat-btn.chosen { border-color: #80b4f0; background: #243049; }
+        .strat-reveal { display: none; margin-top: 18px; font-style: italic; color: #ccc; line-height: 1.6; border-left: 3px solid #80b4f0; padding-left: 18px; }
+
+        /* Split lab */
+        .split-lab { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px; padding: 28px; margin: 36px 0; }
+        .split-grid { display: grid; grid-template-columns: repeat(20, 1fr); gap: 3px; margin-bottom: 14px; }
+        .cell { aspect-ratio: 1/1; border-radius: 2px; transition: background 0.15s, border-color 0.15s; }
+        .cell.studied { background: #80b4f0; }
+        .cell.mock { background: #1c1c2e; border: 1px solid #2a2a40; }
+
+        .split-legend { display: flex; gap: 22px; flex-wrap: wrap; font-family: sans-serif; font-size: 13px; color: #888; margin-bottom: 26px; }
+        .split-legend .sw { display: inline-block; width: 12px; height: 12px; border-radius: 2px; margin-right: 7px; vertical-align: -1px; }
+        .sw.studied { background: #80b4f0; }
+        .sw.mock { background: #1c1c2e; border: 1px solid #2a2a40; }
+
+        .slider-label { font-family: sans-serif; font-size: 14px; color: #a0a0d0; display: block; margin-bottom: 12px; }
+        .slider-wrap { position: relative; margin-bottom: 6px; }
+        input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; background: #2a2a40; border-radius: 3px; outline: none; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; border-radius: 50%; background: #80b4f0; border: 2px solid #141420; cursor: pointer; }
+        input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: #80b4f0; border: 2px solid #141420; cursor: pointer; }
+        .tick { position: absolute; top: -6px; left: 80%; transform: translateX(-50%); pointer-events: none; }
+        .tick .bar { width: 2px; height: 18px; background: #5a5a80; margin: 0 auto; }
+        .tick .lbl { font-family: sans-serif; font-size: 11px; color: #888; white-space: nowrap; margin-top: 3px; }
+        .slider-ends { display: flex; justify-content: space-between; font-family: sans-serif; font-size: 12px; color: #888; margin: 6px 0 30px; }
+        .slider-block { margin-bottom: 12px; }
+
+        .readouts { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin: 8px 0 24px; }
+        .ro { background: #141420; border: 1px solid #2a2a40; border-radius: 8px; padding: 16px 18px; }
+        .ro.wide { grid-column: 1 / -1; }
+        .ro-label { font-family: sans-serif; font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
+        .ro-val { font-size: 26px; color: #fff; }
+        .ro-val .sub { font-size: 15px; color: #888; }
+        .bar-track { height: 8px; background: #2a2a40; border-radius: 4px; margin-top: 12px; overflow: hidden; }
+        .bar-fill { height: 100%; background: #80b4f0; border-radius: 4px; transition: width 0.15s; }
+        .band-track { position: relative; height: 26px; background: #2a2a40; border-radius: 4px; margin-top: 12px; }
+        .band-fill { position: absolute; top: 0; bottom: 0; background: rgba(128,180,240,0.30); border-radius: 4px; transition: left 0.15s, width 0.15s; }
+        .band-mark { position: absolute; top: -3px; bottom: -3px; width: 2px; background: #e8e8f0; transition: left 0.15s; }
+
+        .verdict { font-family: 'Georgia',serif; font-size: 17px; color: #ccc; font-style: italic; border-left: 3px solid #80b4f0; padding: 4px 0 4px 18px; line-height: 1.6; }
+        .lab-caption { font-family: sans-serif; font-size: 13px; color: #777; margin-top: 18px; }
+
+        footer { text-align: center; padding: 40px 24px; color: #444; font-size: 14px; }
+
+        @media (max-width: 680px) {
+            .hero h1 { font-size: 28px; }
+            h2 { font-size: 24px; }
+            body { font-size: 16px; }
+            .quiz-options, .strat-options { flex-direction: column; }
+            .readouts { grid-template-columns: 1fr; }
+            .split-grid { grid-template-columns: repeat(10, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+<button class="lang-toggle" onclick="toggleLang()">DE</button>
+
+<div class="hero">
+    <h1 data-i18n="hero.title">Memorize the Answers</h1>
+    <p class="subtitle" data-i18n="hero.subtitle">Every exam question is already published. For this course, learning them cold is the goal. For a machine learning model, it is the trap. The train/test split is how you tell the two apart.</p>
+</div>
+
+<div class="container">
+
+<!-- Part 1 -->
+<section>
+    <h2 data-i18n="s1.h2">The Questions Are Public</h2>
+    <p data-i18n="s1.p1">Every question that can show up on the final is already published. The full pool, nothing hidden, sitting on one page: <a href="../exam/" target="_blank">the exam pool</a>.</p>
+    <p data-i18n="s1.p2">Go memorize them. For this course that is not cheating, it is the point. This is a foundations course. The basics, what a residual is, what the confusion matrix counts, what overfitting looks like, should sit under your fingertips, recallable cold. Drilling the exact questions is a fine way to get them there.</p>
+    <p data-i18n="s1.p3">So the usual warning, do not just memorize, does not apply to you here. It applies to the thing you are about to build.</p>
+</section>
+
+<hr class="section-rule">
+
+<!-- Part 2: strategy choice -->
+<section>
+    <h2 data-i18n="s2.h2">How Will You Prepare?</h2>
+    <p data-i18n="s2.p1">You have the full pool of questions. Pick how you would actually study for the final.</p>
+
+    <div class="strat" id="strat">
+        <div class="strat-options">
+            <button class="strat-btn" id="strat-all" onclick="chooseStrategy('all')" data-i18n="strat.btnAll">Study all the questions, then test myself on some of them.</button>
+            <button class="strat-btn" id="strat-split" onclick="chooseStrategy('split')" data-i18n="strat.btnSplit">Study some, keep the rest sealed, and test myself on the sealed ones.</button>
+        </div>
+        <div class="strat-reveal" id="strat-reveal"></div>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- Part 3: the twist -->
+<section>
+    <h2 data-i18n="s3.h2">Overfitting, But For You</h2>
+    <p data-i18n="s3.p1">Earlier in the course we gave memorizing a bad name. A model that overfits has memorized its training data instead of learning the pattern behind it. It scores beautifully on the rows it has seen and falls apart on anything new.</p>
+    <p data-i18n="s3.p3">You do not want a churn model that has memorized last quarter’s customers. Those customers are gone. You want one that learned the shape of churn, so it works on customers it has never met. Memorizing the training rows and generalizing to new ones look identical until you put the model in front of something new.</p>
+    <p data-i18n="s3.p4">The train/test split is how you force the question. Train on some of the data. Hold the rest back, sealed, untouched. Then score the model on the sealed part. If it learned the pattern, it does well on data it never trained on. If it only memorized, the sealed score exposes it.</p>
+
+    <div class="quiz" id="quiz1">
+        <div class="quiz-question" data-i18n="quiz1.q">A churn model scores 99% on the exact customers it trained on, and 71% on customers it has never seen. What is the 99% mostly measuring?</div>
+        <div class="quiz-options">
+            <button class="quiz-btn" onclick="answerQuiz('quiz1', this, true)" data-i18n="quiz1.a1">How well it memorized those specific customers</button>
+            <button class="quiz-btn" onclick="answerQuiz('quiz1', this, false)" data-i18n="quiz1.a2">How well it understands churn in general</button>
+        </div>
+        <div class="quiz-feedback" id="quiz1-feedback"></div>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- Part 4: how many test examples -->
+<section>
+    <h2 data-i18n="s4.h2">How Many Test Questions Do You Need?</h2>
+    <p data-i18n="s4.p1">The score on the sealed part is an estimate. You did not test on every possible question, only on the few you set aside. So the number carries error, the same way a poll of ten people carries more error than a poll of ten thousand.</p>
+    <p data-i18n="s4.p2">If your true chance of getting a question right is \(p\), and you test on \(n\) sealed questions, the spread of your measured score is the standard error:</p>
+    <div class="formula-block">$$\text{SE} = \sqrt{\dfrac{p\,(1-p)}{n}}$$</div>
+    <p data-i18n="s4.p3">Two things to read off it. The \(n\) is under a square root, so to halve your uncertainty you need four times as many test questions, not twice. And the \(p(1-p)\) on top says the spread depends on how variable the outcomes are. A model that is right almost always, or wrong almost always, barely varies, so a small test set already pins it down. A model near a coin flip is as uncertain as it gets and needs far more.</p>
+    <p data-i18n="s4.p4">To pin accuracy to within about ten points, a coin-flip-hard problem needs roughly a hundred test questions. A model that is genuinely 95% accurate needs about twenty. Same target, very different test sets, because the precision rides on the variance of the outcomes, not on any fixed percentage.</p>
+
+    <h3 data-i18n="s4.h3">One quiet assumption</h3>
+    <p data-i18n="s4.p5">All of this holds only if the sealed questions came from the same pile as the real ones. Seal a hundred questions on French history, then sit a final on organic chemistry, and your confident sealed score predicts nothing.</p>
+    <p data-i18n="s4.p6">A test set is the same. It estimates how the model behaves on new data only when the new data looks like the test data. Train a churn model on last year’s customers, deploy it on this year’s, and if this year’s customers behave differently, the test score was a confident lie.</p>
+
+    <div class="quiz" id="quiz2">
+        <div class="quiz-question" data-i18n="quiz2.q">Your sealed test set is all French history. The real final turns out to be organic chemistry. Your sealed score was 90%. What is it worth?</div>
+        <div class="quiz-options">
+            <button class="quiz-btn" onclick="answerQuiz('quiz2', this, true)" data-i18n="quiz2.a1">Almost nothing, it came from a different pile</button>
+            <button class="quiz-btn" onclick="answerQuiz('quiz2', this, false)" data-i18n="quiz2.a2">90 percent, a score is a score</button>
+        </div>
+        <div class="quiz-feedback" id="quiz2-feedback"></div>
+    </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- Part 5: the lab -->
+<section>
+    <h2 data-i18n="s5.h2">The Split, In Your Hands</h2>
+    <p data-i18n="s5.p1">Two sliders. The first sets how you split the hundred questions between training and test. The second sets how predictable the material is, which is the part people forget. Watch the accuracy the model reaches, the accuracy the test set reports, and the test set it would actually take to trust that number.</p>
+
+    <div class="split-lab">
+        <div class="split-grid" id="splitGrid"></div>
+        <div class="split-legend">
+            <span><span class="sw studied"></span><span data-i18n="lab.legStudied">training (the model learns from these)</span></span>
+            <span><span class="sw mock"></span><span data-i18n="lab.legMock">sealed test (you score on these)</span></span>
+        </div>
+
+        <div class="slider-block">
+            <label class="slider-label" id="sliderLabel" data-i18n="lab.split">Training questions out of 100</label>
+            <div class="slider-wrap">
+                <input type="range" min="0" max="100" step="5" value="80" id="splitSlider" oninput="updateSplit()">
+                <div class="tick"><div class="bar"></div><div class="lbl" data-i18n="lab.tick80">80/20</div></div>
+            </div>
+            <div class="slider-ends"><span data-i18n="lab.endNone">train on none</span><span data-i18n="lab.endAll">train on all 100</span></div>
+        </div>
+
+        <div class="slider-block">
+            <label class="slider-label" data-i18n="lab.predict">How predictable is the material?</label>
+            <input type="range" min="0" max="100" step="5" value="70" id="predSlider" oninput="updateSplit()">
+            <div class="slider-ends"><span data-i18n="lab.predLow">coin-flip hard</span><span data-i18n="lab.predHigh">very predictable</span></div>
+        </div>
+
+        <div class="readouts">
+            <div class="ro">
+                <div class="ro-label" data-i18n="lab.roReady">Accuracy the model reaches</div>
+                <div class="ro-val" id="roReady">81%</div>
+                <div class="bar-track"><div class="bar-fill" id="readyBar" style="width:81%"></div></div>
+            </div>
+            <div class="ro">
+                <div class="ro-label" data-i18n="lab.roNeed">Test questions needed for &plusmn;10 pts</div>
+                <div class="ro-val" id="roNeed">60</div>
+            </div>
+            <div class="ro wide">
+                <div class="ro-label" data-i18n="lab.roGrade">Accuracy the test set reports</div>
+                <div class="ro-val" id="roGrade">81% <span class="sub">&plusmn; 17</span></div>
+                <div class="band-track">
+                    <div class="band-fill" id="bandFill"></div>
+                    <div class="band-mark" id="bandMark"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="verdict" id="verdict"></div>
+        <p class="lab-caption" data-i18n="lab.caption">The test set hands you a number somewhere inside the shaded band. You do not get to know where. More sealed questions narrow the band. A more predictable problem narrows it too, for free.</p>
+    </div>
+
+    <p data-i18n="s5.p2">Notice the 80/20 mark. Eighty percent training, twenty percent test is what everyone reaches for, and it is a habit, not a result. It fixes a ratio and ignores the two things that actually decide your test set: how many examples you have in total, and how variable the outcomes are. Twenty percent of fifty rows is ten test examples, far too few to trust. Twenty percent of a million is two hundred thousand, far more than you will ever need. A predictable problem lets you seal fewer and pour the rest into training. The right split comes from the data, not from a number someone repeated.</p>
+</section>
+
+<details>
+    <summary data-i18n="dd.summary">For the curious: the square root, in numbers</summary>
+    <div class="dd-body">
+        <p data-i18n="dd.p1">The required test size for a fixed precision comes straight from the standard error. For a 95% interval of half-width \(w\), you need about:</p>
+        <div class="formula-block">$$n \approx \dfrac{1.96^2 \, p\,(1-p)}{w^2}$$</div>
+        <p data-i18n="dd.p2">Set \(w\) to ten points. A coin-flip problem at \(p = 0.5\) needs about 97 test examples. A 90% model needs about 35. A 95% model needs about 19. A 99% model needs about 4. The same precision, costing wildly different amounts, all driven by that \(p(1-p)\) term. This is the math behind every accuracy figure you read. A model reported at 95% on 20 test examples is barely making a claim. The same 95% on ten thousand is a real one.</p>
+    </div>
+</details>
+
+<hr class="section-rule">
+
+<section>
+    <h2 data-i18n="ex.h2">Try This</h2>
+    <p data-i18n="ex.p1">You have 100 labeled customers and want to predict who will churn. You set aside 10 as a sealed test set, train on the other 90, and the model scores 95% on the 10. A colleague sets aside 50, trains on 50, and scores 88% on their 50.</p>
+    <p data-i18n="ex.p2">Whose number would you put in a report to the marketing team, and why? And which of the two numbers is the more dangerous one to repeat out loud?</p>
+</section>
+
+<hr class="section-rule">
+
+<section>
+    <h2 data-i18n="nx.h2">Where This Goes Next</h2>
+    <p data-i18n="nx.p1">Splitting once forces a choice. A bigger training set or a bigger test set, never both from the same data. Cross-validation is the trick that lets you stop choosing, by sealing a different part every time and averaging the results. That is the next module.</p>
+    <p><a href="https://github.com/i-yam/passt/tree/main/modules/testtrain" target="_blank" data-i18n="nx.link">Back to the course homepage</a></p>
+</section>
+
+</div>
+
+<footer>
+    <span data-i18n="footer.title">Memorize the Answers</span>
+    <br>&copy; All rights reserved
+</footer>
+
+<script>
+const T = {
+    en: {
+        'hero.title': 'Memorize the Answers',
+        'hero.subtitle': 'Every exam question is already published. For this course, learning them cold is the goal. For a machine learning model, it is the trap. The train/test split is how you tell the two apart.',
+
+        's1.h2': 'The Questions Are Public',
+        's1.p1': 'Every question that can show up on the final is already published. The full pool, nothing hidden, sitting on one page: <a href="../exam/" target="_blank">the exam pool</a>.',
+        's1.p2': 'Go memorize them. For this course that is not cheating, it is the point. This is a foundations course. The basics, what a residual is, what the confusion matrix counts, what overfitting looks like, should sit under your fingertips, recallable cold. Drilling the exact questions is a fine way to get them there.',
+        's1.p3': 'So the usual warning, do not just memorize, does not apply to you here. It applies to the thing you are about to build.',
+
+        's2.h2': 'How Will You Prepare?',
+        's2.p1': 'You have the full pool of questions. Pick how you would actually study for the final.',
+        'strat.btnAll': 'Study all the questions, then test myself on some of them.',
+        'strat.btnSplit': 'Study some, keep the rest sealed, and test myself on the sealed ones.',
+        'strat.all': 'Honest, and for this course, completely fine. Memorize all hundred, we want them automatic. But look at what your self-test now measures. You are quizzing yourself on questions you already memorized. You will score near perfect and learn nothing about how you would handle a question you had not seen. That blind spot is the whole subject of this module.',
+        'strat.split': 'This is the train/test split, and you found it on your own. You held some questions back and never studied them. Your score on those is the only honest signal of whether you understood the material or just memorized this particular set. Keep that in mind, because it is exactly what we do to a model.',
+
+        's3.h2': 'Overfitting, But For You',
+        's3.p1': 'Earlier in the course we gave memorizing a bad name. A model that overfits has memorized its training data instead of learning the pattern behind it. It scores beautifully on the rows it has seen and falls apart on anything new.',
+        's3.p3': 'You do not want a churn model that has memorized last quarter\u2019s customers. Those customers are gone. You want one that learned the shape of churn, so it works on customers it has never met. Memorizing the training rows and generalizing to new ones look identical until you put the model in front of something new.',
+        's3.p4': 'The train/test split is how you force the question. Train on some of the data. Hold the rest back, sealed, untouched. Then score the model on the sealed part. If it learned the pattern, it does well on data it never trained on. If it only memorized, the sealed score exposes it.',
+
+        'quiz1.q': 'A churn model scores 99% on the exact customers it trained on, and 71% on customers it has never seen. What is the 99% mostly measuring?',
+        'quiz1.a1': 'How well it memorized those specific customers',
+        'quiz1.a2': 'How well it understands churn in general',
+        'quiz1.ok': 'Right. The 99% is recall of those exact customers, not understanding of churn. The honest number is the 71% on customers it never trained on.',
+        'quiz1.no': 'Not quite. Scoring 99% on the very rows it trained on can just mean it memorized them. The 71% on unseen customers is the number that reflects real understanding.',
+
+        's4.h2': 'How Many Test Questions Do You Need?',
+        's4.p1': 'The score on the sealed part is an estimate. You did not test on every possible question, only on the few you set aside. So the number carries error, the same way a poll of ten people carries more error than a poll of ten thousand.',
+        's4.p2': 'If your true chance of getting a question right is \\(p\\), and you test on \\(n\\) sealed questions, the spread of your measured score is the standard error:',
+        's4.p3': 'Two things to read off it. The \\(n\\) is under a square root, so to halve your uncertainty you need four times as many test questions, not twice. And the \\(p(1-p)\\) on top says the spread depends on how variable the outcomes are. A model that is right almost always, or wrong almost always, barely varies, so a small test set already pins it down. A model near a coin flip is as uncertain as it gets and needs far more.',
+        's4.p4': 'To pin accuracy to within about ten points, a coin-flip-hard problem needs roughly a hundred test questions. A model that is genuinely 95% accurate needs about twenty. Same target, very different test sets, because the precision rides on the variance of the outcomes, not on any fixed percentage.',
+        's4.h3': 'One quiet assumption',
+        's4.p5': 'All of this holds only if the sealed questions came from the same pile as the real ones. Seal a hundred questions on French history, then sit a final on organic chemistry, and your confident sealed score predicts nothing.',
+        's4.p6': 'A test set is the same. It estimates how the model behaves on new data only when the new data looks like the test data. Train a churn model on last year\u2019s customers, deploy it on this year\u2019s, and if this year\u2019s customers behave differently, the test score was a confident lie.',
+
+        'quiz2.q': 'Your sealed test set is all French history. The real final turns out to be organic chemistry. Your sealed score was 90%. What is it worth?',
+        'quiz2.a1': 'Almost nothing, it came from a different pile',
+        'quiz2.a2': '90 percent, a score is a score',
+        'quiz2.ok': 'Right. A test estimate only transfers when the test data is drawn from the same distribution as what the model will actually face. Different pile, worthless number.',
+        'quiz2.no': 'Not quite. The number is precise, but it measures the wrong thing. A test score predicts real performance only when both are drawn from the same pool.',
+
+        's5.h2': 'The Split, In Your Hands',
+        's5.p1': 'Two sliders. The first sets how you split the hundred questions between training and test. The second sets how predictable the material is, which is the part people forget. Watch the accuracy the model reaches, the accuracy the test set reports, and the test set it would actually take to trust that number.',
+        's5.p2': 'Notice the 80/20 mark. Eighty percent training, twenty percent test is what everyone reaches for, and it is a habit, not a result. It fixes a ratio and ignores the two things that actually decide your test set: how many examples you have in total, and how variable the outcomes are. Twenty percent of fifty rows is ten test examples, far too few to trust. Twenty percent of a million is two hundred thousand, far more than you will ever need. A predictable problem lets you seal fewer and pour the rest into training. The right split comes from the data, not from a number someone repeated.',
+
+        'lab.legStudied': 'training (the model learns from these)',
+        'lab.legMock': 'sealed test (you score on these)',
+        'lab.split': 'Training questions out of 100',
+        'lab.tick80': '80/20',
+        'lab.endNone': 'train on none',
+        'lab.endAll': 'train on all 100',
+        'lab.predict': 'How predictable is the material?',
+        'lab.predLow': 'coin-flip hard',
+        'lab.predHigh': 'very predictable',
+        'lab.roReady': 'Accuracy the model reaches',
+        'lab.roNeed': 'Test questions needed for \u00b110 pts',
+        'lab.roGrade': 'Accuracy the test set reports',
+        'lab.caption': 'The test set hands you a number somewhere inside the shaded band. You do not get to know where. More sealed questions narrow the band. A more predictable problem narrows it too, for free.',
+
+        'v.notest': 'No test set at all. You cannot estimate anything. You have a model and no idea whether it works.',
+        'v.enough': 'You sealed {n} test questions. For a problem this predictable, about {need} is enough to pin the estimate to roughly \u00b110 points, so you are covered. Every question past that could have trained the model instead.',
+        'v.short': 'You sealed {n} test questions, but a problem this variable needs about {need} to pin the estimate to roughly \u00b110 points. Your reported accuracy is shaky. The 80/20 habit was not built for this.',
+
+        'dd.summary': 'For the curious: the square root, in numbers',
+        'dd.p1': 'The required test size for a fixed precision comes straight from the standard error. For a 95% interval of half-width \\(w\\), you need about:',
+        'dd.p2': 'Set \\(w\\) to ten points. A coin-flip problem at \\(p = 0.5\\) needs about 97 test examples. A 90% model needs about 35. A 95% model needs about 19. A 99% model needs about 4. The same precision, costing wildly different amounts, all driven by that \\(p(1-p)\\) term. This is the math behind every accuracy figure you read. A model reported at 95% on 20 test examples is barely making a claim. The same 95% on ten thousand is a real one.',
+
+        'ex.h2': 'Try This',
+        'ex.p1': 'You have 100 labeled customers and want to predict who will churn. You set aside 10 as a sealed test set, train on the other 90, and the model scores 95% on the 10. A colleague sets aside 50, trains on 50, and scores 88% on their 50.',
+        'ex.p2': 'Whose number would you put in a report to the marketing team, and why? And which of the two numbers is the more dangerous one to repeat out loud?',
+
+        'nx.h2': 'Where This Goes Next',
+        'nx.p1': 'Splitting once forces a choice. A bigger training set or a bigger test set, never both from the same data. Cross-validation is the trick that lets you stop choosing, by sealing a different part every time and averaging the results. That is the next module.',
+        'nx.link': 'Back to the course homepage',
+        'footer.title': 'Memorize the Answers'
+    },
+    de: {
+        'hero.title': 'Lern die Antworten auswendig',
+        'hero.subtitle': 'Jede Klausurfrage ist schon ver\u00f6ffentlicht. F\u00fcr diesen Kurs ist es das Ziel, sie sicher zu beherrschen. F\u00fcr ein Machine-Learning-Modell ist es die Falle. Der Train/Test-Split trennt das eine vom anderen.',
+        's1.h2': 'Die Fragen sind \u00f6ffentlich',
+        's1.p1': 'Jede Frage, die in der Klausur vorkommen kann, ist schon ver\u00f6ffentlicht. Nichts ist versteckt. Alles steht auf einer Seite: <a href="../exam/" target="_blank">hier geht es zum Fragenpool</a>.',
+        's1.p2': 'Lern sie auswendig. In diesem Kurs ist das kein Schummeln, sondern der Sinn der Sache. Das hier ist ein Grundlagenkurs. Die Basics sollen dir in Fleisch und Blut \u00fcbergehen: was ein Residuum ist, was die Wahrheitsmatrix z\u00e4hlt, wie \u00dcberanpassung aussieht. Die genauen Fragen zu pauken ist ein guter Weg dorthin.',
+        's1.p3': 'Die \u00fcbliche Warnung lautet: lern nicht nur auswendig. F\u00fcr dich gilt sie hier nicht. Sie gilt f\u00fcr das, was du gleich bauen wirst.',
+        's2.h2': 'Wie wirst du dich vorbereiten?',
+        's2.p1': 'Du hast den vollst\u00e4ndigen Fragenpool. W\u00e4hle, wie du wirklich f\u00fcr die Klausur lernen w\u00fcrdest.',
+        'strat.btnAll': 'Alle Fragen lernen und mich dann an einigen davon pr\u00fcfen.',
+        'strat.btnSplit': 'Einige lernen, den Rest versiegeln und mich an den versiegelten pr\u00fcfen.',
+        'strat.all': 'Ehrlich, und f\u00fcr diesen Kurs v\u00f6llig in Ordnung. Lern alle hundert auswendig, wir wollen sie automatisch abrufbar. Aber sieh dir an, was dein Selbsttest jetzt misst. Du pr\u00fcfst dich an Fragen, die du schon kannst. Du wirst fast perfekt abschneiden. \u00dcber eine ungesehene Frage lernst du dabei nichts. Genau dieser blinde Fleck ist das Thema dieses Moduls.',
+        'strat.split': 'Das ist der Train/Test-Split, und du bist selbst darauf gekommen. Du hast einige Fragen zur\u00fcckgehalten und nie gelernt. Dein Ergebnis darauf ist das einzige ehrliche Signal. Es zeigt, ob du den Stoff verstanden hast oder nur diesen einen Satz auswendig kannst. Behalte das im Kopf. Genau das tun wir n\u00e4mlich mit einem Modell.',
+        's3.h2': '\u00dcberanpassung, aber bei dir',
+        's3.p1': 'Fr\u00fcher im Kurs haben wir das Auswendiglernen in Verruf gebracht. Ein Modell mit \u00dcberanpassung hat seine Trainingsdaten auswendig gelernt. Das Muster dahinter hat es nie erfasst. Auf den gesehenen Zeilen gl\u00e4nzt es. Bei allem Neuen f\u00e4llt es auseinander. Es passt zu gut, und genau deshalb passt es nicht.',
+        's3.p3': 'Du willst kein Churn-Modell, das die Kunden des letzten Quartals auswendig kann. Diese Kunden sind weg. Du willst eines, das die Form der Abwanderung gelernt hat. Dann funktioniert es auch bei Kunden, die es nie gesehen hat. Auswendiglernen und Verallgemeinern sehen von au\u00dfen gleich aus. Der Unterschied zeigt sich erst, wenn du das Modell vor etwas Neues stellst.',
+        's3.p4': 'Der Train/Test-Split erzwingt die Frage. Trainiere auf einem Teil der Daten. Halte den Rest zur\u00fcck, versiegelt und unber\u00fchrt. Dann bewerte das Modell auf dem versiegelten Teil. Hat es das Muster gelernt, schneidet es auch auf ungesehenen Daten gut ab. Hat es nur auswendig gelernt, entlarvt es das versiegelte Ergebnis.',
+        'quiz1.q': 'Ein Churn-Modell erreicht 99\u00a0% auf genau den Kunden, auf denen es trainiert hat. Auf nie gesehenen Kunden erreicht es 71\u00a0%. Was misst die 99\u00a0% vor allem?',
+        'quiz1.a1': 'Wie gut es diese konkreten Kunden auswendig gelernt hat',
+        'quiz1.a2': 'Wie gut es Abwanderung allgemein versteht',
+        'quiz1.ok': 'Richtig. Die 99\u00a0% sind das Abrufen genau dieser Kunden. Verst\u00e4ndnis von Abwanderung sind sie nicht. Die ehrliche Zahl sind die 71\u00a0% auf ungesehenen Kunden.',
+        'quiz1.no': 'Nicht ganz. 99\u00a0% auf genau den Trainingszeilen k\u00f6nnen schlicht hei\u00dfen: das Modell kann sie auswendig. Die 71\u00a0% auf ungesehenen Kunden zeigen echtes Verst\u00e4ndnis.',
+        's4.h2': 'Wie viele Testfragen brauchst du?',
+        's4.p1': 'Das Ergebnis auf dem versiegelten Teil ist eine Sch\u00e4tzung. Du hast nicht jede m\u00f6gliche Frage getestet, sondern nur die wenigen, die du beiseitegelegt hast. Also tr\u00e4gt die Zahl einen Fehler. Eine Umfrage unter zehn Leuten tr\u00e4gt ja auch mehr Fehler als eine unter zehntausend.',
+        's4.p2': 'Deine wahre Chance auf eine richtige Antwort sei \\(p\\). Du testest an \\(n\\) versiegelten Fragen. Dann ist die Streuung deines gemessenen Ergebnisses der Standardfehler:',
+        's4.p3': 'Zwei Dinge liest du daran ab. Erstens steht das \\(n\\) unter einer Wurzel. Um deine Unsicherheit zu halbieren, brauchst du also viermal so viele Testfragen, nicht doppelt so viele. Zweitens sagt das \\(p(1-p)\\) oben: die Streuung h\u00e4ngt davon ab, wie variabel die Ergebnisse sind. Ein Modell, das fast immer richtig oder fast immer falsch liegt, schwankt kaum. Da reicht schon ein kleines Testset. Ein Modell nahe am M\u00fcnzwurf ist maximal unsicher und braucht weit mehr.',
+        's4.p4': 'Du willst die Trefferquote auf etwa zehn Punkte genau festnageln. Ein m\u00fcnzwurfschweres Problem braucht daf\u00fcr rund hundert Testfragen. Ein Modell mit echten 95\u00a0% braucht etwa zwanzig. Gleiches Ziel, sehr unterschiedliche Testsets. Denn die Pr\u00e4zision h\u00e4ngt an der Varianz der Ergebnisse, nicht an einem festen Prozentsatz.',
+        's4.h3': 'Eine stille Annahme',
+        's4.p5': 'Das alles gilt nur unter einer Bedingung. Die versiegelten Fragen m\u00fcssen aus demselben Stapel kommen wie die echten. Versiegle hundert Fragen zur franz\u00f6sischen Geschichte und schreib dann eine Klausur \u00fcber organische Chemie. Dein selbstsicheres versiegeltes Ergebnis sagt dann gar nichts vorher.',
+        's4.p6': 'Mit Testdaten ist es genauso. Sie sch\u00e4tzen das Verhalten des Modells auf neuen Daten nur dann, wenn die neuen Daten wie die Testdaten aussehen. Trainiere ein Churn-Modell auf den Kunden des letzten Jahres und setz es auf die Kunden dieses Jahres an. Verhalten sich die neuen Kunden anders, war das Testergebnis eine selbstsichere L\u00fcge.',
+        'quiz2.q': 'Deine versiegelten Testdaten sind komplett franz\u00f6sische Geschichte. Die echte Klausur ist organische Chemie. Dein versiegeltes Ergebnis war 90\u00a0%. Was ist es wert?',
+        'quiz2.a1': 'Fast nichts, es kam aus einem anderen Stapel',
+        'quiz2.a2': '90 Prozent, eine Note ist eine Note',
+        'quiz2.ok': 'Richtig. Eine Testsch\u00e4tzung \u00fcbertr\u00e4gt sich nur unter einer Bedingung. Die Testdaten m\u00fcssen aus derselben Verteilung stammen wie das, was dem Modell wirklich begegnet. Anderer Stapel, wertlose Zahl.',
+        'quiz2.no': 'Nicht ganz. Die Zahl ist pr\u00e4zise, aber sie misst das Falsche. Ein Testergebnis sagt die echte Leistung nur vorher, wenn beide aus demselben Pool stammen.',
+        's5.h2': 'Der Split, in deiner Hand',
+        's5.p1': 'Zwei Regler. Der erste bestimmt, wie du die hundert Fragen auf Training und Test verteilst. Der zweite bestimmt, wie vorhersehbar der Stoff ist. Diesen zweiten Teil vergessen die meisten. Achte auf drei Zahlen. Erstens die Trefferquote, die das Modell erreicht. Zweitens die Trefferquote, die die Testdaten melden. Und drittens die Menge an Testfragen, die du f\u00fcr Vertrauen br\u00e4uchtest.',
+        's5.p2': 'Beachte die 80/20-Marke. Achtzig Prozent Training, zwanzig Prozent Test, danach greifen alle. Das ist eine Gewohnheit, kein Ergebnis. Sie legt ein Verh\u00e4ltnis fest und ignoriert die zwei Dinge, die deine Testdaten wirklich bestimmen. Erstens, wie viele Beispiele du insgesamt hast. Zweitens, wie variabel die Ergebnisse sind. Zwanzig Prozent von f\u00fcnfzig Zeilen sind zehn Testbeispiele, viel zu wenig f\u00fcr Vertrauen. Zwanzig Prozent von einer Million sind zweihunderttausend, weit mehr als n\u00f6tig. Bei einem vorhersehbaren Problem kannst du weniger versiegeln und den Rest ins Training stecken. Der richtige Split kommt aus den Daten, nicht aus einer Zahl, die jemand nachgeplappert hat.',
+        'lab.legStudied': 'Training (daraus lernt das Modell)',
+        'lab.legMock': 'versiegelter Test (darauf bewertest du)',
+        'lab.split': 'Trainingsfragen von 100',
+        'lab.tick80': '80/20',
+        'lab.endNone': 'auf keiner trainieren',
+        'lab.endAll': 'auf allen 100 trainieren',
+        'lab.predict': 'Wie vorhersehbar ist der Stoff?',
+        'lab.predLow': 'm\u00fcnzwurfschwer',
+        'lab.predHigh': 'sehr vorhersehbar',
+        'lab.roReady': 'Trefferquote, die das Modell erreicht',
+        'lab.roNeed': 'Testfragen f\u00fcr \u00b110 Punkte n\u00f6tig',
+        'lab.roGrade': 'Trefferquote, die die Testdaten melden',
+        'lab.caption': 'Die Testdaten liefern dir eine Zahl irgendwo im schattierten Band. Wo genau, erf\u00e4hrst du nicht. Mehr versiegelte Fragen machen das Band schmaler. Ein vorhersehbareres Problem macht es ebenfalls schmaler, und das gratis.',
+        'v.notest': 'Gar keine Testdaten. Du kannst nichts sch\u00e4tzen. Du hast ein Modell und keine Ahnung, ob es funktioniert.',
+        'v.enough': 'Du hast {n} Testfragen versiegelt. Bei einem so vorhersehbaren Problem reichen etwa {need} Fragen f\u00fcr rund \u00b110 Punkte. Du bist also abgesichert. Jede Frage dar\u00fcber hinaus h\u00e4tte stattdessen das Modell trainieren k\u00f6nnen.',
+        'v.short': 'Du hast {n} Testfragen versiegelt. Ein so variables Problem braucht aber etwa {need} Fragen f\u00fcr rund \u00b110 Punkte. Deine gemeldete Trefferquote ist wackelig. F\u00fcr so einen Fall war die 80/20-Gewohnheit nie gemacht.',
+        'dd.summary': 'F\u00fcr Neugierige: die Wurzel, in Zahlen',
+        'dd.p1': 'Die n\u00f6tige Testgr\u00f6\u00dfe f\u00fcr eine feste Pr\u00e4zision folgt direkt aus dem Standardfehler. F\u00fcr ein Intervall mit 95\u00a0% Vertrauen und Halbbreite \\(w\\) brauchst du etwa:',
+        'dd.p2': 'Setz \\(w\\) auf zehn Punkte. Ein M\u00fcnzwurfproblem bei \\(p = 0,5\\) braucht etwa 97 Testbeispiele. Ein Modell mit 90\u00a0% braucht etwa 35. Eines mit 95\u00a0% etwa 19. Eines mit 99\u00a0% etwa 4. Dieselbe Pr\u00e4zision, v\u00f6llig unterschiedliche Kosten. Getrieben wird das allein vom Term \\(p(1-p)\\). Das ist die Mathematik hinter jeder Trefferquote, die du irgendwo liest. Ein Modell mit 95\u00a0% auf 20 Testbeispielen behauptet fast nichts. Dieselben 95\u00a0% auf zehntausend Beispielen sind eine echte Aussage.',
+        'ex.h2': 'Probier das',
+        'ex.p1': 'Du hast 100 gelabelte Kunden und willst vorhersagen, wer abwandert. Du legst 10 als versiegelte Testdaten beiseite und trainierst auf den anderen 90. Das Modell erreicht 95\u00a0% auf den 10. Eine Kollegin legt 50 beiseite, trainiert auf 50 und erreicht 88\u00a0% auf ihren 50.',
+        'ex.p2': 'Wessen Zahl w\u00fcrdest du in einen Bericht an das Marketingteam schreiben, und warum? Und welche der beiden Zahlen ist die gef\u00e4hrlichere, wenn man sie laut wiederholt?',
+        'nx.h2': 'Wohin das f\u00fchrt',
+        'nx.p1': 'Einmal aufzuteilen erzwingt eine Wahl. Entweder mehr Trainingsdaten oder mehr Testdaten, nie beides aus denselben Daten. Die Kreuzvalidierung nimmt dir diese Wahl ab. Sie versiegelt jedes Mal einen anderen Teil und mittelt die Ergebnisse. Darum geht es im n\u00e4chsten Modul.',
+        'nx.link': 'Zur\u00fcck zur Kurs-Startseite',
+        'footer.title': 'Lern die Antworten auswendig'
+    }
+};
+
+let currentLang = 'en';
+let chosenStrategy = null;
+function tr(key){ return (T[currentLang] && T[currentLang][key] !== undefined) ? T[currentLang][key] : (T.en[key] || ''); }
+
+const TOTAL = 100;
+const BASELINE = 0.45;
+const DECAY = 35;
+function ceiling(q01){ return 0.55 + 0.43 * q01; }
+function readiness(t, q01){ const C = ceiling(q01); return C - (C - BASELINE) * Math.exp(-t / DECAY); }
+function neededFor10(p){ return Math.ceil((1.96*1.96) * p * (1 - p) / (0.10*0.10)); }
+function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
+
+function buildGrid(){
+    const grid = document.getElementById('splitGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    for (let i = 0; i < TOTAL; i++){ const c = document.createElement('div'); c.className = 'cell mock'; grid.appendChild(c); }
+}
+function fmt(tpl, vars){ return tpl.replace(/\{(\w+)\}/g, (_, k) => (vars[k] !== undefined ? vars[k] : '')); }
+
+function updateSplit(){
+    const split = document.getElementById('splitSlider');
+    const pred = document.getElementById('predSlider');
+    if (!split || !pred) return;
+    const train = parseInt(split.value, 10);
+    const n = TOTAL - train;
+    const q01 = parseInt(pred.value, 10) / 100;
+
+    document.querySelectorAll('#splitGrid .cell').forEach((c, i) => { c.className = 'cell ' + (i < train ? 'studied' : 'mock'); });
+
+    const p = readiness(train, q01);
+    const readyPct = Math.round(p * 100);
+    document.getElementById('roReady').textContent = readyPct + '%';
+    document.getElementById('readyBar').style.width = readyPct + '%';
+
+    const need = neededFor10(p);
+    document.getElementById('roNeed').textContent = need;
+
+    const gradeEl = document.getElementById('roGrade');
+    const fill = document.getElementById('bandFill');
+    const mark = document.getElementById('bandMark');
+    let margin = null;
+    if (n === 0){
+        gradeEl.innerHTML = readyPct + '% <span class="sub">&plusmn; ??</span>';
+        fill.style.left = '0%'; fill.style.width = '100%'; mark.style.left = readyPct + '%';
+    } else {
+        const se = Math.sqrt(p * (1 - p) / n);
+        margin = Math.round(1.96 * se * 100);
+        const lo = clamp(readyPct - margin, 0, 100);
+        const hi = clamp(readyPct + margin, 0, 100);
+        gradeEl.innerHTML = readyPct + '% <span class="sub">&plusmn; ' + margin + '</span>';
+        fill.style.left = lo + '%'; fill.style.width = (hi - lo) + '%'; mark.style.left = readyPct + '%';
+    }
+
+    const v = document.getElementById('verdict');
+    if (n === 0) v.textContent = tr('v.notest');
+    else if (n >= need) v.textContent = fmt(tr('v.enough'), { n: n, need: need });    else v.textContent = fmt(tr('v.short'), { n: n, need: need });
+}
+
+function chooseStrategy(which){
+    chosenStrategy = which;
+    document.querySelectorAll('#strat .strat-btn').forEach(b => b.classList.remove('chosen'));
+    document.getElementById('strat-' + which).classList.add('chosen');
+    const r = document.getElementById('strat-reveal');
+    r.innerHTML = tr('strat.' + which);
+    r.style.display = 'block';
+}
+
+function toggleLang(){
+    currentLang = currentLang === 'en' ? 'de' : 'en';
+    document.documentElement.lang = currentLang;
+    document.querySelector('.lang-toggle').textContent = currentLang === 'en' ? 'DE' : 'EN';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (T[currentLang] && T[currentLang][key] !== undefined) el.innerHTML = T[currentLang][key];
+    });
+    if (chosenStrategy) document.getElementById('strat-reveal').innerHTML = tr('strat.' + chosenStrategy);
+    updateSplit();
+    if (typeof renderMathInElement !== 'undefined'){
+        renderMathInElement(document.body, { delimiters: [ { left: '$$', right: '$$', display: true }, { left: '\\(', right: '\\)', display: false } ], throwOnError: false });
+    }
+}
+
+function answerQuiz(quizId, btn, isCorrect){
+    const quiz = document.getElementById(quizId);
+    const feedback = document.getElementById(quizId + '-feedback');
+    quiz.querySelectorAll('.quiz-btn').forEach(b => b.classList.add('disabled'));
+    btn.classList.add(isCorrect ? 'correct' : 'wrong');
+    feedback.className = 'quiz-feedback ' + (isCorrect ? 'success' : 'fail');
+    feedback.innerHTML = tr(quizId + (isCorrect ? '.ok' : '.no'));
+}
+
+window.addEventListener('load', function(){
+    buildGrid();
+    updateSplit();
+    if (typeof renderMathInElement !== 'undefined'){
+        renderMathInElement(document.body, { delimiters: [ { left: '$$', right: '$$', display: true }, { left: '\\(', right: '\\)', display: false } ], throwOnError: false });
+    }
+});
+</script>
+</body>
+</html>

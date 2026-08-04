@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chasing the Leftovers</title>
+
+    <!-- KaTeX -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #141420;
+            color: #e8e8f0;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            line-height: 1.8;
+            font-size: 18px;
+        }
+        .container { max-width: 820px; margin: 0 auto; padding: 0 24px; }
+
+        .lang-toggle {
+            position: fixed; top: 16px; right: 16px;
+            background: #2a2a44; border: 1px solid #4a4a70; border-radius: 20px;
+            padding: 6px 14px; cursor: pointer; font-size: 13px; font-family: sans-serif;
+            color: #a0a0d0; z-index: 100; transition: background 0.2s;
+        }
+        .lang-toggle:hover { background: #363658; }
+
+        .hero { text-align: center; padding: 80px 24px 40px; }
+        .hero h1 { font-size: 42px; font-weight: 700; color: #fff; line-height: 1.3; max-width: 700px; margin: 0 auto; }
+        .hero .subtitle { margin-top: 16px; color: #888; font-size: 16px; font-style: italic; }
+
+        section { padding: 50px 0; }
+        h2 { font-size: 30px; color: #fff; margin-bottom: 24px; line-height: 1.3; }
+        p { margin-bottom: 20px; color: #ccc; }
+        em { color: #e0e0f0; font-style: italic; }
+
+        .formula-block { margin: 24px auto; text-align: center; overflow-x: auto; padding: 10px 0; }
+
+        /* Quiz */
+        .quiz { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px; padding: 28px; margin: 36px 0; }
+        .quiz-question { font-size: 18px; color: #e0e0f0; margin-bottom: 18px; font-style: italic; }
+        .quiz-options { display: flex; gap: 12px; flex-wrap: wrap; }
+        .quiz-btn {
+            background: #2a2a44; color: #e0e0f0; border: 1px solid #3a3a55; border-radius: 8px;
+            padding: 12px 24px; font-size: 16px; font-family: inherit; cursor: pointer;
+            transition: background 0.2s, border-color 0.2s; flex: 1; min-width: 200px; text-align: center;
+        }
+        .quiz-btn:hover { background: #363658; border-color: #5a5a80; }
+        .quiz-btn.correct { background: #1a4a2a; border-color: #50b878; color: #70e898; }
+        .quiz-btn.wrong { background: #2a2248; border-color: #8264dc; color: #a88ef0; }
+        .quiz-btn.disabled { pointer-events: none; opacity: 0.6; }
+        .quiz-feedback { margin-top: 14px; font-size: 16px; min-height: 24px; line-height: 1.5; }
+        .quiz-feedback.success { color: #70e898; }
+        .quiz-feedback.fail { color: #a88ef0; }
+
+        /* Code */
+        pre.code {
+            background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px;
+            padding: 20px 22px; margin: 26px 0; overflow-x: auto;
+            font-family: 'SF Mono', 'Menlo', 'Consolas', 'Liberation Mono', monospace;
+            font-size: 14px; line-height: 1.65; color: #d8d8e8; white-space: pre;
+        }
+        pre.code .cmt { color: #6f7390; }
+        pre.code .hl  { color: #80b4f0; }
+        .caption { margin-top: 10px; font-size: 13px; color: #777; font-style: italic; }
+
+        /* Deep-dive */
+        details { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px; padding: 0 28px; margin: 36px 0; }
+        details[open] { padding-bottom: 8px; }
+        summary { cursor: pointer; padding: 22px 0; color: #80b4f0; font-family: sans-serif; font-size: 15px; list-style: none; }
+        summary::-webkit-details-marker { display: none; }
+        summary::before { content: "\203A  "; }
+        details[open] summary::before { content: "\2304  "; }
+
+        .reflection { background: #1c1c2e; border: 1px solid #2a2a40; border-radius: 10px; padding: 28px; margin: 36px 0; color: #ccc; }
+        .reflection p:last-child { margin-bottom: 0; }
+
+        .section-rule { border: none; border-top: 1px solid #2a2a40; margin: 0; }
+        a { color: #80b4f0; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        footer { text-align: center; padding: 40px 24px; color: #444; font-size: 14px; }
+        footer a { color: #666; }
+
+        /* === The machine === */
+        .panel-label { font-family: sans-serif; font-size: 13px; color: #888; margin: 14px 0 6px; }
+        .chart-wrap { width: 100%; border: 1px solid #2a2a40; border-radius: 10px; background: #1c1c2e; padding: 12px; }
+        .chart-wrap canvas { display: block; width: 100%; height: auto; }
+
+        .legend { display: flex; gap: 20px; flex-wrap: wrap; font-family: sans-serif; font-size: 13px; color: #888; margin-top: 10px; }
+        .legend span { display: inline-flex; align-items: center; }
+        .legend span::before { content: ""; display: inline-block; width: 16px; margin-right: 7px; border-top: 2px solid transparent; }
+        .legend .l-data::before  { width: 9px; height: 9px; border: none; border-radius: 50%; background: #888; }
+        .legend .l-pred::before  { border-top-color: #80b4f0; }
+        .legend .l-resid::before { width: 9px; height: 9px; border: none; border-radius: 50%; background: #a88ef0; }
+        .legend .l-tree::before  { border-top: 2px dashed #80b4f0; }
+
+        .btn-row { display: flex; gap: 12px; flex-wrap: wrap; margin: 22px 0 4px; font-family: sans-serif; }
+        .btn {
+            background: #2a2a44; color: #e0e0f0; border: 1px solid #3a3a55; border-radius: 8px;
+            padding: 11px 22px; font-family: sans-serif; font-size: 14px; cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .btn:hover { background: #363658; border-color: #5a5a80; }
+        .btn-primary { border-color: #80b4f0; color: #bcd8ff; }
+        .btn-primary:hover { background: #27314a; border-color: #80b4f0; }
+
+        .controls { display: flex; flex-wrap: wrap; gap: 24px; margin: 22px 0 6px; font-family: sans-serif; }
+        .control { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 170px; }
+        .control label { font-size: 13px; color: #888; }
+        .control select {
+            background: #2a2a44; color: #e0e0f0; border: 1px solid #3a3a55; border-radius: 8px;
+            padding: 10px 12px; font-family: sans-serif; font-size: 14px; cursor: pointer;
+        }
+        .control select:hover { border-color: #5a5a80; }
+        .control input[type=range] { accent-color: #80b4f0; cursor: pointer; width: 100%; }
+        .control .val { font-size: 14px; color: #e8e8f0; font-variant-numeric: tabular-nums; }
+
+        .readout { display: flex; gap: 30px; flex-wrap: wrap; font-family: sans-serif; font-size: 14px; color: #a0a0d0; margin-top: 16px; }
+        .readout .num { color: #e8e8f0; font-variant-numeric: tabular-nums; }
+        .overfit-note { display: none; font-family: sans-serif; font-size: 14px; color: #a88ef0; margin-top: 14px; }
+
+        @media (max-width: 680px) {
+            .hero h1 { font-size: 28px; }
+            h2 { font-size: 24px; }
+            body { font-size: 16px; }
+            .quiz-options { flex-direction: column; }
+            .controls { flex-direction: column; gap: 18px; }
+        }
+    </style>
+</head>
+<body>
+
+<button class="lang-toggle" onclick="toggleLang()">DE</button>
+
+<div class="hero">
+    <h1 data-i18n="hero.title">Chasing the Leftovers</h1>
+    <p class="subtitle" data-i18n="hero.subtitle">Gradient boosting on trees, built one residual at a time.</p>
+</div>
+
+<div class="container">
+
+    <section>
+        <p data-i18n="s1.p1">A single tree gets the big picture and misses by a little almost everywhere. That miss, the gap between the data and the prediction, is the residual. Boosting fits a new tree to the residual, folds in a slice of it, and looks at what is left. Then it does the same thing again.</p>
+    </section>
+
+    <hr class="section-rule">
+
+    <section>
+        <h2 data-i18n="machine.h2">The Residual Machine</h2>
+        <p data-i18n="machine.instr">The top panel is the prediction laid over the data. The bottom panel is what is left over, and the dashed line there is the next tree, already fit to those leftovers. Add a tree to fold a fraction of it into the prediction and watch the leftovers shrink.</p>
+
+        <p class="panel-label" data-i18n="panel.pred">Prediction over the data</p>
+        <div class="chart-wrap"><canvas id="cv-pred" width="800" height="320"></canvas></div>
+
+        <p class="panel-label" data-i18n="panel.resid">What is left over (residuals)</p>
+        <div class="chart-wrap"><canvas id="cv-resid" width="800" height="240"></canvas></div>
+
+        <div class="legend">
+            <span class="l-data" data-i18n="lg.data">Data</span>
+            <span class="l-pred" data-i18n="lg.pred">Prediction</span>
+            <span class="l-resid" data-i18n="lg.resid">Leftover</span>
+            <span class="l-tree" data-i18n="lg.tree">Next tree</span>
+        </div>
+
+        <div class="btn-row">
+            <button class="btn btn-primary" id="btn-add" onclick="onAdd()" data-i18n="btn.add">Add a tree</button>
+            <button class="btn" id="btn-play" onclick="togglePlay()" data-i18n="btn.play">Play</button>
+            <button class="btn" id="btn-reset" onclick="onReset()" data-i18n="btn.reset">Reset</button>
+        </div>
+
+        <div class="controls">
+            <div class="control">
+                <label data-i18n="lbl.target">Target shape</label>
+                <select id="sl-target" onchange="onTarget()">
+                    <option value="sine"  data-i18n="opt.sine">Sine</option>
+                    <option value="step"  data-i18n="opt.step">Step</option>
+                    <option value="spike" data-i18n="opt.spike">Spike</option>
+                </select>
+            </div>
+            <div class="control">
+                <label data-i18n="lbl.lr">Learning rate</label>
+                <input type="range" id="sl-lr" min="0.05" max="1" step="0.05" value="0.3" oninput="onLr()">
+                <div class="val"><span id="val-lr">0.30</span></div>
+            </div>
+            <div class="control">
+                <label data-i18n="lbl.depth">Tree depth</label>
+                <input type="range" id="sl-depth" min="1" max="4" value="2" oninput="onDepth()">
+                <div class="val"><span id="val-depth">2</span></div>
+            </div>
+        </div>
+
+        <div class="readout">
+            <div><span data-i18n="ro.trees">Trees</span>: <span class="num" id="val-trees">0</span></div>
+            <div><span data-i18n="ro.train">Training error (MSE)</span>: <span class="num" id="val-train">0.000</span></div>
+            <div><span data-i18n="ro.test">Test error (MSE)</span>: <span class="num" id="val-test">0.000</span></div>
+        </div>
+        <p class="overfit-note" id="overfit-note" data-i18n="note.overfit">Test error is climbing. The extra trees are fitting the noise now. This is where you would stop.</p>
+        <p class="caption" data-i18n="machine.cap">Turn the learning rate down and each tree takes a smaller bite, so you need more of them and the curve stays smooth. Turn it up and the prediction lurches, then starts chasing the noise.</p>
+    </section>
+
+    <hr class="section-rule">
+
+    <section>
+        <h2 data-i18n="s2.h2">What Just Happened</h2>
+        <p data-i18n="s2.p1">Each tree trained on the bottom panel, the leftovers, not on the original targets. A fraction of it, set by the learning rate, got folded into the prediction up top. The leftovers shrank, the next tree fit the smaller leftovers, and the prediction crept toward the data. Stack enough small corrections and a pile of weak trees becomes a sharp model.</p>
+
+        <pre class="code">F = y.mean()                              <span class="cmt"># start flat</span>
+for _ in range(n_trees):
+    residual = y - F                      <span class="hl"># what's left over</span>
+    tree = DecisionTreeRegressor(max_depth=2).fit(X, residual)
+    F = F + lr * tree.predict(X)          <span class="cmt"># take a small step</span></pre>
+        <p class="caption" data-i18n="code.cap">The same loop, in five lines. Start flat, fit the leftover, take a small step, repeat.</p>
+
+        <div class="quiz" id="quiz1">
+            <p class="quiz-question" data-i18n="quiz1.q">When you click Add a tree, what is the new tree trained to predict?</p>
+            <div class="quiz-options">
+                <button class="quiz-btn" data-i18n="quiz1.a1" onclick="answerQuiz('quiz1', this, true)">The leftover error of the current ensemble, the residuals</button>
+                <button class="quiz-btn" data-i18n="quiz1.a2" onclick="answerQuiz('quiz1', this, false)">The original survival labels, from scratch</button>
+            </div>
+            <div class="quiz-feedback" id="quiz1-feedback"></div>
+        </div>
+
+        <div class="quiz" id="quiz2">
+            <p class="quiz-question" data-i18n="quiz2.q">You keep adding trees. Training error falls to near zero, but test error bottoms out and starts rising. What is happening?</p>
+            <div class="quiz-options">
+                <button class="quiz-btn" data-i18n="quiz2.a1" onclick="answerQuiz('quiz2', this, true)">The ensemble has started fitting the noise, overfitting</button>
+                <button class="quiz-btn" data-i18n="quiz2.a2" onclick="answerQuiz('quiz2', this, false)">The learning rate is too small</button>
+            </div>
+            <div class="quiz-feedback" id="quiz2-feedback"></div>
+        </div>
+
+        <details>
+            <summary data-i18n="dd.summary">For the curious: why is it called gradient boosting?</summary>
+            <p data-i18n="dd.p1">You have been running gradient descent without the calculus. For squared-error loss, the gradient of the loss with respect to the prediction at each point is:</p>
+            <div class="formula-block" data-i18n="dd.formula">$$-\frac{\partial L}{\partial F(x_i)} = y_i - F(x_i)$$</div>
+            <p data-i18n="dd.p2">The negative gradient is the residual. So fitting a tree to the leftovers is fitting a tree to the negative gradient, and folding in a slice of it is one downhill step. The learning rate is the step size. Boosting is gradient descent where each step is a whole tree instead of a single number, the same loop as the Hot or Cold game with larger pieces.</p>
+        </details>
+    </section>
+
+    <hr class="section-rule">
+
+    <section>
+        <h2 data-i18n="reflect.h2">Before You Move On</h2>
+        <div class="reflection">
+            <p data-i18n="reflect.p1">Set the learning rate to 1 and add a few trees. What happens to the prediction, and why does a smaller rate behave better?</p>
+            <p data-i18n="reflect.p2">Pick the spike. How many trees before the ensemble catches it, and why can no single shallow tree do it alone?</p>
+            <p data-i18n="reflect.p3">Watch the test error as you add trees. Name the point where you would stop, and say what the trees are doing after it.</p>
+        </div>
+    </section>
+
+</div>
+
+<footer>
+    <p data-i18n="footer.title">Chasing the Leftovers</p>
+    <p><a href="https://github.com/i-yam/passt/tree/main/modules/boosting" data-i18n="footer.repo">Source on GitHub</a> &nbsp;·&nbsp; <a href="../../" data-i18n="footer.course">Passt, Class 8</a></p>
+</footer>
+
+<script>
+
+// ─── Language data ────────────────────────────────────────────────────────────
+const T = {
+    en: {
+        'hero.title':    'Chasing the Leftovers',
+        'hero.subtitle': 'Gradient boosting on trees, built one residual at a time.',
+
+        's1.p1': 'A single tree gets the big picture and misses by a little almost everywhere. That miss, the gap between the data and the prediction, is the residual. Boosting fits a new tree to the residual, folds in a slice of it, and looks at what is left. Then it does the same thing again.',
+
+        'machine.h2':    'The Residual Machine',
+        'machine.instr': 'The top panel is the prediction laid over the data. The bottom panel is what is left over, and the dashed line there is the next tree, already fit to those leftovers. Add a tree to fold a fraction of it into the prediction and watch the leftovers shrink.',
+        'machine.cap':   'Turn the learning rate down and each tree takes a smaller bite, so you need more of them and the curve stays smooth. Turn it up and the prediction lurches, then starts chasing the noise.',
+
+        'panel.pred':  'Prediction over the data',
+        'panel.resid': 'What is left over (residuals)',
+        'lg.data':  'Data',
+        'lg.pred':  'Prediction',
+        'lg.resid': 'Leftover',
+        'lg.tree':  'Next tree',
+
+        'btn.add':   'Add a tree',
+        'btn.play':  'Play',
+        'btn.pause': 'Pause',
+        'btn.reset': 'Reset',
+
+        'lbl.target': 'Target shape',
+        'opt.sine':  'Sine',
+        'opt.step':  'Step',
+        'opt.spike': 'Spike',
+        'lbl.lr':    'Learning rate',
+        'lbl.depth': 'Tree depth',
+
+        'ro.trees': 'Trees',
+        'ro.train': 'Training error (MSE)',
+        'ro.test':  'Test error (MSE)',
+        'note.overfit': 'Test error is climbing. The extra trees are fitting the noise now. This is where you would stop.',
+
+        's2.h2': 'What Just Happened',
+        's2.p1': 'Each tree trained on the bottom panel, the leftovers, not on the original targets. A fraction of it, set by the learning rate, got folded into the prediction up top. The leftovers shrank, the next tree fit the smaller leftovers, and the prediction crept toward the data. Stack enough small corrections and a pile of weak trees becomes a sharp model.',
+        'code.cap': 'The same loop, in five lines. Start flat, fit the leftover, take a small step, repeat.',
+
+        'quiz1.q':  'When you click Add a tree, what is the new tree trained to predict?',
+        'quiz1.a1': 'The leftover error of the current ensemble, the residuals',
+        'quiz1.a2': 'The original survival labels, from scratch',
+        'quiz1.ok': 'Right. Each tree fits what is left after the ones before it. The original targets are never handed to it directly.',
+        'quiz1.no': 'Look at the bottom panel. The new tree is fit to the residuals there, not to the original targets.',
+
+        'quiz2.q':  'You keep adding trees. Training error falls to near zero, but test error bottoms out and starts rising. What is happening?',
+        'quiz2.a1': 'The ensemble has started fitting the noise, overfitting',
+        'quiz2.a2': 'The learning rate is too small',
+        'quiz2.ok': 'Right. Past the useful point the extra trees carve into the noise. That upturn in test error is where you stop.',
+        'quiz2.no': 'A small learning rate slows things down, it does not make test error climb. The upturn is overfitting, the trees fitting noise.',
+
+        'dd.summary': 'For the curious: why is it called gradient boosting?',
+        'dd.p1':      'You have been running gradient descent without the calculus. For squared-error loss, the gradient of the loss with respect to the prediction at each point is:',
+        'dd.formula': '$$-\\frac{\\partial L}{\\partial F(x_i)} = y_i - F(x_i)$$',
+        'dd.p2':      'The negative gradient is the residual. So fitting a tree to the leftovers is fitting a tree to the negative gradient, and folding in a slice of it is one downhill step. The learning rate is the step size. Boosting is gradient descent where each step is a whole tree instead of a single number, the same loop as the Hot or Cold game with larger pieces.',
+
+        'reflect.h2': 'Before You Move On',
+        'reflect.p1': 'Set the learning rate to 1 and add a few trees. What happens to the prediction, and why does a smaller rate behave better?',
+        'reflect.p2': 'Pick the spike. How many trees before the ensemble catches it, and why can no single shallow tree do it alone?',
+        'reflect.p3': 'Watch the test error as you add trees. Name the point where you would stop, and say what the trees are doing after it.',
+
+        'footer.title':  'Chasing the Leftovers',
+        'footer.repo':   'Source on GitHub',
+        'footer.course': 'Passt, Class 8',
+    },
+
+    de: {
+        'hero.title': 'Den Resten hinterher',
+        'hero.subtitle': 'Gradient Boosting auf B\u00e4umen, ein Residuum nach dem anderen.',
+        's1.p1': 'Ein einzelner Baum trifft das gro\u00dfe Ganze. Fast \u00fcberall liegt er dabei ein wenig daneben. Dieses Daneben ist das Residuum, also der Abstand zwischen Daten und Vorhersage. Boosting passt einen neuen Baum an dieses Residuum an. Es rechnet einen Bruchteil davon dazu und schaut, was \u00fcbrig bleibt. Dann macht es dasselbe noch einmal.',
+        'machine.h2': 'Die Residuen-Maschine',
+        'machine.instr': 'Das obere Feld zeigt die Vorhersage \u00fcber den Daten. Das untere Feld zeigt, was \u00fcbrig bleibt. Die gestrichelte Linie dort ist der n\u00e4chste Baum, schon an diese Reste angepasst. F\u00fcge einen Baum hinzu, und ein Bruchteil davon geht in die Vorhersage ein. Sieh dann zu, wie die Reste schrumpfen.',
+        'machine.cap': 'Dreh die Lernrate herunter, und jeder Baum nimmt einen kleineren Bissen. Du brauchst dann mehr B\u00e4ume, und die Kurve bleibt glatt. Dreh sie hoch, und die Vorhersage ruckt. Danach jagt sie nur noch das Rauschen.',
+        'panel.pred': 'Vorhersage \u00fcber den Daten',
+        'panel.resid': 'Was \u00fcbrig bleibt (Residuen)',
+        'lg.data': 'Daten',
+        'lg.pred': 'Vorhersage',
+        'lg.resid': 'Rest',
+        'lg.tree': 'N\u00e4chster Baum',
+        'btn.add': 'Baum hinzuf\u00fcgen',
+        'btn.play': 'Abspielen',
+        'btn.pause': 'Pause',
+        'btn.reset': 'Zur\u00fccksetzen',
+        'lbl.target': 'Zielform',
+        'opt.sine': 'Sinus',
+        'opt.step': 'Stufe',
+        'opt.spike': 'Spitze',
+        'lbl.lr': 'Lernrate',
+        'lbl.depth': 'Baumtiefe',
+        'ro.trees': 'B\u00e4ume',
+        'ro.train': 'Trainingsfehler (MSE)',
+        'ro.test': 'Testfehler (MSE)',
+        'note.overfit': 'Der Testfehler steigt. Die zus\u00e4tzlichen B\u00e4ume passen sich jetzt an das Rauschen an. Hier w\u00fcrdest du aufh\u00f6ren.',
+        's2.h2': 'Was gerade passiert ist',
+        's2.p1': 'Jeder Baum hat auf dem unteren Feld trainiert, also auf den Resten. Auf den urspr\u00fcnglichen Zielen hat er nie trainiert. Ein Bruchteil davon ging oben in die Vorhersage ein, festgelegt durch die Lernrate. Die Reste schrumpften. Der n\u00e4chste Baum passte sich an die kleineren Reste an, und die Vorhersage kroch zu den Daten hin. Staple genug kleine Korrekturen, und aus einem Haufen schwacher B\u00e4ume wird ein scharfes Modell.',
+        'code.cap': 'Dieselbe Schleife, in f\u00fcnf Zeilen. Flach beginnen, den Rest anpassen, einen kleinen Schritt machen, wiederholen.',
+        'quiz1.q': 'Du klickst auf \u201eBaum hinzuf\u00fcgen\u201c. Was soll der neue Baum vorhersagen?',
+        'quiz1.a1': 'Den \u00fcbrig gebliebenen Fehler des aktuellen Ensembles, die Residuen',
+        'quiz1.a2': 'Die urspr\u00fcnglichen \u00dcberlebens-Labels, von vorn',
+        'quiz1.ok': 'Richtig. Jeder Baum passt sich an das an, was nach den vorigen \u00fcbrig bleibt. Die urspr\u00fcnglichen Ziele bekommt er nie direkt.',
+        'quiz1.no': 'Schau auf das untere Feld. Der neue Baum wird an die Residuen dort angepasst, nicht an die urspr\u00fcnglichen Ziele.',
+        'quiz2.q': 'Du f\u00fcgst weiter B\u00e4ume hinzu. Der Trainingsfehler f\u00e4llt fast auf null. Der Testfehler erreicht ein Minimum und steigt danach wieder. Was passiert?',
+        'quiz2.a1': 'Das Ensemble passt sich jetzt an das Rauschen an, also \u00dcberanpassung',
+        'quiz2.a2': 'Die Lernrate ist zu klein',
+        'quiz2.ok': 'Richtig. Jenseits des n\u00fctzlichen Punkts schneiden die zus\u00e4tzlichen B\u00e4ume ins Rauschen. Dieser Anstieg im Testfehler ist deine Stelle zum Aufh\u00f6ren.',
+        'quiz2.no': 'Eine kleine Lernrate verlangsamt nur. Den Testfehler l\u00e4sst sie nicht steigen. Der Anstieg ist \u00dcberanpassung: Die B\u00e4ume passen sich an das Rauschen an.',
+        'dd.summary': 'F\u00fcr Neugierige: warum hei\u00dft es Gradient Boosting?',
+        'dd.p1': 'Du hast die ganze Zeit Gradientenabstieg betrieben, nur ohne die Analysis. Beim quadratischen Verlust sieht der Gradient nach der Vorhersage an jedem Punkt so aus:',
+        'dd.formula': '$$-\\frac{\\partial L}{\\partial F(x_i)} = y_i - F(x_i)$$',
+        'dd.p2': 'Der negative Gradient ist das Residuum. Einen Baum an die Reste anzupassen hei\u00dft also: einen Baum an den negativen Gradienten anzupassen. Und einen Bruchteil davon dazuzurechnen ist ein Schritt bergab. Die Lernrate ist die Schrittgr\u00f6\u00dfe. Boosting ist damit Gradientenabstieg, bei dem jeder Schritt ein ganzer Baum ist statt einer einzelnen Zahl. Dieselbe Schleife wie im Hot-or-Cold-Spiel, nur mit gr\u00f6\u00dferen St\u00fccken.',
+        'reflect.h2': 'Bevor du weitergehst',
+        'reflect.p1': 'Stell die Lernrate auf 1 und f\u00fcge ein paar B\u00e4ume hinzu. Was passiert mit der Vorhersage? Und warum verh\u00e4lt sich eine kleinere Rate besser?',
+        'reflect.p2': 'W\u00e4hle die Spitze. Wie viele B\u00e4ume braucht das Ensemble, bis es sie einf\u00e4ngt? Und warum schafft das kein einzelner flacher Baum allein?',
+        'reflect.p3': 'Beobachte den Testfehler, w\u00e4hrend du B\u00e4ume hinzuf\u00fcgst. Benenne den Punkt, an dem du aufh\u00f6ren w\u00fcrdest. Sag dann, was die B\u00e4ume danach noch tun.',
+        'footer.title': 'Den Resten hinterher',
+        'footer.repo': 'Quellcode auf GitHub',
+        'footer.course': 'Passt, Stunde 8'
+    }
+};
+
+let currentLang = 'en';
+const tr = k => (T[currentLang] && T[currentLang][k]) || T.en[k];
+
+function toggleLang() {
+    currentLang = currentLang === 'en' ? 'de' : 'en';
+    document.documentElement.lang = currentLang;
+    document.querySelector('.lang-toggle').textContent = currentLang === 'en' ? 'DE' : 'EN';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (T[currentLang] && T[currentLang][key]) el.innerHTML = T[currentLang][key];
+    });
+    setPlayLabel();
+    if (typeof renderMathInElement !== 'undefined') {
+        renderMathInElement(document.body, {
+            delimiters: [ { left: '$$', right: '$$', display: true }, { left: '\\(', right: '\\)', display: false } ],
+            throwOnError: false
+        });
+    }
+}
+
+function answerQuiz(quizId, btn, isCorrect) {
+    const quiz = document.getElementById(quizId), feedback = document.getElementById(quizId + '-feedback');
+    quiz.querySelectorAll('.quiz-btn').forEach(b => b.classList.add('disabled'));
+    btn.classList.add(isCorrect ? 'correct' : 'wrong');
+    feedback.className = 'quiz-feedback ' + (isCorrect ? 'success' : 'fail');
+    feedback.innerHTML = tr(quizId + (isCorrect ? '.ok' : '.no'));
+}
+
+// ─── The residual machine ─────────────────────────────────────────────────────
+// Real gradient boosting on 1D regression trees, stepped by hand.
+
+function mulberry32(a) {
+    return function () {
+        a |= 0; a = a + 0x6D2B79F5 | 0;
+        let t = Math.imul(a ^ a >>> 15, 1 | a);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+}
+function gauss(rng) { let u = 0, v = 0; while (u === 0) u = rng(); while (v === 0) v = rng(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+const mean = a => a.reduce((x, y) => x + y, 0) / a.length;
+
+function buildTree(xs, ys, depth, maxDepth) {
+    const n = xs.length, m = mean(ys);
+    if (depth >= maxDepth || n <= 1) return { leaf: true, value: m };
+    const idx = [...Array(n).keys()].sort((a, b) => xs[a] - xs[b]);
+    const sx = idx.map(k => xs[k]), sy = idx.map(k => ys[k]);
+    const totSum = sy.reduce((a, b) => a + b, 0), totSq = sy.reduce((a, b) => a + b * b, 0);
+    let prefix = 0, prefixSq = 0, bestSSE = Infinity, bestThr = null;
+    for (let k = 0; k < n - 1; k++) {
+        prefix += sy[k]; prefixSq += sy[k] * sy[k];
+        if (sx[k] === sx[k + 1]) continue;
+        const nl = k + 1, nr = n - nl;
+        const sseL = prefixSq - prefix * prefix / nl;
+        const sseR = (totSq - prefixSq) - (totSum - prefix) * (totSum - prefix) / nr;
+        if (sseL + sseR < bestSSE) { bestSSE = sseL + sseR; bestThr = (sx[k] + sx[k + 1]) / 2; }
+    }
+    if (bestThr === null) return { leaf: true, value: m };
+    const lx = [], ly = [], rx = [], ry = [];
+    for (let j = 0; j < n; j++) { if (xs[j] <= bestThr) { lx.push(xs[j]); ly.push(ys[j]); } else { rx.push(xs[j]); ry.push(ys[j]); } }
+    return { leaf: false, thr: bestThr, left: buildTree(lx, ly, depth + 1, maxDepth), right: buildTree(rx, ry, depth + 1, maxDepth) };
+}
+function predictTree(t, x) { while (!t.leaf) t = x <= t.thr ? t.left : t.right; return t.value; }
+
+const GRID = (function () { const g = []; for (let i = 0; i <= 240; i++) g.push(i / 240 * 2 * Math.PI); return g; })();
+const XMAX = 2 * Math.PI;
+
+let DATA = [], TRAIN = [], TEST = [], DATA_Y = [];
+const STATE = { target: 'sine', lr: 0.3, depth: 2, trees: [], base: 0, playing: false };
+let minTest = Infinity, anim = null;
+
+function targetFn(target, x) {
+    if (target === 'sine') return Math.sin(x);
+    if (target === 'step') return x < Math.PI ? 0.9 : -0.9;
+    return 1.3 * Math.exp(-((x - Math.PI) ** 2) / (2 * 0.18 * 0.18));   // spike
+}
+function genData(target) {
+    const seed = target === 'sine' ? 11 : target === 'step' ? 22 : 33;
+    const rng = mulberry32(seed), n = 100, pts = [];
+    for (let i = 0; i < n; i++) { const x = i / (n - 1) * XMAX; pts.push({ x, y: targetFn(target, x) + 0.1 * gauss(rng), i }); }
+    DATA = pts; DATA_Y = pts.map(p => p.y);
+    TRAIN = pts.filter(p => p.i % 10 >= 3); TEST = pts.filter(p => p.i % 10 < 3);
+    STATE.trees = []; STATE.base = mean(TRAIN.map(p => p.y)); minTest = Infinity;
+}
+function predAt(x) { let s = STATE.base; for (const e of STATE.trees) s += e.lr * predictTree(e.t, x); return s; }
+function previewTree() {
+    const xs = TRAIN.map(p => p.x), res = TRAIN.map(p => p.y - predAt(p.x));
+    return buildTree(xs, res, 0, STATE.depth);
+}
+function addTree() {
+    const xs = TRAIN.map(p => p.x), res = TRAIN.map(p => p.y - predAt(p.x));
+    STATE.trees.push({ t: buildTree(xs, res, 0, STATE.depth), lr: STATE.lr });
+}
+
+// ── drawing ──
+const PAD = { l: 34, r: 12, t: 10, b: 20 };
+function setupCanvas(cv, ratio) {
+    const wrap = cv.parentElement, cssW = Math.max(10, wrap.clientWidth - 24), cssH = Math.round(cssW * ratio);
+    const dpr = window.devicePixelRatio || 1;
+    cv.style.width = cssW + 'px'; cv.style.height = cssH + 'px';
+    cv.width = Math.round(cssW * dpr); cv.height = Math.round(cssH * dpr);
+    const ctx = cv.getContext('2d'); if (!ctx) return null;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, cssW, cssH);
+    return { ctx, cssW, cssH };
+}
+const Xof = (x, cssW) => PAD.l + x / XMAX * (cssW - PAD.l - PAD.r);
+const Yof = (y, cssH, ymin, ymax) => PAD.t + (ymax - y) / (ymax - ymin) * (cssH - PAD.t - PAD.b);
+
+function grid(ctx, cssW, cssH, ymin, ymax, zeroBright) {
+    ctx.fillStyle = '#555'; ctx.font = '11px sans-serif'; ctx.lineWidth = 1;
+    [-1, 0, 1].forEach(yy => {
+        const py = Yof(yy, cssH, ymin, ymax);
+        ctx.strokeStyle = (yy === 0 && zeroBright) ? '#3a3a55' : '#2a2a40';
+        ctx.beginPath(); ctx.moveTo(Xof(0, cssW), py); ctx.lineTo(Xof(XMAX, cssW), py); ctx.stroke();
+        ctx.fillStyle = '#555'; ctx.fillText(String(yy), 6, py + 3);
+    });
+    for (let t = 0; t <= 6; t++) ctx.fillText(String(t), Xof(t, cssW) - 3, cssH - 6);
+}
+function curve(ctx, arr, cssW, cssH, ymin, ymax, color, width, dash) {
+    ctx.strokeStyle = color; ctx.lineWidth = width; ctx.setLineDash(dash || []);
+    ctx.beginPath();
+    arr.forEach((y, gi) => { const px = Xof(GRID[gi], cssW), py = Yof(y, cssH, ymin, ymax); gi ? ctx.lineTo(px, py) : ctx.moveTo(px, py); });
+    ctx.stroke(); ctx.setLineDash([]);
+}
+function dots(ctx, vals, cssW, cssH, ymin, ymax, color, r) {
+    ctx.fillStyle = color;
+    DATA.forEach((p, i) => { ctx.beginPath(); ctx.arc(Xof(p.x, cssW), Yof(vals[i], cssH, ymin, ymax), r, 0, 2 * Math.PI); ctx.fill(); });
+}
+
+const YR = 1.6;   // shared vertical range
+function drawAll(Fg, resid, showPreview) {
+    let p = setupCanvas(document.getElementById('cv-pred'), 0.40);
+    if (p) {
+        grid(p.ctx, p.cssW, p.cssH, -YR, YR, false);
+        dots(p.ctx, DATA_Y, p.cssW, p.cssH, -YR, YR, 'rgba(150,150,160,0.45)', 3);
+        curve(p.ctx, Fg, p.cssW, p.cssH, -YR, YR, '#80b4f0', 2.5);
+    }
+    let q = setupCanvas(document.getElementById('cv-resid'), 0.30);
+    if (q) {
+        grid(q.ctx, q.cssW, q.cssH, -YR, YR, true);
+        if (showPreview) {
+            const pv = previewTree(), pvCurve = GRID.map(x => predictTree(pv, x));
+            curve(q.ctx, pvCurve, q.cssW, q.cssH, -YR, YR, 'rgba(128,180,240,0.85)', 2, [5, 4]);
+        }
+        dots(q.ctx, resid, q.cssW, q.cssH, -YR, YR, 'rgba(168,142,240,0.7)', 3);
+    }
+}
+
+function updateReadouts() {
+    document.getElementById('val-trees').textContent = STATE.trees.length;
+    let trErr = 0, teErr = 0;
+    TRAIN.forEach(p => trErr += (predAt(p.x) - p.y) ** 2);
+    TEST.forEach(p => teErr += (predAt(p.x) - p.y) ** 2);
+    trErr /= TRAIN.length; teErr /= TEST.length;
+    document.getElementById('val-train').textContent = trErr.toFixed(3);
+    const teEl = document.getElementById('val-test'); teEl.textContent = teErr.toFixed(3);
+    const climbing = STATE.trees.length >= 3 && teErr > minTest + 1e-4;
+    minTest = Math.min(minTest, teErr);
+    teEl.style.color = climbing ? '#a88ef0' : '#e8e8f0';
+    const note = document.getElementById('overfit-note');
+    note.style.display = climbing ? 'block' : 'none';
+    if (climbing) { note.setAttribute('data-i18n', 'note.overfit'); note.innerHTML = tr('note.overfit'); }
+}
+
+function normalRender() {
+    const Fg = GRID.map(predAt), resid = DATA.map(p => p.y - predAt(p.x));
+    drawAll(Fg, resid, true);
+    updateReadouts();
+}
+
+const raf = (cb) => (window.requestAnimationFrame ? window.requestAnimationFrame(cb) : setTimeout(() => cb(Date.now()), 16));
+const now = () => (window.performance && performance.now ? performance.now() : Date.now());
+function lerpArr(a, b, k) { return a.map((v, i) => v + (b[i] - v) * k); }
+function animateTo(oldF, newF, oldR, newR) {
+    if (anim && window.cancelAnimationFrame) cancelAnimationFrame(anim);
+    const dur = 280, t0 = now();
+    function tick(ts) {
+        const k = Math.min(1, (ts - t0) / dur), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+        drawAll(lerpArr(oldF, newF, e), lerpArr(oldR, newR, e), false);
+        if (k < 1) anim = raf(tick); else { anim = null; normalRender(); }
+    }
+    anim = raf(tick);
+}
+
+function onAdd() {
+    if (STATE.trees.length >= 60) return;
+    const oldF = GRID.map(predAt), oldR = DATA.map(p => p.y - predAt(p.x));
+    addTree();
+    updateReadouts();
+    const newF = GRID.map(predAt), newR = DATA.map(p => p.y - predAt(p.x));
+    animateTo(oldF, newF, oldR, newR);
+}
+function setPlayLabel() { document.getElementById('btn-play').innerHTML = tr(STATE.playing ? 'btn.pause' : 'btn.play'); }
+function togglePlay() { STATE.playing = !STATE.playing; setPlayLabel(); if (STATE.playing) playStep(); }
+function playStep() {
+    if (!STATE.playing) return;
+    if (STATE.trees.length >= 60) { STATE.playing = false; setPlayLabel(); return; }
+    onAdd();
+    setTimeout(playStep, 600);
+}
+function onReset() {
+    STATE.playing = false; setPlayLabel();
+    const oldF = GRID.map(predAt), oldR = DATA.map(p => p.y - predAt(p.x));
+    STATE.trees = []; minTest = Infinity;
+    updateReadouts();
+    const newF = GRID.map(predAt), newR = DATA.map(p => p.y - predAt(p.x));
+    animateTo(oldF, newF, oldR, newR);
+}
+function onTarget() { STATE.playing = false; setPlayLabel(); genData(document.getElementById('sl-target').value); normalRender(); }
+function onLr() { STATE.lr = +document.getElementById('sl-lr').value; document.getElementById('val-lr').textContent = STATE.lr.toFixed(2); normalRender(); }
+function onDepth() { STATE.depth = +document.getElementById('sl-depth').value; document.getElementById('val-depth').textContent = STATE.depth; normalRender(); }
+
+function initMachine() { genData('sine'); normalRender(); }
+initMachine();
+
+window.addEventListener('load', function () {
+    normalRender();   // re-fit canvas sizes once layout is settled
+    if (typeof renderMathInElement !== 'undefined') {
+        renderMathInElement(document.body, {
+            delimiters: [ { left: '$$', right: '$$', display: true }, { left: '\\(', right: '\\)', display: false } ],
+            throwOnError: false
+        });
+    }
+});
+window.addEventListener('resize', function () { if (DATA.length) normalRender(); });
+</script>
+
+</body>
+</html>
