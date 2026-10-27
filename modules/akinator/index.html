@@ -162,7 +162,242 @@
 </div>
 
 <script>
-const TREE = {id:"q_feathers",q:"Does it have feathers? (is it a bird)",qDe:"Hat es Federn? (ist es ein Vogel)",yes:{id:"b_fly",q:"Can it fly?",qDe:"Kann es fliegen?",yes:{id:"b_colour",q:"Does it have strikingly colourful plumage?",qDe:"Hat es auffällig buntes Gefieder?",yes:{id:"b_pink",q:"Is it pink and stands on one leg in water?",qDe:"Ist es rosa und steht im Wasser auf einem Bein?",yes:{id:"flamingo",animal:"Flamingo",de:"Flamingo",emoji:"🦩"},no:{id:"b_fan",q:"Does it have a huge fan-shaped tail with eye spots?",qDe:"Hat es einen großen, fächerförmigen Schwanz mit Augenflecken?",yes:{id:"peacock",animal:"Peacock",de:"Pfau",emoji:"🦚"},no:{id:"parrot",animal:"Parrot",de:"Papagei",emoji:"🦜"}}},no:{id:"b_prey",q:"Is it a bird of prey with sharp talons?",qDe:"Ist es ein Greifvogel mit scharfen Krallen?",yes:{id:"b_night",q:"Is it active at night, with big round eyes?",qDe:"Ist es nachtaktiv und hat große runde Augen?",yes:{id:"owl",animal:"Owl",de:"Eule",emoji:"🦉"},no:{id:"eagle",animal:"Eagle",de:"Adler",emoji:"🦅"}},no:{id:"b_swim",q:"Does it swim, with webbed feet, and quack?",qDe:"Schwimmt es, hat Schwimmhäute und schnattert?",yes:{id:"duck",animal:"Duck",de:"Ente",emoji:"🦆"},no:{id:"pigeon",animal:"Pigeon",de:"Taube",emoji:"🐦"}}}},no:{id:"b_cold",q:"Does it live in icy places and swim?",qDe:"Lebt es in eisigen Gegenden und schwimmt?",yes:{id:"penguin",animal:"Penguin",de:"Pinguin",emoji:"🐧"},no:{id:"b_tall",q:"Is it very tall, fast, and the largest bird alive?",qDe:"Ist es sehr groß, schnell und der größte lebende Vogel?",yes:{id:"ostrich",animal:"Ostrich",de:"Strauß",emoji:"🦤"},no:{id:"chicken",animal:"Chicken",de:"Huhn",emoji:"🐔"}}}},no:{id:"q_water",q:"Does it live underwater? (a fish, or a sea creature like an octopus or a whale)",qDe:"Lebt es unter Wasser? (ein Fisch oder ein Meerestier wie ein Oktopus oder ein Wal)",yes:{id:"aq_mammal",q:"Is it a mammal? (breathes air, warm-blooded)",qDe:"Ist es ein Säugetier? (atmet Luft, warmblütig)",yes:{id:"aq_bigcar",q:"Is it bigger than a car?",qDe:"Ist es größer als ein Auto?",yes:{id:"whale",animal:"Whale",de:"Wal",emoji:"🐋"},no:{id:"aq_fur",q:"Does it have fur and haul out onto land or ice?",qDe:"Hat es Fell und kommt an Land oder aufs Eis?",yes:{id:"seal",animal:"Seal",de:"Robbe",emoji:"🦭"},no:{id:"dolphin",animal:"Dolphin",de:"Delfin",emoji:"🐬"}}},no:{id:"aq_fish",q:"Does it have fins and a backbone? (is it a fish)",qDe:"Hat es Flossen und ein Rückgrat? (ist es ein Fisch)",yes:{id:"aq_pred",q:"Is it a large predator with sharp teeth?",qDe:"Ist es ein großer Räuber mit scharfen Zähnen?",yes:{id:"shark",animal:"Shark",de:"Hai",emoji:"🦈"},no:{id:"aq_clown",q:"Is it orange with white stripes?",qDe:"Ist es orange mit weißen Streifen?",yes:{id:"clownfish",animal:"Clownfish",de:"Clownfisch",emoji:"🐠"},no:{id:"goldfish",animal:"Goldfish",de:"Goldfisch",emoji:"🐟"}}},no:{id:"aq_shell",q:"Does it have a hard shell and claws?",qDe:"Hat es einen harten Panzer und Scheren?",yes:{id:"crab",animal:"Crab",de:"Krabbe",emoji:"🦀"},no:{id:"aq_arms",q:"Does it have eight arms and change colour?",qDe:"Hat es acht Arme und kann die Farbe wechseln?",yes:{id:"octopus",animal:"Octopus",de:"Oktopus",emoji:"🐙"},no:{id:"jellyfish",animal:"Jellyfish",de:"Qualle",emoji:"🪼"}}}}},no:{id:"q_bug",q:"Is it an insect or a spider? (small, many legs)",qDe:"Ist es ein Insekt oder eine Spinne? (klein, viele Beine)",yes:{id:"g_eight",q:"Does it have eight legs?",qDe:"Hat es acht Beine?",yes:{id:"spider",animal:"Spider",de:"Spinne",emoji:"🕷️"},no:{id:"g_wings",q:"Does it have large, colourful wings?",qDe:"Hat es große, bunte Flügel?",yes:{id:"butterfly",animal:"Butterfly",de:"Schmetterling",emoji:"🦋"},no:{id:"g_honey",q:"Does it make honey and sting?",qDe:"Macht es Honig und sticht?",yes:{id:"bee",animal:"Bee",de:"Biene",emoji:"🐝"},no:{id:"g_dome",q:"Is it a small red dome with black spots?",qDe:"Ist es eine kleine rote Kuppel mit schwarzen Punkten?",yes:{id:"ladybug",animal:"Ladybug",de:"Marienkäfer",emoji:"🐞"},no:{id:"ant",animal:"Ant",de:"Ameise",emoji:"🐜"}}}}},no:{id:"q_fur",q:"Does it have fur or hair? (is it a mammal)",qDe:"Hat es Fell oder Haare? (ist es ein Säugetier)",yes:{id:"m_fly",q:"Can it fly?",qDe:"Kann es fliegen?",yes:{id:"bat",animal:"Bat",de:"Fledermaus",emoji:"🦇"},no:{id:"m_domestic",q:"Is it commonly kept as a pet or farm animal?",qDe:"Wird es üblicherweise als Haus- oder Nutztier gehalten?",yes:{id:"d_big",q:"Is it bigger than a large dog? (livestock size)",qDe:"Ist es größer als ein großer Hund? (Nutztiergröße)",yes:{id:"d_wool",q:"Does it have a thick, woolly coat?",qDe:"Hat es ein dichtes, wolliges Fell?",yes:{id:"sheep",animal:"Sheep",de:"Schaf",emoji:"🐑"},no:{id:"d_horns",q:"Does it have horns and a beard, and like to climb?",qDe:"Hat es Hörner und einen Bart und klettert gern?",yes:{id:"goat",animal:"Goat",de:"Ziege",emoji:"🐐"},no:{id:"d_snout",q:"Is it pink, with a flat snout, kept for meat?",qDe:"Ist es rosa, hat eine flache Schnauze und wird für Fleisch gehalten?",yes:{id:"pig",animal:"Pig",de:"Schwein",emoji:"🐖"},no:{id:"d_moo",q:"Does it give milk and say moo?",qDe:"Gibt es Milch und macht „muh“?",yes:{id:"cow",animal:"Cow",de:"Kuh",emoji:"🐄"},no:{id:"d_mane",q:"Is it a tall riding animal with a flowing mane?",qDe:"Ist es ein großes Reittier mit wallender Mähne?",yes:{id:"horse",animal:"Horse",de:"Pferd",emoji:"🐎"},no:{id:"donkey",animal:"Donkey",de:"Esel",emoji:"🫏"}}}}}},no:{id:"d_hand",q:"Is it a rodent that fits in your hand?",qDe:"Ist es ein Nagetier, das in deine Hand passt?",yes:{id:"hamster",animal:"Hamster",de:"Hamster",emoji:"🐹"},no:{id:"d_bark",q:"Does it bark?",qDe:"Bellt es?",yes:{id:"dog",animal:"Dog",de:"Hund",emoji:"🐕"},no:{id:"d_meow",q:"Does it purr or meow?",qDe:"Schnurrt oder miaut es?",yes:{id:"cat",animal:"Cat",de:"Katze",emoji:"🐈"},no:{id:"rabbit",animal:"Rabbit",de:"Kaninchen",emoji:"🐇"}}}}},no:{id:"w_small",q:"Is it small, smaller than a medium dog?",qDe:"Ist es klein, kleiner als ein mittelgroßer Hund?",yes:{id:"sw_spines",q:"Does it have spines or quills?",qDe:"Hat es Stacheln?",yes:{id:"hedgehog",animal:"Hedgehog",de:"Igel",emoji:"🦔"},no:{id:"sw_tail",q:"Does it have a big bushy tail and climb trees?",qDe:"Hat es einen großen buschigen Schwanz und klettert auf Bäume?",yes:{id:"squirrel",animal:"Squirrel",de:"Eichhörnchen",emoji:"🐿️"},no:{id:"sw_pest",q:"Is it larger, with a long thin tail, often a pest?",qDe:"Ist es größer, hat einen langen dünnen Schwanz und gilt oft als Plage?",yes:{id:"rat",animal:"Rat",de:"Ratte",emoji:"🐀"},no:{id:"mouse",animal:"Mouse",de:"Maus",emoji:"🐁"}}}},no:{id:"w_cat",q:"Is it a big cat? (a feline predator)",qDe:"Ist es eine Großkatze? (ein katzenartiger Räuber)",yes:{id:"c_mane",q:"Do the males grow a mane?",qDe:"Tragen die Männchen eine Mähne?",yes:{id:"lion",animal:"Lion",de:"Löwe",emoji:"🦁"},no:{id:"c_stripes",q:"Does it have stripes?",qDe:"Hat es Streifen?",yes:{id:"tiger",animal:"Tiger",de:"Tiger",emoji:"🐅"},no:{id:"c_speed",q:"Is it built for speed, with tear-mark lines down its face?",qDe:"Ist es auf Schnelligkeit gebaut, mit Tränenstreifen im Gesicht?",yes:{id:"cheetah",animal:"Cheetah",de:"Gepard",emoji:"🐆"},no:{id:"leopard",animal:"Leopard",de:"Leopard",emoji:"🐆"}}}},no:{id:"w_mega",q:"Is it bigger and heavier than a horse?",qDe:"Ist es größer und schwerer als ein Pferd?",yes:{id:"p_trunk",q:"Does it have a long trunk?",qDe:"Hat es einen langen Rüssel?",yes:{id:"elephant",animal:"Elephant",de:"Elefant",emoji:"🐘"},no:{id:"p_neck",q:"Does it have a very long neck?",qDe:"Hat es einen sehr langen Hals?",yes:{id:"giraffe",animal:"Giraffe",de:"Giraffe",emoji:"🦒"},no:{id:"p_horn",q:"Does it have a horn on its nose?",qDe:"Hat es ein Horn auf der Nase?",yes:{id:"rhino",animal:"Rhino",de:"Nashorn",emoji:"🦏"},no:{id:"hippo",animal:"Hippo",de:"Nilpferd",emoji:"🦛"}}}},no:{id:"w_primate",q:"Is it a primate? (an ape or a monkey)",qDe:"Ist es ein Primat? (ein Menschenaffe oder ein Affe)",yes:{id:"pr_ape",q:"Is it a large ape with no tail?",qDe:"Ist es ein großer Menschenaffe ohne Schwanz?",yes:{id:"gorilla",animal:"Gorilla",de:"Gorilla",emoji:"🦍"},no:{id:"monkey",animal:"Monkey",de:"Affe",emoji:"🐒"}},no:{id:"w_pouch",q:"Does it carry its young in a pouch?",qDe:"Trägt es seine Jungen in einem Beutel?",yes:{id:"ma_hop",q:"Does it hop on big back legs?",qDe:"Hüpft es auf großen Hinterbeinen?",yes:{id:"kangaroo",animal:"Kangaroo",de:"Känguru",emoji:"🦘"},no:{id:"koala",animal:"Koala",de:"Koala",emoji:"🐨"}},no:{id:"w_canine",q:"Is it a dog-like predator? (a canine)",qDe:"Ist es ein hundeartiger Räuber? (ein Hundeartiger)",yes:{id:"ca_fox",q:"Is it small and reddish, with a bushy tail and a pointed face?",qDe:"Ist es klein und rötlich, mit buschigem Schwanz und spitzer Schnauze?",yes:{id:"fox",animal:"Fox",de:"Fuchs",emoji:"🦊"},no:{id:"wolf",animal:"Wolf",de:"Wolf",emoji:"🐺"}},no:{id:"w_bear",q:"Is it a big, heavy-set bear?",qDe:"Ist es ein großer, kräftiger Bär?",yes:{id:"be_panda",q:"Is it black and white, and eats bamboo?",qDe:"Ist es schwarz-weiß und frisst Bambus?",yes:{id:"panda",animal:"Panda",de:"Panda",emoji:"🐼"},no:{id:"bear",animal:"Bear",de:"Bär",emoji:"🐻"}},no:{id:"w_zebra",q:"Does it have black and white stripes?",qDe:"Hat es schwarz-weiße Streifen?",yes:{id:"zebra",animal:"Zebra",de:"Zebra",emoji:"🦓"},no:{id:"w_hump",q:"Does it have humps on its back?",qDe:"Hat es Höcker auf dem Rücken?",yes:{id:"camel",animal:"Camel",de:"Kamel",emoji:"🐫"},no:{id:"deer",animal:"Deer",de:"Hirsch",emoji:"🦌"}}}}}}}}}}}},no:{id:"q_shell",q:"Does it have a hard shell on its back?",qDe:"Hat es einen harten Panzer auf dem Rücken?",yes:{id:"turtle",animal:"Turtle",de:"Schildkröte",emoji:"🐢"},no:{id:"r_legs",q:"Does it have legs?",qDe:"Hat es Beine?",yes:{id:"r_jaws",q:"Is it a large water predator with powerful jaws?",qDe:"Ist es ein großer Wasserräuber mit kräftigem Kiefer?",yes:{id:"crocodile",animal:"Crocodile",de:"Krokodil",emoji:"🐊"},no:{id:"r_skin",q:"Does it have smooth, moist skin, and does it hop?",qDe:"Hat es glatte, feuchte Haut und hüpft es?",yes:{id:"frog",animal:"Frog",de:"Frosch",emoji:"🐸"},no:{id:"r_colour",q:"Can it change colour, with eyes that swivel independently?",qDe:"Kann es die Farbe wechseln, mit Augen, die sich unabhängig drehen?",yes:{id:"chameleon",animal:"Chameleon",de:"Chamäleon",emoji:"🦎"},no:{id:"lizard",animal:"Lizard",de:"Eidechse",emoji:"🦎"}}}},no:{id:"snake",animal:"Snake",de:"Schlange",emoji:"🐍"}}}}}}};
+/* ---------- the tree ----------
+   Q(id, question EN, question DE, yes-branch, no-branch)
+   A(id, name EN, name DE, emoji)                     -> a leaf
+   100 leaves. Order of questions chosen by hand (on purpose: see footnote). */
+const Q=(id,q,qDe,yes,no)=>({id,q,qDe,yes,no});
+const A=(id,animal,de,emoji)=>({id,animal,de,emoji});
+
+/* ===== birds (20) ===== */
+const BIRDS =
+Q("b_fly","Can it fly?","Kann es fliegen?",
+  Q("b_water","Does it spend most of its time on or beside water? (a water bird)","Verbringt es die meiste Zeit auf dem Wasser oder am Ufer? (ein Wasservogel)",
+    Q("b_pink","Is it pink and stands on one leg?","Ist es rosa und steht auf einem Bein?",
+      A("flamingo","Flamingo","Flamingo","🦩"),
+      Q("b_swan","Is it white, with a long curved neck?","Ist es weiß, mit einem langen, gebogenen Hals?",
+        A("swan","Swan","Schwan","🦢"),
+        Q("b_stork","Does it have very long legs and nest on rooftops?","Hat es sehr lange Beine und nistet auf Dächern?",
+          A("stork","Stork","Storch","🐦"),
+          Q("b_gull","Is it a grey-and-white seabird that screeches and steals chips?","Ist es ein grau-weißer Seevogel, der kreischt und Pommes klaut?",
+            A("seagull","Seagull","Möwe","🐦"),
+            Q("b_quack","Does it quack?","Schnattert es?",
+              A("duck","Duck","Ente","🦆"),
+              A("goose","Goose","Gans","🪿")))))),
+    Q("b_prey","Is it a bird of prey with sharp talons?","Ist es ein Greifvogel mit scharfen Krallen?",
+      Q("b_night","Is it active at night, with big round eyes?","Ist es nachtaktiv und hat große runde Augen?",
+        A("owl","Owl","Eule","🦉"),
+        A("eagle","Eagle","Adler","🦅")),
+      Q("b_colour","Does it have strikingly colourful plumage?","Hat es auffällig buntes Gefieder?",
+        Q("b_fan","Does it have a huge fan-shaped tail with eye spots?","Hat es einen großen, fächerförmigen Schwanz mit Augenflecken?",
+          A("peacock","Peacock","Pfau","🦚"),
+          Q("b_hover","Is it tiny and hovers in place while drinking nectar?","Ist es winzig und schwebt beim Nektartrinken auf der Stelle?",
+            A("hummingbird","Hummingbird","Kolibri","🐦"),
+            A("parrot","Parrot","Papagei","🦜"))),
+        Q("b_black","Is it all black and caws?","Ist es ganz schwarz und krächzt?",
+          A("crow","Crow","Krähe","🐦‍⬛"),
+          Q("b_drum","Does it hammer holes into tree trunks with its beak?","Hämmert es mit dem Schnabel Löcher in Baumstämme?",
+            A("woodpecker","Woodpecker","Specht","🐦"),
+            Q("b_red","Is it small with a red-orange breast?","Ist es klein und hat eine rot-orange Brust?",
+              A("robin","Robin","Rotkehlchen","🐦"),
+              Q("b_sparrow","Is it a small, plain brown bird that chirps in gardens and cities?","Ist es ein kleiner, schlichter brauner Vogel, der in Gärten und Städten zwitschert?",
+                A("sparrow","Sparrow","Spatz","🐦"),
+                A("pigeon","Pigeon","Taube","🕊️")))))))),
+  Q("b_cold","Does it live in icy places and swim?","Lebt es in eisigen Gegenden und schwimmt?",
+    A("penguin","Penguin","Pinguin","🐧"),
+    Q("b_tall","Is it very tall, fast, and the largest bird alive?","Ist es sehr groß, schnell und der größte lebende Vogel?",
+      A("ostrich","Ostrich","Strauß","🐦"),
+      Q("b_turkey","Is it a big farm bird with a red wattle, roasted for holidays?","Ist es ein großer Hofvogel mit rotem Kehllappen, der zu Feiertagen gebraten wird?",
+        A("turkey","Turkey","Truthahn","🦃"),
+        A("chicken","Chicken","Huhn","🐔")))));
+
+/* ===== water creatures (17) ===== */
+const WATER =
+Q("aq_mammal","Is it a mammal? (breathes air, warm-blooded)","Ist es ein Säugetier? (atmet Luft, warmblütig)",
+  Q("aq_bigcar","Is it bigger than a car?","Ist es größer als ein Auto?",
+    A("whale","Whale","Wal","🐋"),
+    Q("aq_fur","Does it have fur?","Hat es Fell?",
+      Q("aq_river","Does it live in rivers, float on its back and crack shellfish on its belly?","Lebt es in Flüssen, treibt auf dem Rücken und knackt Muscheln auf dem Bauch?",
+        A("otter","Otter","Otter","🦦"),
+        A("seal","Seal","Robbe","🦭")),
+      A("dolphin","Dolphin","Delfin","🐬"))),
+  Q("aq_fish","Does it have fins and a backbone? (is it a fish)","Hat es Flossen und ein Rückgrat? (ist es ein Fisch)",
+    Q("aq_pred","Is it a large predator with rows of sharp teeth?","Ist es ein großer Räuber mit Reihen scharfer Zähne?",
+      A("shark","Shark","Hai","🦈"),
+      Q("aq_snake","Is it long and snake-like?","Ist es lang und schlangenförmig?",
+        A("eel","Eel","Aal","🐍"),
+        Q("aq_horse","Is it tiny, swims upright, and has a head like a horse?","Ist es winzig, schwimmt aufrecht und hat einen Kopf wie ein Pferd?",
+          A("seahorse","Seahorse","Seepferdchen","🐠"),
+          Q("aq_clown","Is it orange with white stripes?","Ist es orange mit weißen Streifen?",
+            A("clownfish","Clownfish","Clownfisch","🐠"),
+            Q("aq_salmon","Does it have pink flesh and swim up rivers to spawn?","Hat es rosa Fleisch und schwimmt zum Laichen Flüsse hinauf?",
+              A("salmon","Salmon","Lachs","🐟"),
+              A("goldfish","Goldfish","Goldfisch","🐟")))))),
+    Q("aq_shell","Does it have a hard shell and claws? (a crustacean)","Hat es einen harten Panzer und Scheren? (ein Krebstier)",
+      Q("aq_lobster","Is it large, with two big claws and a long body?","Ist es groß, mit zwei großen Scheren und einem langen Körper?",
+        A("lobster","Lobster","Hummer","🦞"),
+        Q("aq_shrimp","Is it small and curved, and turns pink when cooked?","Ist es klein und gebogen und wird beim Kochen rosa?",
+          A("shrimp","Shrimp","Garnele","🦐"),
+          A("crab","Crab","Krabbe","🦀"))),
+      Q("aq_arms","Does it have eight arms and change colour?","Hat es acht Arme und kann die Farbe wechseln?",
+        A("octopus","Octopus","Oktopus","🐙"),
+        Q("aq_ten","Does it have a long tube-shaped body and ten arms?","Hat es einen langen, röhrenförmigen Körper und zehn Arme?",
+          A("squid","Squid","Tintenfisch","🦑"),
+          Q("aq_star","Is it star-shaped, with five arms, and sits on rocks?","Ist es sternförmig, mit fünf Armen, und sitzt auf Felsen?",
+            A("starfish","Starfish","Seestern","⭐"),
+            A("jellyfish","Jellyfish","Qualle","🪼")))))));
+
+/* ===== creepy-crawlies (15) ===== */
+const BUGS =
+Q("g_legs","Does it have legs?","Hat es Beine?",
+  Q("g_eight","Does it have eight legs?","Hat es acht Beine?",
+    Q("g_sting_tail","Does it have pincers and a curled tail with a stinger?","Hat es Scheren und einen gekrümmten Schwanz mit Stachel?",
+      A("scorpion","Scorpion","Skorpion","🦂"),
+      A("spider","Spider","Spinne","🕷️")),
+    Q("g_wings","Does it have large wings, bigger than its body?","Hat es große Flügel, größer als sein Körper?",
+      Q("g_night","Does it fly at night and circle around lamps?","Fliegt es nachts und kreist um Lampen?",
+        A("moth","Moth","Motte","🦋"),
+        A("butterfly","Butterfly","Schmetterling","🦋")),
+      Q("g_sting","Does it sting?","Sticht es?",
+        Q("g_honey","Is it fuzzy and makes honey?","Ist es pelzig und macht Honig?",
+          A("bee","Bee","Biene","🐝"),
+          A("wasp","Wasp","Wespe","🐝")),
+        Q("g_fly","Can it fly?","Kann es fliegen?",
+          Q("g_blood","Does it whine in your ear and drink blood?","Surrt es dir ins Ohr und saugt Blut?",
+            A("mosquito","Mosquito","Mücke","🦟"),
+            Q("g_dome","Is it a small red dome with black spots?","Ist es eine kleine rote Kuppel mit schwarzen Punkten?",
+              A("ladybug","Ladybug","Marienkäfer","🐞"),
+              Q("g_hard","Does it have hard, shiny wing cases on its back?","Hat es harte, glänzende Flügeldecken auf dem Rücken?",
+                A("beetle","Beetle","Käfer","🪲"),
+                A("fly","Fly","Fliege","🪰")))),
+          Q("g_hop","Does it jump with big back legs and chirp?","Springt es mit großen Hinterbeinen und zirpt?",
+            A("grasshopper","Grasshopper","Grashüpfer","🦗"),
+            Q("g_roach","Is it brown and flat, scurries around kitchens, and is hard to kill?","Ist es braun und flach, huscht durch Küchen und ist schwer totzukriegen?",
+              A("cockroach","Cockroach","Kakerlake","🪳"),
+              A("ant","Ant","Ameise","🐜"))))))),
+  Q("g_shell","Does it carry a spiral shell on its back?","Trägt es ein spiralförmiges Haus auf dem Rücken?",
+    A("snail","Snail","Schnecke","🐌"),
+    A("worm","Worm","Wurm","🪱")));
+
+/* ===== mammals (42) ===== */
+const DOMESTIC =
+Q("d_big","Is it livestock-sized, bigger than a large dog?","Hat es Nutztiergröße, größer als ein großer Hund?",
+  Q("d_wool","Does it have a thick, woolly coat?","Hat es ein dichtes, wolliges Fell?",
+    A("sheep","Sheep","Schaf","🐑"),
+    Q("d_horns","Does it have horns and a beard, and like to climb?","Hat es Hörner und einen Bart und klettert gern?",
+      A("goat","Goat","Ziege","🐐"),
+      Q("d_snout","Is it pink, with a flat snout and a curly tail?","Ist es rosa, mit flacher Schnauze und Ringelschwanz?",
+        A("pig","Pig","Schwein","🐖"),
+        Q("d_moo","Does it give milk and say moo?","Gibt es Milch und macht „muh“?",
+          A("cow","Cow","Kuh","🐄"),
+          Q("d_mane","Is it a tall riding animal with a flowing mane?","Ist es ein großes Reittier mit wallender Mähne?",
+            A("horse","Horse","Pferd","🐎"),
+            A("donkey","Donkey","Esel","🫏")))))),
+  Q("d_cage","Is it a small rodent kept in a cage?","Ist es ein kleines Nagetier, das im Käfig gehalten wird?",
+    Q("d_notail","Is it chubby, with no tail, and squeaks loudly?","Ist es pummelig, ohne Schwanz, und quiekt laut?",
+      A("guineapig","Guinea pig","Meerschweinchen","🐹"),
+      A("hamster","Hamster","Hamster","🐹")),
+    Q("d_bark","Does it bark?","Bellt es?",
+      A("dog","Dog","Hund","🐕"),
+      Q("d_meow","Does it purr or meow?","Schnurrt oder miaut es?",
+        A("cat","Cat","Katze","🐈"),
+        A("rabbit","Rabbit","Kaninchen","🐇")))));
+
+const SMALL_WILD =
+Q("sw_spines","Does it have spines?","Hat es Stacheln?",
+  A("hedgehog","Hedgehog","Igel","🦔"),
+  Q("sw_tail","Does it have a big bushy tail and climb trees?","Hat es einen großen buschigen Schwanz und klettert auf Bäume?",
+    A("squirrel","Squirrel","Eichhörnchen","🐿️"),
+    Q("sw_dam","Does it have a flat paddle tail and build dams?","Hat es einen flachen Paddelschwanz und baut Dämme?",
+      A("beaver","Beaver","Biber","🦫"),
+      Q("sw_mask","Does it have a black mask across its eyes and raid rubbish bins?","Hat es eine schwarze Maske über den Augen und plündert Mülltonnen?",
+        A("raccoon","Raccoon","Waschbär","🦝"),
+        Q("sw_stink","Is it black with a white stripe, and sprays a terrible smell?","Ist es schwarz mit weißem Streifen und versprüht einen furchtbaren Gestank?",
+          A("skunk","Skunk","Stinktier","🦨"),
+          Q("sw_rat","Is it bigger than your fist, with a long bald tail?","Ist es größer als deine Faust, mit langem nacktem Schwanz?",
+            A("rat","Rat","Ratte","🐀"),
+            A("mouse","Mouse","Maus","🐁")))))));
+
+const BIG_WILD =
+Q("w_cat","Is it a big cat? (a feline predator)","Ist es eine Großkatze? (ein katzenartiger Räuber)",
+  Q("c_mane","Do the males grow a mane?","Tragen die Männchen eine Mähne?",
+    A("lion","Lion","Löwe","🦁"),
+    Q("c_stripes","Does it have stripes?","Hat es Streifen?",
+      A("tiger","Tiger","Tiger","🐅"),
+      Q("c_speed","Is it built for speed, with tear-mark lines down its face?","Ist es auf Schnelligkeit gebaut, mit Tränenstreifen im Gesicht?",
+        A("cheetah","Cheetah","Gepard","🐆"),
+        A("leopard","Leopard","Leopard","🐆")))),
+  Q("w_bear","Is it a bear?","Ist es ein Bär?",
+    Q("be_panda","Is it black and white, and eats bamboo?","Ist es schwarz-weiß und frisst Bambus?",
+      A("panda","Panda","Panda","🐼"),
+      A("bear","Bear","Bär","🐻")),
+    Q("w_moose","Does it have huge flat, palm-shaped antlers and a drooping nose?","Hat es riesige flache, schaufelförmige Geweihe und eine hängende Nase?",
+      A("moose","Moose","Elch","🫎"),
+      Q("w_mega","Is it bigger and heavier than a horse?","Ist es größer und schwerer als ein Pferd?",
+        Q("p_trunk","Does it have a long trunk?","Hat es einen langen Rüssel?",
+          A("elephant","Elephant","Elefant","🐘"),
+          Q("p_neck","Does it have a very long neck?","Hat es einen sehr langen Hals?",
+            A("giraffe","Giraffe","Giraffe","🦒"),
+            Q("p_horn","Does it have a horn on its nose?","Hat es ein Horn auf der Nase?",
+              A("rhino","Rhino","Nashorn","🦏"),
+              Q("p_shaggy","Is it a huge, shaggy wild ox with curved horns?","Ist es ein riesiges, zotteliges Wildrind mit gebogenen Hörnern?",
+                A("buffalo","Buffalo","Büffel","🦬"),
+                A("hippo","Hippo","Nilpferd","🦛"))))),
+        Q("w_primate","Is it a primate? (an ape or a monkey)","Ist es ein Primat? (ein Menschenaffe oder ein Affe)",
+          Q("pr_ape","Is it an ape with no tail?","Ist es ein Menschenaffe ohne Schwanz?",
+            Q("pr_big","Is it huge and heavy, with a silver back?","Ist es riesig und schwer, mit silbernem Rücken?",
+              A("gorilla","Gorilla","Gorilla","🦍"),
+              A("chimpanzee","Chimpanzee","Schimpanse","🐵")),
+            A("monkey","Monkey","Affe","🐒")),
+          Q("w_pouch","Does it carry its young in a pouch?","Trägt es seine Jungen in einem Beutel?",
+            Q("ma_hop","Does it hop on big back legs?","Hüpft es auf großen Hinterbeinen?",
+              A("kangaroo","Kangaroo","Känguru","🦘"),
+              A("koala","Koala","Koala","🐨")),
+            Q("w_canine","Is it a dog-like predator?","Ist es ein hundeartiger Räuber?",
+              Q("ca_fox","Is it small and reddish, with a bushy tail and a pointed face?","Ist es klein und rötlich, mit buschigem Schwanz und spitzer Schnauze?",
+                A("fox","Fox","Fuchs","🦊"),
+                Q("ca_laugh","Is it spotted, lives in Africa, and sounds like it is laughing?","Ist es gefleckt, lebt in Afrika und klingt, als würde es lachen?",
+                  A("hyena","Hyena","Hyäne","🐺"),
+                  A("wolf","Wolf","Wolf","🐺"))),
+              Q("w_zebra","Does it have black and white stripes?","Hat es schwarz-weiße Streifen?",
+                A("zebra","Zebra","Zebra","🦓"),
+                Q("w_hump","Does it have humps on its back?","Hat es Höcker auf dem Rücken?",
+                  A("camel","Camel","Kamel","🐫"),
+                  A("deer","Deer","Hirsch","🦌"))))))))));
+
+const MAMMALS =
+Q("m_fly","Can it fly?","Kann es fliegen?",
+  A("bat","Bat","Fledermaus","🦇"),
+  Q("m_domestic","Is it commonly kept as a pet or farm animal?","Wird es üblicherweise als Haus- oder Nutztier gehalten?",
+    DOMESTIC,
+    Q("w_small","Is it smaller than a medium-sized dog?","Ist es kleiner als ein mittelgroßer Hund?",
+      SMALL_WILD,
+      BIG_WILD)));
+
+/* ===== reptiles & amphibians (6) ===== */
+const REPTILES =
+Q("q_shell","Does it have a hard shell on its back?","Hat es einen harten Panzer auf dem Rücken?",
+  A("turtle","Turtle","Schildkröte","🐢"),
+  Q("r_legs","Does it have legs?","Hat es Beine?",
+    Q("r_jaws","Is it a large water predator with powerful jaws?","Ist es ein großer Wasserräuber mit kräftigem Kiefer?",
+      A("crocodile","Crocodile","Krokodil","🐊"),
+      Q("r_skin","Does it have smooth, moist skin, and does it hop?","Hat es glatte, feuchte Haut und hüpft es?",
+        A("frog","Frog","Frosch","🐸"),
+        Q("r_colour","Can it change colour, with eyes that swivel independently?","Kann es die Farbe wechseln, mit Augen, die sich unabhängig drehen?",
+          A("chameleon","Chameleon","Chamäleon","🦎"),
+          A("lizard","Lizard","Eidechse","🦎")))),
+    A("snake","Snake","Schlange","🐍")));
+
+const TREE =
+Q("q_feathers","Does it have feathers? (is it a bird)","Hat es Federn? (ist es ein Vogel)",
+  BIRDS,
+  Q("q_water","Does it live mostly in the water? (a fish, or a sea creature like an octopus, a whale or a seal)","Lebt es hauptsächlich im Wasser? (ein Fisch oder ein Meerestier wie ein Oktopus, ein Wal oder eine Robbe)",
+    WATER,
+    Q("q_bug","Is it a small creepy-crawly? (an insect, a spider, a snail or a worm)","Ist es ein kleines Krabbeltier? (ein Insekt, eine Spinne, eine Schnecke oder ein Wurm)",
+      BUGS,
+      Q("q_fur","Does it have fur or hair? (is it a mammal)","Hat es Fell oder Haare? (ist es ein Säugetier)",
+        MAMMALS,
+        REPTILES))));
 
 /* ---------- i18n strings ---------- */
 const T = {
@@ -170,7 +405,7 @@ const T = {
     heroTitle:"Think of an animal.",
     heroQuote:"Don't tell me which one. I'll ask yes-or-no questions and guess it. Then I'll show you exactly how I did it. There is no magic in the box. There is a box.",
     startBtn:"I'm thinking of one. Begin.",
-    introNote:"64 animals live in this machine. Pick a common one and I'll almost certainly find it. Pick an axolotl and you'll teach me a lesson instead.",
+    introNote:"{n} animals live in this machine. Pick a common one and I'll almost certainly find it. Pick an axolotl and you'll teach me a lesson instead.",
     yes:"Yes", no:"No",
     guessAsk:"Is this your animal?",
     guessSub:"Be honest. Either way I'll show you the map.",
@@ -179,11 +414,11 @@ const T = {
     verdictWin:"guessed it", verdictMiss:"wrong",
     captionWin:"I never knew anything about your animal. I only knew which way you turned at each fork. Follow the purple line from the top down to where you landed.",
     captionMiss:"I missed. Either your animal does not live in this machine, or one of my questions was too blunt to tell two creatures apart. The route is still a real route. A wrong answer is just the wrong leaf at the end of it.",
-    hint:"Scroll sideways to see all 64 leaves. Hover any node to read its question.",
+    hint:"Scroll sideways to see all {n} leaves. Hover any node to read its question.",
     routeTitle:"The route you took",
     playAgain:"Play again", backStart:"Back to start",
     ddSummary:"For the curious: who chose the order of the questions?",
-    ddP1:"You may have noticed that some animals took three questions and others took twelve. A whale fell out fast. A deer made you work. That gap is not an accident. It comes from the order the questions sit in, and I chose that order by hand, badly.",
+    ddP1:"You may have noticed that some animals took three questions and others took sixteen. A whale fell out fast. A deer made you work. That gap is not an accident. It comes from the order the questions sit in, and I chose that order by hand, badly.",
     ddP2:"A real decision tree does not guess the order. At every fork it measures which question splits the remaining animals most cleanly, and it puts that question first. The measure has a name, information gain, and it is the subject of the next module. The machine you just beat or lost to is the thing that measure is trying to build, automatically and better.",
     footnote:"Each question was a <b style='color:#777;'>split</b>. Your answers chose a <b style='color:#777;'>branch</b>. The animal at the end was a <b style='color:#777;'>leaf</b>. That is a decision tree.",
     srcLink:"source",
@@ -193,7 +428,7 @@ const T = {
     heroTitle:"Denk dir ein Tier.",
     heroQuote:"Verrate nicht, welches. Ich stelle Ja-Nein-Fragen und errate es. Danach zeige ich dir genau, wie. In der Kiste steckt keine Magie. In der Kiste steckt eine Kiste.",
     startBtn:"Ich habe eins. Los.",
-    introNote:"64 Tiere wohnen in dieser Maschine. Nimm ein gewöhnliches, und ich finde es fast sicher. Nimm einen Axolotl, und du erteilst mir stattdessen eine Lektion.",
+    introNote:"{n} Tiere wohnen in dieser Maschine. Nimm ein gewöhnliches, und ich finde es fast sicher. Nimm einen Axolotl, und du erteilst mir stattdessen eine Lektion.",
     yes:"Ja", no:"Nein",
     guessAsk:"Ist das dein Tier?",
     guessSub:"Sei ehrlich. So oder so zeige ich dir die Karte.",
@@ -202,11 +437,11 @@ const T = {
     verdictWin:"erraten", verdictMiss:"daneben",
     captionWin:"Ich wusste nie etwas über dein Tier. Ich wusste nur, wohin du an jeder Gabelung abgebogen bist. Folge der lila Linie von oben bis dorthin, wo du gelandet bist.",
     captionMiss:"Daneben. Entweder wohnt dein Tier nicht in dieser Maschine, oder eine meiner Fragen war zu grob, um zwei Tiere zu trennen. Der Weg ist trotzdem ein echter Weg. Eine falsche Antwort ist nur das falsche Blatt an seinem Ende.",
-    hint:"Scrolle zur Seite, um alle 64 Blätter zu sehen. Fahre über einen Knoten, um seine Frage zu lesen.",
+    hint:"Scrolle zur Seite, um alle {n} Blätter zu sehen. Fahre über einen Knoten, um seine Frage zu lesen.",
     routeTitle:"Dein Weg",
     playAgain:"Nochmal", backStart:"Zurück zum Anfang",
     ddSummary:"Für Neugierige: Wer hat die Reihenfolge der Fragen gewählt?",
-    ddP1:"Vielleicht ist dir aufgefallen, dass manche Tiere drei Fragen brauchten und andere zwölf. Ein Wal fiel schnell heraus. Ein Hirsch hat dich arbeiten lassen. Dieser Unterschied ist kein Zufall. Er kommt aus der Reihenfolge der Fragen, und die habe ich von Hand gewählt, schlecht.",
+    ddP1:"Vielleicht ist dir aufgefallen, dass manche Tiere drei Fragen brauchten und andere sechzehn. Ein Wal fiel schnell heraus. Ein Hirsch hat dich arbeiten lassen. Dieser Unterschied ist kein Zufall. Er kommt aus der Reihenfolge der Fragen, und die habe ich von Hand gewählt, schlecht.",
     ddP2:"Ein echter Entscheidungsbaum rät die Reihenfolge nicht. An jeder Gabelung misst er, welche Frage die übrigen Tiere am saubersten trennt. Diese Frage stellt er zuerst. Das Maß hat einen Namen: Informationsgewinn. Es ist das Thema des nächsten Moduls. Du hast eben gegen diese Maschine gewonnen oder verloren. Genau so eine Maschine versucht das Maß zu bauen, automatisch und besser.",
     footnote:"Jede Frage war eine <b style='color:#777;'>Aufteilung</b>. Deine Antworten wählten einen <b style='color:#777;'>Zweig</b>. Das Tier am Ende war ein <b style='color:#777;'>Blatt</b>. Das ist ein Entscheidungsbaum.",
     srcLink:"Quellcode",
@@ -221,14 +456,14 @@ let _leaf=0, _maxDepth=0;
   layout(n.yes,d+1); layout(n.no,d+1); n.gx=(n.yes.gx+n.no.gx)/2;
 })(TREE,0);
 const LEAVES=_leaf;
-const PAD=34, GAP=33, YG=52, LABELROOM=46;
+const PAD=34, GAP=33, YG=48, LABELROOM=62;
 const W = PAD*2 + (LEAVES-1)*GAP;
 const H = PAD + _maxDepth*YG + LABELROOM;
 const px=n=>PAD + n.gx*GAP, py=n=>PAD + n.depth*YG;
 
 /* ---------- lang ---------- */
 let lang='en';
-const tr=k=>T[lang][k];
+const tr=k=>T[lang][k].replace(/\{n\}/g,LEAVES);
 const qOf=n=>lang==='de'?n.qDe:n.q;
 const nameOf=n=>lang==='de'?n.de:n.animal;
 function applyStatic(){
